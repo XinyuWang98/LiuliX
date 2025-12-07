@@ -1,0 +1,128 @@
+[
+    {
+        "id": "data-cleaning-expert",
+        "category": "cleaning",
+        "tags": [
+            "cleaning",
+            "preprocessing",
+            "csv"
+        ],
+        "translations": {
+            "zh-CN": {
+                "title": "数据清洗专家",
+                "description": "专业的 CSV 数据清洗助手,可以处理缺失值、异常值和格式转换。",
+                "content": "你是一位资深数据分析师。请帮我清洗这份数据,主要关注以下几点:\n1. 检查并处理缺失值\n2. 识别异常值\n3. 统一日期格式\n请输出清洗后的 CSV 格式数据以及清洗报告。"
+            },
+            "en-US": {
+                "title": "Data Cleaning Expert",
+                "description": "Professional CSV data cleaning assistant for handling missing values, outliers, and format conversion.",
+                "content": "You are a senior data analyst. Please help me clean this dataset, focusing on:\n1. Check and handle missing values\n2. Identify outliers\n3. Standardize date format\nPlease output the cleaned CSV data and a cleaning report."
+            }
+        }
+    },
+    {
+        "id": "sales-trend-analysis",
+        "category": "analysis",
+        "tags": [
+            "analysis",
+            "trend",
+            "sales"
+        ],
+        "translations": {
+            "zh-CN": {
+                "title": "销售趋势分析",
+                "description": "根据时间序列数据分析销售趋势,识别季节性和增长点。",
+                "content": "请根据提供的销售数据进行趋势分析:\n1. 计算月度增长率\n2. 识别销售旺季和淡季\n3. 预测未来 3 个月的销售趋势\n请使用折线图展示结果。"
+            },
+            "en-US": {
+                "title": "Sales Trend Analysis",
+                "description": "Analyze sales trends based on time series data, identify seasonality and growth points.",
+                "content": "Please analyze sales trends based on the provided data:\n1. Calculate monthly growth rate\n2. Identify peak and off-peak seasons\n3. Forecast sales trend for the next 3 months\nPlease visualize results using line charts."
+            }
+        }
+    },
+    {
+        "id": "user-persona-generation",
+        "category": "analysis",
+        "tags": [
+            "analysis",
+            "user",
+            "clustering"
+        ],
+        "translations": {
+            "zh-CN": {
+                "title": "用户画像生成",
+                "description": "基于用户行为数据生成详细的用户画像和分群建议。",
+                "content": "根据用户的购买记录和浏览行为,请帮我:\n1. 将用户分为高价值、潜力、流失风险三类\n2. 生成每一类用户的典型画像\n3. 针对不同群体提出营销建议"
+            },
+            "en-US": {
+                "title": "User Persona Generation",
+                "description": "Generate detailed user personas and segmentation recommendations based on user behavioral data.",
+                "content": "Based on user purchase history and browsing behavior, please:\n1. Segment users into high-value, potential, and churn-risk categories\n2. Generate typical personas for each category\n3. Provide marketing recommendations for different segments"
+            }
+        }
+    },
+    {
+        "id": "complex-chart-generation",
+        "category": "visualization",
+        "tags": [
+            "visualization",
+            "chart",
+            "plotly"
+        ],
+        "translations": {
+            "zh-CN": {
+                "title": "复杂图表生成",
+                "description": "生成组合图表,如帕累托图、双轴图等。",
+                "content": "请帮我用 Plotly.js 生成一个帕累托图,展示影响销售额的主要因素。左轴为销售额(柱状图),右轴为累计百分比(折线图)。"
+            },
+            "en-US": {
+                "title": "Complex Chart Generation",
+                "description": "Generate combination charts such as Pareto charts and dual-axis charts.",
+                "content": "Please help me create a Pareto chart using Plotly.js to show main factors affecting sales. Left axis for sales (bar chart), right axis for cumulative percentage (line chart)."
+            }
+        }
+    },
+    {
+        "id": "correlation-analysis",
+        "category": "analysis",
+        "tags": [
+            "analysis",
+            "statistics",
+            "correlation"
+        ],
+        "translations": {
+            "zh-CN": {
+                "title": "相关性分析",
+                "description": "分析数据各维度之间的相关性,发现潜在关联。",
+                "content": "请对提供的数据进行相关性分析:\n1. 计算各变量之间的相关系数\n2. 生成相关性热力图\n3. 指出显著相关的变量对\n4. 解释可能的因果关系"
+            },
+            "en-US": {
+                "title": "Correlation Analysis",
+                "description": "Analyze correlations between data dimensions and discover potential associations.",
+                "content": "Please perform correlation analysis on the provided data:\n1. Calculate correlation coefficients between variables\n2. Generate correlation heatmap\n3. Identify significantly correlated variable pairs\n4. Explain possible causal relationships"
+            }
+        }
+    },
+    {
+        "id": "outlier-detection",
+        "category": "cleaning",
+        "tags": [
+            "cleaning",
+            "outliers",
+            "statistics"
+        ],
+        "translations": {
+            "zh-CN": {
+                "title": "异常值检测",
+                "description": "使用统计方法检测并处理数据中的异常值。",
+                "content": "请帮我检测数据中的异常值:\n1. 使用 IQR 方法识别异常值\n2. 使用 Z-score 方法二次确认\n3. 可视化异常值分布\n4. 建议处理策略(删除/替换/保留)"
+            },
+            "en-US": {
+                "title": "Outlier Detection",
+                "description": "Detect and handle outliers in data using statistical methods.",
+                "content": "Please help me detect outliers in the data:\n1. Identify outliers using IQR method\n2. Confirm with Z-score method\n3. Visualize outlier distribution\n4. Suggest handling strategies (remove/replace/keep)"
+            }
+        }
+    }
+]

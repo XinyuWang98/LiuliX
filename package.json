@@ -1,0 +1,35 @@
+{
+    "name": "dataprism",
+    "version": "0.1.0",
+    "type": "module",
+    "description": "Future Tech 风格的 AI 主导 EDA 工具",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "type-check": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@google/generative-ai": "^0.24.1",
+        "@tanstack/react-table": "^8.20.5",
+        "dexie": "^4.0.10",
+        "dexie-react-hooks": "^1.1.7",
+        "lucide-react": "^0.460.0",
+        "papaparse": "^5.4.1",
+        "plotly.js": "^2.35.2",
+        "pyodide": "^0.26.4",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-plotly.js": "^2.6.0",
+        "xlsx": "^0.18.5"
+    },
+    "devDependencies": {
+        "@types/papaparse": "^5.3.15",
+        "@types/plotly.js": "^2.33.4",
+        "@types/react": "^18.3.12",
+        "@types/react-dom": "^18.3.1",
+        "@vitejs/plugin-react": "^4.3.3",
+        "typescript": "^5.6.3",
+        "vite": "^5.4.11"
+    }
+}
