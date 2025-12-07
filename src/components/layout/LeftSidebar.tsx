@@ -23,14 +23,28 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
     const [editingProject, setEditingProject] = useState<{ id: string; name: string } | null>(null);
 
     // 组件加载时从 IndexedDB 加载项目
+    // 组件加载时从 IndexedDB 加载项目（带安全检查）
     useEffect(() => {
         loadProjects().then(loadedProjects => {
             setProjects(loadedProjects);
-            // 如果有项目,自动选中第一个项目
+
+            // 安全检查：只自动选择小文件项目
             if (loadedProjects.length > 0) {
                 const firstProject = loadedProjects[0];
-                setSelectedProjectId(firstProject.id);
-                onProjectSelect?.(firstProject);
+
+                // 检查项目中是否有大文件
+                const hasSafeFiles = firstProject.files.every(f => {
+                    const fileSize = f.data?.fileSize || 0;
+                    const sizeMB = fileSize / (1024 * 1024);
+                    return sizeMB < 5; // 只自动加载<5MB的文件
+                });
+
+                if (hasSafeFiles) {
+                    setSelectedProjectId(firstProject.id);
+                    onProjectSelect?.(firstProject);
+                } else {
+                    console.warn('项目包含大文件，跳过自动选择。请手动选择项目。');
+                }
             }
         }).catch(error => {
             console.error('Failed to load projects:', error);
