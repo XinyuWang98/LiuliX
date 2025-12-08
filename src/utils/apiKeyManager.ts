@@ -6,6 +6,7 @@
 const API_KEY_STORAGE_KEY = 'dataprism_api_key';
 const API_PROVIDER_KEY = 'dataprism_api_provider';
 const API_MODEL_KEY = 'dataprism_api_model';
+const API_BASE_URL_KEY = 'dataprism_api_base_url';
 
 export type APIProvider = 'gemini' | 'claude' | 'grok';
 
@@ -13,6 +14,7 @@ export interface APIConfig {
     provider: APIProvider;
     modelId: string;
     apiKey: string;
+    baseUrl?: string;
 }
 
 /**
@@ -31,7 +33,8 @@ export function validateAPIKey(provider: APIProvider, key: string): boolean {
 
     switch (provider) {
         case 'gemini':
-            return key.startsWith('AIza');
+            // Relaxed validation for proxy support
+            return key.length > 0;
         case 'claude':
             return key.startsWith('sk-ant-');
         case 'grok':
@@ -52,6 +55,11 @@ export function saveAPIConfig(config: APIConfig): void {
     sessionStorage.setItem(API_PROVIDER_KEY, config.provider);
     sessionStorage.setItem(API_MODEL_KEY, config.modelId);
     sessionStorage.setItem(API_KEY_STORAGE_KEY, config.apiKey);
+    if (config.baseUrl) {
+        sessionStorage.setItem(API_BASE_URL_KEY, config.baseUrl);
+    } else {
+        sessionStorage.removeItem(API_BASE_URL_KEY);
+    }
 }
 
 /**
@@ -61,10 +69,11 @@ export function loadAPIConfig(): APIConfig | null {
     const provider = sessionStorage.getItem(API_PROVIDER_KEY) as APIProvider;
     const modelId = sessionStorage.getItem(API_MODEL_KEY) || 'gemini-pro';
     const apiKey = sessionStorage.getItem(API_KEY_STORAGE_KEY) || '';
+    const baseUrl = sessionStorage.getItem(API_BASE_URL_KEY) || undefined;
 
     if (!provider || !modelId) return null;
 
-    return { provider, modelId, apiKey };
+    return { provider, modelId, apiKey, baseUrl };
 }
 
 /**
@@ -74,6 +83,7 @@ export function clearAPIConfig(): void {
     sessionStorage.removeItem(API_PROVIDER_KEY);
     sessionStorage.removeItem(API_MODEL_KEY);
     sessionStorage.removeItem(API_KEY_STORAGE_KEY);
+    sessionStorage.removeItem(API_BASE_URL_KEY);
 }
 
 /**

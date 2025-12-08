@@ -24,6 +24,9 @@ export interface ColumnStats {
         value_counts?: { [key: string]: number }; // 完整的值计数
     };
 }
+// ColumnMetadata 别名，用于兼容 Project 类型定义
+export type ColumnMetadata = ColumnStats;
+
 
 // DataFrame 完整信息
 export interface DataFrameInfo {

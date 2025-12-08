@@ -20,6 +20,14 @@ export const enUS: LanguageConfig = {
             all: 'All',
         },
 
+        data: {
+            unique: 'Unique',
+            missing: 'Missing',
+            min: 'Min',
+            max: 'Max',
+            mean: 'Mean',
+        },
+
         nav: {
             appName: 'DataPrism',
             noProject: 'No Project Selected',
@@ -42,6 +50,10 @@ export const enUS: LanguageConfig = {
             noApiKeyRequired: 'No API Key Required',
             rateLimit: 'Rate Limit',
             requestsPerMinute: 'requests/minute',
+            baseUrl: 'API Base URL',
+            baseUrlPlaceholder: 'e.g. https://my-proxy.com (Leave empty for default)',
+            baseUrlHint: 'Use this if you are using an API proxy service.',
+            optional: 'Optional',
 
             // Security warning
             securityWarning: '⚠️ Security Notice',
@@ -64,10 +76,25 @@ export const enUS: LanguageConfig = {
             errorInvalidKeySolution: 'Please check if your API Key format is correct (should start with AIza).',
             errorNetwork: 'Network Error',
             errorNetworkSolution: 'Please check your network connection and try again.',
+
+            errorGeminiEmpty: 'Gemini returned empty response',
+            errorClaudeEmpty: 'Claude returned empty response',
+            errorModelEmpty: 'No content',
+            errorAllFailed: 'All AI models failed, please try again later',
+
+            errorQuota: 'API Quota Exceeded',
+            errorQuotaSolution: 'Your Google AI Studio free tier quota has been exhausted. Please wait or switch accounts.',
+            errorRateLimit: 'Rate Limit Exceeded',
+            errorRateLimitSolution: 'You are sending requests too fast.',
+            errorInvalidChars: 'Invalid Characters in Key',
+            errorInvalidCharsSolution: 'Please check for hidden spaces, newlines, or non-ASCII characters.',
+            errorUnknown: 'Unknown Error',
             viewDocumentation: 'View Documentation',
 
             // Success messages
             connectionSuccess: 'Connection Successful',
+            connectionSuccessPrefix: 'Connection Successful! Current Model: ',
+            autoUpgradeAlert: 'Automatically upgraded to gemini-2.5-flash (2025 Latest)',
             configSaved: 'API Configuration Saved',
 
             // First time setup
@@ -80,6 +107,11 @@ export const enUS: LanguageConfig = {
             changeConfig: 'Change Configuration',
             noModelConfigured: 'No AI Model Configured',
             configureModel: 'Configure Model',
+            priorityHint: 'ℹ️ Drag to reorder priority. Keys are stored in SessionStorage only.',
+            dragToReorder: 'Drag to Reorder',
+            keyPlaceholder: 'Enter {model} API Key',
+            connectionSuccessShort: 'Connected',
+            settingComplete: 'Done',
         },
 
         prompt: {

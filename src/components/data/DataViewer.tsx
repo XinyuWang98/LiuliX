@@ -5,7 +5,6 @@ import { ParsedFileData } from '@utils/fileParser';
 import { FileText, Database, Columns3, LayoutGrid, Loader } from 'lucide-react';
 import { pyodideManager } from '../../services/PyodideManager';
 import { ColumnStats } from '@/types/data';
-import { ColumnStatsCard } from './ColumnStatsCard';
 import { DataTable } from './DataTable';
 import { loadProjects } from '@utils/indexedDB';
 
@@ -177,27 +176,15 @@ export function DataViewer({ project }: DataViewerProps) {
                         错误: {error}
                     </div>
                 ) : dataInfo ? (
-                    /* 数据展示 */
+                    /* 数据展示 - 一体化表格 */
                     <>
-                        {/* 列统计卡片区 - 横向滚动 */}
-                        <div style={{
-                            display: 'flex',
-                            gap: 'var(--gap-m)',
-                            overflowX: 'auto',
-                            paddingBottom: 'var(--gap-m)',
-                            flexShrink: 0
-                        }}>
-                            {dataInfo.columns.map((col) => (
-                                <ColumnStatsCard key={col.column_name} stats={col} />
-                            ))}
-                        </div>
-
-                        {/* 数据表格 */}
+                        {/* 数据表格（已集成列统计） */}
                         <DataTable
                             columns={dataInfo.columns}
                             data={dataInfo.preview_data}
                             rowCount={dataInfo.row_count}
                         />
+
 
                         {/* Sheet 切换器 */}
                         {project && project.files.length > 1 && (

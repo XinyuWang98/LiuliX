@@ -8,7 +8,7 @@ import { Project } from './utils/projectUtils';
 import { PanelRight, PanelLeft } from 'lucide-react';
 import { ExplorationFlow } from './components/exploration/ExplorationFlow';
 import { pyodideManager } from './services/PyodideManager';
-import { APISettings } from './components/settings/APISettings';
+import { AIConfigModal } from './components/AIConfigModal';
 
 function LoadingScreen() {
     const { t } = useI18n();
@@ -274,7 +274,7 @@ function AppContent() {
                 )}
             </div>
 
-            {showAPISettings && <APISettings onClose={() => setShowAPISettings(false)} />}
+            {showAPISettings && <AIConfigModal isOpen={showAPISettings} onClose={() => setShowAPISettings(false)} />}
         </div>
     );
 }

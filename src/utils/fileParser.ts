@@ -2,10 +2,7 @@ import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 
 // 文件大小阈值
-const FILE_SIZE_SMALL = 5 * 1024 * 1024;    // 5MB
-const FILE_SIZE_MEDIUM = 50 * 1024 * 1024;  // 50MB
-const SAMPLE_ROWS_MEDIUM = 5000;
-const SAMPLE_ROWS_LARGE = 1000;
+
 
 /**
  * 文件大小阈值配置
@@ -86,7 +83,7 @@ function parseCSV(file: File): Promise<ParsedFileData> {
                 };
                 reader.readAsText(file);
             },
-            error: (error) => {
+            error: (error: any) => {
                 reject(new Error(`CSV parsing failed: ${error.message}`));
             },
             skipEmptyLines: true,
@@ -97,7 +94,7 @@ function parseCSV(file: File): Promise<ParsedFileData> {
 /**
  * 解析 CSV 文件（抽样版）
  */
-function parseCSVSampled(file: File, maxRows: number): Promise<ParsedFileData> {
+export function parseCSVSampled(file: File, maxRows: number): Promise<ParsedFileData> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
@@ -133,7 +130,7 @@ function parseCSVSampled(file: File, maxRows: number): Promise<ParsedFileData> {
                             originalSize: file.size,
                         });
                     },
-                    error: (error) => {
+                    error: (error: any) => {
                         reject(new Error(`CSV sampling failed: ${error.message}`));
                     },
                     skipEmptyLines: true,

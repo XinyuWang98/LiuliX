@@ -118,11 +118,11 @@ export function ColumnStatsCard({ stats }: ColumnStatsCardProps) {
                 marginBottom: '8px'
             }}>
                 <div>
-                    <div style={{ color: 'var(--text-secondary)' }}>Unique</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>{t('data.unique')}</div>
                     <div style={{ fontWeight: 'var(--fw-bold)' }}>{stats.unique_count}</div>
                 </div>
                 <div>
-                    <div style={{ color: 'var(--text-secondary)' }}>Missing</div>
+                    <div style={{ color: 'var(--text-secondary)' }}>{t('data.missing')}</div>
                     <div style={{ fontWeight: 'var(--fw-bold)', color: stats.missing_ratio > 0.1 ? 'var(--warning)' : 'inherit' }}>
                         {(stats.missing_ratio * 100).toFixed(1)}%
                     </div>
@@ -136,9 +136,9 @@ export function ColumnStatsCard({ stats }: ColumnStatsCardProps) {
                     color: 'var(--text-secondary)',
                     marginBottom: '4px'
                 }}>
-                    <div>Min: {stats.numeric_stats.min.toFixed(2)}</div>
-                    <div>Max: {stats.numeric_stats.max.toFixed(2)}</div>
-                    <div>Mean: {stats.numeric_stats.mean.toFixed(2)}</div>
+                    <div>{t('data.min')}: {stats.numeric_stats.min.toFixed(2)}</div>
+                    <div>{t('data.max')}: {stats.numeric_stats.max.toFixed(2)}</div>
+                    <div>{t('data.mean')}: {stats.numeric_stats.mean.toFixed(2)}</div>
                 </div>
             )}
 

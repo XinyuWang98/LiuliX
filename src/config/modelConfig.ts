@@ -10,17 +10,8 @@ export interface ModelConfig {
 
 export const AVAILABLE_MODELS: ModelConfig[] = [
     {
-        id: 'gemini-pro',
-        name: 'Gemini Pro',
-        isFree: true,
-        requiresApiKey: true,  // 所有 Gemini 模型都需要 API Key
-        rateLimit: '15',
-        features: ['free', 'basic'],
-        docUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini'
-    },
-    {
-        id: 'gemini-1.5-flash',
-        name: 'Gemini 1.5 Flash',
+        id: 'gemini-1.5-flash-001', // Stable version 001
+        name: 'Gemini 1.5 Flash (001)',
         isFree: true,
         requiresApiKey: true,
         rateLimit: '15',
@@ -28,11 +19,21 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
         docUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini'
     },
     {
-        id: 'gemini-1.5-pro',
-        name: 'Gemini 1.5 Pro',
-        isFree: false,
+        id: 'gemini-1.5-pro-001', // Stable version 001
+        name: 'Gemini 1.5 Pro (001)',
+        isFree: true,
         requiresApiKey: true,
-        features: ['paid', 'advanced'],
+        rateLimit: '2',
+        features: ['advanced', 'requires_key'],
+        docUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini'
+    },
+    {
+        id: 'gemini-1.5-flash', // Alias
+        name: 'Gemini 1.5 Flash (Latest)',
+        isFree: true,
+        requiresApiKey: true,
+        rateLimit: '15',
+        features: ['free', 'fast', 'requires_key'],
         docUrl: 'https://ai.google.dev/gemini-api/docs/models/gemini'
     },
     {
@@ -51,5 +52,5 @@ export function getModelById(id: string): ModelConfig | undefined {
 }
 
 export function getDefaultModel(): ModelConfig {
-    return AVAILABLE_MODELS[0]; // gemini-pro
+    return AVAILABLE_MODELS[0]; // gemini-1.5-flash-001
 }

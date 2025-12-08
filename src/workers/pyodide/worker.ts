@@ -64,7 +64,7 @@ shape = df.shape
 `;
             const resultProxy = await pyodide.runPythonAsync(pythonCode);
             // Convert proxy to JS object
-            const result = resultProxy.toJs();
+            const result = resultProxy.toJs({ dict_converter: Object.fromEntries });
             resultProxy.destroy();
 
             ctx.postMessage({ id, type: 'SUCCESS', result });
@@ -107,7 +107,17 @@ result = {
     "was_sampled": was_sampled
 }
 
-json.dumps(result)
+import math
+def replace_nan(obj):
+    if isinstance(obj, float) and math.isnan(obj):
+        return None
+    elif isinstance(obj, dict):
+        return {k: replace_nan(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_nan(x) for x in obj]
+    return obj
+
+json.dumps(replace_nan(result))
 `;
 
             const resultStr = await pyodide.runPythonAsync(pythonCode);
@@ -162,7 +172,17 @@ for col in df.columns:
     
     columns_stats.append(stats)
 
-json.dumps(columns_stats)
+import math
+def replace_nan(obj):
+    if isinstance(obj, float) and math.isnan(obj):
+        return None
+    elif isinstance(obj, dict):
+        return {k: replace_nan(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_nan(x) for x in obj]
+    return obj
+
+json.dumps(replace_nan(columns_stats))
 `;
 
             const resultStr = await pyodide.runPythonAsync(pythonCode);
@@ -181,7 +201,17 @@ preview = {
     "columns": df.columns.tolist()
 }
 
-json.dumps(preview)
+import math
+def replace_nan(obj):
+    if isinstance(obj, float) and math.isnan(obj):
+        return None
+    elif isinstance(obj, dict):
+        return {k: replace_nan(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_nan(x) for x in obj]
+    return obj
+
+json.dumps(replace_nan(preview))
 `;
 
             const resultStr = await pyodide.runPythonAsync(pythonCode);

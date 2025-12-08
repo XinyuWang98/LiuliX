@@ -21,6 +21,7 @@ export function APISettings({ onClose }: APISettingsProps) {
     const [provider, setProvider] = useState<APIProvider>('gemini');
     const [selectedModel, setSelectedModel] = useState<ModelConfig>(AVAILABLE_MODELS[0]);
     const [apiKey, setApiKey] = useState('');
+    const [baseUrl, setBaseUrl] = useState('');
     const [showApiKey, setShowApiKey] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
     const [testResult, setTestResult] = useState<{ success: boolean; message: string; docUrl?: string } | null>(null);
@@ -35,6 +36,7 @@ export function APISettings({ onClose }: APISettingsProps) {
                 setSelectedModel(model);
             }
             setApiKey(config.apiKey);
+            setBaseUrl(config.baseUrl || '');
             setIsSaved(true);
         }
     }, []);
@@ -49,7 +51,10 @@ export function APISettings({ onClose }: APISettingsProps) {
     };
 
     const handleTestConnection = async () => {
-        if (selectedModel.requiresApiKey && !apiKey) {
+        const cleanKey = apiKey.trim();
+        const cleanBaseUrl = baseUrl.trim();
+
+        if (selectedModel.requiresApiKey && !cleanKey) {
             setTestResult({
                 success: false,
                 message: t('settings.errorInvalidKey'),
@@ -58,7 +63,7 @@ export function APISettings({ onClose }: APISettingsProps) {
             return;
         }
 
-        if (selectedModel.requiresApiKey && !validateAPIKey(provider, apiKey)) {
+        if (selectedModel.requiresApiKey && !validateAPIKey(provider, cleanKey)) {
             setTestResult({
                 success: false,
                 message: t('settings.errorInvalidKeySolution'),
@@ -71,23 +76,40 @@ export function APISettings({ onClose }: APISettingsProps) {
         setTestResult(null);
 
         try {
-            geminiService.initialize(apiKey, selectedModel.id);
+            geminiService.initialize(cleanKey, selectedModel.id, cleanBaseUrl);
             const result = await geminiService.testConnection();
             setTestResult({
                 ...result,
                 docUrl: selectedModel.docUrl
             });
         } catch (error: any) {
-            let errorMessage = error.message || t('settings.errorNetwork');
+            let errorMessage = t('settings.errorNetwork');
             let solution = t('settings.errorNetworkSolution');
+            const msg = error.message;
 
-            // 解析具体错误类型
-            if (error.message?.includes('404')) {
+            if (msg === 'API_KEY_INVALID') {
+                errorMessage = t('settings.errorInvalidKey');
+                solution = t('settings.errorInvalidKeySolution');
+            } else if (msg === 'QUOTA_EXCEEDED') {
+                errorMessage = t('settings.errorQuota');
+                solution = t('settings.errorQuotaSolution');
+            } else if (msg === 'RATE_LIMIT') {
+                errorMessage = t('settings.errorRateLimit');
+                solution = t('settings.errorRateLimitSolution');
+            } else if (msg === 'NETWORK_ERROR') {
+                errorMessage = t('settings.errorNetwork');
+                solution = t('settings.errorNetworkSolution');
+            } else if (msg === 'INVALID_CHARACTERS') {
+                errorMessage = t('settings.errorInvalidChars');
+                solution = t('settings.errorInvalidCharsSolution');
+            } else if (msg.includes('404')) {
                 errorMessage = t('settings.error404');
                 solution = t('settings.error404Solution');
-            } else if (error.message?.includes('429')) {
-                errorMessage = t('settings.error429');
-                solution = t('settings.error429Solution');
+            } else if (msg.includes('429')) { // Fallback for raw 429
+                errorMessage = t('settings.errorQuota');
+                solution = t('settings.errorQuotaSolution');
+            } else {
+                errorMessage = `${t('settings.errorUnknown')}: ${msg}`;
             }
 
             setTestResult({
@@ -101,7 +123,10 @@ export function APISettings({ onClose }: APISettingsProps) {
     };
 
     const handleSave = () => {
-        if (selectedModel.requiresApiKey && !apiKey) {
+        const cleanKey = apiKey.trim();
+        const cleanBaseUrl = baseUrl.trim();
+
+        if (selectedModel.requiresApiKey && !cleanKey) {
             setTestResult({
                 success: false,
                 message: t('settings.errorInvalidKey')
@@ -113,12 +138,13 @@ export function APISettings({ onClose }: APISettingsProps) {
             saveAPIConfig({
                 provider,
                 modelId: selectedModel.id,
-                apiKey
+                apiKey: cleanKey,
+                baseUrl: cleanBaseUrl
             });
             setIsSaved(true);
             setTestResult({ success: true, message: t('settings.configSaved') });
 
-            geminiService.initialize(apiKey, selectedModel.id);
+            geminiService.initialize(cleanKey, selectedModel.id, cleanBaseUrl);
 
             // 标记为已配置
             localStorage.setItem('api_configured', 'true');
@@ -130,6 +156,7 @@ export function APISettings({ onClose }: APISettingsProps) {
     const handleClear = () => {
         clearAPIConfig();
         setApiKey('');
+        setBaseUrl('');
         setSelectedModel(AVAILABLE_MODELS[0]);
         setIsSaved(false);
         setTestResult(null);
@@ -333,6 +360,42 @@ export function APISettings({ onClose }: APISettingsProps) {
                             {isSaved && <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--primary)', marginTop: 'var(--gap-xs)' }}>
                                 ✓ {t('settings.saved')}: {maskAPIKey(apiKey)}
                             </p>}
+                        </div>
+
+                        {/* Base URL 设置 (可选) */}
+                        <div style={{ marginBottom: 'var(--gap-l)' }}>
+                            <label style={{
+                                fontSize: 'var(--fs-sm)',
+                                fontWeight: 'var(--fw-medium)',
+                                color: 'var(--text-secondary)',
+                                display: 'block',
+                                marginBottom: 'var(--gap-s)',
+                            }}>
+                                {t('settings.baseUrl')} <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal', fontSize: 'var(--fs-xs)' }}>({t('settings.optional')})</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={baseUrl}
+                                onChange={(e) => {
+                                    setBaseUrl(e.target.value);
+                                    setIsSaved(false);
+                                    setTestResult(null);
+                                }}
+                                placeholder={t('settings.baseUrlPlaceholder')}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    border: '1px solid var(--border)',
+                                    borderRadius: 'var(--radius-m)',
+                                    background: 'var(--bg-main)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: 'var(--fs-sm)',
+                                    fontFamily: 'monospace',
+                                }}
+                            />
+                            <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                {t('settings.baseUrlHint')}
+                            </p>
                         </div>
                     </>
                 )}
