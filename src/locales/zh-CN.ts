@@ -84,6 +84,12 @@ export const zhCN: LanguageConfig = {
             errorNetwork: '网络错误',
             errorNetworkSolution: '请检查您的网络连接并重试。',
 
+            // DuckDB 错误提示
+            dbNotReady: 'DuckDB 引擎未就绪',
+            opfsFailed: 'OPFS 持久化失败',
+            opfsSuccess: 'OPFS 持久化成功',
+            parseSuccess: '数据解析成功',
+
             errorGeminiEmpty: 'Gemini 没说话',
             errorClaudeEmpty: 'Claude 哑巴了',
             errorModelEmpty: '没内容',
@@ -241,6 +247,44 @@ export const zhCN: LanguageConfig = {
         workshop: {
             title: '智能工坊',
             description: 'AI 交互和证据池',
+        },
+
+        cleaning: {
+            title: '数据清洗',
+            currentTable: '当前表格',
+            dedup: '去重',
+            fillNull: '填充缺失值',
+            normalize: '标准化',
+            dropEmpty: '删除空行',
+            sqlPlaceholder: '输入 SQL 清洗语句...',
+            runSQL: '执行 SQL',
+            intentDedup: '去除重复数据',
+            intentFillNull: '填充空值',
+            intentNormalize: '数据标准化',
+            intentDropEmpty: '删除空行',
+        },
+
+        grid: {
+            loading: '加载中...',
+            loadStatsFailed: '加载统计信息失败',
+            loadDataFailed: '加载数据失败',
+            nullRate: '缺失率: {rate}%',
+            uniqueValues: '{count} 个唯一值',
+            missingPercent: '{percent}% 缺失',
+            selectedColumns: '已选择 {count}/{total} 列',
+            selectColumns: '选择列',
+            selectAll: '全选',
+            deselectAll: '取消全选',
+        },
+
+        pagination: {
+            prev: '上一页',
+            next: '下一页',
+            page: '第',
+            of: '/',
+            totalPages: '页',
+            totalRows: '共',
+            rows: '行',
         },
 
         workflow: {

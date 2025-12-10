@@ -89,6 +89,12 @@ export interface LanguageConfig {
             errorNetwork: string;
             errorNetworkSolution: string;
 
+            // DuckDB Errors
+            dbNotReady: string;
+            opfsFailed: string;
+            opfsSuccess: string;
+            parseSuccess: string;
+
             // AI Service Specific Errors
             errorGeminiEmpty: string;
             errorClaudeEmpty: string;
@@ -258,6 +264,22 @@ export interface LanguageConfig {
             description: string;
         };
 
+        // 数据清洗
+        cleaning: {
+            title: string;
+            currentTable: string;
+            dedup: string;
+            fillNull: string;
+            normalize: string;
+            dropEmpty: string;
+            sqlPlaceholder: string;
+            runSQL: string;
+            intentDedup: string;
+            intentFillNull: string;
+            intentNormalize: string;
+            intentDropEmpty: string;
+        };
+
         // 工作流
         workflow: {
             upload: string;
@@ -265,6 +287,31 @@ export interface LanguageConfig {
             hypothesis: string;
             insights: string;
             report: string;
+        };
+
+        // 数据表格
+        grid: {
+            loading: string;
+            loadStatsFailed: string;
+            loadDataFailed: string;
+            nullRate: string;
+            uniqueValues: string;
+            missingPercent: string;
+            selectedColumns: string;
+            selectColumns: string;
+            selectAll: string;
+            deselectAll: string;
+        };
+
+        // 分页器
+        pagination: {
+            prev: string;
+            next: string;
+            page: string;
+            of: string;
+            totalPages: string;
+            totalRows: string;
+            rows: string;
         };
 
         // 数据探索流

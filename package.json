@@ -10,8 +10,11 @@
         "type-check": "tsc --noEmit"
     },
     "dependencies": {
+        "@duckdb/duckdb-wasm": "^1.30.0",
+        "@duckdb/react-duckdb": "^1.29.1-dev132.0",
         "@google/generative-ai": "^0.24.1",
         "@tanstack/react-table": "^8.20.5",
+        "apache-arrow": "^21.1.0",
         "dexie": "^4.0.10",
         "dexie-react-hooks": "^1.1.7",
         "ky": "^1.14.1",
@@ -22,6 +25,8 @@
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "react-plotly.js": "^2.6.0",
+        "react-virtualized-auto-sizer": "^1.0.26",
+        "react-window": "^2.2.3",
         "xlsx": "^0.18.5"
     },
     "devDependencies": {
@@ -29,6 +34,7 @@
         "@types/plotly.js": "^2.33.4",
         "@types/react": "^18.3.12",
         "@types/react-dom": "^18.3.1",
+        "@types/react-window": "^1.8.8",
         "@vitejs/plugin-react": "^4.3.3",
         "typescript": "^5.6.3",
         "vite": "^5.4.11"

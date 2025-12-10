@@ -213,4 +213,77 @@
   --z-dropdown: 900;
   --z-sticky: 100;
   --z-base: 1;
+
+  /* ========== DataGrid 变量 ========== */
+  --grid-row-height: 35px;
+  --grid-col-width: 150px;
+  --grid-overscan: 5;
+  --grid-chunk-size: 100;
+  --grid-min-height: 400px;
+  /* 表格最小高度 */
+  --grid-header-z: 10;
+  /* 表头 z-index */
+
+  /* ========== 超小字号和间距 ========== */
+  --fs-xxs: 10px;
+  /* 超小字号 */
+  --gap-xxs: 2px;
+  /* 超小间距 */
+
+  /* ========== 按钮和组件尺寸 ========== */
+  --btn-padding-y: 8px;
+  --btn-padding-x: 16px;
+  --btn-height-sm: 36px;
+  /* 小按钮高度 */
+
+  /* ========== 加载器和动画 ========== */
+  --spinner-size: 32px;
+  --spinner-border: 3px;
+  --opacity-disabled: 0.4;
+
+  /* ========== 通用颜色别名 ========== */
+  --color-white: #FFFFFF;
+  --text-inverse: #FFFFFF;
+  /* 反色文字（深色背景上的白字） */
+  --bg-secondary: #252527;
+  /* 次要背景色 */
+  --border-light: rgba(255, 255, 255, 0.08);
+  /* 浅边框 */
+  --text-tertiary: #6C6C6E;
+  /* 三级文字（最弱） */
+  --primary: var(--bg-accent);
+  /* 主色别名 */
+  --error: var(--warning);
+  /* 错误色别名 */
+  --font-mono: var(--font-family-mono);
+  /* 等宽字体别名 */
+  --fw-bold: 600;
+  /* 粗体字重 */
+
+  /* ========== 数据统计卡片 ========== */
+  --stat-card-min-width: 120px;
+  --stat-bar-height: 4px;
+  --stat-mini-bar-height: 3px;
+
+  /* ========== 列宽计算常量 ========== */
+  --col-name-char-width: 10;
+  /* 列名每字符占用宽度 */
+  --col-width-offset: 60;
+  /* 列宽基础偏移 */
+
+  /* =========== 数据表格高亮色 ========== */
+  --highlight-row: rgba(255, 200, 100, 0.15);
+  /* 行高亮（暖色调，柔和） */
+  --highlight-col: rgba(100, 150, 255, 0.12);
+  /* 列高亮（冷色调，淡雅） */
+  --highlight-cell: rgba(255, 200, 100, 0.35);
+  /* 单元格高亮（强调色） */
+  --transition-fast: 0.1s;
+  /* 快速过渡 */
+  --border-width: 1px;
+  /* 边框宽度 */
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  /* 悬浮背景色 */
+  --fw-medium: 500;
+  /* 中等字重 */
 }

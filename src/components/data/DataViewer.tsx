@@ -6,6 +6,9 @@ import { FileText, Database, Columns3, LayoutGrid, Loader } from 'lucide-react';
 import { pyodideManager } from '../../services/PyodideManager';
 import { ColumnStats } from '@/types/data';
 import { DataTable } from './DataTable';
+import { VirtualDataGrid } from '../VirtualDataGrid';
+import { DuckDBEngine } from '../../db/duckdbEngine';
+import { ColumnMetadata } from '../../types/duckdb';
 import { loadProjects } from '@utils/indexedDB';
 
 interface DataViewerProps {
@@ -20,16 +23,31 @@ interface DataFrameInfo {
     preview_data: any[][];
 }
 
+interface DuckDBInfo {
+    tableName: string;
+    rowCount: number;
+    columns: ColumnMetadata[];
+}
+
 /**
  * 数据查看器组件 - Kaggle 风格
- * 显示列统计卡片 + 数据表格
+ * 智能路由：小文件走 Pyodide + DataTable，大文件/CSV 走 DuckDB + VirtualDataGrid
  */
 export function DataViewer({ project }: DataViewerProps) {
     const { t } = useI18n();
     const [loading, setLoading] = useState(false);
     const [dataInfo, setDataInfo] = useState<DataFrameInfo | null>(null);
+
+    // DuckDB 状态
+    const [duckInfo, setDuckInfo] = useState<DuckDBInfo | null>(null);
+    const [useDuckDB, setUseDuckDB] = useState(false);
+
     const [error, setError] = useState<string | null>(null);
     const [activeFileId, setActiveFileId] = useState<string | null>(null);
+
+    // 列筛选器状态
+    const [selectedColumns, setSelectedColumns] = useState<number[]>([]);
+    const [showColumnSelector, setShowColumnSelector] = useState(false);
 
     // 初始化：选择第一个文件
     useEffect(() => {
@@ -52,6 +70,9 @@ export function DataViewer({ project }: DataViewerProps) {
 
         setLoading(true);
         setError(null);
+        setDuckInfo(null);
+        setDataInfo(null);
+        setUseDuckDB(false);
 
         try {
             // 1. 从 IndexedDB 加载项目数据
@@ -63,11 +84,75 @@ export function DataViewer({ project }: DataViewerProps) {
             const file = projectData.files.find((f: any) => f.id === activeFileId);
             if (!file || !file.data) throw new Error('文件内容未找到');
 
-            // 3. 使用 Pyodide 加载数据
+            const fileName = file.data.fileName.toLowerCase();
+            const isCSV = fileName.endsWith('.csv');
+
+            // 策略：如果是 CSV 且行数 > 5000 或强制使用 DuckDB
+            // 这里为了演示 VirtualDataGrid，我们对所有 CSV 优先尝试 DuckDB
+            if (isCSV) {
+                try {
+                    // 尝试使用 DuckDB
+                    const engine = DuckDBEngine.getInstance();
+                    await engine.init();
+
+                    // Prioritize original raw file (optimized path)
+                    if (file.data.originalFile) {
+                        const rawFile = file.data.originalFile;
+
+                        // Pass options based on FileUploader's flags
+                        // If file.data.isSampled is true, it means FORCE_SAMPLE or User Confirmed Sample
+                        const result = await engine.ingestCSV(rawFile, {
+                            sampleSize: file.data.isSampled ? 200000 : -1, // Use standard large chunk if sampled
+                            sampleRate: 0.2, // Default 20%
+                            autoSampleThreshold: 200000 // Force threshold match
+                        });
+
+                        setDuckInfo({
+                            tableName: result.tableName,
+                            rowCount: result.rowCount,
+                            columns: result.columns
+                        });
+                        setUseDuckDB(true);
+                        return;
+                    }
+
+                    // Fallback: Reconstruct CSV from JSON (Legacy/Edge case)
+                    // ... (Original logic kept as safety net)
+                    let csvContent = '';
+                    const data = file.data.data;
+                    if (data && data.length > 0) {
+                        const headers = Object.keys(data[0]);
+                        csvContent += headers.join(',') + '\n';
+                        data.forEach((row: any) => {
+                            csvContent += headers.map(h => {
+                                const val = row[h];
+                                return val === null || val === undefined ? '' : String(val);
+                            }).join(',') + '\n';
+                        });
+                    }
+
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const csvFile = new File([blob], fileName, { type: 'text/csv' });
+
+                    const result = await engine.ingestCSV(csvFile);
+                    setDuckInfo({
+                        tableName: result.tableName,
+                        rowCount: result.rowCount,
+                        columns: result.columns
+                    });
+                    setUseDuckDB(true);
+                    return;
+
+                } catch (duckErr) {
+                    console.warn('DuckDB 加载失败，回退到 Pyodide', duckErr);
+                }
+            }
+
+            // 3. 使用 Pyodide 加载数据 (Fallback)
             const fileContent = JSON.stringify(file.data);
             const loadResult = await pyodideManager.loadDataFromFile(
                 fileContent,
-                file.data.fileName.endsWith('.json') ? 'json' : 'csv',
+                fileName.endsWith('.json') ? 'json' : 'csv',
                 { maxRows: 100000, sample: false }
             );
 
@@ -89,6 +174,14 @@ export function DataViewer({ project }: DataViewerProps) {
             setLoading(false);
         }
     }
+
+    // 初始化列筛选器（当DuckDB数据加载后）
+    useEffect(() => {
+        if (duckInfo && duckInfo.columns.length > 0) {
+            const defaultColumnCount = Math.min(10, duckInfo.columns.length);
+            setSelectedColumns(Array.from({ length: defaultColumnCount }, (_, i) => i));
+        }
+    }, [duckInfo]);
 
     return (
         <div style={{
@@ -120,23 +213,174 @@ export function DataViewer({ project }: DataViewerProps) {
                 </h2>
 
                 {/* 数据集信息 */}
-                {dataInfo && (
+                {(dataInfo || duckInfo) && (
                     <div style={{
                         display: 'flex',
                         gap: 'var(--gap-l)',
                         alignItems: 'center',
                     }}>
+                        {useDuckDB && (
+                            <span style={{
+                                fontSize: 'var(--fs-xs)',
+                                background: 'var(--bg-accent)',
+                                color: '#fff',
+                                padding: '2px 6px',
+                                borderRadius: '4px'
+                            }}>
+                                DuckDB Turbo
+                            </span>
+                        )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-xs)' }}>
                             <Database size={14} style={{ color: 'var(--text-secondary)' }} />
                             <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-                                {dataInfo.row_count.toLocaleString()} 行
+                                {(duckInfo?.rowCount || dataInfo?.row_count || 0).toLocaleString()} 行
                             </span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-xs)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-s)' }}>
                             <Columns3 size={14} style={{ color: 'var(--text-secondary)' }} />
-                            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-                                {dataInfo.column_count} 列
-                            </span>
+
+                            {/* 列筛选器按钮 */}
+                            {useDuckDB && duckInfo ? (
+                                <div style={{ position: 'relative' }}>
+                                    <button
+                                        onClick={() => setShowColumnSelector(!showColumnSelector)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 'var(--gap-xs)',
+                                            padding: 'var(--gap-xs) var(--gap-s)',
+                                            background: 'transparent',
+                                            border: '1px solid var(--border)',
+                                            borderRadius: 'var(--radius-s)',
+                                            color: 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            fontSize: 'var(--fs-sm)',
+                                            transition: 'all var(--transition-fast)',
+                                        }}
+                                    >
+                                        <span>{t('grid.selectedColumns', {
+                                            count: selectedColumns.length,
+                                            total: duckInfo.columns.length
+                                        })}</span>
+                                    </button>
+
+                                    {/* 列筛选下拉框 */}
+                                    {showColumnSelector && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '110%',
+                                            right: 0,
+                                            background: 'var(--bg-secondary)',
+                                            border: '1px solid var(--border)',
+                                            borderRadius: 'var(--radius-m)',
+                                            boxShadow: 'var(--shadow-lv2)',
+                                            padding: 'var(--gap-s)',
+                                            minWidth: '250px',
+                                            maxHeight: '400px',
+                                            zIndex: 1000,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                        }}>
+                                            {/* 全选/取消全选按钮 - 固定在顶部 */}
+                                            <div style={{
+                                                display: 'flex',
+                                                gap: 'var(--gap-s)',
+                                                marginBottom: 'var(--gap-s)',
+                                                paddingBottom: 'var(--gap-s)',
+                                                borderBottom: '1px solid var(--border)',
+                                                flexShrink: 0,
+                                            }}>
+                                                <button
+                                                    onClick={() => setSelectedColumns(duckInfo.columns.map((_, idx) => idx))}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: 'var(--gap-xs) var(--gap-s)',
+                                                        background: 'var(--bg-secondary)',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: 'var(--radius-s)',
+                                                        color: 'var(--text-primary)',
+                                                        cursor: 'pointer',
+                                                        fontSize: 'var(--fs-xs)',
+                                                    }}
+                                                >
+                                                    {t('grid.selectAll')}
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedColumns([])}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: 'var(--gap-xs) var(--gap-s)',
+                                                        background: 'var(--bg-secondary)',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: 'var(--radius-s)',
+                                                        color: 'var(--text-primary)',
+                                                        cursor: 'pointer',
+                                                        fontSize: 'var(--fs-xs)',
+                                                    }}
+                                                >
+                                                    {t('grid.deselectAll')}
+                                                </button>
+                                            </div>
+
+                                            {/* 列选择列表 - 可滚动区域 */}
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: 'var(--gap-xs)',
+                                                overflowY: 'auto',
+                                                maxHeight: '300px',
+                                            }}>
+                                                {duckInfo.columns.map((col, idx) => (
+                                                    <label
+                                                        key={idx}
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 'var(--gap-s)',
+                                                            padding: 'var(--gap-xs)',
+                                                            borderRadius: 'var(--radius-s)',
+                                                            cursor: 'pointer',
+                                                            transition: 'background var(--transition-fast)',
+                                                        }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedColumns.includes(idx)}
+                                                            onChange={() => {
+                                                                if (selectedColumns.includes(idx)) {
+                                                                    setSelectedColumns(selectedColumns.filter(i => i !== idx));
+                                                                } else {
+                                                                    setSelectedColumns([...selectedColumns, idx].sort((a, b) => a - b));
+                                                                }
+                                                            }}
+                                                            style={{ cursor: 'pointer' }}
+                                                        />
+                                                        <span style={{
+                                                            fontSize: 'var(--fs-sm)',
+                                                            color: 'var(--text-primary)',
+                                                        }}>
+                                                            {col.name}
+                                                        </span>
+                                                        <span style={{
+                                                            marginLeft: 'auto',
+                                                            fontSize: 'var(--fs-xxs)',
+                                                            color: 'var(--text-tertiary)',
+                                                        }}>
+                                                            {col.type}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+                                    {(duckInfo ? duckInfo.columns.length : dataInfo?.column_count || 0)} 列
+                                </span>
+                            )}
                         </div>
                     </div>
                 )}
@@ -175,53 +419,31 @@ export function DataViewer({ project }: DataViewerProps) {
                     }}>
                         错误: {error}
                     </div>
+                ) : (useDuckDB && duckInfo) ? (
+                    /* DuckDB 虚拟表格 */
+                    <div style={{
+                        flex: 1,
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-m)',
+                        overflow: 'hidden',
+                        background: 'var(--bg-panel)'
+                    }}>
+                        <VirtualDataGrid
+                            tableName={duckInfo.tableName}
+                            rowCount={duckInfo.rowCount}
+                            columns={duckInfo.columns}
+                            selectedColumns={selectedColumns}
+                        />
+                    </div>
                 ) : dataInfo ? (
-                    /* 数据展示 - 一体化表格 */
+                    /* 常规 Pyodide 表格 */
                     <>
-                        {/* 数据表格（已集成列统计） */}
                         <DataTable
                             columns={dataInfo.columns}
                             data={dataInfo.preview_data}
                             rowCount={dataInfo.row_count}
                         />
-
-
-                        {/* Sheet 切换器 */}
-                        {project && project.files.length > 1 && (
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                background: 'var(--bg-panel)',
-                                borderTop: '1px solid var(--border)',
-                                marginTop: 'var(--gap-m)',
-                                overflowX: 'auto',
-                                borderRadius: 'var(--radius-m)'
-                            }}>
-                                {project.files.map(file => (
-                                    <button
-                                        key={file.id}
-                                        onClick={() => setActiveFileId(file.id)}
-                                        style={{
-                                            padding: '10px 18px',
-                                            border: 'none',
-                                            background: activeFileId === file.id ? 'var(--primary)' : 'transparent',
-                                            color: activeFileId === file.id ? '#fff' : 'var(--text-secondary)',
-                                            borderRight: '1px solid var(--border)',
-                                            fontWeight: activeFileId === file.id ? '600' : '400',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px',
-                                            whiteSpace: 'nowrap',
-                                            transition: 'all 0.2s ease'
-                                        }}
-                                    >
-                                        <FileText size={14} />
-                                        {file.data.fileName}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                        {/* Sheet 切换器 (省略，仅 CSV 场景下通常无多 Sheet) */}
                     </>
                 ) : (
                     /* 空状态 */
@@ -235,6 +457,44 @@ export function DataViewer({ project }: DataViewerProps) {
                         {t('dataSource.noProjects')}
                     </div>
                 )}
+
+                {/* 底部 Sheet 切换器 (仅在 Pyodide 模式且多文件时显示) */}
+                {(!useDuckDB && project && project.files.length > 1) && (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        background: 'var(--bg-panel)',
+                        borderTop: '1px solid var(--border)',
+                        marginTop: 'var(--gap-m)',
+                        overflowX: 'auto',
+                        borderRadius: 'var(--radius-m)'
+                    }}>
+                        {project.files.map(file => (
+                            <button
+                                key={file.id}
+                                onClick={() => setActiveFileId(file.id)}
+                                style={{
+                                    padding: '10px 18px',
+                                    border: 'none',
+                                    background: activeFileId === file.id ? 'var(--primary)' : 'transparent',
+                                    color: activeFileId === file.id ? '#fff' : 'var(--text-secondary)',
+                                    borderRight: '1px solid var(--border)',
+                                    fontWeight: activeFileId === file.id ? '600' : '400',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    whiteSpace: 'nowrap',
+                                    transition: 'all 0.2s ease'
+                                }}
+                            >
+                                <FileText size={14} />
+                                {file.data.fileName}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
             </div>
         </div>
     );

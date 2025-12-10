@@ -1,0 +1,224 @@
+/* VirtualDataGrid.css - 严格遵守 CSS 变量规则 */
+
+.virtualGridContainer {
+    width: 100%;
+    height: 100%;
+    min-height: var(--grid-min-height);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+
+    --local-row-height: var(--grid-row-height);
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* 增强表头 */
+.enhancedGridHeader {
+    display: flex;
+    background: var(--bg-secondary);
+    border-bottom: 2px solid var(--border);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: var(--grid-header-z);
+}
+
+.enhancedHeaderCell {
+    flex-shrink: 0;
+    padding: var(--gap-s);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    border-right: 1px solid var(--border);
+    box-sizing: border-box;
+}
+
+.headerCellTop {
+    display: flex;
+    align-items: baseline;
+    gap: var(--gap-xs);
+}
+
+.headerCellName {
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.headerCellType {
+    font-size: var(--fs-xxs);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-weight: normal;
+}
+
+.headerCellStats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xxs);
+}
+
+.statMiniBar {
+    height: var(--stat-mini-bar-height);
+    background: var(--bg-main);
+    border-radius: var(--progress-radius);
+    overflow: hidden;
+}
+
+.statMiniBarFill {
+    height: 100%;
+    background: var(--error);
+    transition: width var(--transition-m) var(--ease-out);
+}
+
+.statMiniText {
+    font-size: var(--fs-xxs);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 表体容器 - 统一管理横向和纵向滚动 */
+.simpleTableBody {
+    flex: 1;
+    overflow: auto;
+    /* 同时处理横向和纵向滚动 */
+    scrollbar-width: thin;
+}
+
+.simpleTableRow {
+    display: flex;
+    border-bottom: 1px solid var(--border-light);
+    transition: background var(--transition-s) var(--ease-out);
+}
+
+/* 移除hover效果，只保留点击选中的高亮 */
+
+.enhancedGridCell {
+    flex-shrink: 0;
+    padding: var(--gap-s);
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* 移除单元格hover效果 */
+
+/* 序号列专属样式 */
+.enhancedHeaderCell序号列,
+.enhancedGridCell序号 {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    text-align: center;
+    justify-content: center;
+    font-weight: var(--fw-medium);
+    color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 移除序号列hover效果 */
+
+/* 行列高亮效果 */
+.enhancedGridCell.highlightRow {
+    background-color: var(--highlight-row) !important;
+}
+
+.enhancedGridCell.highlightCol {
+    background-color: var(--highlight-col) !important;
+}
+
+.enhancedGridCell.highlightCell {
+    background-color: var(--highlight-cell) !important;
+    border: var(--border-width) solid var(--primary);
+    box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+/* 加载状态 */
+.loadingPlaceholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gap-xl);
+    gap: var(--gap-m);
+    color: var(--text-secondary);
+}
+
+.loadingSpinner {
+    width: var(--spinner-size);
+    height: var(--spinner-size);
+    border: var(--spinner-border) solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 分页器 */
+.simplePagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-l);
+    padding: var(--gap-m);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg-secondary);
+}
+
+.paginationBtn {
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    transition: all var(--transition-s) var(--ease-out);
+}
+
+.paginationBtn:hover:not(:disabled) {
+    background: var(--primary);
+    color: var(--text-inverse);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.paginationBtn:disabled {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+}
+
+.paginationInfo {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+.paginationInfo strong {
+    color: var(--text-primary);
+    font-weight: var(--fw-bold);
+}

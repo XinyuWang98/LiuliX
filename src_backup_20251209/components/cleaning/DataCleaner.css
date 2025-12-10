@@ -1,0 +1,145 @@
+/* DataCleaner.css */
+
+.cleanerContainer {
+    padding: var(--gap-m);
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+}
+
+.cleanerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cleanerTitle {
+    margin: 0;
+    font-size: var(--fs-m);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    color: var(--text-primary);
+}
+
+.cleanerTableInfo {
+    font-size: var(--fs-s);
+    color: var(--text-secondary);
+}
+
+.cleanerTableInfo code {
+    font-family: monospace;
+    background: var(--bg-main);
+    padding: 2px 4px;
+    border-radius: var(--radius-s);
+    color: var(--primary);
+}
+
+.cleanerSuggestions {
+    display: flex;
+    gap: var(--gap-s);
+    flex-wrap: wrap;
+}
+
+.suggestionBtn {
+    border: 1px solid var(--border);
+    font-size: var(--fs-s);
+    padding: 4px 10px;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: var(--radius-s);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.suggestionBtn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--bg-hover);
+}
+
+.suggestionBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.editorContainer {
+    position: relative;
+    width: 100%;
+}
+
+.sqlEditor {
+    width: 100%;
+    min-height: 80px;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: var(--gap-s);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--fs-s);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.sqlEditor:focus {
+    border-color: var(--primary);
+}
+
+.executeBtnWrapper {
+    position: absolute;
+    bottom: var(--gap-s);
+    right: var(--gap-s);
+    display: flex;
+    gap: var(--gap-s);
+}
+
+.executeBtn {
+    padding: 6px 16px;
+    font-size: var(--fs-s);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    border-radius: var(--radius-s);
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.executeBtn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.executeBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--bg-button-disabled);
+}
+
+.errorBox {
+    padding: var(--gap-s);
+    background: rgba(220, 38, 38, 0.1);
+    /* Error color with opacity */
+    border: 1px solid var(--error);
+    color: var(--error);
+    font-size: var(--fs-s);
+    border-radius: var(--radius-s);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -50,6 +50,24 @@
         "--blur-light": "15px",
         "--blur-medium": "30px",
         "--blur-heavy": "50px",
-        "--glass-highlight": "inset 0 1.5px 0 0 rgba(255, 255, 255, 0.2)"
+        "--glass-highlight": "inset 0 1.5px 0 0 rgba(255, 255, 255, 0.2)",
+        "--bg-secondary": "#1C1C1E",
+        "--border-light": "rgba(255, 255, 255, 0.08)",
+        "--text-on-primary": "#FFFFFF",
+        "--error-bg": "rgba(255, 69, 58, 0.15)",
+        "--highlight-row": "rgba(255, 200, 100, 0.15)",
+        "--highlight-col": "rgba(255, 200, 100, 0.15)",
+        "--highlight-cell": "rgba(255, 200, 100, 0.35)",
+        "--transition-fast": "0.1s",
+        "--border-width": "1px",
+        "--fs-xxs": "10px",
+        "--gap-xxs": "2px",
+        "--grid-row-height": "35px",
+        "--grid-col-width": "150px",
+        "--grid-min-height": "400px",
+        "--grid-header-z": "10",
+        "--scrollbar-thumb": "rgba(100, 100, 100, 0.4)",
+        "--scrollbar-thumb-hover": "rgba(120, 120, 120, 0.6)",
+        "--scrollbar-track": "rgba(50, 50, 50, 0.3)"
     }
 }

@@ -142,18 +142,18 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--bg-accent);
+    background: var(--scrollbar-thumb);
     border-radius: var(--radius-full);
     border: 2px solid transparent;
     background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--bg-hover);
+    background: var(--scrollbar-thumb-hover);
     background-clip: content-box;
 }
 

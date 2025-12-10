@@ -1,0 +1,196 @@
+import { useState, useEffect, useRef } from 'react';
+import { aiService, AIModel } from '../services/aiService';
+// Import lucide icons if available, else emojis. Assuming Lucide is in project based on previous list_files.
+import { X, GripVertical, CheckCircle, AlertCircle, Play } from 'lucide-react';
+
+interface AIConfigModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+const MODEL_NAMES: Record<AIModel, string> = {
+    gemini: 'Gemini 2.5 Flash',
+    grok: 'Grok Beta',
+    claude: 'Claude 3.5 Sonnet',
+    deepseek: 'DeepSeek Chat'
+};
+
+export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
+    // Priority State
+    const [priority, setPriority] = useState<AIModel[]>(() => {
+        const stored = localStorage.getItem('ai_priority');
+        return stored ? JSON.parse(stored) : ['gemini', 'grok', 'claude', 'deepseek'];
+    });
+
+    // Keys State
+    const [keys, setKeys] = useState<Record<string, string>>({});
+
+    // Test Status State
+    const [testStatus, setTestStatus] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
+    const [testMsg, setTestMsg] = useState<Record<string, string>>({});
+
+    // DnD State
+    const dragItem = useRef<number | null>(null);
+    const dragOverItem = useRef<number | null>(null);
+
+    // Initialize keys from sessionStorage on mount
+    useEffect(() => {
+        const newKeys: Record<string, string> = {};
+        const models: AIModel[] = ['gemini', 'grok', 'claude', 'deepseek'];
+        models.forEach(m => {
+            newKeys[m] = sessionStorage.getItem(`${m}_key`) || '';
+        });
+        setKeys(newKeys);
+    }, [isOpen]);
+
+    // Save priority when changed
+    useEffect(() => {
+        localStorage.setItem('ai_priority', JSON.stringify(priority));
+    }, [priority]);
+
+    const handleKeyChange = (model: string, val: string) => {
+        sessionStorage.setItem(`${model}_key`, val);
+        setKeys(prev => ({ ...prev, [model]: val }));
+    };
+
+    const handleTest = async (model: AIModel) => {
+        if (!keys[model]) {
+            setTestStatus(prev => ({ ...prev, [model]: 'error' }));
+            setTestMsg(prev => ({ ...prev, [model]: '请输入 API Key' }));
+            return;
+        }
+
+        setTestStatus(prev => ({ ...prev, [model]: 'loading' }));
+        setTestMsg(prev => ({ ...prev, [model]: '' }));
+
+        try {
+            await aiService.testConnection(model, keys[model]);
+            setTestStatus(prev => ({ ...prev, [model]: 'success' }));
+        } catch (err: any) {
+            setTestStatus(prev => ({ ...prev, [model]: 'error' }));
+            setTestMsg(prev => ({ ...prev, [model]: err.message || '连接失败' }));
+        }
+    };
+
+    // Drag and Drop Handlers
+    const onDragStart = (_e: React.DragEvent<HTMLDivElement>, index: number) => {
+        dragItem.current = index;
+    };
+
+    const onDragEnter = (_e: React.DragEvent<HTMLDivElement>, index: number) => {
+        dragOverItem.current = index;
+    };
+
+    const onDragEnd = () => {
+        if (dragItem.current !== null && dragOverItem.current !== null) {
+            const copy_priority = [...priority];
+            const dragItemContent = copy_priority[dragItem.current];
+            copy_priority.splice(dragItem.current, 1);
+            copy_priority.splice(dragOverItem.current, 0, dragItemContent);
+            setPriority(copy_priority);
+        }
+        dragItem.current = null;
+        dragOverItem.current = null;
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="w-[600px] max-h-[80vh] overflow-y-auto bg-[#1a1b1e] border border-white/10 rounded-xl shadow-2xl text-white font-sans">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-white/10">
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        AI 模型配置
+                    </h2>
+                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                        <X size={20} className="text-gray-400" />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div className="p-6 space-y-6">
+                    <div className="text-sm text-gray-400 bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg">
+                        ℹ️ 拖拽模型名称可调整调用优先级。Key 仅保存在当前会话中 (SessionStorage)。
+                    </div>
+
+                    <div className="space-y-3">
+                        {priority.map((model, index) => (
+                            <div
+                                key={model}
+                                draggable
+                                onDragStart={(e) => onDragStart(e, index)}
+                                onDragEnter={(e) => onDragEnter(e, index)}
+                                onDragEnd={onDragEnd}
+                                onDragOver={(e) => e.preventDefault()}
+                                className="group bg-[#25262b] border border-white/5 rounded-lg p-4 transition-all hover:border-white/10"
+                            >
+                                <div className="flex items-start gap-4">
+                                    {/* Drag Handle */}
+                                    <div className="mt-3 cursor-grab text-gray-600 hover:text-gray-300">
+                                        <GripVertical size={20} />
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex-1 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-medium text-gray-200">
+                                                {MODEL_NAMES[model]}
+                                            </span>
+                                            <div className="text-xs text-gray-500 uppercase tracking-wider">
+                                                Priority {index + 1}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="password"
+                                                placeholder={`输入 ${MODEL_NAMES[model]} API Key`}
+                                                value={keys[model] || ''}
+                                                onChange={(e) => handleKeyChange(model, e.target.value)}
+                                                className="flex-1 bg-[#141517] border border-white/10 rounded px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blue-500 transition-colors"
+                                            />
+                                            <button
+                                                onClick={() => handleTest(model)}
+                                                disabled={testStatus[model] === 'loading'}
+                                                className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-gray-300 transition-colors disabled:opacity-50"
+                                                title="测试连接"
+                                            >
+                                                {testStatus[model] === 'loading' ? (
+                                                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                ) : (
+                                                    <Play size={16} />
+                                                )}
+                                            </button>
+                                        </div>
+
+                                        {/* Status Message */}
+                                        {testStatus[model] && testStatus[model] !== 'idle' && (
+                                            <div className={`flex items-center gap-2 text-xs ${testStatus[model] === 'success' ? 'text-green-400' :
+                                                testStatus[model] === 'error' ? 'text-red-400' : 'text-gray-400'
+                                                }`}>
+                                                {testStatus[model] === 'success' ? <CheckCircle size={14} /> :
+                                                    testStatus[model] === 'error' ? <AlertCircle size={14} /> : null}
+                                                {testStatus[model] === 'success' ? '连接成功' : testMsg[model]}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="p-6 border-t border-white/10 flex justify-end">
+                    <button
+                        onClick={onClose}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/20"
+                    >
+                        完成设置
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};

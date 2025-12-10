@@ -10,7 +10,46 @@ import {
     validateAPIKey
 } from '@utils/apiKeyManager';
 import { geminiService } from '../../services/GeminiService';
-import { AVAILABLE_MODELS, ModelConfig, getModelById } from '../../config/modelConfig';
+
+// 模型配置类型
+interface ModelOption {
+    id: string;
+    name: string;
+    provider: APIProvider;
+    requiresApiKey: boolean;
+    isFree: boolean;
+    docUrl?: string;
+    rateLimit?: number; // 每分钟请求数限制
+    features?: string[]; // 特性标签
+}
+
+// 可用模型列表
+const AVAILABLE_MODELS: ModelOption[] = [
+    {
+        id: 'gemini-2.5-flash',
+        name: 'Gemini 2.5 Flash',
+        provider: 'gemini',
+        requiresApiKey: true,
+        isFree: true,
+        docUrl: 'https://ai.google.dev/gemini-api/docs'
+    },
+    {
+        id: 'claude-3-5-sonnet',
+        name: 'Claude 3.5 Sonnet',
+        provider: 'claude',
+        requiresApiKey: true,
+        isFree: false,
+        docUrl: 'https://docs.anthropic.com/claude/docs'
+    },
+    {
+        id: 'grok-2',
+        name: 'Grok 2',
+        provider: 'grok',
+        requiresApiKey: true,
+        isFree: false,
+        docUrl: 'https://docs.x.ai/'
+    }
+];
 
 interface APISettingsProps {
     onClose: () => void;
@@ -19,7 +58,7 @@ interface APISettingsProps {
 export function APISettings({ onClose }: APISettingsProps) {
     const { t } = useI18n();
     const [provider, setProvider] = useState<APIProvider>('gemini');
-    const [selectedModel, setSelectedModel] = useState<ModelConfig>(AVAILABLE_MODELS[0]);
+    const [selectedModel, setSelectedModel] = useState<ModelOption>(AVAILABLE_MODELS[0]);
     const [apiKey, setApiKey] = useState('');
     const [baseUrl, setBaseUrl] = useState('');
     const [showApiKey, setShowApiKey] = useState(false);
@@ -31,7 +70,7 @@ export function APISettings({ onClose }: APISettingsProps) {
         const config = loadAPIConfig();
         if (config) {
             setProvider(config.provider);
-            const model = getModelById(config.modelId);
+            const model = AVAILABLE_MODELS.find(m => m.id === config.modelId);
             if (model) {
                 setSelectedModel(model);
             }
@@ -42,9 +81,10 @@ export function APISettings({ onClose }: APISettingsProps) {
     }, []);
 
     const handleModelChange = (modelId: string) => {
-        const model = getModelById(modelId);
+        const model = AVAILABLE_MODELS.find(m => m.id === modelId);
         if (model) {
             setSelectedModel(model);
+            setProvider(model.provider);
             setIsSaved(false);
             setTestResult(null);
         }

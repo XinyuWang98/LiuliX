@@ -77,6 +77,12 @@ export const enUS: LanguageConfig = {
             errorNetwork: 'Network Error',
             errorNetworkSolution: 'Please check your network connection and try again.',
 
+            // DuckDB Errors
+            dbNotReady: 'Database not initialized',
+            opfsFailed: 'OPFS Mount failed, falling back to in-memory mode',
+            opfsSuccess: '🦆 DuckDB Engine Initialized',
+            parseSuccess: 'Parsed in {time}ms',
+
             errorGeminiEmpty: 'Gemini returned empty response',
             errorClaudeEmpty: 'Claude returned empty response',
             errorModelEmpty: 'No content',
@@ -241,6 +247,44 @@ export const enUS: LanguageConfig = {
         workshop: {
             title: 'Smart Workshop',
             description: 'AI Interaction and Evidence Pool',
+        },
+
+        cleaning: {
+            title: 'Data Cleaning (DuckDB Native)',
+            currentTable: 'Current Table',
+            dedup: 'Auto Deduplication',
+            fillNull: 'Fill Missing Values',
+            normalize: 'Normalize Columns',
+            dropEmpty: 'Drop Empty Rows',
+            sqlPlaceholder: 'Generated SQL will appear here...',
+            runSQL: 'Run SQL',
+            intentDedup: 'Remove duplicate rows',
+            intentFillNull: 'Fill NULL values in numeric columns with 0 and text with "Unknown"',
+            intentNormalize: 'Rename columns to snake_case (lowercase with underscores)',
+            intentDropEmpty: 'Delete rows where all columns are NULL',
+        },
+
+        grid: {
+            loading: 'Loading...',
+            loadStatsFailed: 'Failed to load statistics',
+            loadDataFailed: 'Failed to load data',
+            nullRate: 'Missing rate: {rate}%',
+            uniqueValues: '{count} unique values',
+            missingPercent: '{percent}% missing',
+            selectedColumns: 'Selected {count}/{total} columns',
+            selectColumns: 'Select Columns',
+            selectAll: 'Select All',
+            deselectAll: 'Deselect All',
+        },
+
+        pagination: {
+            prev: 'Previous',
+            next: 'Next',
+            page: 'Page',
+            of: 'of',
+            totalPages: 'pages',
+            totalRows: 'Total',
+            rows: 'rows',
         },
 
         workflow: {
