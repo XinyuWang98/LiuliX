@@ -299,6 +299,11 @@ export interface LanguageConfig {
             missingPercent: string;
             selectedColumns: string;
             selectColumns: string;
+            clickToExpand: string;
+            clickToCollapse: string;
+            distribution: string;
+            value: string;
+            count: string;
             selectAll: string;
             deselectAll: string;
         };

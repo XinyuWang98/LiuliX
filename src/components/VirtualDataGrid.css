@@ -35,6 +35,8 @@
     gap: var(--gap-xs);
     border-right: 1px solid var(--border);
     box-sizing: border-box;
+    min-height: 180px;
+    /* 增加高度以容纳80px的直方图 */
 }
 
 .headerCellTop {
@@ -65,6 +67,37 @@
     gap: var(--gap-xxs);
 }
 
+/* 缺失值进度条样式 */
+.missing-rate-container {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    width: 100%;
+    margin-top: 2px;
+}
+
+.missing-rate-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: var(--bg-accent);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.missing-rate-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width var(--transition-fast);
+}
+
+.missing-rate-text {
+    font-size: var(--fs-xxs);
+    color: var(--text-tertiary);
+    min-width: 2.5em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 .statMiniBar {
     height: var(--stat-mini-bar-height);
     background: var(--bg-main);
@@ -80,11 +113,185 @@
 
 .statMiniText {
     font-size: var(--fs-xxs);
+    color: var(--text-tertiary);
+}
+
+/* ========== 微型直方图 ========== */
+.headerMiniHistogram {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2px;
+    height: 80px;
+    padding: var(--gap-xs) var(--gap-xxs);
+    /* 移除背景色 background: rgba(0, 0, 0, 0.1); */
+    border-radius: var(--radius-s);
+    overflow: hidden;
+    margin: var(--gap-xs) 0;
+    border: 1px solid var(--border-light);
+}
+
+.histogramBar {
+    flex: 1;
+    background: var(--primary);
+    min-height: 4px;
+    transition: all var(--transition-fast);
+    border-radius: 2px;
+    opacity: 0.8;
+}
+
+.histogramBar:hover {
+    background: var(--primary);
+    opacity: 1;
+    transform: scaleY(1.05);
+}
+
+/* ========== 分类条形图 (Top 5 - 垂直展示) ========== */
+.headerMiniBarChart {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2px;
+    height: 80px;
+    padding: var(--gap-xs) var(--gap-xxs);
+    /* 移除背景色 background: rgba(0, 0, 0, 0.1); */
+    border-radius: var(--radius-s);
+    overflow: hidden;
+    margin: var(--gap-xs) 0;
+    border: 1px solid var(--border-light);
+}
+
+.miniBarItem {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    border-radius: 2px;
+    overflow: hidden;
+    background: transparent;
+}
+
+.miniBar {
+    width: 100%;
+    background: var(--primary);
+    border-radius: 2px 2px 0 0;
+    opacity: 0.8;
+    transition: all var(--transition-fast);
+}
+
+.miniBar:hover {
+    opacity: 1;
+    transform: scaleY(1.05);
+    /* 悬浮放大 */
+    transform-origin: bottom;
+}
+
+/* ========== 详细统计面板 ========== */
+.headerDetailedStats {
+    /* 移除绝对定位，改为流式布局以撑开表头，避免遮挡 */
+    position: relative;
+    width: 100%;
+    flex: 1;
+    /* 撑满剩余高度，实现高度统一 */
+    display: flex;
+    /* 其中的内容也可能需要伸缩 */
+    flex-direction: column;
+
+    background: var(--bg-main);
+    /* 使用主背景色以区分 */
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-s);
+    padding: var(--gap-xs);
+    margin-top: var(--gap-xs);
+    animation: slideDown var(--transition-fast);
+    /* 确保内容不溢出 */
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 统计面板通用样式 */
+.numericStatsPanel,
+.categoricalStatsPanel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xxs);
+}
+
+.headerCellStats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xxs);
+}
+
+.statHeader {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
     color: var(--text-secondary);
-    white-space: nowrap;
+    margin-bottom: var(--gap-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.statRow {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--gap-xxs) 0;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.statRow:last-child {
+    border-bottom: none;
+}
+
+.statRow span:first-child {
+    font-weight: var(--fw-medium);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    font-size: var(--fs-xxs);
+    letter-spacing: 0.3px;
+}
+
+.statRow span:last-child {
+    font-weight: var(--fw-medium);
+    color: var(--text-primary);
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+/* 分类值样式 */
+.valueText {
+    flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: var(--gap-s);
 }
+
+.valueCount {
+    flex-shrink: 0;
+    /* padding: 2px var(--gap-xs); */
+    /* background: var(--bg-accent); */
+    /* border-radius: var(--radius-s); */
+    font-size: var(--fs-xxs);
+    color: var(--text-secondary);
+    font-weight: var(--fw-medium);
+}
+
+/* ========== 表格行和单元格样式 ========== */
 
 /* 表体容器 - 统一管理横向和纵向滚动 */
 .simpleTableBody {
@@ -128,7 +335,10 @@
     left: 0;
     z-index: 2;
     text-align: center;
+    align-items: center;
+    /* 确保垂直方向居中 (对于 header 是 flex-col) */
     justify-content: center;
+    /* 确保水平方向居中 */
     font-weight: var(--fw-medium);
     color: var(--text-secondary);
     background-color: var(--bg-secondary);

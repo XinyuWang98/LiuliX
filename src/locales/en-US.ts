@@ -275,6 +275,11 @@ export const enUS: LanguageConfig = {
             selectColumns: 'Select Columns',
             selectAll: 'Select All',
             deselectAll: 'Deselect All',
+            clickToExpand: 'Click to expand stats',
+            clickToCollapse: 'Click to collapse stats',
+            distribution: 'Distribution',
+            value: 'Value',
+            count: 'Count',
         },
 
         pagination: {

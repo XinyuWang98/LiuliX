@@ -235,7 +235,8 @@ export class DuckDBEngine {
     }
 
     /**
-     * 获取表的所有列统计信息 (Min/Max/Null/Unique)
+     * 获取表的所有列详细统计信息
+     * 包括：基础统计、数值统计(五数概括+标准差+偏度)、分类统计(TOP 5)、分布直方图
      */
     public async getColumnStats(tableName: string): Promise<any[]> {
         if (!this.conn) return [];
@@ -244,10 +245,10 @@ export class DuckDBEngine {
         const columns = await this.getTableColumns(tableName);
         const stats: any[] = [];
 
-        // 2. 为每一列构建聚合查询 (为了从简，这里先循环查询，后续可优化为单条 SQL)
+        // 2. 为每一列构建聚合查询
         for (const col of columns) {
             try {
-                // 基础统计
+                // 基础统计（所有类型）
                 const basicSql = `
                     SELECT 
                         count(*) as total,
@@ -258,31 +259,193 @@ export class DuckDBEngine {
                 const basicResult = await this.conn.query(basicSql);
                 const basicRow = basicResult.get(0);
 
-                let min = null;
-                let max = null;
+                const total = Number(basicRow ? basicRow['total'] : 0);
+                const nonNull = Number(basicRow ? basicRow['non_null'] : 0);
+                const nullCount = total - nonNull;
+                const uniqueCount = Number(basicRow ? basicRow['unique_count'] : 0);
 
-                // 数值类型额外查 Min/Max
-                if (['INTEGER', 'BIGINT', 'DOUBLE', 'FLOAT', 'DECIMAL'].some(t => col.type.includes(t))) {
-                    const rangeSql = `SELECT min("${col.name}") as mi, max("${col.name}") as ma FROM ${tableName}`;
-                    const rangeResult = await this.conn.query(rangeSql);
-                    const rangeRow = rangeResult.get(0);
-                    min = rangeRow ? rangeRow['mi'] : null;
-                    max = rangeRow ? rangeRow['ma'] : null;
+                // 判断是否为数值类型
+                const isNumeric = ['INT', 'DOUBLE', 'FLOAT', 'DECIMAL', 'NUMERIC'].some(t =>
+                    col.type.toUpperCase().includes(t)
+                );
+
+                let numericStats = null;
+                let categoricalStats = null;
+                let distribution = null;
+
+                if (isNumeric && nonNull > 0) {
+                    // 数值类型：获取详细统计
+                    try {
+                        const numericSql = `
+                            SELECT 
+                                min("${col.name}") as min_val,
+                                approx_quantile("${col.name}", 0.25) as q1,
+                                median("${col.name}") as median_val,
+                                approx_quantile("${col.name}", 0.75) as q3,
+                                max("${col.name}") as max_val,
+                                stddev("${col.name}") as stddev_val,
+                                skewness("${col.name}") as skewness_val
+                            FROM ${tableName}
+                            WHERE "${col.name}" IS NOT NULL
+                        `;
+                        const numericResult = await this.conn.query(numericSql);
+                        const numericRow = numericResult.get(0);
+
+                        if (numericRow) {
+                            numericStats = {
+                                min: Number(numericRow['min_val']),
+                                q1: Number(numericRow['q1']),
+                                median: Number(numericRow['median_val']),
+                                q3: Number(numericRow['q3']),
+                                max: Number(numericRow['max_val']),
+                                stddev: Number(numericRow['stddev_val']),
+                                skewness: Number(numericRow['skewness_val'])
+                            };
+
+                            // 获取直方图数据 (Smart Binning)
+                            try {
+                                const min = numericStats.min;
+                                const max = numericStats.max;
+                                const uniqueCount = Number(numericRow['skewness_val'] ? 0 : 0) + Number(basicRow ? basicRow['unique_count'] : 0); // Re-fetch unique count from closure variable is cleaner
+
+                                if (min !== max && isFinite(min) && isFinite(max)) {
+                                    // 智能判断：如果唯一值很少 (<= 20)，直接显示具体值的分布
+                                    // 注意：我们直接使用闭包中的 uniqueCount 变量
+                                    if (uniqueCount <= 20) {
+                                        const discreteSql = `
+                                            SELECT 
+                                                "${col.name}" as value,
+                                                count(*) as count 
+                                            FROM ${tableName} 
+                                            WHERE "${col.name}" IS NOT NULL 
+                                            GROUP BY "${col.name}" 
+                                            ORDER BY "${col.name}" ASC
+                                        `;
+                                        const discreteResult: any = await this.conn.query(discreteSql);
+                                        const counts: number[] = [];
+                                        const labels: number[] = [];
+
+                                        for (let i = 0; i < discreteResult.numRows; i++) {
+                                            const row: any = discreteResult.get(i);
+                                            counts.push(Number(row['count']));
+                                            labels.push(Number(row['value']));
+                                        }
+
+                                        distribution = {
+                                            bins: counts.length,
+                                            counts: counts,
+                                            min: min,
+                                            max: max,
+                                            labels: labels // 传递具体值给前端
+                                        };
+                                        console.log(`✓ Discrete Distribution for ${col.name}:`, counts);
+
+                                    } else {
+                                        // 连续数值：使用分箱直方图 (10个区间)
+                                        const binWidth = (max - min) / 10;
+                                        // 使用CASE WHEN手动分桶，避免width_bucket兼容性问题
+                                        const histSql = `
+                                            SELECT 
+                                                CASE 
+                                                    WHEN "${col.name}" < ${min + binWidth} THEN 0
+                                                    WHEN "${col.name}" < ${min + binWidth * 2} THEN 1
+                                                    WHEN "${col.name}" < ${min + binWidth * 3} THEN 2
+                                                    WHEN "${col.name}" < ${min + binWidth * 4} THEN 3
+                                                    WHEN "${col.name}" < ${min + binWidth * 5} THEN 4
+                                                    WHEN "${col.name}" < ${min + binWidth * 6} THEN 5
+                                                    WHEN "${col.name}" < ${min + binWidth * 7} THEN 6
+                                                    WHEN "${col.name}" < ${min + binWidth * 8} THEN 7
+                                                    WHEN "${col.name}" < ${min + binWidth * 9} THEN 8
+                                                    ELSE 9
+                                                END as bucket,
+                                                COUNT(*) as count
+                                            FROM ${tableName}
+                                            WHERE "${col.name}" IS NOT NULL
+                                            GROUP BY bucket
+                                            ORDER BY bucket
+                                        `;
+                                        const histResult: any = await this.conn.query(histSql);
+                                        const counts = new Array(10).fill(0);
+
+                                        for (let i = 0; i < histResult.numRows; i++) {
+                                            const row: any = histResult.get(i);
+                                            if (row) {
+                                                const bucket = Number(row['bucket']);
+                                                if (bucket >= 0 && bucket < 10) {
+                                                    counts[bucket] = Number(row['count']);
+                                                }
+                                            }
+                                        }
+
+                                        distribution = {
+                                            bins: 10,
+                                            counts: counts,
+                                            min: min,
+                                            max: max
+                                        };
+                                        console.log(`✓ Histogram for ${col.name}:`, counts);
+                                    }
+                                }
+                            } catch (histError) {
+                                console.warn(`Failed to get histogram for ${col.name}`, histError);
+                            }
+                        }
+                    } catch (numericError) {
+                        console.warn(`Failed to get numeric stats for ${col.name}`, numericError);
+                    }
+                } else if (nonNull > 0) {
+                    // 非数值类型：获取 TOP 5 VALUES
+                    try {
+                        const topValuesSql = `
+                            SELECT 
+                                "${col.name}" as value,
+                                COUNT(*) as count
+                            FROM ${tableName}
+                            WHERE "${col.name}" IS NOT NULL
+                            GROUP BY "${col.name}"
+                            ORDER BY count DESC
+                            LIMIT 5
+                        `;
+                        const topValuesResult = await this.conn.query(topValuesSql);
+                        const topValues = [];
+
+                        for (let i = 0; i < topValuesResult.numRows; i++) {
+                            const row = topValuesResult.get(i);
+                            if (row) {
+                                topValues.push({
+                                    value: String(row['value']),
+                                    count: Number(row['count'])
+                                });
+                            }
+                        }
+
+                        categoricalStats = { topValues };
+                    } catch (catError) {
+                        console.warn(`Failed to get categorical stats for ${col.name}`, catError);
+                    }
                 }
 
                 stats.push({
                     name: col.name,
                     type: col.type,
-                    total: Number(basicRow ? basicRow['total'] : 0),
-                    nullCount: Number(basicRow ? basicRow['total'] : 0) - Number(basicRow ? basicRow['non_null'] : 0),
-                    uniqueCount: Number(basicRow ? basicRow['unique_count'] : 0),
-                    min,
-                    max
+                    total,
+                    nullCount,
+                    uniqueCount,
+                    numericStats,
+                    categoricalStats,
+                    distribution
                 });
 
             } catch (e) {
                 console.warn(`Failed to get stats for column ${col.name}`, e);
-                stats.push({ name: col.name, type: col.type, error: true });
+                stats.push({
+                    name: col.name,
+                    type: col.type,
+                    error: true,
+                    total: 0,
+                    nullCount: 0,
+                    uniqueCount: 0
+                });
             }
         }
         return stats;

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Project } from '@utils/projectUtils';
 import { useI18n } from '@contexts/I18nContext';
 import { ParsedFileData } from '@utils/fileParser';
-import { FileText, Database, Columns3, LayoutGrid, Loader } from 'lucide-react';
+import { FileText, Database, Columns3, LayoutGrid, Loader, BarChart2 } from 'lucide-react';
 import { pyodideManager } from '../../services/PyodideManager';
 import { ColumnStats } from '@/types/data';
 import { DataTable } from './DataTable';
@@ -48,6 +48,9 @@ export function DataViewer({ project }: DataViewerProps) {
     // 列筛选器状态
     const [selectedColumns, setSelectedColumns] = useState<number[]>([]);
     const [showColumnSelector, setShowColumnSelector] = useState(false);
+
+    // 详细统计信息显示状态
+    const [showStats, setShowStats] = useState(false);
 
     // 初始化：选择第一个文件
     useEffect(() => {
@@ -239,7 +242,7 @@ export function DataViewer({ project }: DataViewerProps) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-s)' }}>
                             <Columns3 size={14} style={{ color: 'var(--text-secondary)' }} />
 
-                            {/* 列筛选器按钮 */}
+                            {/* 列筛选器按钮 (Swap Order: 1st) */}
                             {useDuckDB && duckInfo ? (
                                 <div style={{ position: 'relative' }}>
                                     <button
@@ -381,6 +384,30 @@ export function DataViewer({ project }: DataViewerProps) {
                                     {(duckInfo ? duckInfo.columns.length : dataInfo?.column_count || 0)} 列
                                 </span>
                             )}
+
+                            {/* 统计切换按钮 (Swap Order: 2nd) */}
+                            {useDuckDB && duckInfo && (
+                                <button
+                                    onClick={() => setShowStats(!showStats)}
+                                    title={showStats ? t('grid.clickToCollapse') : t('grid.clickToExpand')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 'var(--gap-xs)',
+                                        padding: 'var(--gap-xs) var(--gap-s)',
+                                        background: showStats ? 'var(--bg-accent-subtle)' : 'transparent',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: 'var(--radius-s)',
+                                        color: showStats ? 'var(--primary)' : 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        fontSize: 'var(--fs-sm)',
+                                        transition: 'all var(--transition-fast)',
+                                    }}
+                                >
+                                    <BarChart2 size={14} />
+                                    <span>{t('grid.distribution')}</span>
+                                </button>
+                            )}
                         </div>
                     </div>
                 )}
@@ -433,6 +460,7 @@ export function DataViewer({ project }: DataViewerProps) {
                             rowCount={duckInfo.rowCount}
                             columns={duckInfo.columns}
                             selectedColumns={selectedColumns}
+                            showStats={showStats}
                         />
                     </div>
                 ) : dataInfo ? (

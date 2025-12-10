@@ -16,6 +16,13 @@ export interface ColumnStats {
         q1: number; // 第一四分位数
         q3: number; // 第三四分位数
         histogram?: number[]; // 用于迷你柱状图的10个bin
+        distribution?: {
+            bins: number;
+            counts: number[];
+            min: number;
+            max: number;
+            labels?: (string | number)[]; // 新增：用于离散值的标签
+        };
     };
 
     // 分类列统计（仅当 data_type === 'categorical' 时存在）
