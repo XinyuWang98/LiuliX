@@ -247,6 +247,28 @@ export const enUS: LanguageConfig = {
         workshop: {
             title: 'Smart Workshop',
             description: 'AI Interaction and Evidence Pool',
+            tools: {
+                cleaning: {
+                    title: 'Data Cleaning Suggestions',
+                    desc: 'AI analyzes data quality and generates cleaning suggestions',
+                    action: 'Generate',
+                },
+                exploration: {
+                    title: 'Data Exploration',
+                    desc: 'Auto-generate data exploration reports and visualizations',
+                    action: 'Explore',
+                },
+                hypothesis: {
+                    title: 'Analysis Hypothesis',
+                    desc: 'Generate analysis hypotheses based on data characteristics',
+                    action: 'Generate',
+                },
+                suggestions: {
+                    title: 'Analysis Suggestions',
+                    desc: 'AI recommends appropriate analysis methods and steps',
+                    action: 'Get Suggestions',
+                },
+            },
         },
 
         cleaning: {

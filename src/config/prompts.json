@@ -21,6 +21,36 @@
         }
     },
     {
+        "id": "remove-duplicates",
+        "category": "cleaning",
+        "tags": [
+            "cleaning",
+            "dedup"
+        ],
+        "translations": {
+            "zh-CN": {
+                "title": "删除重复行",
+                "description": "智能识别并删除完全重复的数据行。",
+                "content": "请检查数据中的重复行，保留第一条出现的记录，删除其余重复项。"
+            }
+        }
+    },
+    {
+        "id": "fill-missing-values",
+        "category": "cleaning",
+        "tags": [
+            "cleaning",
+            "null"
+        ],
+        "translations": {
+            "zh-CN": {
+                "title": "填充缺失值",
+                "description": "对数值列使用中位数填充，文本列标记为Unknown。",
+                "content": "请扫描所有列。对于数值类型的列，如果存在缺失值，请用该列的中位数进行填充；对于文本类型的列，用'Unknown'填充。"
+            }
+        }
+    },
+    {
         "id": "sales-trend-analysis",
         "category": "analysis",
         "tags": [

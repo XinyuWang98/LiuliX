@@ -262,6 +262,28 @@ export interface LanguageConfig {
         workshop: {
             title: string;
             description: string;
+            tools: {
+                cleaning: {
+                    title: string;
+                    desc: string;
+                    action: string;
+                };
+                exploration: {
+                    title: string;
+                    desc: string;
+                    action: string;
+                };
+                hypothesis: {
+                    title: string;
+                    desc: string;
+                    action: string;
+                };
+                suggestions: {
+                    title: string;
+                    desc: string;
+                    action: string;
+                };
+            };
         };
 
         // 数据清洗
@@ -278,6 +300,30 @@ export interface LanguageConfig {
             intentFillNull: string;
             intentNormalize: string;
             intentDropEmpty: string;
+
+            // DataCleaner 增强功能键
+            aiSuggestions: string;
+            collapse: string;
+            expandMore: string;
+            applySelected: string;
+            analyzing: string;
+            noSuggestions: string;
+            promptLib: string;
+            recommend: string;
+            promptStandardizeDate: string;
+            reasonDate: string;
+            removeDuplicates: string;
+            history: string;
+            noHistory: string;
+            applied: string;
+            unknownAction: string;
+            unknownColumn: string;
+            currentFile: string;
+            switchFile: string;
+            noData: string;
+            rowsCount: string;
+            columnFilter: string;
+            statsDistribution: string;
         };
 
         // 工作流

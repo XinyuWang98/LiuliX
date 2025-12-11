@@ -4,6 +4,7 @@ import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { NavigationBar } from './components/layout/NavigationBar';
 import { LeftSidebar } from './components/layout/LeftSidebar';
 import { PromptLibrary } from './components/prompt/PromptLibrary';
+import { AIWorkshopTools } from './components/workshop/AIWorkshopTools';
 import { Project } from './utils/projectUtils';
 import { PanelRight, PanelLeft } from 'lucide-react';
 import { ExplorationFlow } from './components/exploration/ExplorationFlow';
@@ -236,11 +237,9 @@ function AppContent() {
                             <div style={{
                                 flex: 1,
                                 overflowY: 'auto',
-                                padding: 'var(--gap-m)',
+                                padding: 'var(--gap-l)',
                             }}>
-                                <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
-                                    {t('workshop.description')}
-                                </p>
+                                <AIWorkshopTools project={selectedProject} />
                             </div>
                         </aside>
                     </div>

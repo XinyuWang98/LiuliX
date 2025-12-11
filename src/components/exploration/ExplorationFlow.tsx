@@ -4,7 +4,6 @@ import { Search, Send, Plus, X, LayoutDashboard, Library } from 'lucide-react';
 import { ExplorationBlock } from './ExplorationBlock';
 import { DataCleaner } from '../cleaning/DataCleaner';
 import { ExplorationBlock as BlockType, ExplorationAction, BlockType as EBlockType } from '@/types/exploration';
-import { DataViewer } from '@components/data/DataViewer';
 import { Project } from '@utils/projectUtils';
 import { WorkflowProgressBar, WorkflowStep } from '@components/common/WorkflowProgressBar';
 
@@ -108,14 +107,9 @@ export function ExplorationFlow({ project, onNavigate }: ExplorationFlowProps) {
     const renderContent = (block: BlockType) => {
         switch (block.type) {
             case 'upload':
-                return <DataViewer project={project} fileData={null} />;
+                return project ? <DataCleaner project={project} /> : null;
             case 'cleaning':
-                return project ? (
-                    <DataCleaner
-                        tableName="my_table" // TODO: Connect to real state
-                        onTableUpdate={(name) => console.log('Updated:', name)}
-                    />
-                ) : null;
+                return project ? <DataCleaner project={project} /> : null;
         }
     };
 

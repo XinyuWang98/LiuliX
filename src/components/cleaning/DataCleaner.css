@@ -1,207 +1,264 @@
+/* DataCleaner.css - 数据清洗模块完整样式 */
+
 .cleanerContainer {
     display: flex;
     flex-direction: column;
     height: 100%;
     gap: var(--gap-m);
     padding: var(--gap-m);
-    box-sizing: border-box;
-}
-
-/* 1. Header */
-.cleanerHeader {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-s);
-    flex-shrink: 0;
-}
-
-.headerTitleRow {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-m);
-}
-
-.cleanerTitle {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-s);
-    margin: 0;
-    font-size: var(--fs-lg);
-    font-weight: var(--fw-bold);
-    color: var(--text-primary);
-}
-
-.cleanerTableInfo {
-    font-family: var(--font-mono);
-    font-size: var(--fs-sm);
-    color: var(--text-secondary);
-    background: var(--bg-main);
-    padding: 2px 6px;
-    border-radius: var(--radius-s);
-    border: 1px solid var(--border);
-}
-
-/* Stats Row */
-.statsScrollContainer {
-    display: flex;
-    gap: var(--gap-m);
-    overflow-x: auto;
-    padding-bottom: var(--gap-xs);
-    /* Hide scrollbar but keep functionality */
-    scrollbar-width: thin;
-}
-
-.columnStatCard {
-    background: var(--bg-main);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-m);
-    padding: var(--gap-s);
-    min-width: 120px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.statName {
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-bold);
-    color: var(--text-primary);
+    background-color: var(--bg-panel);
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.statType {
-    font-size: 10px;
+/* ==================== 1. 标题栏：项目名称 + 文件名称 =========== */
+.cleanerTitleBar {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding-bottom: var(--gap-s);
+    border-bottom: 1px solid var(--border);
+}
+
+.titleProject {
+    font-size: var(--fs-l);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.titleSeparator {
     color: var(--text-tertiary);
-    text-transform: uppercase;
+    font-size: var(--fs-l);
 }
 
-.statBar {
-    height: 4px;
-    background: var(--bg-secondary);
-    border-radius: 2px;
-    margin-top: 4px;
-    overflow: hidden;
+.titleFile {
+    font-size: var(--fs-l);
+    font-weight: 500;
+    color: var(--text-secondary);
 }
 
-.statFill {
-    height: 100%;
-    background: var(--error);
-    /* Red for nulls is common convention */
-}
-
-.statMeta {
+/* ==================== 2. 辅助栏：文件切换+行数+列筛选+统计分布 ==================== */
+.cleanerToolbar {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
-
-/* 2. Grid Wrapper */
-.cleanerGridWrapper {
-    flex: 1;
-    min-height: 0;
-    border: 1px solid var(--border);
+    align-items: center;
+    padding: var(--gap-s) var(--gap-m);
+    background-color: var(--bg-element);
     border-radius: var(--radius-m);
-    overflow: hidden;
-    position: relative;
-    background: var(--bg-main);
+    border: 1px solid var(--border);
 }
 
-/* 3. Actions */
-.cleanerActions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-s);
-    flex-shrink: 0;
-}
-
-.cleanerSuggestions {
-    display: flex;
-    gap: var(--gap-s);
-    flex-wrap: wrap;
-}
-
-.suggestionBtn {
+.toolbarLeft,
+.toolbarRight {
     display: flex;
     align-items: center;
-    gap: var(--gap-s);
-    background: var(--bg-secondary);
+    gap: var(--gap-m);
+}
+
+.fileSelector {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+.fileDropdown {
+    padding: 4px var(--gap-s);
     border: 1px solid var(--border);
     border-radius: var(--radius-s);
-    padding: 6px 12px;
+    background-color: var(--bg-panel);
     color: var(--text-primary);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-s);
     cursor: pointer;
-    transition: all var(--transition-s);
 }
 
-.suggestionBtn:hover:not(:disabled) {
-    background: var(--hover-bg);
-    border-color: var(--primary);
-    transform: translateY(-1px);
+.fileDropdown:hover {
+    background-color: var(--bg-hover);
 }
 
-.suggestionBtn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.editorContainer {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-s);
-}
-
-.sqlInputRow {
-    display: flex;
-    gap: var(--gap-s);
-    height: 36px;
-}
-
-.sqlInputOneLine {
-    flex: 1;
-    background: var(--bg-main);
-    border: 1px solid var(--border);
+.rowCountBadge {
+    padding: 4px var(--gap-s);
+    background-color: var(--bg-accent-subtle, rgba(255, 136, 0, 0.1));
     border-radius: var(--radius-s);
-    padding: 0 var(--gap-m);
-    color: var(--font-mono);
-    font-size: var(--fs-sm);
-    outline: none;
-    transition: border-color var(--transition-s);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    color: var(--primary);
 }
 
-.sqlInputOneLine:focus {
-    border-color: var(--primary);
-}
-
-.executeBtnSmall {
-    width: 36px;
+.toolbarBtn {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--primary);
-    color: var(--text-on-primary);
-    border: none;
+    padding: var(--gap-xs);
+    border: 1px solid var(--border);
     border-radius: var(--radius-s);
+    background-color: transparent;
+    color: var(--text-secondary);
     cursor: pointer;
+    transition: all 0.2s;
 }
 
-.executeBtnSmall:disabled {
+.toolbarBtn:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+/* ==================== 3. AI建议面板 ==================== */
+.aiActionPanel {
+    flex: 0 0 auto;
+    max-height: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+    padding: var(--gap-m);
+    background-color: var(--bg-element);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+}
+
+.aiPanelHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.aiTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    font-size: var(--fs-m);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.aiHeaderActions {
+    display: flex;
+    gap: var(--gap-s);
+}
+
+.btnGhost {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-xs) var(--gap-s);
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    cursor: pointer;
+    border-radius: var(--radius-s);
+}
+
+.btnGhost:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.btnPrimary {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-xs) var(--gap-m);
+    border: none;
+    border-radius: var(--radius-s);
+    background-color: var(--primary);
+    color: #fff;
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btnPrimary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.errorBox {
-    color: var(--error);
-    font-size: var(--fs-sm);
+.suggestionList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.suggestionItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-s);
     padding: var(--gap-s);
-    background: var(--error-bg);
-    border: 1px solid var(--error);
+    border: 1px solid var(--border);
     border-radius: var(--radius-s);
+    background-color: var(--bg-panel);
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.suggestionItem:hover {
+    border-color: var(--primary);
+}
+
+.suggestionItem.selected {
+    border-color: var(--primary);
+    background-color: var(--bg-accent-subtle, rgba(255, 136, 0, 0.05));
+}
+
+.suggestionCheckbox {
+    margin-top: 4px;
+    cursor: pointer;
+}
+
+.suggestionContent {
+    flex: 1;
+}
+
+.suggestionHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.suggestionLabel {
+    font-size: var(--fs-s);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.suggestionBadgeContainer {
+    display: flex;
+    gap: var(--gap-xs);
+}
+
+.promptBadge {
+    background-color: var(--accent);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+.confidenceBadge {
+    background-color: var(--bg-hover);
+    color: var(--text-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+.suggestionReason {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.aiLoading,
+.aiEmpty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-s);
+    padding: var(--gap-m);
+    color: var(--text-secondary);
+    font-size: var(--fs-s);
 }
 
 .spin {
@@ -216,4 +273,128 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* ==================== 4. 数据表格 ==================== */
+.cleanerGridWrapper {
+    flex: 1 1 auto;
+    min-height: 300px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    background-color: var(--bg-panel);
+}
+
+/* ==================== 5. 清洗历史 ==================== */
+.historyPanel {
+    flex: 0 0 160px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    border-top: 1px solid var(--border);
+    padding-top: var(--gap-s);
+    overflow: hidden;
+}
+
+.historyTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    font-size: var(--fs-s);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.historyList {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--bg-element);
+    border-radius: var(--radius-s);
+    padding: var(--gap-xs);
+    font-family: monospace;
+}
+
+.historyItem {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: var(--gap-s);
+    padding: 4px 8px;
+    border-bottom: 1px dashed var(--border);
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.historyItem:last-child {
+    border-bottom: none;
+}
+
+.historyTime {
+    color: var(--text-tertiary);
+}
+
+.historyAction {
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deltaTag {
+    font-weight: 600;
+}
+
+.deltaTag.negative {
+    color: var(--error);
+}
+
+.deltaTag.positive {
+    color: var(--success);
+}
+
+.historyEmpty {
+    padding: var(--gap-s);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--fs-xs);
+    font-style: italic;
+}
+
+/* ==================== 通用组件 ==================== */
+.loadingPlaceholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: var(--text-secondary);
+    gap: var(--gap-m);
+}
+
+.loadingSpinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: var(--gap-s);
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--error);
+    border-radius: var(--radius-s);
+    font-size: var(--fs-s);
+}
+
+.errorIcon,
+.historyIcon,
+.aiEmptyIcon,
+.loadingSpinnerInline,
+.aiCollapseBtn,
+.aiApplyBtn {
+    flex-shrink: 0;
 }

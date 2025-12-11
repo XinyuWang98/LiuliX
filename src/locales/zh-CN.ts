@@ -247,6 +247,28 @@ export const zhCN: LanguageConfig = {
         workshop: {
             title: '智能工坊',
             description: 'AI 交互和证据池',
+            tools: {
+                cleaning: {
+                    title: '数据清洗建议',
+                    desc: 'AI智能分析数据质量，生成清洗建议',
+                    action: '生成建议',
+                },
+                exploration: {
+                    title: '数据探索',
+                    desc: '自动生成数据探索报告和可视化',
+                    action: '开始探索',
+                },
+                hypothesis: {
+                    title: '分析假设',
+                    desc: '基于数据特征生成分析假设',
+                    action: '生成假设',
+                },
+                suggestions: {
+                    title: '分析建议',
+                    desc: 'AI推荐合适的分析方法和步骤',
+                    action: '获取建议',
+                },
+            },
         },
 
         cleaning: {
@@ -262,6 +284,30 @@ export const zhCN: LanguageConfig = {
             intentFillNull: '填充空值',
             intentNormalize: '数据标准化',
             intentDropEmpty: '删除空行',
+
+            // DataCleaner 增强功能翻译键
+            aiSuggestions: 'AI 清洗建议',
+            collapse: '收起',
+            expandMore: '展开更多',
+            applySelected: '一键应用 ({count})',
+            analyzing: '正在分析数据特征...',
+            noSuggestions: '数据质量良好，暂无建议',
+            promptLib: 'Prompt库',
+            recommend: '{percent}% 推荐',
+            promptStandardizeDate: '标准化日期格式',
+            reasonDate: '检测到日期字段，建议统一格式 (YYYY-MM-DD)。',
+            removeDuplicates: '删除重复行',
+            history: '清洗记录',
+            noHistory: '暂无清洗记录',
+            applied: '已应用: {type} 对列 {column}',
+            unknownAction: '未知操作',
+            unknownColumn: '未知列',
+            currentFile: '当前文件',
+            switchFile: '切换文件',
+            noData: '暂无数据',
+            rowsCount: '{count} 行',
+            columnFilter: '列筛选',
+            statsDistribution: '统计信息分布',
         },
 
         grid: {
@@ -302,8 +348,9 @@ export const zhCN: LanguageConfig = {
 
         // 数据探索流
         exploration: {
-            searchPlaceholder: '搜索对话记录...',
-            chatPlaceholder: '输入消息与 AI 助手对话...',
+            title: '数据探索',
+            addBlock: '添加分析模块',
+            placeholder: '在此输入分析需求...',
             actions: {
                 collapse: '收起',
                 expand: '展开',
@@ -315,7 +362,7 @@ export const zhCN: LanguageConfig = {
                 delete: '删除',
             },
             blocks: {
-                upload: '数据清洗',
+                upload: '数据源',
                 cleaning: '数据清洗建议',
                 hypothesis: '分析假设生成',
                 insights: '关键数据洞察',

@@ -180,3 +180,138 @@ SQL:`;
     const { content } = await askAI(prompt, { modelHint: 'grok' });
     return content.replace(/```sql/g, '').replace(/```/g, '').trim();
 };
+
+// ==================== 数据清洗建议服务 ====================
+
+// ==================== 数据清洗建议服务 ====================
+
+export interface CleaningSuggestion {
+    id: string;
+    type: 'dedup' | 'fill' | 'filter' | 'normalize' | 'prompt';
+    column?: string;
+    label: string;
+    reason: string;
+    confidence: number;
+    sql: string;
+    isPromptLib?: boolean; // 是否来自 Prompt 库
+}
+
+import PROMPTS from '../config/prompts.json';
+
+/**
+ * 生成清洗建议 (Mock + Rules + LLM)
+ * 目前 MVP 阶段包含：
+ * 1. 规则检测 (全空列、重复行)
+ * 2. Prompt 库匹配
+ * 3. 模拟 LLM 建议
+ */
+export const generateCleaningSuggestions = async (
+    tableName: string,
+    columns: any[], // Column Metadata
+    stats: any[],   // Column Stats
+    t: (key: string) => string
+): Promise<CleaningSuggestion[]> => {
+    const suggestions: CleaningSuggestion[] = [];
+
+    // 1. Prompt 库匹配 (Category = cleaning)
+    const cleaningPrompts = PROMPTS.filter(p => p.category === 'cleaning');
+
+    // 示例 A: 日期格式标准化 (Rule: detect date col)
+    const dateCol = columns.find(c => c.type.includes('DATE') || c.name.toLowerCase().includes('date') || c.name.toLowerCase().includes('time'));
+    if (dateCol) {
+        suggestions.push({
+            id: 'prompt-date-fmt',
+            type: 'prompt',
+            label: t('cleaning.promptStandardizeDate') || '标准化日期格式',
+            column: dateCol.name,
+            reason: t('cleaning.reasonDate') || '检测到日期字段，建议统一格式 (YYYY-MM-DD)。',
+            confidence: 0.95,
+            isPromptLib: true,
+            sql: `UPDATE ${tableName} SET "${dateCol.name}" = strptime("${dateCol.name}", '%Y-%m-%d') WHERE regexp_matches("${dateCol.name}", '^\\d{4}-\\d{2}-\\d{2}$')` // Mock SQL, safe for dry run
+        });
+    }
+
+    // 示例 B: 邮箱格式修正 (Rule: detect email col)
+    const emailCol = columns.find(c => c.name.toLowerCase().includes('email'));
+    if (emailCol) {
+        suggestions.push({
+            id: 'prompt-email-fmt',
+            type: 'prompt',
+            label: '标准化邮箱格式',
+            column: emailCol.name,
+            reason: '检测到邮箱字段，建议转为小写并去除空格。',
+            confidence: 0.90,
+            isPromptLib: true, // Assign to Prompt Lib for visibility
+            sql: `UPDATE ${tableName} SET "${emailCol.name}" = lower(trim("${emailCol.name}"))`
+        });
+    }
+
+
+    // 2. 基于统计的规则检测 (Rule-Based)
+
+    // (A) 重复行检测
+    // 简单假设：没有主键且行数 > 0
+    suggestions.push({
+        id: 'rule-dedup',
+        type: 'dedup',
+        label: t('cleaning.removeDuplicates') || '删除重复行',
+        reason: '检测到可能存在的完全重复记录。',
+        confidence: 0.85,
+        sql: `CREATE OR REPLACE TABLE ${tableName} AS SELECT DISTINCT * FROM ${tableName}`
+    });
+
+    // (B) 缺失值检测
+    stats.forEach(stat => {
+        if (stat.nullCount > 0 && stat.total > 0) {
+            const nullRate = stat.nullCount / stat.total;
+            if (nullRate > 0.01) { // >1% missing
+                // 数值列：中位数填充
+                if (stat.type.includes('DOUBLE') || stat.type.includes('INT') || stat.type.includes('FLOAT')) {
+                    suggestions.push({
+                        id: `rule-fill-${stat.name}`,
+                        type: 'fill',
+                        column: stat.name,
+                        label: `${t('cleaning.fillNull')} ${stat.name} (中位数)`,
+                        reason: `列 "${stat.name}" 缺失 ${(nullRate * 100).toFixed(1)}%，建议用中位数填充。`,
+                        confidence: 0.88,
+                        sql: `UPDATE ${tableName} SET "${stat.name}" = ${stat.median || stat.min || 0} WHERE "${stat.name}" IS NULL`
+                    });
+                }
+                // 文本列：Unknown 填充
+                else if (stat.type.includes('VARCHAR')) {
+                    suggestions.push({
+                        id: `rule-fill-${stat.name}`,
+                        type: 'fill',
+                        column: stat.name,
+                        label: `${t('cleaning.fillNull')} ${stat.name}`,
+                        reason: `列 "${stat.name}" 缺失 ${(nullRate * 100).toFixed(1)}%，建议标记为 'Unknown'。`,
+                        confidence: 0.88,
+                        sql: `UPDATE ${tableName} SET "${stat.name}" = 'Unknown' WHERE "${stat.name}" IS NULL`
+                    });
+                }
+            }
+        }
+    });
+
+    // (C) 模拟 LLM 建议 (针对特定列名)
+    // 假设有名为 'price' or 'amount' -> 标准化金额
+    const moneyCol = columns.find(c => c.name.toLowerCase().includes('price') || c.name.toLowerCase().includes('amount') || c.name.toLowerCase().includes('salary'));
+    if (moneyCol) {
+        suggestions.push({
+            id: 'ai-normalize-money',
+            type: 'normalize',
+            column: moneyCol.name,
+            label: '标准化金额 (2位小数)',
+            reason: '识别为金额字段，建议统一保留两位小数。',
+            confidence: 0.75,
+            sql: `UPDATE ${tableName} SET "${moneyCol.name}" = ROUND(CAST("${moneyCol.name}" AS DOUBLE), 2)`
+        });
+    }
+
+    // 排序：Prompt (Tag=Prompt) > Confidence Desc
+    return suggestions.sort((a, b) => {
+        if (a.isPromptLib && !b.isPromptLib) return -1;
+        if (!a.isPromptLib && b.isPromptLib) return 1;
+        return b.confidence - a.confidence;
+    });
+};

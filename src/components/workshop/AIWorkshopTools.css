@@ -1,0 +1,95 @@
+/* AI Workshop Tools - 智能工坊工具卡片 */
+
+.workshopTools {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gap-m);
+    padding: 0;
+}
+
+.toolCard {
+    background: var(--bg-element);
+    border: var(--border);
+    border-radius: var(--radius-m);
+    padding: var(--gap-l);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.toolCard:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+    transform: translateY(-2px);
+}
+
+.toolCard.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.toolIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-m);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.toolContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+}
+
+.toolTitle {
+    font-size: var(--fs-l);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.toolDesc {
+    font-size: var(--fs-s);
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.toolButton {
+    width: 100%;
+    padding: var(--gap-m);
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-s);
+    font-size: var(--fs-m);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toolButton:hover:not(:disabled) {
+    background: var(--primary-hover);
+    transform: scale(1.02);
+}
+
+.toolButton:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.toolButton:disabled {
+    background: var(--bg-panel);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}

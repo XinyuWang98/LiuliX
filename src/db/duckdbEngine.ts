@@ -48,6 +48,8 @@ export class DuckDBEngine {
 
         // 2. 实例化 Worker
         const worker = new Worker(bundle.mainWorker!);
+        worker.onerror = (e) => console.error("❌ DuckDB Worker 报错:", e.message, e.filename, e.lineno, e);
+        worker.onmessageerror = (e) => console.error("❌ DuckDB Worker 消息错误:", e);
 
         // 3. 启动 DB
         const logger = new duckdb.ConsoleLogger();
@@ -108,6 +110,27 @@ export class DuckDBEngine {
         const tableName = `t_${Date.now()}`;
         const autoSampleThreshold = options.autoSampleThreshold || 100000;
         const sampleRate = options.sampleRate || 0.2;
+
+        // 先清理所有临时表，避免表已存在错误
+        try {
+            const tables = await this.conn.query("SHOW TABLES");
+            if (tables && tables.numRows > 0) {
+                for (let i = 0; i < tables.numRows; i++) {
+                    const row = tables.get(i);
+                    const tblName = row?.name || row?.table_name || row?.NAME || row?.TABLE_NAME;
+                    if (tblName && String(tblName).startsWith('t_')) {
+                        try {
+                            await this.conn.query(`DROP TABLE IF EXISTS ${tblName}`);
+                            console.log(`DuckDB: 已删除旧表 ${tblName}`);
+                        } catch (e) {
+                            console.warn(`DuckDB: 删除表${tblName}失败，继续`, e);
+                        }
+                    }
+                }
+            }
+        } catch (cleanupErr) {
+            console.warn('DuckDB: 清理旧表失败（忽略）', cleanupErr);
+        }
 
         // 1. 注册文件句柄 (并不立即读取，零拷贝)
         // 务实技巧：直接用 registerFileHandle 最快，但为了进度条，我们需要流式处理
