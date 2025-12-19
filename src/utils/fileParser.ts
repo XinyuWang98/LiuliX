@@ -39,6 +39,12 @@ export interface ParsedFileData {
     /** 列数 */
     columnCount: number;
 
+    /** 列类型（可选，用于AI分析） */
+    types?: string[];
+
+    /** 数据预览（可选，用于统计分析） */
+    preview?: any[][];
+
     /** 原始文件内容(用于传给 Pyodide) */
     rawContent?: string;
 
@@ -53,6 +59,18 @@ export interface ParsedFileData {
 
     /** 原始文件大小（未抽样前） */
     originalSize?: number;
+
+    /** DuckDB表名（ingest后由DataViewer填充） */
+    tableName?: string;
+
+    /** 文件最后修改时间戳（用于触发DataViewer刷新） */
+    lastModified?: number;
+
+    /** 数据质量评分 (0-100) */
+    qualityScore?: number;
+
+    /** 数据质量报告概要 */
+    qualityStatus?: 'good' | 'warning' | 'critical' | 'unknown';
 }
 
 /**
@@ -70,6 +88,30 @@ function parseCSV(file: File): Promise<ParsedFileData> {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const rawContent = e.target?.result as string;
+
+                    // 推断列类型
+                    const types = columns.map((_col: string, idx: number) => {
+                        const sample = dataRows.slice(0, 100).map(row => row[idx]).filter(v => v != null);
+                        if (sample.length === 0) return 'VARCHAR';
+
+                        const isNumeric = sample.every(v => !isNaN(parseFloat(v as string)));
+                        if (isNumeric) {
+                            const hasDecimal = sample.some(v => String(v).includes('.'));
+                            return hasDecimal ? 'DOUBLE' : 'INTEGER';
+                        }
+
+                        const isDate = sample.some(v => {
+                            const d = new Date(v as string);
+                            return !isNaN(d.getTime()) && String(v).match(/\d{4}-\d{2}-\d{2}/);
+                        });
+                        if (isDate) return 'DATE';
+
+                        return 'VARCHAR';
+                    });
+
+                    // preview: 前100行
+                    const preview = dataRows.slice(0, 100);
+
                     resolve({
                         fileName: file.name,
                         fileType: 'CSV',
@@ -78,6 +120,8 @@ function parseCSV(file: File): Promise<ParsedFileData> {
                         columns,
                         rowCount: dataRows.length,
                         columnCount: columns.length,
+                        types,
+                        preview,
                         rawContent,
                         cacheStrategy: 'full',
                         isSampled: false,

@@ -1,0 +1,74 @@
+/* 深挖输入框样式 - 100% CSS 变量 */
+
+.deep-dive-input {
+    display: flex;
+    gap: var(--gap-s);
+    margin-top: var(--gap-m);
+    padding: var(--gap-m);
+    background: var(--bg-main);
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border);
+}
+
+.deep-dive-input__field {
+    flex: 1;
+    padding: var(--gap-s) var(--gap-m);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    color: var(--text-primary);
+    font-size: var(--fs-base);
+    font-family: var(--font-family);
+    transition: border-color var(--transition-s) var(--ease-out);
+}
+
+.deep-dive-input__field:focus {
+    outline: none;
+    border-color: var(--bg-accent);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.deep-dive-input__field:disabled {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+}
+
+.deep-dive-input__field::placeholder {
+    color: var(--text-tertiary);
+}
+
+.deep-dive-input__btn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-accent);
+    border: none;
+    border-radius: var(--radius-s);
+    color: var(--text-inverse);
+    cursor: pointer;
+    transition: all var(--transition-s) var(--ease-out);
+}
+
+.deep-dive-input__btn:hover:not(:disabled) {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lv1);
+}
+
+.deep-dive-input__btn:disabled {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+}
+
+.deep-dive-input__btn .spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

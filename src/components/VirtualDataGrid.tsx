@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { DuckDBEngine } from '../db/duckdbEngine';
 import { ColumnMetadata } from '../types/duckdb';
 import { useI18n } from '../contexts/I18nContext';
+import { formatTimestamp } from '../utils/dateUtils';
 import './VirtualDataGrid.css';
 
 interface VirtualDataGridProps {
@@ -59,22 +60,9 @@ const formatCellValue = (value: any, type: string): string => {
         return '-';
     }
 
-    // 日期类型 - 核心修复：时间戳转为可读格式
+    // 日期类型 - 核心修复：统一使用 dateUtils.formatTimestamp
     if (typeUpper === 'DATE' || typeUpper === 'TIMESTAMP') {
-        let dateVal = value;
-        // 如果是纯数字字符串，强制转为数字处理（假定为毫秒时间戳）
-        if (typeof value === 'string' && /^\d+$/.test(value)) {
-            const num = Number(value);
-            // 简单防卫：如果是微秒级（非常大），可能需要/1000，但这里先假设是毫秒
-            dateVal = num;
-        }
-
-        const date = new Date(dateVal);
-        if (isNaN(date.getTime())) return String(value);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return formatTimestamp(value, typeUpper === 'TIMESTAMP');
     }
 
     // 数值类型 - 添加千分位分隔
@@ -220,23 +208,37 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
     );
 
     // ========== 内部组件：分类统计面板 ==========
-    const CategoricalStatsPanel: React.FC<{ stat: NonNullable<ColumnStats['categoricalStats']>, type: string }> = ({ stat, type }) => (
+    const CategoricalStatsPanel: React.FC<{ stat: NonNullable<ColumnStats['categoricalStats']>, type: string, columnName: string }> = ({ stat, type, columnName }) => (
         <div className="categoricalStatsPanel">
             <div className="statHeader">TOP 5 VALUES</div>
-            {stat.topValues.map((item, idx) => (
-                <div key={idx} className="statRow">
-                    <span className="valueText" title={String(item.value)}>
-                        {/* 使用全局格式化函数处理值 */}
-                        {formatCellValue(item.value, type)}
-                    </span>
-                    <span className="valueCount">{item.count}</span>
-                </div>
-            ))}
+            {stat.topValues.map((item, idx) => {
+                let displayValue = String(item.value);
+                const typeUpper = type.toUpperCase();
+                // 使用统一的格式化逻辑
+                if (typeUpper === 'DATE' || typeUpper === 'TIMESTAMP') {
+                    displayValue = formatTimestamp(item.value, typeUpper === 'TIMESTAMP');
+                } else if ((typeof item.value === 'number' || !isNaN(Number(item.value))) && (columnName.toLowerCase().includes('time') || columnName.toLowerCase().includes('date'))) {
+                    // 启发式：数值型且名字像时间
+                    displayValue = formatTimestamp(item.value);
+                } else {
+                    // 其他情况尝试用 formatCellValue (比如 boolean, numeric formatter)
+                    displayValue = formatCellValue(item.value, type);
+                }
+
+                return (
+                    <div key={idx} className="statRow">
+                        <span className="valueText" title={String(displayValue)}>
+                            {displayValue}
+                        </span>
+                        <span className="valueCount">{item.count}</span>
+                    </div>
+                );
+            })}
         </div>
     );
 
     // ========== 内部组件：微型直方图 ==========
-    const MiniHistogram: React.FC<{ distribution: NonNullable<ColumnStats['distribution']> & { labels?: (string | number)[] } }> = ({ distribution }) => {
+    const MiniHistogram: React.FC<{ distribution: NonNullable<ColumnStats['distribution']> & { labels?: (string | number)[] }, type: string, columnName: string }> = ({ distribution, type, columnName }) => {
         const { counts, min, max } = distribution;
         const maxCount = Math.max(...counts);
         if (maxCount === 0) return null;
@@ -246,6 +248,16 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
         const binWidth = hasRange ? (max - min) / counts.length : 0;
         const labels = distribution.labels; // 获取离散标签
 
+        const formatTooltipValue = (val: any) => {
+            const typeUpper = type.toUpperCase();
+            if (typeUpper === 'DATE' || typeUpper === 'TIMESTAMP') {
+                return formatTimestamp(val, typeUpper === 'TIMESTAMP');
+            } else if ((typeof val === 'number' || !isNaN(Number(val))) && (columnName.toLowerCase().includes('time') || columnName.toLowerCase().includes('date'))) {
+                return formatTimestamp(val);
+            }
+            return String(val);
+        };
+
         return (
             <div className="headerMiniHistogram">
                 {counts.map((count, idx) => {
@@ -253,14 +265,29 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
 
                     if (labels && labels[idx] !== undefined) {
                         // 离散模式：直接显示具体值
-                        tooltipText = `${t('grid.value')}: ${labels[idx]}\n${tooltipText}`;
+                        const displayVal = formatTooltipValue(labels[idx]);
+                        tooltipText = `${t('grid.value')}: ${displayVal}\n${tooltipText}`;
                     } else if (hasRange) {
                         // 连续模式：显示区间
+                        // 对于连续区间，min/max本身是数值，不一定是时间戳，除非是数值型时间戳。
+                        // 如果是 Date/Timestamp 类型，DuckDB 返回的 min/max 可能是数字时间戳。
                         const start = min + idx * binWidth;
                         const end = min + (idx + 1) * binWidth;
-                        // 简单的格式化
-                        const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
-                        tooltipText = `${t('grid.value')}: ${fmt(start)} - ${fmt(end)}\n${tooltipText}`;
+
+                        // 如果认为是时间，尝试格式化
+                        let startStr = String(start);
+                        let endStr = String(end);
+
+                        const typeUpper = type.toUpperCase();
+                        if (typeUpper === 'DATE' || typeUpper === 'TIMESTAMP' || (columnName.toLowerCase().includes('time') || columnName.toLowerCase().includes('date'))) {
+                            startStr = formatTimestamp(start, typeUpper === 'TIMESTAMP');
+                            endStr = formatTimestamp(end, typeUpper === 'TIMESTAMP');
+                        } else {
+                            const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+                            startStr = fmt(start);
+                            endStr = fmt(end);
+                        }
+                        tooltipText = `${t('grid.value')}: ${startStr} - ${endStr}\n${tooltipText}`;
                     }
 
                     return (
@@ -279,23 +306,36 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
     };
 
     // ========== 内部组件：分类字段微型条形图 ==========
-    const MiniBarChart: React.FC<{ categoricalStats: NonNullable<ColumnStats['categoricalStats']> }> = ({ categoricalStats }) => {
+    const MiniBarChart: React.FC<{ categoricalStats: NonNullable<ColumnStats['categoricalStats']>, type: string, columnName: string }> = ({ categoricalStats, type, columnName }) => {
         if (!categoricalStats.topValues || categoricalStats.topValues.length === 0) return null;
         const maxCount = Math.max(...categoricalStats.topValues.map(v => v.count));
 
+        const formatTooltipValue = (val: any) => {
+            const typeUpper = type.toUpperCase();
+            if (typeUpper === 'DATE' || typeUpper === 'TIMESTAMP') {
+                return formatTimestamp(val, typeUpper === 'TIMESTAMP');
+            } else if ((typeof val === 'number' || !isNaN(Number(val))) && (columnName.toLowerCase().includes('time') || columnName.toLowerCase().includes('date'))) {
+                return formatTimestamp(val);
+            }
+            return String(val);
+        };
+
         return (
             <div className="headerMiniBarChart">
-                {categoricalStats.topValues.map((item, idx) => (
-                    <div key={idx} className="miniBarItem" title={`${t('grid.value')}: ${item.value}\n${t('grid.count')}: ${item.count}`}>
-                        <div
-                            className="miniBar"
-                            style={{
-                                height: `${(item.count / maxCount) * 100}%`,
-                                width: '100%' // 确保宽度充满
-                            }}
-                        />
-                    </div>
-                ))}
+                {categoricalStats.topValues.map((item, idx) => {
+                    const displayValue = formatTooltipValue(item.value);
+                    return (
+                        <div key={idx} className="miniBarItem" title={`${t('grid.value')}: ${displayValue}\n${t('grid.count')}: ${item.count}`}>
+                            <div
+                                className="miniBar"
+                                style={{
+                                    height: `${(item.count / maxCount) * 100}%`,
+                                    width: '100%' // 确保宽度充满
+                                }}
+                            />
+                        </div>
+                    );
+                })}
             </div>
         );
     };
@@ -364,9 +404,9 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
 
                             {/* 微型可视化：数值列显示直方图，字符串列显示条形图 */}
                             {stat?.distribution ? (
-                                <MiniHistogram distribution={stat.distribution} />
+                                <MiniHistogram distribution={stat.distribution} type={col.type} columnName={col.name} />
                             ) : stat?.categoricalStats ? (
-                                <MiniBarChart categoricalStats={stat.categoricalStats} />
+                                <MiniBarChart categoricalStats={stat.categoricalStats} type={col.type} columnName={col.name} />
                             ) : null}
 
                             {/* 基础统计信息（始终可见） */}
@@ -384,7 +424,7 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
                                     {isNumericType && stat.numericStats ? (
                                         <NumericStatsPanel stat={stat.numericStats} />
                                     ) : !isNumericType && stat.categoricalStats ? (
-                                        <CategoricalStatsPanel stat={stat.categoricalStats} type={col.type} />
+                                        <CategoricalStatsPanel stat={stat.categoricalStats} type={col.type} columnName={col.name} />
                                     ) : null}
                                 </div>
                             )}

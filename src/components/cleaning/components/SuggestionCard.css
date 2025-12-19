@@ -1,0 +1,135 @@
+/* 建议卡片增强样式 - Cyber Dark主题优化 */
+
+.suggestionCard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 160px;
+    min-height: 110px;
+    padding: var(--gap-m);
+    background: linear-gradient(135deg, var(--bg-element) 0%, var(--bg-panel) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 卡片背景光效 */
+.suggestionCard::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-radius: var(--radius-m);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 彩色左侧条 - 增强霓虹效果 */
+.suggestionCard::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: currentColor;
+    opacity: 0;
+    transition: all var(--transition-fast);
+    box-shadow: 0 0 10px currentColor;
+}
+
+.suggestionCard:hover::before {
+    opacity: 1;
+    width: 4px;
+}
+
+.suggestionCard:hover::after {
+    opacity: 1;
+}
+
+.suggestionCard:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(var(--primary-rgb, 59, 130, 246), 0.2);
+    border-color: var(--primary);
+}
+
+/* 选中状态 - 霓虹高亮 */
+.suggestionCard.selected {
+    border-width: 2px;
+    border-color: var(--color-accent);
+    background: linear-gradient(135deg,
+            rgba(var(--accent-rgb, 255, 107, 53), 0.1) 0%,
+            var(--bg-element) 100%);
+    box-shadow: 0 0 0 3px var(--color-accent-muted),
+        0 4px 16px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px rgba(var(--accent-rgb, 255, 107, 53), 0.1);
+}
+
+.suggestionCard.selected::before {
+    opacity: 1;
+    width: 4px;
+    box-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+}
+
+.suggestionCard input[type="checkbox"] {
+    position: absolute;
+    top: var(--gap-s);
+    right: var(--gap-s);
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    z-index: 10;
+    accent-color: var(--color-accent);
+}
+
+/* 卡片图标 - 增强视觉层次 */
+.cardIcon {
+    font-size: 36px;
+    margin-bottom: var(--gap-xs);
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    z-index: 1;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-s);
+    width: 100%;
+    text-align: center;
+    z-index: 1;
+}
+
+.cardText {
+    font-size: var(--fs-s);
+    color: var(--text-primary);
+    font-weight: 600;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.cardConfidence {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    padding: 4px var(--gap-s);
+    border-radius: var(--radius-s);
+    min-width: 50px;
+    backdrop-filter: blur(8px);
+    border: 1px solid currentColor;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}

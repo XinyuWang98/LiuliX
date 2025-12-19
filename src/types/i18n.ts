@@ -42,6 +42,22 @@ export interface LanguageConfig {
             theme: string;
         };
 
+        // 侧边栏
+        sidebar: {
+            collapse: string;
+        };
+
+        // 聊天/交互
+        chat: {
+            askAIPlaceholder: string;
+        };
+
+        // 语言选择
+        language: {
+            title: string;
+            priority: string;
+        };
+
         // 设置
         settings: {
             apiConfig: string;
@@ -258,10 +274,17 @@ export interface LanguageConfig {
             };
         };
 
-        // 智能工坊
+        // AI工坊
         workshop: {
             title: string;
-            description: string;
+            cleaning: string;
+            cleaningDesc: string;
+            exploration: string;
+            explorationDesc: string;
+            hypothesis: string;
+            hypothesisDesc: string;
+            suggestions: string;
+            suggestionsDesc: string;
             tools: {
                 cleaning: {
                     title: string;
@@ -324,6 +347,102 @@ export interface LanguageConfig {
             rowsCount: string;
             columnFilter: string;
             statsDistribution: string;
+
+            // 清洗操作描述文本
+            actionDropColumn: string;
+            actionDedup: string;
+            actionFillMissing: string;
+
+            // AI建议文本
+            suggFillMissing: string;
+            suggFillReason: string;
+            suggDropColumn: string;
+            suggDropReason: string;
+            suggDedup: string;
+            suggDedupReason: string;
+
+            // 证据池标签
+            tagDedup: string;
+            tagFillMissing: string;
+            tagDropColumn: string;
+            tagPromptLib: string;
+            tagRuleSuggestion: string;
+
+            // 重新开始功能
+            resetAll: string;
+            resetConfirm: string;
+            resetSuccess: string;
+            resetting: string;
+            resetConfirmTitle: string;
+            resetConfirmMessage: string;
+            resetConfirmOk: string;
+            resetConfirmCancel: string;
+            searchColumns: string;
+            // 建议类型名称
+            catDeduplication: string;
+            catDropEmpty: string;
+            catFillMissing: string;
+            catTypeConversion: string;
+            catNormalize: string;
+            catFill: string;
+            catExperimental: string;
+            applySuccess: string;
+            // 展开按钮
+            showMore: string;
+            showLess: string;
+            moreCount: string;
+            selectAll: string;
+            deselectAll: string;
+
+            // AI清洗建议
+            aiMode: string;
+            ruleMode: string;
+            desensitizing: string;
+            generatingSuggestions: string;
+            validatingSuggestions: string;
+            aiFailed: string;
+            suggestionValidated: string;
+            suggestionFiltered: string;
+            expectedImpact: string;
+            affectedRows: string;
+            qualityScore: string;
+
+            // 校验错误提示
+            validationError: {
+                jsonFormat: string;
+                missingSuggestions: string;
+                missingField: string;
+                invalidType: string;
+                confidenceOutOfRange: string;
+                forbiddenKeyword: string;
+                tableNotReferenced: string;
+                invalidSqlType: string;
+                syntaxError: string;
+                dryRunFailed: string;
+            };
+
+            // Prompt模板
+            datasetOverview: string;
+            columnDetails: string;
+            qualityIssues: string;
+            dataIntegrity: string;
+            dataConsistency: string;
+            dataFormat: string;
+            outputFormat: string;
+        };
+
+        quality: {
+            title: string;
+            score: string;
+            issues: string;
+            noData: string;
+            missingValues: string;
+            duplicates: string;
+            good: string;
+            needsReviews: string;
+            criticalIssues: string;
+            clickToImprove: string;
+            healthScore: string;
         };
 
         // 工作流
@@ -333,6 +452,30 @@ export interface LanguageConfig {
             hypothesis: string;
             insights: string;
             report: string;
+        };
+
+        // 洞察链
+        insightChain: {
+            title: string;
+            loading: string;
+            loadingHypothesis: string;
+            noHypotheses: string;
+            noInsights: string;
+            generateHypothesis: string;
+            customHypothesis: string;
+            customPlaceholder: string;
+            submit: string;
+            adopt: string;
+            ignore: string;
+            adopted: string;
+            viewCode: string;
+            copyCode: string;
+            codeCopied: string;
+            conclusion: string;
+            analysisMethod: string;
+            dataSource: string;
+            selectHypothesis: string;
+            or: string;
         };
 
         // 数据表格
@@ -367,6 +510,9 @@ export interface LanguageConfig {
 
         // 数据探索流
         exploration: {
+            title: string;
+            addBlock: string;
+            placeholder: string;
             searchPlaceholder: string;
             chatPlaceholder: string;
             actions: {
@@ -386,6 +532,73 @@ export interface LanguageConfig {
                 insights: string;
                 report: string;
                 chat: string;
+            };
+        };
+
+        // 证据池
+        evidence: {
+            title: string;
+            noRecords: string;
+            noRecordsHint: string;
+            clearAll: string;
+            pin: string;
+            unpin: string;
+            delete: string;
+            affectedRows: string;
+            rowsChanged: string;
+            type: {
+                cleaning: string;
+                analysis: string;
+                insight: string;
+                visualization: string;
+                insightChain: string;
+            };
+        };
+
+        // 报告生成器
+        report: {
+            title: string;
+            copy: string;
+            copied: string;
+            download: string;
+            copyToClipboard: string;
+            downloadMarkdown: string;
+            noRecords: string;
+            noRecordsHint: string;
+            totalRecords: string;
+            cleaningOps: string;
+            insights: string;
+            previewHint: string;
+        };
+
+        // AI成本提示
+        aiCost: {
+            title: string;
+            fileCount: string;
+            estimatedCalls: string;
+            quotaInsufficient: string;
+            quotaRemaining: string;
+            configureAPI: string;
+            confirmProceed: string;
+            costSavingTip: string;
+        };
+
+        // AI重试
+        aiRetry: {
+            title: string;
+            retryButton: string;
+            retrying: string;
+            failed: string;
+            staleHint: string;
+        };
+
+        // 缓存/采样标记
+        cache: {
+            basedOnSample: {
+                hint: string;
+                sampleSize: string;
+                totalSize: string;
+                note: string;
             };
         };
     };

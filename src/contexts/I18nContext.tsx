@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { LanguageConfig } from '@/types/i18n';
+import { useState, createContext, useContext, ReactNode } from 'react';
+import { LanguageConfig } from '../types/i18n';
 import { zhCN } from '../locales/zh-CN';
 import { enUS } from '../locales/en-US';
 

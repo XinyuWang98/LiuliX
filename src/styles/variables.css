@@ -45,6 +45,14 @@
   /* 新拟态 - 深阴影色 */
   --shadow-dark: rgba(0, 0, 0, 0.3);
 
+  /* RGB颜色值（用于rgba函数） */
+  --primary-rgb: 0, 122, 255;
+  --accent-rgb: 255, 107, 53;
+  --bg-element: #2C2C2E;
+  --color-accent: #FF6B35;
+  --color-accent-muted: rgba(255, 107, 53, 0.2);
+
+
 
   /* ========== 4.1.2 间距系统(gap & padding) ========== */
 
@@ -286,4 +294,26 @@
   /* 悬浮背景色 */
   --fw-medium: 500;
   /* 中等字重 */
+
+  /* ========== 树状视图变量 ========== */
+  --tree-row-height: 28px;
+  --tree-indent: 20px;
+
+  /* ========== 数据质量评分颜色 ========== */
+  --color-quality-critical: #ef4444;
+  /* <60分，红色警告 */
+  --color-quality-warning: #f59e0b;
+  /* 60-84分，橙色注意 */
+  --color-quality-healthy: #10b981;
+  /* >=85分，绿色健康 */
+
+  /* ========== AI重试按钮 ========== */
+  --color-retry-button: #3b82f6;
+  /* 重试按钮蓝色 */
+  --color-retry-hover: #2563eb;
+  /* 重试按钮悬停深蓝 */
+
+  /* ========== 模态框背景 ========== */
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+  /* 半透明黑色遮罩 */
 }

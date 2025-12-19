@@ -42,7 +42,18 @@ const CONFIG: Record<AIModel, ModelConfig> = {
     },
     deepseek: {
         url: MODEL_CONFIG.DEEPSEEK.URL,
-        key: () => sessionStorage.getItem('deepseek_key') || '',
+        // DeepSeek使用环境变量默认Key（通过代理服务器）
+        // 高级模式：用户可以在localStorage设置自定义Key
+        key: () => {
+            const advancedKey = localStorage.getItem('deepseek_advanced_key');
+            if (advancedKey) {
+                console.log('[AIService] 使用高级模式DeepSeek Key');
+                return advancedKey;
+            }
+            // 返回'default'标记，让代理服务器使用环境变量中的Key
+            console.log('[AIService] 使用环境变量默认DeepSeek Key');
+            return 'default';
+        },
         model: MODEL_CONFIG.DEEPSEEK.DEFAULT_MODEL,
         modelVar: MODEL_CONFIG.DEEPSEEK.CSS_VAR_MODEL
     }
@@ -91,6 +102,9 @@ export const askAI = async (
             if (model === 'gemini') {
                 const res = await ky
                     .post(`${cfg.url}?key=${key}`, {
+                        headers: {
+                            'x-api-key': key // 代理服务器需要此header
+                        },
                         json: { contents: [{ parts: [{ text: prompt }] }] },
                         timeout: MODEL_CONFIG.TIMEOUT_MS
                     })
@@ -124,12 +138,18 @@ export const askAI = async (
             }
 
             // Grok + DeepSeek 通用 OpenAI 格式
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json'
+            };
+
+            // 只有非default的key才添加x-api-key（高级模式）
+            if (key !== 'default') {
+                headers['x-api-key'] = key;
+            }
+
             const res = await ky
                 .post(cfg.url, {
-                    headers: {
-                        Authorization: `Bearer ${key}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers,
                     json: {
                         model: currentModelName,
                         messages: [{ role: 'user', content: prompt }],
@@ -194,9 +214,9 @@ export interface CleaningSuggestion {
     confidence: number;
     sql: string;
     isPromptLib?: boolean; // 是否来自 Prompt 库
+    expectedImpact?: string;
+    dryRunStatus?: 'pending' | 'success' | 'failed';
 }
-
-import PROMPTS from '../config/prompts.json';
 
 /**
  * 生成清洗建议 (Mock + Rules + LLM)
@@ -212,9 +232,6 @@ export const generateCleaningSuggestions = async (
     t: (key: string) => string
 ): Promise<CleaningSuggestion[]> => {
     const suggestions: CleaningSuggestion[] = [];
-
-    // 1. Prompt 库匹配 (Category = cleaning)
-    const cleaningPrompts = PROMPTS.filter(p => p.category === 'cleaning');
 
     // 示例 A: 日期格式标准化 (Rule: detect date col)
     const dateCol = columns.find(c => c.type.includes('DATE') || c.name.toLowerCase().includes('date') || c.name.toLowerCase().includes('time'));
@@ -314,4 +331,44 @@ export const generateCleaningSuggestions = async (
         if (!a.isPromptLib && b.isPromptLib) return 1;
         return b.confidence - a.confidence;
     });
+};
+
+// ==================== 洞察链 AI 服务 ====================
+
+/**
+ * 生成分析假设
+ * @param 数据摘要 - 数据集元信息
+ * @returns 3 条假设数组
+ */
+export const generateHypotheses = async (数据摘要: {
+    columns?: string[];
+    rowCount?: number;
+    sampleData?: any[];
+}): Promise<Array<{ assumption: string; verification: string }>> => {
+    const { 生成假设Prompt, 解析假设结果 } = await import('@/services/prompts/hypothesis');
+
+    const prompt = 生成假设Prompt(数据摘要);
+    const { content } = await askAI(prompt);
+    return 解析假设结果(content);
+};
+
+/**
+ * 生成洞察分析
+ * @param 假设描述 - 当前假设
+ * @param 数据字段列表 - 可用字段
+ * @param 用户指令 - 深挖指令
+ * @param 代码语言 - python 或 sql
+ * @returns 洞察结果（图表类型、数据、结论、代码）
+ */
+export const generateInsight = async (
+    假设描述: string,
+    数据字段列表: string[],
+    用户指令: string,
+    代码语言: 'python' | 'sql' = 'python'
+): Promise<any> => {
+    const { 生成洞察Prompt, 解析洞察结果 } = await import('@/services/prompts/insightGenerator');
+
+    const prompt = 生成洞察Prompt(假设描述, 数据字段列表, 用户指令, 代码语言);
+    const { content } = await askAI(prompt);
+    return 解析洞察结果(content);
 };

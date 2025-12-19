@@ -1,95 +1,126 @@
-/* AI Workshop Tools - 智能工坊工具卡片 */
+/* AI工坊 - NotebookLM风格网格布局 */
 
-.workshopTools {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--gap-m);
-    padding: 0;
-}
-
-.toolCard {
-    background: var(--bg-element);
-    border: var(--border);
-    border-radius: var(--radius-m);
-    padding: var(--gap-l);
+.aiWorkshopContainer {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    gap: var(--gap-l);
+    padding: var(--gap-s);
+}
+
+.aiWorkshopGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--gap-m);
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.toolCard:hover {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
-    transform: translateY(-2px);
-}
-
-.toolCard.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.toolIcon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-m);
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
     flex-shrink: 0;
 }
 
-.toolContent {
+.evidencePoolWrapper {
     flex: 1;
+    min-height: 0;
+    margin-top: var(--gap-s);
+    border-top: 1px solid var(--border);
+    padding-top: var(--gap-m);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: var(--gap-s);
 }
 
-.toolTitle {
-    font-size: var(--fs-l);
-    font-weight: var(--fw-semibold);
-    color: var(--text-primary);
-    margin: 0;
-    line-height: 1.3;
-}
-
-.toolDesc {
-    font-size: var(--fs-s);
-    color: var(--text-secondary);
-    margin: 0;
-    line-height: 1.5;
-}
-
-.toolButton {
-    width: 100%;
-    padding: var(--gap-m);
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: var(--radius-s);
-    font-size: var(--fs-m);
-    font-weight: var(--fw-medium);
+.toolGridItem {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gap-l);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 100px;
 }
 
-.toolButton:hover:not(:disabled) {
-    background: var(--primary-hover);
-    transform: scale(1.02);
+.toolGridItem:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.toolButton:active:not(:disabled) {
-    transform: scale(0.98);
-}
-
-.toolButton:disabled {
-    background: var(--bg-panel);
-    color: var(--text-tertiary);
-    cursor: not-allowed;
+.toolGridItem.loading {
     opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.toolIcon {
+    margin-bottom: var(--gap-s);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolName {
+    font-size: var(--fs-s);
+    font-weight: var(--fw-medium);
+    color: var(--text-primary);
+    text-align: center;
+    line-height: var(--line-height-tight);
+}
+
+/* Hover Tooltip */
+.toolTooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: var(--gap-s);
+    padding: var(--gap-s) var(--gap-m);
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    box-shadow: var(--shadow-lg);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Progress Bar */
+.toolProgressText {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin-top: var(--gap-s);
+    font-variant-numeric: tabular-nums;
+}
+
+.toolProgressBar {
+    width: 60%;
+    height: 4px;
+    background: var(--bg-main);
+    border-radius: var(--radius-full);
+    margin-top: var(--gap-xs);
+    overflow: hidden;
+}
+
+.toolProgressFill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
 }

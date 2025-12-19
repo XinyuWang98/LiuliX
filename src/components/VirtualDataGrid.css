@@ -305,6 +305,9 @@
     display: flex;
     border-bottom: 1px solid var(--border-light);
     transition: background var(--transition-s) var(--ease-out);
+    /* 核心修复：确保行宽度撑开，让 sticky left 生效 */
+    width: max-content;
+    min-width: 100%;
 }
 
 /* 移除hover效果，只保留点击选中的高亮 */
@@ -348,8 +351,14 @@
 /* 移除序号列hover效果 */
 
 /* 行列高亮效果 */
+/* 行列高亮效果 */
 .enhancedGridCell.highlightRow {
     background-color: var(--highlight-row) !important;
+}
+
+/* 修复序号列高亮时的透明度问题（确保不透出下方内容） */
+.enhancedGridCell序号.highlightRow {
+    background: linear-gradient(var(--highlight-row), var(--highlight-row)), var(--bg-secondary) !important;
 }
 
 .enhancedGridCell.highlightCol {
@@ -368,24 +377,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--gap-xl);
+    height: 100%;
     gap: var(--gap-m);
     color: var(--text-secondary);
 }
 
 .loadingSpinner {
-    width: var(--spinner-size);
-    height: var(--spinner-size);
-    border: var(--spinner-border) solid var(--border);
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
     border-top-color: var(--primary);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 /* 分页器 */

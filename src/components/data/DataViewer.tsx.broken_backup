@@ -1,0 +1,614 @@
+import { useState, useEffect, useRef } from 'react';
+import { Project, ProjectFile } from '@utils/projectUtils';
+import { useI18n } from '@contexts/I18nContext';
+import { ParsedFileData } from '@utils/fileParser';
+import { Database, Columns3, Loader, BarChart2 } from 'lucide-react';
+import { pyodideManager } from '../../services/PyodideManager';
+import { ColumnStats } from '@/types/data';
+import { DataTable } from './DataTable';
+import { VirtualDataGrid } from '../VirtualDataGrid';
+import { DuckDBEngine } from '../../db/duckdbEngine';
+import { ColumnMetadata } from '../../types/duckdb';
+import { DataQualityService } from '../../services/dataQualityService';
+import { SmartFileTabBar } from './SmartFileTabBar';
+
+interface DataViewerProps {
+    project: Project | null;
+    fileData?: ParsedFileData | null; // Kept for compatibility
+    activeFileId?: string; // 从外部接收当前激活的文件ID
+    onProjectUpdate?: (project: Project) => void;
+    onFileChange?: (fileId: string) => void;
+    children?: React.ReactNode;
+}
+
+interface DataFrameInfo {
+    columns: ColumnStats[];
+    row_count: number;
+    column_count: number;
+    preview_data: any[][];
+}
+
+interface DuckDBInfo {
+    tableName: string;
+    rowCount: number;
+    columns: ColumnMetadata[];
+}
+
+/**
+ * 数据查看器组件 - Kaggle 风格
+ * 智能路由：小文件走 Pyodide + DataTable，大文件/CSV 走 DuckDB + VirtualDataGrid
+ */
+export function DataViewer({ project, activeFileId: externalActiveFileId, onProjectUpdate, onFileChange, children }: DataViewerProps) {
+    const { t } = useI18n();
+    const [loading, setLoading] = useState(false);
+    const [dataInfo, setDataInfo] = useState<DataFrameInfo | null>(null);
+
+    // DuckDB 状态
+    const [duckInfo, setDuckInfo] = useState<DuckDBInfo | null>(null);
+    const [useDuckDB, setUseDuckDB] = useState(false);
+
+    const [error, setError] = useState<string | null>(null);
+    const [activeFileId, setActiveFileId] = useState<string | null>(null);
+
+    // 列筛选器状态
+    const [selectedColumns, setSelectedColumns] = useState<number[]>([]);
+    const [showColumnSelector, setShowColumnSelector] = useState(false);
+
+    // 详细统计信息显示状态
+    const [showStats, setShowStats] = useState(false);
+
+    // 初始化：使用外部传入的activeFileId，或选择第一个文件
+    useEffect(() => {
+        if (project && project.files.length > 0) {
+            // 优先使用外部传入的activeFileId
+            if (externalActiveFileId && project.files.find(f => f.id === externalActiveFileId)) {
+                setActiveFileId(externalActiveFileId);
+            } else if (!activeFileId || !project.files.find(f => f.id === activeFileId)) {
+                setActiveFileId(project.files[0].id);
+            }
+        }
+    }, [project?.id, externalActiveFileId]); // 监听外部activeFileId变化
+
+    const projectRef = useRef(project);
+    useEffect(() => {
+        projectRef.current = project;
+    }, [project]);
+
+    // 加载数据当项目ID、活动文件或文件被修改时
+    useEffect(() => {
+        if (project && activeFileId) {
+            loadData();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [project?.id, activeFileId, project?.files.find(f => f.id === activeFileId)?.data?.lastModified]); // 监听文件的lastModified
+
+
+    async function loadData() {
+        if (!project || !activeFileId) return;
+
+        setLoading(true);
+        setError(null);
+        setDuckInfo(null);
+        setDataInfo(null);
+        setUseDuckDB(false);
+
+        try {
+            // 🆕 直接使用props中的project，不从IndexedDB重新加载
+            // （IndexedDB中的数据可能是旧的，props中的是最新的）
+
+            // 1. 找到当前活动文件
+            const file: ProjectFile | undefined = project.files.find((f: ProjectFile) => f.id === activeFileId);
+            if (!file || !file.data) throw new Error('文件内容未找到');
+
+            // 🔍 调试：打印file.data的状态
+            console.log('🔍 DataViewer loadData - file.data状态:', {
+                fileName: file.data.fileName,
+                hasTableName: !!file.data.tableName,
+                tableName: file.data.tableName,
+                hasLastModified: !!file.data.lastModified,
+                lastModified: file.data.lastModified,
+                columnCount: file.data.columnCount,
+                rowCount: file.data.rowCount
+            });
+
+            const fileName = file.data.fileName.toLowerCase();
+            const isCSV = fileName.endsWith('.csv');
+
+            // 策略：如果是 CSV 且行数 > 5000 或强制使用 DuckDB
+            // 这里为了演示 VirtualDataGrid，我们对所有 CSV 优先尝试 DuckDB
+            if (isCSV) {
+                try {
+                    // 2. 尝试使用 DuckDB (针对CSV文件)
+                    // 定义更新状态函数
+                    const engine = DuckDBEngine.getInstance(); // Ensure engine is accessible here
+                    const updateProjectState = async (tableName: string) => {
+                        if (projectRef.current && onProjectUpdate && activeFileId) {
+                            try {
+                                const currentProject = projectRef.current;
+                                const updatedProject = { ...currentProject };
+                                // Deep copy files array to avoid mutation issues
+                                updatedProject.files = [...currentProject.files];
+
+                                const targetIndex = updatedProject.files.findIndex((f: ProjectFile) => f.id === activeFileId);
+                                if (targetIndex !== -1) {
+                                    updatedProject.files[targetIndex] = {
+                                        ...updatedProject.files[targetIndex],
+                                        data: {
+                                            ...updatedProject.files[targetIndex].data,
+                                            tableName: tableName,
+                                            // @ts-ignore
+                                            hasTableName: true
+                                        }
+                                    };
+
+                                    console.log('🔄 DataViewer: 已更新Project状态中的tableName', tableName);
+
+                                    // 🆕 立即进行质量评分（如果还没有评分）
+                                    const targetFile = updatedProject.files[targetIndex];
+                                    if (targetFile.data.qualityScore === undefined) {
+                                        try {
+                                            const chunk = await engine.queryChunk(tableName, 0, 500);
+                                            if (chunk && chunk.length > 0) {
+                                                const schema = await engine.getTableColumns(tableName);
+                                                const columns = schema.map(c => c.name);
+                                                const report = DataQualityService.assessQuality(chunk, columns, t);
+
+                                                updatedProject.files[targetIndex] = {
+                                                    ...updatedProject.files[targetIndex],
+                                                    data: {
+                                                        ...updatedProject.files[targetIndex].data,
+                                                        qualityScore: report.score,
+                                                        qualityStatus: report.score >= 85 ? 'good' : (report.score >= 60 ? 'warning' : 'critical')
+                                                    }
+                                                };
+
+                                                console.log(`[ImmediateCheck] File ${targetFile.data.fileName} Score: ${report.score}`);
+                                            }
+                                        } catch (qualityErr) {
+                                            console.warn('质量评分失败:', qualityErr);
+                                        }
+                                    }
+
+                                    onProjectUpdate(updatedProject);
+                                }
+                            } catch (e) {
+                                console.error("❌ DataViewer: 更新Project状态失败", e);
+                            }
+                        }
+                    };
+
+                    // 🆕 优先使用已存在的tableName（来自上传时或之前的ingest）
+                    if (file.data.tableName) {
+                        console.log('📌 使用已有tableName:', file.data.tableName);
+
+                        // 验证表是否还存在（优先查working表，因为清洗操作在working表上）
+                        try {
+                            // 先尝试查询working表
+                            let tableToUse = file.data.tableName;
+
+                            // 如果tableName是original表，尝试找对应的working表
+                            if (tableToUse.includes('_original')) {
+                                const workingTable = tableToUse.replace('_original', '_working');
+                                console.log('🔄 检测到original表，尝试使用working表:', workingTable);
+
+                                try {
+                                    // 验证working表存在（只需查询列信息）
+                                    const workingCols = await engine.getTableColumns(workingTable);
+                                    if (workingCols && workingCols.length > 0) {
+                                        tableToUse = workingTable;
+                                        console.log('✅ 使用working表');
+                                    }
+                                } catch {
+                                    console.log('⚠️ working表不存在，使用original表');
+                                }
+                            }
+
+
+                            // 验证表存在并获取列信息
+                            const columns = await engine.getTableColumns(tableToUse);
+                            if (columns && columns.length > 0) {
+                                // 表存在，使用file.data中的行数（更准确）
+                                const rowCount = file.data.rowCount || 0;
+
+                                setDuckInfo({
+                                    tableName: tableToUse,
+                                    rowCount: rowCount,
+                                    columns: columns
+                                });
+                                setUseDuckDB(true);
+                                console.log('✅ 使用已有表，行数:', rowCount, '列数:', columns.length);
+                                return;
+                            }
+                        } catch (tableErr) {
+                            console.warn('⚠️ 已有tableName无效，将重新ingest:', tableErr);
+                            // 表不存在，继续下面的ingest流程
+                        }
+                    }
+
+                    // Prioritize original raw file (optimized path)
+                    if (file.data.originalFile) {
+                        const rawFile = file.data.originalFile;
+
+                        // Pass options based on FileUploader's flags
+                        // If file.data.isSampled is true, it means FORCE_SAMPLE or User Confirmed Sample
+                        const result = await engine.ingestCSV(rawFile, {
+                            sampleSize: file.data.isSampled ? 200000 : -1, // Use standard large chunk if sampled
+                            sampleRate: 0.2, // Default 20%
+                            autoSampleThreshold: 200000 // Force threshold match
+                        });
+
+                        setDuckInfo({
+                            tableName: result.tableName,
+                            rowCount: result.rowCount,
+                            columns: result.columns
+                        });
+                        setUseDuckDB(true);
+                        updateProjectState(result.tableName);
+                        return;
+                    }
+
+                    // Fallback: Reconstruct CSV from JSON (Legacy/Edge case)
+                    // ... (Original logic kept as safety net)
+                    let csvContent = '';
+                    const data = file.data.data;
+                    if (data && data.length > 0) {
+                        const headers = Object.keys(data[0]);
+                        csvContent += headers.join(',') + '\n';
+                        data.forEach((row: any) => {
+                            csvContent += headers.map(h => {
+                                const val = row[h];
+                                return val === null || val === undefined ? '' : String(val);
+                            }).join(',') + '\n';
+                        });
+                    }
+
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const csvFile = new File([blob], fileName, { type: 'text/csv' });
+
+                    const result = await engine.ingestCSV(csvFile);
+                    setDuckInfo({
+                        tableName: result.tableName,
+                        rowCount: result.rowCount,
+                        columns: result.columns
+                    });
+                    setUseDuckDB(true);
+                    return;
+
+                } catch (duckErr) {
+                    console.warn('DuckDB 加载失败，回退到 Pyodide', duckErr);
+                }
+            }
+
+            // 3. 使用 Pyodide 加载数据 (Fallback)
+            const fileContent = JSON.stringify(file.data);
+            const loadResult = await pyodideManager.loadDataFromFile(
+                fileContent,
+                fileName.endsWith('.json') ? 'json' : 'csv',
+                { maxRows: 100000, sample: false }
+            );
+
+            // 4. 计算列统计信息
+            const columnStats = await pyodideManager.calculateColumnStats();
+
+            // 5. 组合数据
+            setDataInfo({
+                columns: columnStats,
+                row_count: loadResult.row_count,
+                column_count: loadResult.column_count,
+                preview_data: loadResult.preview_data
+            });
+
+        } catch (err) {
+            console.error('数据加载失败:', err);
+            setError(err instanceof Error ? err.message : '数据加载失败');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // 初始化列筛选器（当DuckDB数据加载后）
+    useEffect(() => {
+        if (duckInfo && duckInfo.columns.length > 0) {
+            const defaultColumnCount = Math.min(10, duckInfo.columns.length);
+            setSelectedColumns(Array.from({ length: defaultColumnCount }, (_, i) => i));
+        }
+    }, [duckInfo]);
+
+    return (
+        <div style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'transparent',
+            overflow: 'hidden',
+        }}>
+            {/* 顶栏 */}
+            <div style={{
+                padding: 'var(--gap-m) var(--gap-l)', /* Reduced padding */
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexShrink: 0,
+                borderBottom: '1px solid var(--border)', /* Optional: add border for separation */
+                background: 'var(--bg-panel)',
+            }}>
+                {/* 左侧：文件切换 Tabs */}
+                {project && (
+                    <SmartFileTabBar
+                        files={project.files}
+                        activeFileId={activeFileId}
+                        onFileChange={(id) => {
+                            setActiveFileId(id);
+                            if (onFileChange) {
+                                onFileChange(id);
+                            }
+                        }}
+                    />
+                )}
+
+                {/* 右侧：数据信息与工具 */}
+                {(dataInfo || duckInfo) && (
+                    <div style={{
+                        display: 'flex',
+                        gap: 'var(--gap-l)',
+                        alignItems: 'center',
+                        marginLeft: 'var(--gap-l)', /* Ensure separation from tabs */
+                        flexShrink: 0,
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-xs)' }}>
+                            <Database size={14} style={{ color: 'var(--text-secondary)' }} />
+                            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+                                {(duckInfo?.rowCount || dataInfo?.row_count || 0).toLocaleString()} {t('pagination.rows')}
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-s)' }}>
+                            <Columns3 size={14} style={{ color: 'var(--text-secondary)' }} />
+
+                            {/* 列筛选器按钮 (Swap Order: 1st) */}
+                            {useDuckDB && duckInfo ? (
+                                <div style={{ position: 'relative' }}>
+                                    <button
+                                        onClick={() => setShowColumnSelector(!showColumnSelector)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 'var(--gap-xs)',
+                                            padding: 'var(--gap-xs) var(--gap-s)',
+                                            background: 'transparent',
+                                            border: '1px solid var(--border)',
+                                            borderRadius: 'var(--radius-s)',
+                                            color: 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            fontSize: 'var(--fs-sm)',
+                                            transition: 'all var(--transition-fast)',
+                                        }}
+                                    >
+                                        <span>{t('grid.selectedColumns', {
+                                            count: selectedColumns.length,
+                                            total: duckInfo.columns.length
+                                        })}</span>
+                                    </button>
+
+                                    {/* 列筛选下拉框 */}
+                                    {showColumnSelector && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '110%',
+                                            right: 0,
+                                            background: 'var(--bg-secondary)',
+                                            border: '1px solid var(--border)',
+                                            borderRadius: 'var(--radius-m)',
+                                            boxShadow: 'var(--shadow-lv2)',
+                                            padding: 'var(--gap-s)',
+                                            minWidth: '250px',
+                                            maxHeight: '400px',
+                                            zIndex: 1000,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                        }}>
+                                            {/* 全选/取消全选按钮 - 固定在顶部 */}
+                                            <div style={{
+                                                display: 'flex',
+                                                gap: 'var(--gap-s)',
+                                                marginBottom: 'var(--gap-s)',
+                                                paddingBottom: 'var(--gap-s)',
+                                                borderBottom: '1px solid var(--border)',
+                                                flexShrink: 0,
+                                            }}>
+                                                <button
+                                                    onClick={() => setSelectedColumns(duckInfo.columns.map((_, idx) => idx))}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: 'var(--gap-xs) var(--gap-s)',
+                                                        background: 'var(--bg-secondary)',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: 'var(--radius-s)',
+                                                        color: 'var(--text-primary)',
+                                                        cursor: 'pointer',
+                                                        fontSize: 'var(--fs-xs)',
+                                                    }}
+                                                >
+                                                    {t('grid.selectAll')}
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedColumns([])}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: 'var(--gap-xs) var(--gap-s)',
+                                                        background: 'var(--bg-secondary)',
+                                                        border: '1px solid var(--border)',
+                                                        borderRadius: 'var(--radius-s)',
+                                                        color: 'var(--text-primary)',
+                                                        cursor: 'pointer',
+                                                        fontSize: 'var(--fs-xs)',
+                                                    }}
+                                                >
+                                                    {t('grid.deselectAll')}
+                                                </button>
+                                            </div>
+
+                                            {/* 列选择列表 - 可滚动区域 */}
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: 'var(--gap-xs)',
+                                                overflowY: 'auto',
+                                                maxHeight: '300px',
+                                            }}>
+                                                {duckInfo.columns.map((col, idx) => (
+                                                    <label
+                                                        key={idx}
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 'var(--gap-s)',
+                                                            padding: 'var(--gap-xs)',
+                                                            borderRadius: 'var(--radius-s)',
+                                                            cursor: 'pointer',
+                                                            transition: 'background var(--transition-fast)',
+                                                        }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedColumns.includes(idx)}
+                                                            onChange={() => {
+                                                                if (selectedColumns.includes(idx)) {
+                                                                    setSelectedColumns(selectedColumns.filter(i => i !== idx));
+                                                                } else {
+                                                                    setSelectedColumns([...selectedColumns, idx].sort((a, b) => a - b));
+                                                                }
+                                                            }}
+                                                            style={{ cursor: 'pointer' }}
+                                                        />
+                                                        <span style={{
+                                                            fontSize: 'var(--fs-sm)',
+                                                            color: 'var(--text-primary)',
+                                                        }}>
+                                                            {col.name}
+                                                        </span>
+                                                        <span style={{
+                                                            marginLeft: 'auto',
+                                                            fontSize: 'var(--fs-xxs)',
+                                                            color: 'var(--text-tertiary)',
+                                                        }}>
+                                                            {col.type}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+                                    {(duckInfo ? duckInfo.columns.length : dataInfo?.column_count || 0)} 列
+                                </span>
+                            )}
+
+                            {/* 统计切换按钮 (Swap Order: 2nd) */}
+                            {useDuckDB && duckInfo && (
+                                <button
+                                    onClick={() => setShowStats(!showStats)}
+                                    title={showStats ? t('grid.clickToCollapse') : t('grid.clickToExpand')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 'var(--gap-xs)',
+                                        padding: 'var(--gap-xs) var(--gap-s)',
+                                        background: showStats ? 'var(--bg-accent-subtle)' : 'transparent',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: 'var(--radius-s)',
+                                        color: showStats ? 'var(--primary)' : 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        fontSize: 'var(--fs-sm)',
+                                        transition: 'all var(--transition-fast)',
+                                    }}
+                                >
+                                    <BarChart2 size={14} />
+                                    <span>{t('grid.distribution')}</span>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* 注入的内容 (如 AI Panel) */}
+            {children}
+
+            {/* 内容区域 (虚拟列表或普通表格) */}
+            <div style={{
+                flex: 1,
+                overflow: 'hidden',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '0',
+            }}>
+                {loading ? (
+                    /* 加载状态 */
+                    <div style={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
+                        gap: '16px'
+                    }}>
+                        <Loader size={40} style={{ color: 'var(--primary)', animation: 'spin 1s linear infinite' }} />
+                        <p style={{ color: 'var(--text-secondary)' }}>正在加载数据...</p>
+                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    </div>
+                ) : error ? (
+                    /* 错误状态 */
+                    <div style={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--error)'
+                    }}>
+                        错误: {error}
+                    </div>
+                ) : (useDuckDB && duckInfo) ? (
+                    /* DuckDB 虚拟表格 */
+                    <div style={{
+                        flex: 1,
+                        borderRadius: 'var(--radius-m)',
+                        overflow: 'hidden',
+                        background: 'var(--bg-panel)'
+                    }}>
+                        <VirtualDataGrid
+                            tableName={duckInfo.tableName}
+                            rowCount={duckInfo.rowCount}
+                            columns={duckInfo.columns}
+                            selectedColumns={selectedColumns}
+                            showStats={showStats}
+                        />
+                    </div>
+                ) : dataInfo ? (
+                    /* 常规 Pyodide 表格 */
+                    <DataTable
+                        columns={dataInfo.columns}
+                        data={dataInfo.preview_data}
+                        rowCount={dataInfo.row_count}
+                    />
+                ) : (
+                    /* 空状态 */
+                    <div style={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-secondary)'
+                    }}>
+                        {t('dataSource.noProjects')}
+                    </div>
+                )}
+
+            </div>
+        </div>
+    );
+}

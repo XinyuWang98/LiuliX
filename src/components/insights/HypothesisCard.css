@@ -1,0 +1,83 @@
+/* 假设卡片样式 - 100% CSS 变量 */
+
+.hypothesis-card {
+  background: var(--bg-panel);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-m);
+  padding: var(--gap-m);
+  cursor: pointer;
+  transition: all var(--transition-m) var(--ease-out);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-m);
+}
+
+.hypothesis-card:hover {
+  border-color: var(--bg-accent);
+  box-shadow: var(--shadow-lv2);
+  transform: translateY(-2px);
+}
+
+.hypothesis-card.active {
+  background: var(--bg-accent);
+  background: linear-gradient(135deg, var(--bg-accent) 0%, rgba(0, 122, 255, 0.7) 100%);
+  border-color: var(--bg-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.hypothesis-card__icon {
+  flex-shrink: 0;
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg-accent);
+}
+
+.hypothesis-card.active .hypothesis-card__icon {
+  color: var(--text-inverse);
+}
+
+.hypothesis-card__content {
+  flex: 1;
+  min-width: 0; /* 防止溢出 */
+}
+
+.hypothesis-card__title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--gap-xs) 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hypothesis-card.active .hypothesis-card__title {
+  color: var(--text-inverse);
+}
+
+.hypothesis-card__verification {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.hypothesis-card.active .hypothesis-card__verification {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hypothesis-card__expand-icon {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  transition: transform var(--transition-s) var(--ease-out);
+}
+
+.hypothesis-card.active .hypothesis-card__expand-icon {
+  color: var(--text-inverse);
+}
+
+.hypothesis-card:hover .hypothesis-card__expand-icon {
+  transform: translateY(2px);
+}

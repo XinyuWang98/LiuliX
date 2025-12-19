@@ -1,4 +1,4 @@
-import * as duckdb from '@duckdb/duckdb-wasm';
+﻿import * as duckdb from '@duckdb/duckdb-wasm';
 import duckdb_wasm from '@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url';
 import duckdb_eh_wasm from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url';
 import duckdb_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url';
@@ -51,8 +51,8 @@ export class DuckDBEngine {
         worker.onerror = (e) => console.error("❌ DuckDB Worker 报错:", e.message, e.filename, e.lineno, e);
         worker.onmessageerror = (e) => console.error("❌ DuckDB Worker 消息错误:", e);
 
-        // 3. 启动 DB
-        const logger = new duckdb.ConsoleLogger();
+        // 3. 启动 DB (使用VoidLogger禁用DuckDB内部日志)
+        const logger = new duckdb.VoidLogger();
         this.db = new duckdb.AsyncDuckDB(logger, worker);
         await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
@@ -107,46 +107,32 @@ export class DuckDBEngine {
     ): Promise<IngestionResult> {
         if (!this.db || !this.conn) throw new Error(globalT('settings.dbNotReady'));
 
-        const tableName = `t_${Date.now()}`;
+        // 生成文件唯一标识（基于时间戳）
+        const fileId = `${Date.now()}`;
+        const originalTable = `t_${fileId}_original`; // 原始数据表（只读）
+        const workingTable = `t_${fileId}_working`;  // 工作表（可清洗）
+
         const autoSampleThreshold = options.autoSampleThreshold || 100000;
         const sampleRate = options.sampleRate || 0.2;
 
-        // 先清理所有临时表，避免表已存在错误
+        // 清理可能存在的同名表
         try {
-            const tables = await this.conn.query("SHOW TABLES");
-            if (tables && tables.numRows > 0) {
-                for (let i = 0; i < tables.numRows; i++) {
-                    const row = tables.get(i);
-                    const tblName = row?.name || row?.table_name || row?.NAME || row?.TABLE_NAME;
-                    if (tblName && String(tblName).startsWith('t_')) {
-                        try {
-                            await this.conn.query(`DROP TABLE IF EXISTS ${tblName}`);
-                            console.log(`DuckDB: 已删除旧表 ${tblName}`);
-                        } catch (e) {
-                            console.warn(`DuckDB: 删除表${tblName}失败，继续`, e);
-                        }
-                    }
-                }
-            }
+            await this.conn.query(`DROP TABLE IF EXISTS ${originalTable}`);
+            await this.conn.query(`DROP TABLE IF EXISTS ${workingTable}`);
+            console.log(`DuckDB: 准备为文件创建双表 ${originalTable} + ${workingTable}`);
         } catch (cleanupErr) {
-            console.warn('DuckDB: 清理旧表失败（忽略）', cleanupErr);
+            console.warn(`DuckDB: 清理表失败（忽略）`, cleanupErr);
         }
 
-        // 1. 注册文件句柄 (并不立即读取，零拷贝)
-        // 务实技巧：直接用 registerFileHandle 最快，但为了进度条，我们需要流式处理
-        // 如果文件极大，建议先注册 Handle 拿 metadata，再决定怎么读
+        // 1. 注册文件句柄（零拷贝）
         await this.db.registerFileHandle(file.name, file, duckdb.DuckDBDataProtocol.BROWSER_FILEREADER, true);
 
-        // 2. 预检：获取行数（非常快，因为 DuckDB 读取 CSV 尾部或 Metadata）
-        // 注意：read_csv_auto 默认会嗅探类型
-        // 为了性能，我们先 count 一下
+        // 2. 预检：判断是否需要抽样
         const fileSizeMB = file.size / (1024 * 1024);
         let shouldSample = false;
 
-        // 3. 简单的文件大小判断逻辑
         if (fileSizeMB > 20) {
-            // 对于大文件，我们在 SQL 层面做优化，或者先 Count
-            // 使用 ignore_errors=true 确保 dirty CSV 也能读出 Count
+            // 对于大文件，先获取总行数判断是否需要抽样
             const countResult = await this.conn.query(`SELECT count(*) as c FROM read_csv_auto('${file.name}', ignore_errors=true)`);
             const row = countResult.get(0);
             const totalRows = row ? Number(row['c']) : 0;
@@ -155,29 +141,36 @@ export class DuckDBEngine {
             }
         }
 
-        // 4. 构建 SQL - 关键修复：允许忽略脏数据行 (ignore_errors=true)
-        let sql = `CREATE TABLE ${tableName} AS SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true)`;
+        // 3. 构建SQL - 先创建 original 表（原始数据，只读）
+        let sql = `CREATE TABLE ${originalTable} AS SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true)`;
 
         if (shouldSample && options.sampleSize !== -1) {
             sql += ` USING SAMPLE ${Math.floor(sampleRate * 100)}%`;
         }
 
-        // 5. 执行解析
+        // 4. 执行解析 - 创建原始表
         if (onProgress) onProgress(10);
         const start = performance.now();
 
         await this.conn.query(sql);
 
+        if (onProgress) onProgress(50);
+        console.log(`✅ 原始表创建成功: ${originalTable}`);
+
+        // 5. 从 original 复制数据到 working 表
+        await this.conn.query(`CREATE TABLE ${workingTable} AS SELECT * FROM ${originalTable}`);
+
         if (onProgress) onProgress(100);
+        console.log(`✅ 工作表创建成功: ${workingTable}`);
         console.log(globalT('settings.parseSuccess', { time: (performance.now() - start).toFixed(2) }));
 
-        // 6. 获取 Schema 和 最终行数
-        const info = await this.conn.query(`SELECT count(*) as c FROM ${tableName}`);
+        // 6. 获取 Schema 和行数（从 working 表查询）
+        const info = await this.conn.query(`SELECT count(*) as c FROM ${workingTable}`);
         const infoRow = info.get(0);
         const actualRows = infoRow ? Number(infoRow['c']) : 0;
 
         // 获取列信息
-        const schemaWait = await this.conn.query(`DESCRIBE ${tableName}`);
+        const schemaWait = await this.conn.query(`DESCRIBE ${workingTable}`);
         const columns: ColumnMetadata[] = [];
         for (let i = 0; i < schemaWait.numRows; i++) {
             const row = schemaWait.get(i);
@@ -189,8 +182,9 @@ export class DuckDBEngine {
             }
         }
 
+        // 返回 working 表名（所有后续操作都使用 working 表）
         return {
-            tableName,
+            tableName: workingTable, // 重要：返回 working 表名
             rowCount: actualRows,
             isSampled: shouldSample,
             columns
@@ -239,6 +233,51 @@ export class DuckDBEngine {
     }
 
     /**
+     * 重置工作表到原始状态
+     * @param workingTableName 工作表名（格式：t_{fileId}_working）
+     * @returns 是否成功
+     */
+    public async resetWorkingTable(workingTableName: string): Promise<boolean> {
+        if (!this.conn) throw new Error(globalT('settings.dbNotReady'));
+
+        // 从 working 表名推导出 original 表名
+        // 例如：t_1234567890_working → t_1234567890_original
+        const originalTableName = workingTableName.replace('_working', '_original');
+
+        console.log(`🔄 开始重置工作表: ${workingTableName} ← ${originalTableName}`);
+
+        try {
+            // 1. 检查 original 表是否存在
+            const checkResult = await this.conn.query(`
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_name = '${originalTableName}'
+            `);
+
+            if (checkResult.numRows === 0) {
+                console.error(`❌ 原始表不存在: ${originalTableName}`);
+                return false;
+            }
+
+            // 2. 删除当前 working 表
+            await this.conn.query(`DROP TABLE IF EXISTS ${workingTableName}`);
+            console.log(`✓ 已删除工作表: ${workingTableName}`);
+
+            // 3. 从 original 重新复制数据到 working
+            await this.conn.query(`
+                CREATE TABLE ${workingTableName} AS 
+                SELECT * FROM ${originalTableName}
+            `);
+            console.log(`✅ 工作表重置成功: ${workingTableName}`);
+
+            return true;
+        } catch (error) {
+            console.error(`❌ 重置工作表失败:`, error);
+            return false;
+        }
+    }
+
+    /**
      * 获取表的所有列信息
      */
     public async getTableColumns(tableName: string): Promise<ColumnMetadata[]> {
@@ -255,6 +294,22 @@ export class DuckDBEngine {
             }
         }
         return columns;
+    }
+
+    /**
+     * 执行任意SQL查询（便捷方法）
+     */
+    public async runQuery(sql: string): Promise<any[]> {
+        if (!this.conn) throw new Error(globalT('settings.dbNotReady'));
+        const result = await this.conn.query(sql);
+        const rows: any[] = [];
+        for (let i = 0; i < result.numRows; i++) {
+            const row = result.get(i);
+            if (row) {
+                rows.push(row);
+            }
+        }
+        return rows;
     }
 
     /**
@@ -361,7 +416,6 @@ export class DuckDBEngine {
                                             max: max,
                                             labels: labels // 传递具体值给前端
                                         };
-                                        console.log(`✓ Discrete Distribution for ${col.name}:`, counts);
 
                                     } else {
                                         // 连续数值：使用分箱直方图 (10个区间)
@@ -406,7 +460,6 @@ export class DuckDBEngine {
                                             min: min,
                                             max: max
                                         };
-                                        console.log(`✓ Histogram for ${col.name}:`, counts);
                                     }
                                 }
                             } catch (histError) {

@@ -1,0 +1,135 @@
+/**
+ * 报告生成器样式
+ * 100% 使用 CSS 变量，支持主题切换
+ */
+
+.report-generator {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-panel);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+}
+
+/* 头部 */
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--gap-m);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-main);
+}
+
+.report-title {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+}
+
+.report-title h3 {
+    margin: 0;
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+}
+
+.report-actions {
+    display: flex;
+    gap: var(--gap-s);
+}
+
+.report-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    font-size: var(--fs-sm);
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    border-radius: var(--btn-radius);
+    transition: all var(--transition-s);
+}
+
+/* 预览区域 */
+.report-preview {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--gap-l);
+}
+
+/* 空状态 */
+.report-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: var(--gap-xl);
+    text-align: center;
+}
+
+.report-empty-icon {
+    color: var(--text-tertiary);
+    margin-bottom: var(--gap-m);
+}
+
+.report-empty-text {
+    margin: 0 0 var(--gap-xs) 0;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-medium);
+    color: var(--text-secondary);
+}
+
+.report-empty-hint {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-tertiary);
+}
+
+/* 报告内容 */
+.report-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+}
+
+/* 摘要统计 */
+.report-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--gap-m);
+    padding: var(--gap-m);
+    background: var(--bg-main);
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border);
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+}
+
+.summary-label {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-value {
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    color: var(--bg-accent);
+}
+
+.report-hint {
+    margin: 0;
+    padding: var(--gap-m);
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--bg-accent);
+    border-radius: var(--radius-s);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    line-height: var(--line-height);
+}

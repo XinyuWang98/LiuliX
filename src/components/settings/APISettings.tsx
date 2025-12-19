@@ -284,7 +284,7 @@ export function APISettings({ onClose }: APISettingsProps) {
                                 {model.name}
                                 {model.isFree && ` - ${t('settings.freeTierModel')}`}
                                 {!model.isFree && ` - ${t('settings.paidModel')}`}
-                                {model.features.includes('experimental') && ` (${t('settings.experimentalModel')})`}
+                                {model.features?.includes('experimental') && ` (${t('settings.experimentalModel')})`}
                             </option>
                         ))}
                     </select>

@@ -1,86 +1,237 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Sparkles, TrendingUp, Lightbulb, Target } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 import { Project } from '../../utils/projectUtils';
+import { DuckDBEngine } from '../../db/duckdbEngine';
+import { generateAICleaningSuggestions } from '../../services/aiCleaningService';
+// removed DataQualityService
+import { EvidencePool } from '../evidence/EvidencePool';
 import './AIWorkshopTools.css';
 
 interface AIWorkshopToolsProps {
     project: Project | null;
     onToolClick?: (toolId: string) => void;
+    onSuggestionsGenerated?: (suggestions: any[]) => void;
+    // removed DataQualityService
 }
 
-// 图标尺寸常量
-const ICON_SIZE = 24; // 工具卡片图标尺寸
+// 工具配置
+const TOOLS = [
+    {
+        id: 'cleaning',
+        icon: Sparkles,
+        nameKey: 'workshop.cleaning',
+        descKey: 'workshop.cleaningDesc'
+    },
+    {
+        id: 'exploration',
+        icon: TrendingUp,
+        nameKey: 'workshop.exploration',
+        descKey: 'workshop.explorationDesc'
+    },
+    {
+        id: 'hypothesis',
+        icon: Lightbulb,
+        nameKey: 'workshop.hypothesis',
+        descKey: 'workshop.hypothesisDesc'
+    },
+    {
+        id: 'suggestions',
+        icon: Target,
+        nameKey: 'workshop.suggestions',
+        descKey: 'workshop.suggestionsDesc'
+    }
+];
 
-export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToolClick }) => {
-    const { t, language } = useI18n();
+export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToolClick, onSuggestionsGenerated }) => {
+    const { t } = useI18n();
+    const [loadingTool, setLoadingTool] = useState<string | null>(null);
+    const [hoveredTool, setHoveredTool] = useState<string | null>(null);
+    const [progress, setProgress] = useState(0);
+    const [isGenerating, setIsGenerating] = useState(false); // 🚀 防重复点击
 
-    // 调试i18n
-    console.log('=== AIWorkshopTools i18n调试 ===');
-    console.log('language.translations.workshop:', language.translations.workshop);
-    console.log('language.translations.workshop.tools:', language.translations.workshop?.tools);
+    // Auto Health Check REMOVED
 
-    const tools = [
-        {
-            id: 'cleaning',
-            icon: <Sparkles size={ICON_SIZE} />,
-            title: t('workshop.tools.cleaning.title'),
-            description: t('workshop.tools.cleaning.desc'),
-            action: t('workshop.tools.cleaning.action'),
-            available: !!project,
-        },
-        {
-            id: 'exploration',
-            icon: <TrendingUp size={ICON_SIZE} />,
-            title: t('workshop.tools.exploration.title'),
-            description: t('workshop.tools.exploration.desc'),
-            action: t('workshop.tools.exploration.action'),
-            available: !!project,
-        },
-        {
-            id: 'hypothesis',
-            icon: <Lightbulb size={ICON_SIZE} />,
-            title: t('workshop.tools.hypothesis.title'),
-            description: t('workshop.tools.hypothesis.desc'),
-            action: t('workshop.tools.hypothesis.action'),
-            available: !!project,
-        },
-        {
-            id: 'suggestions',
-            icon: <Target size={ICON_SIZE} />,
-            title: t('workshop.tools.suggestions.title'),
-            description: t('workshop.tools.suggestions.desc'),
-            action: t('workshop.tools.suggestions.action'),
-            available: !!project,
-        },
-    ];
+    const handleToolClick = async (toolId: string) => {
+        // 🚀 防重复点击保护
+        if (isGenerating) {
+            console.log('[AI工坊] ⏸️ 正在生成中，请勿重复点击');
+            return;
+        }
 
-    const handleToolClick = (toolId: string) => {
-        console.log(`工坊工具被点击: ${toolId}`);
+        if (toolId === 'cleaning' && project) {
+            setIsGenerating(true); // 🚀 标记开始生成
+            setLoadingTool(toolId);
+            setProgress(0);
+
+            try {
+                // 获取当前文件
+                let currentFile = null;
+                for (let i = project.files.length - 1; i >= 0; i--) {
+                    if (project.files[i].data.tableName) {
+                        currentFile = project.files[i];
+                        break;
+                    }
+                }
+
+                if (!currentFile) {
+                    alert('❌ 未找到有效文件');
+                    return;
+                }
+
+                console.log('[AI工坊] 当前文件:', currentFile.id);
+                console.log('[AI工坊] tableName:', currentFile.data.tableName);
+                console.log('[AI工坊] columns:', currentFile.data.columns?.length || 0);
+
+                let columns = currentFile.data.columns;
+                let tableName = currentFile.data.tableName; // 🚀 改为let，允许更新
+                let columnInfos: any[] = [];
+
+                // 1. 尝试从文件数据构建列信息
+                if (columns && columns.length > 0) {
+                    const types = currentFile.data.types || [];
+                    columnInfos = columns.map((name, i) => ({
+                        name,
+                        type: types[i] || 'VARCHAR' // 默认为VARCHAR
+                    }));
+                }
+
+                // DuckDB fallback
+                if (!columns || columns.length === 0) {
+                    console.log('[AI工坊] ⚠️ columns为空，尝试从DuckDB获取schema');
+                    const engine = DuckDBEngine.getInstance();
+                    const tables = await engine.queryChunk('information_schema.tables', 0, 100);
+                    const latestTable = tables
+                        .filter((t: any) => t.table_name && String(t.table_name).startsWith('t_'))
+                        .sort((a: any, b: any) => String(b.table_name).localeCompare(String(a.table_name)))[0];
+
+                    if (latestTable) {
+                        const latestTableName = String(latestTable.table_name);
+                        console.log('[AI工坊] ✅ 最新表:', latestTableName);
+
+                        // 🚀 更新tableName为最新表名
+                        if (tableName !== latestTableName) {
+                            console.log('[AI工坊] 🔄 更新tableName:', tableName, '→', latestTableName);
+                            tableName = latestTableName;
+                        }
+
+                        const schema = await engine.getTableColumns(latestTableName);
+                        columns = schema.map((c: any) => c.name);
+                        columnInfos = schema.map((c: any) => ({ name: c.name, type: c.type }));
+
+                        await engine.queryChunk(latestTableName, 0, 100);
+                        console.log('[AI工坊] ✅ 从DuckDB获取columns:', columns.length);
+                    }
+                }
+
+                if (!columns || columns.length === 0) {
+                    alert('❌ 无法获取数据列信息');
+                    return;
+                }
+
+                console.log('[AI工坊] ✅ DuckDB fallback成功');
+
+
+                const suggestions = await generateAICleaningSuggestions(
+                    tableName || 'unknown',
+                    columnInfos,
+                    [],
+                    t,
+                    undefined,
+                    (progressMsg: string) => {
+                        console.log('[AI工坊]', progressMsg);
+                        // 简单的进度估算
+                        if (progressMsg.includes('Step 1')) setProgress(25);
+                        else if (progressMsg.includes('Step 2')) setProgress(50);
+                        else if (progressMsg.includes('Step 3')) setProgress(75);
+                        else if (progressMsg.includes('JSON')) setProgress(90);
+                    },
+                    // Progressive Update Callback
+                    (updatedSuggestions) => {
+                        if (onSuggestionsGenerated) {
+                            onSuggestionsGenerated(updatedSuggestions);
+                        }
+                    }
+                );
+
+                setProgress(100);
+
+                console.log('[AI工坊] ✅ 成功获得', suggestions.length, '条建议');
+                suggestions.forEach((sugg: any, idx: number) => {
+                    console.log(`  ${idx + 1}. [${sugg.type}] ${sugg.label}`);
+                    console.log(`     ${sugg.reason}`);
+                });
+
+                // Final guarantee update
+                if (onSuggestionsGenerated) {
+                    onSuggestionsGenerated(suggestions);
+                    console.log('[AI工坊] ✅ 建议已传递到DataCleaner (Final)');
+                }
+
+            } catch (error: any) {
+                console.error('[AI工坊] ❌ 失败:', error);
+                alert(`❌ 失败: ${error.message}`);
+            } finally {
+                setLoadingTool(null);
+                setIsGenerating(false); // 🚀 重置生成状态
+            }
+        }
+
         if (onToolClick) {
             onToolClick(toolId);
         }
-        // TODO: 实现具体的工具逻辑
     };
 
     return (
-        <div className="workshopTools">
-            {tools.map(tool => (
-                <div key={tool.id} className={`toolCard ${!tool.available ? 'disabled' : ''}`}>
-                    <div className="toolIcon">{tool.icon}</div>
-                    <div className="toolContent">
-                        <h3 className="toolTitle">{tool.title}</h3>
-                        <p className="toolDesc">{tool.description}</p>
-                    </div>
-                    <button
-                        className="toolButton"
-                        onClick={() => handleToolClick(tool.id)}
-                        disabled={!tool.available}
-                    >
-                        {tool.action}
-                    </button>
-                </div>
-            ))}
+        <div className="aiWorkshopContainer">
+            <div className="aiWorkshopGrid">
+                {TOOLS.map(tool => {
+                    const Icon = tool.icon;
+                    const isLoading = loadingTool === tool.id;
+                    const isHovered = hoveredTool === tool.id;
+
+                    return (
+                        <div
+                            key={tool.id}
+                            className={`toolGridItem ${isLoading ? 'loading' : ''}`}
+                            onClick={() => !isLoading && handleToolClick(tool.id)}
+                            onMouseEnter={() => setHoveredTool(tool.id)}
+                            onMouseLeave={() => setHoveredTool(null)}
+                        >
+                            <div className="toolIcon">
+                                <Icon size={24} />
+                            </div>
+                            <div className="toolName">{t(tool.nameKey as any)}</div>
+
+                            {/* Health Score Badge REMOVED */}
+
+                            {/* Loading Progress */}
+                            {isLoading && (
+                                <>
+                                    <div className="toolProgressText">{progress}%</div>
+                                    <div className="toolProgressBar">
+                                        <div
+                                            className="toolProgressFill"
+                                            style={{ width: `${progress}%` }}
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Hover Tooltip - Hide when loading */}
+                            {isHovered && !isLoading && (
+                                <div className="toolTooltip">
+                                    {t(tool.descKey as any)}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+
+            <div className="evidencePoolWrapper">
+                <EvidencePool />
+            </div>
         </div>
     );
 };

@@ -5,16 +5,20 @@ node_modules/
 dist/
 build/
 
-# Environment files
-.env
-.env.local
-
-# OS files
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Logs
-*.log
+# Environment variables (保护敏感信息)
+.env*
+!.env.examplelog
 npm-debug.log*
 
 # Test data (often large files)

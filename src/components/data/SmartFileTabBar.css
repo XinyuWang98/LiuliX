@@ -1,0 +1,133 @@
+/* src/components/data/SmartFileTabBar.css */
+.smartFileTabBar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    /* Reduced gap for more tabs */
+    flex: 1;
+    overflow: hidden;
+    /* Prevent tabs from overflowing container */
+    padding-right: var(--gap-m);
+}
+
+.smartTab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: none;
+    border-radius: var(--radius-s);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    /* Prevent text wrapping */
+    user-select: none;
+    flex-shrink: 0;
+    /* Keep tabs original size, don't shrink */
+}
+
+.smartTab:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.smartTab.active {
+    background: var(--bg-accent);
+    color: #fff;
+    font-weight: 500;
+}
+
+.smartTab.overflowBtn {
+    padding: 0 8px;
+    /* Compact overflow button */
+}
+
+.tabIcon {
+    opacity: 0.7;
+}
+
+.smartTab.active .tabIcon {
+    opacity: 1;
+}
+
+/* Overflow Container */
+.overflowContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Dropdown Menu */
+.overflowMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-m);
+    padding: 4px;
+    min-width: 200px;
+    max-width: 300px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 32px;
+    padding: 0 12px;
+    border: none;
+    border-radius: var(--radius-s);
+    background: transparent;
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.menuItem:hover {
+    background: var(--bg-hover);
+}
+
+.menuItem.active {
+    background: rgba(var(--primary-rgb), 0.1);
+    /* Subtle active bg for menu items */
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.menuItem.active .menuItemName {
+    color: var(--primary);
+}
+
+.menuItemName {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -213,7 +213,7 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                                                 textTransform: 'uppercase',
                                                 letterSpacing: '0.05em'
                                             }}>
-                                                Priority {index + 1}
+                                                {t('language.priority')} {index + 1}
                                             </div>
                                         </div>
 
@@ -258,12 +258,10 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                                                         border: '2px solid currentColor',
                                                         borderTopColor: 'transparent',
                                                         borderRadius: '50%',
-                                                        animation: 'spin 1s linear infinite'
                                                     }} />
                                                 ) : (
                                                     <Play size={16} />
                                                 )}
-                                                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                                             </button>
                                         </div>
 

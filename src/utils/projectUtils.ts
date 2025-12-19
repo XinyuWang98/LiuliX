@@ -105,6 +105,45 @@ export interface ProjectFile {
     data: ParsedFileData;
     sampled: boolean;
     addedAt: Date;
+
+    /** 预处理分析缓存 */
+    analysisCache?: {
+        /** 数据质量评分 */
+        quality?: {
+            score: number;
+            issues: Array<{
+                type: string;
+                severity: 'low' | 'medium' | 'high';
+                message: string;
+                affectedColumns?: string[];
+            }>;
+            lastUpdated: number;
+        };
+        /** 清洗建议 */
+        cleaning?: {
+            suggestions: Array<any>; // 详细类型见CleaningSuggestion
+            status: 'pending' | 'ready' | 'failed';
+            /** 采样元数据 */
+            basedOnSample?: {
+                isSampled: boolean;
+                sampleSize: number;
+                totalSize: number;
+            };
+        };
+        /** 洞察假设 */
+        insight?: {
+            hypotheses: Array<any>; // 详细类型见Hypothesis
+            status: 'pending' | 'ready' | 'failed';
+            /** 数据清洗后标记为过期 */
+            isStale?: boolean;
+            /** 采样元数据 */
+            basedOnSample?: {
+                isSampled: boolean;
+                sampleSize: number;
+                totalSize: number;
+            };
+        };
+    };
 }
 
 /**

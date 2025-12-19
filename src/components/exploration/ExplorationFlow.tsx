@@ -3,16 +3,21 @@ import { useI18n } from '@contexts/I18nContext';
 import { Search, Send, Plus, X, LayoutDashboard, Library } from 'lucide-react';
 import { ExplorationBlock } from './ExplorationBlock';
 import { DataCleaner } from '../cleaning/DataCleaner';
+import { ReportGenerator } from '../report/ReportGenerator';
+import { InsightChainFlow } from '../insights/InsightChainFlow'; // 导入报告生成器
 import { ExplorationBlock as BlockType, ExplorationAction, BlockType as EBlockType } from '@/types/exploration';
 import { Project } from '@utils/projectUtils';
 import { WorkflowProgressBar, WorkflowStep } from '@components/common/WorkflowProgressBar';
 
 interface ExplorationFlowProps {
     project: Project | null;
-    onNavigate: (view: 'dashboard' | 'library') => void;
+    onNavigate: (view: string) => void;
+    cleaningTrigger?: number;
+    onProjectUpdate?: (project: Project) => void;
+    aiSuggestions?: any[]; // 新增
 }
 
-export function ExplorationFlow({ project, onNavigate }: ExplorationFlowProps) {
+export function ExplorationFlow({ project, onNavigate, cleaningTrigger, onProjectUpdate, aiSuggestions }: ExplorationFlowProps) {
     const activeView = 'dashboard'; // Always dashboard in this component
     const { t } = useI18n();
     const [searchQuery, setSearchQuery] = useState('');
@@ -23,21 +28,61 @@ export function ExplorationFlow({ project, onNavigate }: ExplorationFlowProps) {
     // Initial Blocks State
     const [blocks, setBlocks] = useState<BlockType[]>([]);
 
-    // Initialize with Upload block when project changes
+    // Initialize with Upload, Insights, and Report blocks when project changes
     useEffect(() => {
         if (project) {
             setBlocks(prev => {
-                // Check if upload block exists
-                if (prev.some(b => b.type === 'upload')) return prev;
-                return [{
-                    id: 'block-upload',
-                    type: 'upload',
-                    title: t('exploration.blocks.upload'),
-                    content: null,
-                    isCollapsed: false,
-                    isPinned: true,
-                    timestamp: Date.now(),
-                }, ...prev];
+                // Check if required blocks exist
+                const hasUpload = prev.some(b => b.type === 'upload');
+                const hasInsights = prev.some(b => b.type === 'insights');
+                const hasReport = prev.some(b => b.type === 'report');
+
+                const newBlocks = [...prev];
+
+                // Add upload block if missing
+                if (!hasUpload) {
+                    newBlocks.unshift({
+                        id: 'block-upload',
+                        type: 'upload',
+                        title: t('exploration.blocks.upload'),
+                        content: null,
+                        isCollapsed: false,
+                        isPinned: true,
+                        timestamp: Date.now(),
+                    });
+                }
+
+                // Add insights block if missing (always add when project exists)
+                if (!hasInsights) {
+                    const uploadIndex = newBlocks.findIndex(b => b.type === 'upload');
+                    const insertIndex = uploadIndex >= 0 ? uploadIndex + 1 : newBlocks.length;
+
+                    console.log('🔍 添加 insights block，当前files数量:', project.files?.length || 0);
+                    newBlocks.splice(insertIndex, 0, {
+                        id: 'block-insights',
+                        type: 'insights',
+                        title: '洞察链分析', // TODO: i18n
+                        content: null,
+                        isCollapsed: false,
+                        isPinned: false,
+                        timestamp: Date.now() + 0.5,
+                    });
+                }
+
+                // Add report block if missing (at the end)
+                if (!hasReport) {
+                    newBlocks.push({
+                        id: 'block-report',
+                        type: 'report',
+                        title: t('exploration.blocks.report'),
+                        content: null,
+                        isCollapsed: false,
+                        isPinned: false,
+                        timestamp: Date.now() + 1,
+                    });
+                }
+
+                return newBlocks;
             });
         }
     }, [project, t]);
@@ -107,9 +152,32 @@ export function ExplorationFlow({ project, onNavigate }: ExplorationFlowProps) {
     const renderContent = (block: BlockType) => {
         switch (block.type) {
             case 'upload':
-                return project ? <DataCleaner project={project} /> : null;
+                return project ? <DataCleaner project={project} cleaningTrigger={cleaningTrigger} onProjectUpdate={onProjectUpdate} aiSuggestions={aiSuggestions} /> : null;
             case 'cleaning':
-                return project ? <DataCleaner project={project} /> : null;
+                return project ? <DataCleaner project={project} cleaningTrigger={cleaningTrigger} onProjectUpdate={onProjectUpdate} aiSuggestions={aiSuggestions} /> : null;
+            case 'insights':
+                // 洞察链模块：安全传递数据集元信息
+                if (project && project.files && project.files.length > 0) {
+                    const firstFile: any = project.files[0]; // MVP 类型断言
+                    const columns = firstFile.columns?.map((c: any) => c.name) ?? [];
+                    const rowCount = firstFile.rowCount ?? 0;
+                    const sampleData = firstFile.preview?.slice(0, 5) ?? [];
+                    const tableName = firstFile.data?.tableName; // 🚀 获取tableName用于采样
+                    const insightCache = firstFile.analysisCache?.insight; // 🚀 获取缓存状态用于智能刷新
+
+                    return (
+                        <InsightChainFlow
+                            columns={columns}
+                            rowCount={rowCount}
+                            sampleData={sampleData}
+                            tableName={tableName}
+                            insightCache={insightCache}
+                        />
+                    );
+                }
+                return <div className="text-gray-500 text-center py-8">请先上传并清洗数据以启用洞察链</div>;
+            case 'report':
+                return <ReportGenerator />;
         }
     };
 
@@ -362,7 +430,7 @@ export function ExplorationFlow({ project, onNavigate }: ExplorationFlowProps) {
                     <textarea
                         value={inputValue}
                         onChange={e => setInputValue(e.target.value)}
-                        placeholder="Ask AI about your data..."
+                        placeholder={t('chat.askAIPlaceholder')}
                         style={{
                             flex: 1,
                             background: 'transparent',

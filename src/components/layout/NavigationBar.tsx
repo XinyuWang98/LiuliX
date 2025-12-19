@@ -125,7 +125,7 @@ export function NavigationBar({ onOpenAPISettings }: NavigationBarProps = {}) {
                             {/* Language Options */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-secondary)', paddingLeft: '8px', textTransform: 'uppercase' }}>
-                                    Language
+                                    {t('language.title')}
                                 </span>
                                 <button
                                     onClick={() => { setLanguage('en-US'); setShowSettings(false); }}

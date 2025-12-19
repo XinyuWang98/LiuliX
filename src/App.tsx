@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { I18nProvider, useI18n } from './contexts/I18nContext';
+import { EvidenceProvider } from './contexts/EvidenceContext';
+import { InsightChainProvider } from './contexts/InsightChainContext';
 import { NavigationBar } from './components/layout/NavigationBar';
 import { LeftSidebar } from './components/layout/LeftSidebar';
 import { PromptLibrary } from './components/prompt/PromptLibrary';
@@ -52,10 +54,12 @@ function AppContent() {
     const { t } = useI18n();
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [activeView, setActiveView] = useState<'dashboard' | 'library'>('dashboard');
+    const [cleaningTrigger, setCleaningTrigger] = useState(0); // 用于触发数据清洗建议生成
     const [isPyodideReady, setIsPyodideReady] = useState(false);
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
     const [showRight, setShowRight] = useState(() => localStorage.getItem('layout.showRight') !== 'false');
     const [showAPISettings, setShowAPISettings] = useState(false);
+    const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
 
     useEffect(() => localStorage.setItem('layout.showLeft', showLeft.toString()), [showLeft]);
     useEffect(() => localStorage.setItem('layout.showRight', showRight.toString()), [showRight]);
@@ -170,7 +174,10 @@ function AppContent() {
                         {activeView === 'dashboard' ? (
                             <ExplorationFlow
                                 project={selectedProject}
-                                onNavigate={setActiveView}
+                                onNavigate={(view) => setActiveView(view as 'dashboard' | 'library')}
+                                cleaningTrigger={cleaningTrigger}
+                                onProjectUpdate={setSelectedProject}
+                                aiSuggestions={aiSuggestions}
                             />
                         ) : (
                             <PromptLibrary
@@ -229,7 +236,7 @@ function AppContent() {
                                         color: 'var(--text-secondary)',
                                         cursor: 'pointer',
                                     }}
-                                    title="收起侧边栏"
+                                    title={t('sidebar.collapse')}
                                 >
                                     <PanelRight size={18} />
                                 </button>
@@ -239,7 +246,18 @@ function AppContent() {
                                 overflowY: 'auto',
                                 padding: 'var(--gap-l)',
                             }}>
-                                <AIWorkshopTools project={selectedProject} />
+                                <AIWorkshopTools
+                                    project={selectedProject}
+                                    onToolClick={(toolId) => {
+                                        if (toolId === 'cleaning') {
+                                            setCleaningTrigger(prev => prev + 1);
+                                        }
+                                    }}
+                                    onSuggestionsGenerated={(suggestions) => {
+                                        setAiSuggestions(suggestions);
+                                        console.log('[App] 收到AI建议:', suggestions.length);
+                                    }}
+                                />
                             </div>
                         </aside>
                     </div>
@@ -282,7 +300,11 @@ export default function App() {
     return (
         <I18nProvider>
             <ThemeProvider>
-                <AppContent />
+                <EvidenceProvider>
+                    <InsightChainProvider>
+                        <AppContent />
+                    </InsightChainProvider>
+                </EvidenceProvider>
             </ThemeProvider>
         </I18nProvider>
     );
