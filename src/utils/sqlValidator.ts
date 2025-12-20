@@ -135,12 +135,14 @@ export async function validateWithDryRun(
     t: (key: string, params?: Record<string, any>) => string
 ): Promise<ValidationResult & { affectedRows?: number }> {
 
-    const tempTable = `${tableName}_dryrun_${Date.now()}`;
+    // 🛠️ 使用时间戳 + 随机数确保并发调用时表名唯一
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const tempTable = `${tableName}_dryrun_${Date.now()}_${randomSuffix}`;
 
     try {
         // 1. 使用EXPLAIN检查语法
         try {
-            await duckdbEngine.query(`EXPLAIN ${sql}`);
+            await duckdbEngine.runQuery(`EXPLAIN ${sql}`);
         } catch (error: any) {
             return {
                 valid: false,
@@ -148,8 +150,9 @@ export async function validateWithDryRun(
             };
         }
 
-        // 2. 创建临时表
-        await duckdbEngine.query(`
+        // 2. 创建临时表（先删除可能存在的同名表，防止冲突）
+        await duckdbEngine.runQuery(`DROP TABLE IF EXISTS ${tempTable}`);
+        await duckdbEngine.runQuery(`
             CREATE TEMP TABLE ${tempTable} AS 
             SELECT * FROM ${tableName} LIMIT 100
         `);
@@ -160,14 +163,14 @@ export async function validateWithDryRun(
             tempTable
         );
 
-        await duckdbEngine.query(modifiedSQL);
+        await duckdbEngine.runQuery(modifiedSQL);
 
         // 4. 获取影响行数
-        const countResult = await duckdbEngine.query(`SELECT COUNT(*) as cnt FROM ${tempTable}`);
+        const countResult = await duckdbEngine.runQuery(`SELECT COUNT(*) as cnt FROM ${tempTable}`);
         const affectedRows = countResult[0]?.cnt || 0;
 
         // 5. 清理临时表
-        await duckdbEngine.query(`DROP TABLE ${tempTable}`);
+        await duckdbEngine.runQuery(`DROP TABLE ${tempTable}`);
 
         return {
             valid: true,
@@ -177,7 +180,7 @@ export async function validateWithDryRun(
     } catch (error: any) {
         // 清理临时表
         try {
-            await duckdbEngine.query(`DROP TABLE IF EXISTS ${tempTable}`);
+            await duckdbEngine.runQuery(`DROP TABLE IF EXISTS ${tempTable}`);
         } catch (e) {
             // 忽略清理错误
         }

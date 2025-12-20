@@ -39,7 +39,7 @@ export function EvidencePool() {
             analysis: t('evidence.type.analysis'),
             insight: t('evidence.type.insight'),
             visualization: t('evidence.type.visualization'),
-            insightChain: '洞察链', // TODO: 添加到 i18n
+            insightChain: t('evidence.type.insightChain'),
         };
         return typeMap[type];
     };

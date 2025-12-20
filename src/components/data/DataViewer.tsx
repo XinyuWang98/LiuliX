@@ -71,7 +71,7 @@ export function DataViewer({ project, activeFileId: externalActiveFileId, onProj
         }}>
             {/* 顶栏 */}
             <div style={{
-                padding: 'var(--gap-m) var(--gap-l)', /* Reduced padding */
+                padding: 'var(--gap-s) var(--gap-xs)', /* Reduced padding to 4px left/right */
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',

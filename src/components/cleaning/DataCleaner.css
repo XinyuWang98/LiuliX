@@ -4,519 +4,225 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    gap: var(--gap-m);
-    padding: var(--gap-m);
+    gap: 0;
+    /* Changed to 0 to manage spacing via sub-elements */
+    padding: 0;
+    /* Remove padding to allow full-width headers if needed */
     background-color: var(--bg-panel);
     overflow: hidden;
 }
 
-/* ==================== 1. 标题栏：项目名称 + 文件名称 ===========/* 标题栏：文件Tab切换 */
-.cleanerTitleBar {
+/* ==================== 1. 数据表格 (Top) ==================== */
+.cleanerGridWrapper {
+    flex: 1;
+    min-height: 0;
     display: flex;
-    align-items: center;
-    gap: 0;
-    /* Tab之间无间隙，紧密排列 */
-    padding: 0;
-    background: var(--bg-panel);
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    /* 文件多时可横向滚动 */
+    flex-direction: column;
+    background-color: var(--bg-panel);
+    /* padding-left: var(--gap-xs); // Removed to avoid double padding if DataViewer has it */
 }
 
-/* 文件Tab按钮 */
-.fileTab {
+/* ==================== 2. 底部综合面板 (Integrated) ==================== */
+.cleanerBottomModule {
+    flex: 0 0 350px;
+    /* Fixed height for bottom module */
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.bottomModuleHeader {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--gap-m);
+    background-color: var(--bg-element);
+    border-bottom: 1px solid var(--border);
+    height: 48px;
     flex-shrink: 0;
-    /* 防止压缩 */
-    padding: var(--gap-s) var(--gap-m);
-    background: var(--bg-element);
+}
+
+.bottomModuleTab {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: 0 var(--gap-l);
+    height: 100%;
+    background: transparent;
     border: none;
-    border-right: 1px solid var(--border);
     border-bottom: 2px solid transparent;
     color: var(--text-secondary);
-    font-size: var(--fs-m);
-    /* Changed from var(--text-m) to var(--fs-m) for consistency */
-    font-weight: 400;
+    font-size: var(--fs-sm);
+    font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
-    white-space: nowrap;
-    /* 文件名不换行 */
 }
 
-.fileTab:hover {
-    background: var(--bg-element-hover);
-    color: var(--text-primary);
-}
-
-/* 激活的Tab */
-.fileTab.active {
-    background: var(--bg-panel);
-    border-bottom-color: var(--color-accent);
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-.fileTab:first-child {
-    border-left: none;
-}
-
-/* ==================== 2. 辅助栏：文件切换+行数+列筛选+统计分布 ==================== */
-.cleanerToolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--gap-s) var(--gap-m);
-    background-color: var(--bg-element);
-    border-radius: var(--radius-m);
-    border: 1px solid var(--border);
-}
-
-.toolbarLeft,
-.toolbarRight {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-m);
-}
-
-.fileSelector {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-xs);
-}
-
-.fileDropdown {
-    padding: 4px var(--gap-s);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-s);
+.bottomModuleTab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
     background-color: var(--bg-panel);
-    color: var(--text-primary);
-    font-size: var(--fs-s);
-    cursor: pointer;
 }
 
-.fileDropdown:hover {
+.bottomModuleTab:hover:not(.active) {
     background-color: var(--bg-hover);
+    color: var(--text-primary);
 }
 
-.rowCountBadge {
-    padding: 4px var(--gap-s);
-    background-color: var(--bg-accent-subtle, rgba(255, 136, 0, 0.1));
-    border-radius: var(--radius-s);
-    font-size: var(--fs-xs);
-    font-weight: 500;
+.tabBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background-color: var(--bg-hover);
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
+.bottomModuleTab.active .tabBadge {
+    background-color: var(--bg-accent-subtle);
     color: var(--primary);
 }
 
-.toolbarBtn {
+.bottomModuleActions {
+    margin-left: auto;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: var(--gap-xs);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-s);
-    background-color: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s;
+    gap: var(--gap-s);
 }
 
-.toolbarBtn:hover {
+.btnPanelAction {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btnPanelAction:hover:not(:disabled) {
     background-color: var(--bg-hover);
     color: var(--text-primary);
     border-color: var(--primary);
 }
 
-/* ==================== 3. AI建议面板 ==================== */
+.btnPanelAction:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnPanelAction.btnApply {
+    background-color: var(--bg-accent-subtle);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.btnPanelAction.btnApply:hover {
+    background-color: var(--primary);
+    color: #fff;
+}
+
+/* ==================== 3. 模块内容区 ==================== */
+.bottomModuleContent {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--gap-s);
+}
+
+.suggestionsTabContent,
+.historyTabContent {
+    height: 100%;
+}
+
+/* AI建议面板适配 */
 .aiActionPanel {
-    flex: 0 0 auto;
-    max-height: 350px;
+    background: transparent;
+    border: none;
     display: flex;
     flex-direction: column;
-    gap: var(--gap-s);
-    padding: var(--gap-m);
-    background-color: var(--bg-element);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-m);
+    height: 100%;
 }
 
 .aiPanelHeader {
+    padding: 0 0 var(--gap-s) 0;
     display: flex;
-    justify-content: space-between;
     align-items: center;
 }
 
-.aiTitle {
+.suggestionTabs {
     display: flex;
-    align-items: center;
-    gap: var(--gap-s);
-    font-size: var(--fs-m);
-    font-weight: 600;
-    color: var(--text-primary);
+    gap: 4px;
+    overflow-x: auto;
 }
 
-.aiHeaderActions {
-    display: flex;
-    gap: var(--gap-s);
-}
-
-.btnGhost {
+/* 标签样式模仿 SmartFileTabBar */
+.tabItem {
     display: flex;
     align-items: center;
-    gap: var(--gap-xs);
-    padding: var(--gap-xs) var(--gap-s);
-    border: none;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: var(--radius-s);
     background: transparent;
     color: var(--text-secondary);
     font-size: var(--fs-xs);
-    cursor: pointer;
-    border-radius: var(--radius-s);
-}
-
-.btnGhost:hover {
-    background-color: var(--bg-hover);
-    color: var(--text-primary);
-}
-
-.btnPrimary {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-xs);
-    padding: var(--gap-xs) var(--gap-m);
     border: none;
-    border-radius: var(--radius-s);
-    background-color: var(--primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.tabItem:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.tabItem.active {
+    background: var(--primary);
     color: #fff;
-    font-size: var(--fs-xs);
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s;
 }
 
-.btnPrimary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.aiSuggestionList {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-m);
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-/* ==================== 分行布局样式 ==================== */
-.suggestionsByCategory {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-l);
-    max-height: 450px;
-    overflow-y: auto;
-    padding: var(--gap-s) 0;
-}
-
-/* 类型行容器 */
-.categoryRow {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-m);
-}
-
-/* 类型标题栏 - Cyber Dark主题优化 */
-.categoryHeader {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: var(--gap-m);
-    font-size: var(--fs-m);
-    font-weight: 600;
-    color: var(--text-primary);
-    padding: var(--gap-m) 0 var(--gap-m) calc(var(--gap-m) + 6px);
-    border-bottom: 1px solid var(--border);
-    margin-bottom: var(--gap-s);
-    background: linear-gradient(90deg,
-            rgba(var(--primary-rgb, 59, 130, 246), 0.05) 0%,
-            transparent 50%);
-}
-
-/* 彩色左侧条 - 增强霓虹效果 */
-.categoryHeader::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: currentColor;
-    border-radius: var(--radius-s);
-    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
-}
-
-.categoryIcon {
-    font-size: calc(var(--fs-l) * 1.8);
-    line-height: 1;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
-}
-
-.categoryName {
-    flex: 1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.categoryCount {
-    color: var(--text-secondary);
-    font-size: var(--fs-s);
-    font-weight: 500;
-    opacity: 0.7;
-    background: var(--bg-element);
-    padding: 2px var(--gap-s);
-    border-radius: var(--radius-s);
-}
-
-/* 卡片行 - 优化间距 */
-.cardRow {
-    display: flex;
-    gap: var(--gap-l);
-    flex-wrap: wrap;
-    align-items: flex-start;
-}
-
-/* 导入SuggestionCard组件样式 */
-@import './components/SuggestionCard.css';
-
-/* 查看更多按钮 - Cyber Dark主题 */
-.btnShowMore {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 160px;
-    min-height: 110px;
-    padding: var(--gap-m);
-    background: linear-gradient(135deg,
-            rgba(var(--primary-rgb, 59, 130, 246), 0.1) 0%,
-            transparent 100%);
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-m);
-    color: var(--text-secondary);
-    font-size: var(--fs-s);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    gap: var(--gap-s);
-    position: relative;
-    overflow: hidden;
-}
-
-.btnShowMore::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg,
-            rgba(var(--primary-rgb, 59, 130, 246), 0.2) 0%,
-            transparent 100%);
-    opacity: 0;
-    transition: opacity var(--transition-fast);
-}
-
-.btnShowMore:hover::before {
-    opacity: 1;
-}
-
-.btnShowMore:hover {
-    background: linear-gradient(135deg,
-            rgba(var(--primary-rgb, 59, 130, 246), 0.15) 0%,
-            rgba(var(--primary-rgb, 59, 130, 246), 0.05) 100%);
-    border-color: var(--primary);
-    border-style: solid;
-    color: var(--text-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(var(--primary-rgb, 59, 130, 246), 0.3),
-        inset 0 0 20px rgba(var(--primary-rgb, 59, 130, 246), 0.1);
-}
-
-.moreCount {
-    font-size: var(--fs-xs);
-    color: var(--text-tertiary);
+.tabCount {
+    font-size: 10px;
     opacity: 0.8;
 }
 
-
-
-/* 保留原有建议项样式（如果需要兼容） */
-.suggestItem {
-    display: flex;
-    align-items: flex-start;
+.cardRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--gap-s);
-    padding: var(--gap-m);
-    background: var(--bg-element);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-m);
-    cursor: pointer;
-    transition: all var(--transition-fast);
 }
 
-/* 置信度颜色编码 */
-.suggestItem.confidence-high {
-    background: var(--bg-success-muted);
-    border-color: var(--color-success);
-}
-
-.suggestItem.confidence-medium {
-    background: var(--bg-warning-muted);
-    border-color: var(--color-warning);
-}
-
-.suggestItem.confidence-low {
-    background: var(--bg-info-muted);
-    border-color: var(--color-info);
-}
-
-/* Hover效果 */
-.suggestItem:hover {
-    transform: scale(1.02);
-    box-shadow: var(--shadow-m);
-}
-
-/* 选中状态高亮 */
-.suggestItem.selected {
-    border-width: 2px;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 2px var(--color-accent-muted);
-}
-
-.suggestionContent {
-    flex: 1;
-}
-
-.suggestionHeader {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-}
-
-.suggestionLabel {
-    font-size: var(--fs-s);
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.suggestionBadgeContainer {
-    display: flex;
-    gap: var(--gap-xs);
-}
-
-.promptBadge {
-    background-color: var(--accent);
-    color: #fff;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-}
-
-.confidenceBadge {
-    background-color: var(--bg-hover);
-    color: var(--text-secondary);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-}
-
-.suggestionReason {
-    font-size: var(--fs-xs);
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-.aiLoading,
-.aiEmpty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--gap-s);
-    padding: var(--gap-m);
-    color: var(--text-secondary);
-    font-size: var(--fs-s);
-}
-
-
-
-/* ==================== 4. 数据表格 ==================== */
-.cleanerGridWrapper {
-    flex: 1 1 auto;
-    min-height: 300px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-m);
-    overflow: hidden;
-    background-color: var(--bg-panel);
-}
-
-/* ==================== 5. 清洗历史 ==================== */
+/* 历史记录面板适配 */
 .historyPanel {
-    flex: 0 0 160px;
     display: flex;
     flex-direction: column;
-    gap: var(--gap-xs);
-    border-top: 1px solid var(--border);
-    padding-top: var(--gap-s);
-    overflow: hidden;
-}
-
-.historyHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.historyTitle {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-s);
-    font-size: var(--fs-s);
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.btnReset {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-xs);
-    padding: 4px var(--gap-s);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-s);
-    background-color: var(--bg-panel);
-    color: var(--text-secondary);
-    font-size: var(--fs-xs);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btnReset:hover {
-    background-color: var(--bg-hover);
-    color: var(--primary);
-    border-color: var(--primary);
-}
-
-.btnReset:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    height: 100%;
 }
 
 .historyList {
     flex: 1;
     overflow-y: auto;
-    background-color: var(--bg-element);
-    border-radius: var(--radius-s);
-    padding: var(--gap-xs);
-    font-family: monospace;
+    background: var(--bg-element);
+    border-radius: var(--radius-m);
+    padding: var(--gap-s);
 }
 
 .historyItem {
-    display: grid;
-    grid-template-columns: 80px 1fr auto;
-    gap: var(--gap-s);
-    padding: 4px 8px;
-    border-bottom: 1px dashed var(--border);
-    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
 }
 
@@ -524,166 +230,98 @@
     border-bottom: none;
 }
 
-.historyTime {
-    color: var(--text-tertiary);
-}
-
-.historyAction {
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 .deltaTag {
     font-weight: 600;
 }
 
 .deltaTag.negative {
-    color: var(--error);
+    color: var(--warning);
 }
 
 .deltaTag.positive {
     color: var(--success);
 }
 
+/* 空状态 */
+.aiEmpty,
 .historyEmpty {
-    padding: var(--gap-s);
-    text-align: center;
-    color: var(--text-tertiary);
-    font-size: var(--fs-xs);
-    font-style: italic;
-}
-
-/* ==================== 通用组件 ==================== */
-.loadingPlaceholder {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    height: 100%;
-    color: var(--text-secondary);
-    gap: var(--gap-m);
+    justify-content: center;
+    height: 100px;
+    color: var(--text-tertiary);
+    font-size: var(--fs-sm);
+    gap: var(--gap-s);
 }
 
-.loadingSpinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+/* 通用动画 */
+.spin {
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
     to {
         transform: rotate(360deg);
     }
 }
 
-.errorBox {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-s);
-    padding: var(--gap-s);
-    background-color: rgba(220, 38, 38, 0.1);
-    color: var(--error);
-    border-radius: var(--radius-s);
-    font-size: var(--fs-s);
-}
-
-.errorIcon,
-.historyIcon,
-.aiEmptyIcon,
-.loadingSpinnerInline,
-.aiCollapseBtn,
-.aiApplyBtn {
-    flex-shrink: 0;
-}
-
-/* ==================== 确认对话框样式 ==================== */
+/* 确认对话框 - 保持原有样式并微调 */
 .confirmOverlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--overlay-bg);
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
-    backdrop-filter: blur(var(--blur-s));
-    animation: fadeIn var(--transition-normal);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+    z-index: 2000;
+    backdrop-filter: blur(4px);
 }
 
 .confirmDialog {
     background: var(--bg-panel);
-    border: calc(var(--border-width) * 3) solid var(--color-accent);
-    /* 3倍边框宽度 */
+    border: 1px solid var(--border);
     border-radius: var(--radius-l);
     padding: var(--gap-l);
-    min-width: 400px;
-    max-width: 500px;
-    box-shadow: var(--shadow-heavy), 0 0 calc(var(--gap-l) * 2) var(--color-accent-muted);
-    /* 双重阴影+光晕 */
-    animation: slideIn var(--transition-normal);
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(calc(var(--gap-l) * -1));
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.btnDanger {
-    background: var(--color-error);
-    color: var(--text-on-primary);
-    border: none;
-    padding: var(--gap-s) var(--gap-l);
-    border-radius: var(--radius-m);
-    cursor: pointer;
-    font-size: var(--text-m);
-    font-weight: 500;
-    transition: all var(--transition-fast);
-}
-
-.btnDanger:hover {
-    opacity: var(--opacity-hover);
-    transform: translateY(calc(var(--offset-hover) * -1));
+    width: 400px;
+    box-shadow: var(--shadow-lv2);
 }
 
 .confirmTitle {
-    margin: 0 0 var(--gap-m) 0;
+    margin-top: 0;
     color: var(--text-primary);
-    font-size: var(--text-l);
-}
-
-.confirmMessage {
-    margin: 0 0 var(--gap-l) 0;
-    color: var(--text-secondary);
-    line-height: var(--line-height-normal);
-    font-size: var(--text-m);
 }
 
 .confirmActions {
     display: flex;
     gap: var(--gap-m);
     justify-content: flex-end;
+    margin-top: var(--gap-l);
 }
+
+.btnGhost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btnDanger {
+    background: var(--warning);
+    border: none;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+@import './components/SuggestionCard.css';

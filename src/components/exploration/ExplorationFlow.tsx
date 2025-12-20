@@ -61,7 +61,7 @@ export function ExplorationFlow({ project, onNavigate, cleaningTrigger, onProjec
                     newBlocks.splice(insertIndex, 0, {
                         id: 'block-insights',
                         type: 'insights',
-                        title: '洞察链分析', // TODO: i18n
+                        title: t('insightChain.title'),
                         content: null,
                         isCollapsed: false,
                         isPinned: false,
@@ -175,7 +175,7 @@ export function ExplorationFlow({ project, onNavigate, cleaningTrigger, onProjec
                         />
                     );
                 }
-                return <div className="text-gray-500 text-center py-8">请先上传并清洗数据以启用洞察链</div>;
+                return <div className="text-gray-500 text-center py-8">{t('insightChain.noHypotheses')}</div>;
             case 'report':
                 return <ReportGenerator />;
         }
@@ -378,7 +378,7 @@ export function ExplorationFlow({ project, onNavigate, cleaningTrigger, onProjec
             >
                 {filteredBlocks.length === 0 && project && (
                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                        暂无内容
+                        {t('exploration.noContent')}
                     </div>
                 )}
 

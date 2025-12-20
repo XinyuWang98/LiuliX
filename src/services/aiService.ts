@@ -2,6 +2,11 @@
 import ky from 'ky';
 import { MODEL_CONFIG } from '../config/modelConfig';
 
+// ==================== 常量定义 ====================
+const PROXY_URL = 'http://localhost:3001/api/proxy';
+
+
+
 // ==================== 配置类型定义 ====================
 interface ModelConfig {
     url: string;
@@ -101,11 +106,15 @@ export const askAI = async (
             // Gemini 专用格式
             if (model === 'gemini') {
                 const res = await ky
-                    .post(`${cfg.url}?key=${key}`, {
-                        headers: {
-                            'x-api-key': key // 代理服务器需要此header
+                    .post(PROXY_URL, {
+                        json: {
+                            targetUrl: `${cfg.url}?key=${key}`,
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            data: { contents: [{ parts: [{ text: prompt }] }] }
                         },
-                        json: { contents: [{ parts: [{ text: prompt }] }] },
                         timeout: MODEL_CONFIG.TIMEOUT_MS
                     })
                     .json<any>();
@@ -120,16 +129,20 @@ export const askAI = async (
             // Claude 专用格式
             if (model === 'claude') {
                 const res = await ky
-                    .post(cfg.url, {
-                        headers: {
-                            'x-api-key': key,
-                            'anthropic-version': MODEL_CONFIG.ANTHROPIC.VERSION,
-                            'content-type': 'application/json'
-                        },
+                    .post(PROXY_URL, {
                         json: {
-                            model: currentModelName,
-                            max_tokens: MODEL_CONFIG.ANTHROPIC.MAX_TOKENS,
-                            messages: [{ role: 'user', content: prompt }]
+                            targetUrl: cfg.url,
+                            method: 'POST',
+                            headers: {
+                                'x-api-key': key,
+                                'anthropic-version': MODEL_CONFIG.ANTHROPIC.VERSION,
+                                'content-type': 'application/json'
+                            },
+                            data: {
+                                model: currentModelName,
+                                max_tokens: MODEL_CONFIG.ANTHROPIC.MAX_TOKENS,
+                                messages: [{ role: 'user', content: prompt }]
+                            }
                         },
                         timeout: MODEL_CONFIG.TIMEOUT_MS
                     })
@@ -142,31 +155,43 @@ export const askAI = async (
                 'Content-Type': 'application/json'
             };
 
-            // 只有非default的key才添加x-api-key（高级模式）
-            if (key !== 'default') {
+            // 添加 API Key（包括 'default' 标记，让后端识别并替换）
+            if (key) {
                 headers['x-api-key'] = key;
             }
 
             const res = await ky
-                .post(cfg.url, {
-                    headers,
+                .post(PROXY_URL, {
                     json: {
-                        model: currentModelName,
-                        messages: [{ role: 'user', content: prompt }],
-                        stream: false
+                        targetUrl: cfg.url,
+                        method: 'POST',
+                        headers,
+                        data: {
+                            model: currentModelName,
+                            messages: [{ role: 'user', content: prompt }],
+                            stream: false
+                        }
                     },
                     timeout: MODEL_CONFIG.TIMEOUT_MS
                 })
                 .json<any>();
+
+            // 🎯 提取 Token 使用信息
+            const usage = res.usage;
+            if (usage) {
+                console.log(`[AI服务] 📊 Token消耗: 输入=${usage.prompt_tokens || 0}, 输出=${usage.completion_tokens || 0}, 总计=${usage.total_tokens || 0}`);
+            }
 
             const content =
                 res.choices?.[0]?.message?.content ||
                 res.message?.content ||
                 t('settings.errorModelEmpty');
 
-            return { content, model };
+            console.log(`[AI服务] ✅ ${model}响应成功，内容长度: ${content.length}`);
+
+            return { content, model, usage };
         } catch (err: any) {
-            console.warn(`${model} 挂了:`, err.message);
+            console.warn(`[AI服务] ⚠️ ${model} 调用失败:`, err.message);
             continue;
         }
     }

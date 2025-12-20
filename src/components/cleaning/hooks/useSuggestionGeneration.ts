@@ -1,7 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../../contexts/I18nContext';
 import { SimpleSuggestion } from '../types/cleaning.types';
 import { isMissing } from '../utils/dataValidator';
+import { generateAICleaningSuggestions } from '../../../services/aiCleaningService';
+import { DuckDBEngine } from '../../../db/duckdbEngine';
+
+// 常量定义：避免魔法数字
+const QUERY_CHUNK_SIZE = 1000;          // DuckDB 查询分页大小
+const CONFIDENCE_HIGH = 0.9;             // 高置信度阈值
+const CONFIDENCE_MEDIUM = 0.8;           // 中置信度阈值
+const CONFIDENCE_LOW = 0.7;              // 低置信度阈值
 
 /**
  * 建议生成Hook
@@ -10,15 +18,23 @@ import { isMissing } from '../utils/dataValidator';
 export function useSuggestionGeneration(
     activeFile: any,
     cleaningTrigger: number,
-    aiSuggestions?: any[]
+    aiSuggestions?: any[],
+    onProjectUpdate?: (project: any) => void,
+    project?: any
 ) {
-    const { t } = useI18n();
+    const { t, language } = useI18n();
     const [suggestions, setSuggestions] = useState<SimpleSuggestion[]>([]);
     const [loading, setLoading] = useState(false);
+    const [aiGenerated, setAiGenerated] = useState(false); // 是否已生成AI建议
+    const [error, setError] = useState<string | null>(null);
+
+    // 防止Strict Mode双重调用和重复生成
+    const loadedOnceRef = useRef<{ [key: string]: boolean }>({});
 
     useEffect(() => {
         const generateSuggestions = async () => {
             setLoading(true);
+            setError(null);
 
             if (!activeFile) {
                 setSuggestions([]);
@@ -51,7 +67,7 @@ export function useSuggestionGeneration(
                         await engine.queryChunk(tableName, 0, 1);
                         // tableName有效，继续使用
                         console.log('[建议生成] ✅ tableName有效:', tableName);
-                        const rows = await engine.queryChunk(tableName, 0, 1000);
+                        const rows = await engine.queryChunk(tableName, 0, QUERY_CHUNK_SIZE);
                         data = rows;
                     } catch (tableError: any) {
                         // 🟢 表不存在，查找最新表
@@ -66,7 +82,7 @@ export function useSuggestionGeneration(
                             if (latestTable) {
                                 tableName = String(latestTable.table_name);
                                 console.log('[建议生成] 🔄 更新为最新表:', tableName);
-                                const rows = await engine.queryChunk(tableName, 0, 1000);
+                                const rows = await engine.queryChunk(tableName, 0, QUERY_CHUNK_SIZE);
                                 data = rows;
                             } else {
                                 console.log('[建议生成] ⏳ 数据表暂未就绪，跳过建议生成');
@@ -90,9 +106,9 @@ export function useSuggestionGeneration(
                     if (activeFile.data.columns && activeFile.data.columns.length > 0) {
                         const generated: SimpleSuggestion[] = [{
                             id: 'check_data',
-                            label: '检查数据质量',
-                            reason: `文件较大（${(activeFile.data.fileSize / 1024 / 1024).toFixed(1)} MB），建议先检查数据质量`,
-                            confidence: 0.8,
+                            label: t('cleaning.checkDataQuality'),
+                            reason: t('cleaning.largeFileHint', { size: (activeFile.data.fileSize / 1024 / 1024).toFixed(1) }),
+                            confidence: CONFIDENCE_MEDIUM,
                             action: 'dedup',
                             category: 'experimental'
                         }];
@@ -136,11 +152,16 @@ export function useSuggestionGeneration(
                 const nullPercent = (nullCount / data.length) * 100;
 
                 if (nullPercent >= NULL_THRESHOLD_LOW && nullPercent < NULL_THRESHOLD_HIGH) {
+                    // 简单的类型推断（实际应使用 DuckDB 元数据）
+                    // 假设第一行是非空的来推断类型，或默认为 Unknown
+                    const val = firstRow[col];
+                    const isNumber = typeof val === 'number' && !isNaN(val);
+
                     generated.push({
                         id: `fill_${col}`,
-                        label: t('cleaning.suggFillMissing', { col }),
+                        label: isNumber ? t('cleaning.suggFillZero', { col }) : t('cleaning.suggFillUnknown', { col }),
                         reason: t('cleaning.suggFillReason', { percent: nullPercent.toFixed(1) }),
-                        confidence: 0.8,
+                        confidence: CONFIDENCE_MEDIUM,
                         column: col,
                         action: 'fill',
                         category: 'fill_missing'
@@ -148,9 +169,9 @@ export function useSuggestionGeneration(
                 } else if (nullPercent >= NULL_THRESHOLD_HIGH && nullPercent < NULL_THRESHOLD_DROP) {
                     generated.push({
                         id: `drop_${col}`,
-                        label: t('cleaning.suggDropColumn', { col }),
+                        label: t('cleaning.suggDropColumnSimple', { col }),
                         reason: t('cleaning.suggDropReason', { percent: nullPercent.toFixed(1) }),
-                        confidence: 0.7,
+                        confidence: CONFIDENCE_LOW,
                         column: col,
                         action: 'drop_column',
                         category: 'drop_empty_column'
@@ -174,26 +195,129 @@ export function useSuggestionGeneration(
                     id: 'dedup',
                     label: t('cleaning.suggRemoveDuplicates'),
                     reason: t('cleaning.suggDedupReason', { count: dupCount, percent: dupPercent.toFixed(1) }),
-                    confidence: dupPercent > DUPLICATE_THRESHOLD ? 0.9 : 0.7,
+                    confidence: dupPercent > DUPLICATE_THRESHOLD ? CONFIDENCE_HIGH : CONFIDENCE_LOW,
                     action: 'dedup',
                     category: 'deduplication'
                 });
             }
 
-            // 合并AI建议和规则建议
-            const aiMapped = (aiSuggestions || []).map((s: any) => ({
-                id: `ai_${s.id || Math.random()}`,
-                label: s.label,
-                reason: s.reason,
-                confidence: s.confidence || 0.8,
-                action: s.action || 'normalize',
-                category: s.category || 'normalize',
-                column: s.column,
-                sql: s.sql,
-                expectedImpact: s.expectedImpact,
-                dryRunStatus: s.dryRunStatus
-            }));
+            // ------------------------------------------------------------
+            // 🟡 AI 建议自动预加载 (Auto-Preload)
+            // ------------------------------------------------------------
 
+            // 1. 优先使用传入的 prop AI 建议 (手动触发优先)
+            let aiMapped: SimpleSuggestion[] = [];
+
+            if (aiSuggestions && aiSuggestions.length > 0) {
+                console.log('[建议生成] 使用手动触发的 AI 建议');
+                aiMapped = (aiSuggestions || []).map((s: any) => ({
+                    id: `ai_${s.id || Math.random()}`,
+                    label: s.label,
+                    reason: s.reason,
+                    confidence: s.confidence || CONFIDENCE_MEDIUM,
+                    action: s.action || 'normalize',
+                    category: s.category || 'normalize',
+                    column: s.column,
+                    sql: s.sql,
+                    expectedImpact: s.expectedImpact,
+                    dryRunStatus: s.dryRunStatus
+                }));
+            }
+            // 2. 其次尝试读取缓存 (Analysis Cache)
+            else if (activeFile?.analysisCache?.cleaning?.suggestions?.length > 0 && !activeFile.analysisCache.cleaning.isStale) {
+                console.log('[建议生成] 🚀 命中 AI 建议缓存');
+                const cachedSuggestions = activeFile.analysisCache.cleaning.suggestions;
+
+                aiMapped = cachedSuggestions.map((s: any) => ({
+                    ...s,
+                    // 确保 ID 格式统一
+                    id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`
+                }));
+            }
+            // 3. 自动触发预加载 (无缓存 or 过期)
+            else {
+
+                // 检查是否已经请求过 (防止 Strict Mode 双重调用)
+                const cacheKey = `${activeFile.id}_${activeFile.data.tableName}`;
+
+                if (!loadedOnceRef.current[cacheKey] &&
+                    onProjectUpdate &&
+                    project &&
+                    activeFile.data.tableName &&
+                    (!activeFile.analysisCache?.cleaning || activeFile.analysisCache.cleaning.isStale === true)) {
+                    console.log('[建议生成] 🤖 触发 AI 建议自动预加载 (后台静默)');
+                    loadedOnceRef.current[cacheKey] = true;
+
+                    // 异步执行，不阻塞规则建议显示
+                    (async () => {
+                        try {
+                            const aiResults = await generateAICleaningSuggestions(
+                                activeFile.data.tableName,
+                                activeFile.data.columns.map((c: string) => ({ name: c, type: 'VARCHAR' })), // 简化的 Schema
+                                [], // stats (optional)
+                                t,
+                                DuckDBEngine.getInstance(),
+                                undefined,
+                                undefined,
+                                language.name // 🌍 Pass current language
+                            );
+
+                            if (aiResults && aiResults.length > 0) {
+                                console.log('[建议生成] ✅ 自动预加载完成，生成', aiResults.length, '条AI建议');
+
+                                // 🎯 立即更新 suggestions 状态，让用户看到
+                                const aiMappedNew: SimpleSuggestion[] = aiResults.map((s: any) => ({
+                                    id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`,
+                                    label: s.label,
+                                    reason: s.reason,
+                                    confidence: s.confidence || CONFIDENCE_MEDIUM,
+                                    action: s.action || 'normalize',
+                                    category: s.category || 'normalize',
+                                    column: s.column,
+                                    sql: s.sql,
+                                    expectedImpact: s.expectedImpact,
+                                    dryRunStatus: s.dryRunStatus
+                                }));
+
+                                // 合并到当前建议列表（先显示 AI，后显示规则）
+                                setSuggestions(prev => {
+                                    // 过滤掉已存在的 AI 建议，防止重复
+                                    const rulesOnly = prev.filter(s => !s.id.startsWith('ai_'));
+                                    const merged = [...aiMappedNew, ...rulesOnly];
+                                    console.log('[建议生成] 📊 更新UI: AI建议', aiMappedNew.length, '条 + 规则建议', rulesOnly.length, '条');
+                                    return merged;
+                                });
+
+                                // 同时保存到缓存
+                                const updatedFile = {
+                                    ...activeFile,
+                                    analysisCache: {
+                                        ...activeFile.analysisCache,
+                                        cleaning: {
+                                            suggestions: aiResults,
+                                            status: 'ready',
+                                            isStale: false,
+                                            generatedAt: Date.now()
+                                        }
+                                    }
+                                };
+
+                                const updatedProject = {
+                                    ...project,
+                                    files: project.files.map((f: any) => f.id === activeFile.id ? updatedFile : f)
+                                };
+
+                                onProjectUpdate(updatedProject);
+                            }
+                        } catch (err: any) {
+                            console.warn('[建议生成] ⚠️ 自动预加载失败 (静默忽略):', err);
+                            // Auto-preload failure doesn't set global error to avoid blocking UI
+                        }
+                    })();
+                }
+            }
+
+            // 合并AI建议 (Cached or Props) 和规则建议
             const allSuggestions = [...aiMapped, ...generated];
 
             setSuggestions(allSuggestions.sort((a, b) => {
@@ -207,12 +331,65 @@ export function useSuggestionGeneration(
         };
 
         generateSuggestions();
-    }, [activeFile?.id, cleaningTrigger, aiSuggestions, t]);
+    }, [activeFile?.id, activeFile?.data?.tableName, cleaningTrigger, aiSuggestions, t, language.name]); // onProjectUpdate 和 project 不放入依赖，避免循环
 
     // 移除已应用的建议
     const removeSuggestions = (idsToRemove: string[]) => {
         setSuggestions(prev => prev.filter(s => !idsToRemove.includes(s.id)));
     };
 
-    return { suggestions, loading, removeSuggestions };
+    // 手动刷新 AI 建议
+    const refreshAISuggestions = async () => {
+        if (!activeFile?.data?.tableName || !onProjectUpdate || !project) return;
+
+        setLoading(true);
+        setError(null);
+        console.log('[建议生成] 手动刷新 AI 建议...');
+
+        try {
+            const aiResults = await generateAICleaningSuggestions(
+                activeFile.data.tableName,
+                activeFile.data.columns.map((c: string) => ({ name: c, type: 'VARCHAR' })),
+                [],
+                t,
+                DuckDBEngine.getInstance(),
+                undefined,
+                undefined,
+                language.name // 🌍 Pass current language
+            );
+
+            if (aiResults && aiResults.length > 0) {
+                console.log('[建议生成] 刷新完成，获得', aiResults.length, '条AI建议');
+                setAiGenerated(true);
+
+                const aiMappedNew: SimpleSuggestion[] = aiResults.map((s: any) => ({
+                    id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`,
+                    label: s.label,
+                    reason: s.reason,
+                    confidence: s.confidence || CONFIDENCE_MEDIUM,
+                    action: s.action || 'normalize',
+                    category: s.category || 'normalize',
+                    column: s.column,
+                    sql: s.sql,
+                    expectedImpact: s.expectedImpact,
+                    dryRunStatus: s.dryRunStatus
+                }));
+
+                setSuggestions(prev => {
+                    const rulesOnly = prev.filter(s => !s.id.startsWith('ai_'));
+                    return [...aiMappedNew, ...rulesOnly];
+                });
+            }
+        } catch (err: any) {
+            console.warn('[建议生成] 刷新失败:', err);
+            setError(err.message || 'AI Generation Failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 检查是否有 AI 建议
+    const hasAISuggestions = suggestions.some(s => s.id.startsWith('ai_'));
+
+    return { suggestions, loading, removeSuggestions, refreshAISuggestions, hasAISuggestions, aiGenerated, error };
 }

@@ -15,7 +15,8 @@ export function buildCleaningPrompt(
     tableName: string,
     desensitizedData: DesensitizedColumnInfo[],
     qualityIssues: DataQualityIssue[],
-    t: (key: string, params?: Record<string, any>) => string
+    t: (key: string, params?: Record<string, any>) => string,
+    language: string = 'Chinese (Simplified)' // Default language fallback
 ): string {
     // 计算数据质量得分
     const qualityScore = calculateQualityScore(desensitizedData, qualityIssues);
@@ -114,6 +115,8 @@ ${issuesList || t('common.none')}
 - suggestions数组应包含2-5个建议
 - confidence应基于数据质量问题的严重程度
 - 敏感列已脱敏，不会影响数据分析
+
+IMPORTANT: All text in the JSON analysis (especially label, reason, and expectedImpact fields) MUST be in ${language} language.
 `.trim();
 }
 

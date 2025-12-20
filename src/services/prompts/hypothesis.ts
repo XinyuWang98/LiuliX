@@ -23,8 +23,15 @@ export function 生成假设Prompt(数据摘要: {
     ? `\n可用字段：${数据摘要.columns.join(', ')}`
     : '';
 
+  // 🛠️ BigInt 安全序列化：DuckDB 返回的大数字可能是 BigInt 类型
+  const safeStringify = (obj: any) => {
+    return JSON.stringify(obj, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+      , 2);
+  };
+
   const 样本信息 = 数据摘要.sampleData && 数据摘要.sampleData.length > 0
-    ? `\n样本数据（前3行）：\n${JSON.stringify(数据摘要.sampleData.slice(0, 3), null, 2)}`
+    ? `\n样本数据（前3行）：\n${safeStringify(数据摘要.sampleData.slice(0, 3))}`
     : '';
 
   return `

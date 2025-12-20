@@ -109,19 +109,19 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backgroundColor: 'var(--modal-backdrop, rgba(0, 0, 0, 0.6))',
             backdropFilter: 'blur(4px)',
         }}>
             <div style={{
                 width: '600px',
                 maxHeight: '80vh',
                 overflowY: 'auto',
-                backgroundColor: 'var(--bg-panel, #1a1b1e)',
-                border: '1px solid var(--border-color, rgba(255,255,255,0.1))',
+                backgroundColor: 'var(--bg-panel)',
+                border: '1px solid var(--border)',
                 borderRadius: '12px',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                color: 'var(--text-primary, #ffffff)',
-                fontFamily: 'var(--font-family, sans-serif)',
+                boxShadow: 'var(--shadow-lg)',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-family)',
                 display: 'flex',
                 flexDirection: 'column',
             }}>
@@ -131,7 +131,7 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '24px',
-                    borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.1))',
+                    borderBottom: '1px solid var(--border)',
                 }}>
                     <h2 style={{
                         marginTop: 0,
@@ -225,12 +225,12 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                                                 onChange={(e) => handleKeyChange(model, e.target.value)}
                                                 style={{
                                                     flex: 1,
-                                                    backgroundColor: 'var(--input-bg, #141517)',
-                                                    border: '1px solid var(--border-color, rgba(255,255,255,0.1))',
+                                                    backgroundColor: 'var(--input-bg)',
+                                                    border: '1px solid var(--border)',
                                                     borderRadius: '4px',
                                                     padding: '8px 12px',
                                                     fontSize: '14px',
-                                                    color: 'var(--text-primary, #d1d5db)',
+                                                    color: 'var(--text-primary)',
                                                     outline: 'none',
                                                 }}
                                             />

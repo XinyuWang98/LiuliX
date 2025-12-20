@@ -83,37 +83,37 @@ export const CARDS_PER_ROW = 5;
  */
 export const CATEGORY_META: Record<SuggestionCategory, CategoryMetadata> = {
     deduplication: {
-        icon: '🔄',
+        icon: '⊘',
         color: '#3b82f6',
         nameKey: 'cleaning.catDeduplication'
     },
     drop_empty_column: {
-        icon: '🗑️',
+        icon: '×',
         color: '#ef4444',
         nameKey: 'cleaning.catDropEmpty'
     },
     fill_missing: {
-        icon: '🔧',
+        icon: '+',
         color: '#f59e0b',
         nameKey: 'cleaning.catFillMissing'
     },
     type_conversion: {
-        icon: '🔀',
+        icon: '⇄',
         color: '#8b5cf6',
         nameKey: 'cleaning.catTypeConversion'
     },
     normalize: {
-        icon: '⚡',
+        icon: '≡',
         color: '#10b981',
         nameKey: 'cleaning.catNormalize'
     },
     fill: {
-        icon: '🔧',
+        icon: '+',
         color: '#f59e0b',
         nameKey: 'cleaning.catFill'
     },
     experimental: {
-        icon: '🧪',
+        icon: '?',
         color: '#6b7280',
         nameKey: 'cleaning.catExperimental'
     }

@@ -107,6 +107,7 @@ export interface ProjectFile {
     addedAt: Date;
 
     /** 预处理分析缓存 */
+    /** 预处理分析缓存 */
     analysisCache?: {
         /** 数据质量评分 */
         quality?: {
@@ -119,10 +120,14 @@ export interface ProjectFile {
             }>;
             lastUpdated: number;
         };
-        /** 清洗建议 */
+        /** 清洗建议（增强版） */
         cleaning?: {
-            suggestions: Array<any>; // 详细类型见CleaningSuggestion
+            suggestions: import('../components/cleaning/types/cleaning.types').SimpleSuggestion[];
             status: 'pending' | 'ready' | 'failed';
+            /** 是否已过期（需重新生成） */
+            isStale?: boolean;
+            /** 后台生成的时间戳 */
+            generatedAt?: number;
             /** 采样元数据 */
             basedOnSample?: {
                 isSampled: boolean;

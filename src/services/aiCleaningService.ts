@@ -25,7 +25,8 @@ export async function generateAICleaningSuggestions(
     t: (key: string, params?: Record<string, any>) => string,
     duckdbEngine?: any,
     onProgress?: (progressMsg: string) => void,  // 进度回调
-    onSuggestionUpdate?: (suggestions: CleaningSuggestion[]) => void // 增量更新回调
+    onSuggestionUpdate?: (suggestions: CleaningSuggestion[]) => void, // 增量更新回调
+    language: string = 'Chinese (Simplified)' // Default to Chinese
 ): Promise<CleaningSuggestion[]> {
 
     try {
@@ -56,7 +57,7 @@ export async function generateAICleaningSuggestions(
         console.log('[AI清洗] Step 2/4:', step2);
         onProgress?.(step2);
 
-        const prompt = buildCleaningPrompt(tableName, desensitizedData, qualityIssues, t);
+        const prompt = buildCleaningPrompt(tableName, desensitizedData, qualityIssues, t, language);
 
         // 打印Prompt供调试
         console.log('[AI清洗] Prompt长度:', prompt.length, '字符');

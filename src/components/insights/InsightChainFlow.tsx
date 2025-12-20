@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useI18n } from '@/contexts/I18nContext';
 import { HypothesisCard } from './HypothesisCard';
 import { InsightNode } from './InsightNode';
 import { DeepDiveInput } from './DeepDiveInput';
@@ -20,8 +21,8 @@ interface InsightChainFlowProps {
     };
 }
 
-export function InsightChainFlow({ columns, rowCount, sampleData, tableName, insightCache }: InsightChainFlowProps) {
-    // const { t } = useI18n(); // TODO: 添加 i18n 翻译后启用
+export function InsightChainFlow({ columns, rowCount, sampleData: _sampleData, tableName, insightCache }: InsightChainFlowProps) {
+    const { t } = useI18n();
     const {
         hypotheses,
         insights,
@@ -63,7 +64,7 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
                 return;
             }
 
-            console.log('🔄 触发洞察刷新:', {
+            console.log('[洞察链] 🔄 触发刷新:', {
                 原因: hypotheses.length === 0 ? '无缓存' : 'isStale=true',
                 isStale: insightCache?.isStale,
                 status: insightCache?.status,
@@ -78,7 +79,7 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
 
             loadHypotheses();
         } else if (需要刷新 && !可以执行) {
-            console.log('⏸️ 洞察刷新被阻止（防重复）:', { status: insightCache?.status });
+            console.log('[洞察链] ⏸️ 刷新被阻止（防重复）:', { status: insightCache?.status });
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,17 +98,17 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
             if (tableName) {
                 try {
                     const { sampledData, metadata } = await sampleDataForAI(tableName, 1000);
-                    console.log('🎯 洞察生成使用采样数据:', metadata);
+                    console.log('[洞察链] 🎯 使用采样数据:', metadata);
                     采样数据 = sampledData;
                 } catch (采样错误) {
-                    console.warn('⚠️ 采样失败，使用空数据:', 采样错误);
+                    console.warn('[洞察链] ⚠️ 采样失败:', 采样错误);
                 }
             } else {
-                console.log('📊 tableName未提供，跳过采样');
+                console.log('[洞察链] 📊 tableName未提供，跳过采样');
             }
 
             // 🚀 步骤2：调用AI生成假设（代理已就绪）
-            console.log('🤖 调用AI生成假设...');
+            console.log('[洞察链] 🤖 调用AI生成假设...');
             const 生成结果 = await generateHypotheses({
                 columns: columns || [],
                 rowCount: rowCount || 0,
@@ -124,11 +125,11 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
             }));
 
             setHypotheses(假设卡片);
-            console.log('✅ AI假设生成成功:', 假设卡片.length, '条');
+            console.log('[洞察链] ✅ AI假设生成成功:', 假设卡片.length, '条');
 
         } catch (AI错误) {
             // 🚀 步骤4：AI失败降级到Mock数据（保证UI不崩溃）
-            console.error('🚫 AI生成失败，使用Mock兜底:', AI错误);
+            console.error('[洞察链] 🚫 AI生成失败，使用Mock兜底:', AI错误);
 
             const mockHypotheses: HypothesisCardType[] = [
                 {
@@ -243,14 +244,14 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
     return (
         <div style={{ padding: 'var(--gap-m)' }}>
             <h3 style={{ color: 'var(--text-primary)', marginBottom: 'var(--gap-m)' }}>
-                洞察链分析
+                {t('insightChain.title')}
             </h3>
 
             {/* 加载状态 */}
             {isLoadingHypotheses && (
                 <div style={{ textAlign: 'center', padding: 'var(--gap-xl)', color: 'var(--text-secondary)' }}>
                     <Loader size={32} className="spinning" />
-                    <p>正在生成分析假设...</p>
+                    <p>{t('insightChain.loadingHypothesis')}</p>
                 </div>
             )}
 
@@ -269,7 +270,7 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
                 }}>
                     <span style={{ color: 'var(--warning)', fontSize: '20px' }}>⚠️</span>
                     <span style={{ flex: 1 }}>
-                        暂无分析假设。AI服务可能暂时不可用，或当前数据无明显分析方向。
+                        {t('insightChain.noHypotheses')}
                     </span>
                     <button
                         className="btnPrimary"
@@ -286,7 +287,7 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
                             <polyline points="23 4 23 10 17 10"></polyline>
                             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                         </svg>
-                        重试
+                        {t('aiRetry.retryButton')}
                     </button>
                 </div>
             )}
@@ -316,7 +317,7 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
             {activeHypothesisId && (
                 <div style={{ marginTop: 'var(--gap-l)' }}>
                     <h4 style={{ color: 'var(--text-primary)', marginBottom: 'var(--gap-m)' }}>
-                        洞察节点
+                        {t('insightChain.noInsights').replace('暂无', '')}
                     </h4>
 
                     {/* 洞察节点 */}
@@ -342,7 +343,7 @@ export function InsightChainFlow({ columns, rowCount, sampleData, tableName, ins
                     {isLoadingInsight && (
                         <div style={{ textAlign: 'center', padding: 'var(--gap-m)', color: 'var(--text-secondary)' }}>
                             <Loader size={24} className="spinning" />
-                            <p>正在挖掘洞察...</p>
+                            <p>{t('insightChain.loading')}</p>
                         </div>
                     )}
                 </div>

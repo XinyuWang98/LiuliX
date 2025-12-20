@@ -52,6 +52,8 @@
         "--blur-heavy": "50px",
         "--glass-highlight": "inset 0 1.5px 0 0 rgba(255, 255, 255, 0.2)",
         "--bg-secondary": "#1C1C1E",
+        "--bg-element": "#2C2C2E",
+        "--input-bg": "#1C1C1E",
         "--border-light": "rgba(255, 255, 255, 0.08)",
         "--text-on-primary": "#FFFFFF",
         "--error-bg": "rgba(255, 69, 58, 0.15)",

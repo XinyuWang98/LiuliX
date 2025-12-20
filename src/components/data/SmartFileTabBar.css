@@ -36,7 +36,7 @@
 }
 
 .smartTab.active {
-    background: var(--bg-accent);
+    background: var(--primary);
     color: #fff;
     font-weight: 500;
 }

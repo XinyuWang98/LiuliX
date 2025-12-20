@@ -120,7 +120,9 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
 
 
     const engine = DuckDBEngine.getInstance();
-    const totalPages = Math.ceil(rowCount / 每页行数);
+    // 🛠️ 防止 BigInt 混合运算：DuckDB 返回的 rowCount 可能是 BigInt
+    const rowCountNum = typeof rowCount === 'bigint' ? Number(rowCount) : rowCount;
+    const totalPages = Math.ceil(rowCountNum / 每页行数);
 
     // 加载统计信息
     useEffect(() => {

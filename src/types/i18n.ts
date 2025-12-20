@@ -326,6 +326,7 @@ export interface LanguageConfig {
 
             // DataCleaner 增强功能键
             aiSuggestions: string;
+            cleaningSuggestions: string;
             collapse: string;
             expandMore: string;
             applySelected: string;
@@ -429,6 +430,20 @@ export interface LanguageConfig {
             dataConsistency: string;
             dataFormat: string;
             outputFormat: string;
+
+            // 自动预加载相关
+            checkDataQuality: string;
+            largeFileHint: string;
+            suggRemoveDuplicates: string;
+            tagAISuggestion: string;
+            recommendPercent: string;
+            generateAI: string;
+            refreshAI: string;
+            suggDropColumnSimple: string;
+            suggFillZero: string;
+            suggFillUnknown: string;
+            suggFillMedian: string;
+            suggFillMode: string;
         };
 
         quality: {
@@ -515,6 +530,7 @@ export interface LanguageConfig {
             placeholder: string;
             searchPlaceholder: string;
             chatPlaceholder: string;
+            noContent: string;
             actions: {
                 collapse: string;
                 expand: string;
@@ -563,12 +579,24 @@ export interface LanguageConfig {
             download: string;
             copyToClipboard: string;
             downloadMarkdown: string;
+            downloadPdf: string;
             noRecords: string;
             noRecordsHint: string;
+            noInsightChain: string;
             totalRecords: string;
             cleaningOps: string;
             insights: string;
             previewHint: string;
+            aiAssistant: string;
+            evidenceCollected: string;
+            hypothesis: string;
+            conclusion: string;
+            viewCode: string;
+            overallConclusion: string;
+            basedOnInsights: string;
+            suggestion1: string;
+            suggestion2: string;
+            suggestion3: string;
         };
 
         // AI成本提示

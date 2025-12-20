@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { Sparkles, Play, CheckCircle2, RefreshCw, History, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Play, CheckCircle2, RefreshCw, History, Check } from 'lucide-react';
 
 import { SuggestionCard } from './components/SuggestionCard';
 import { useI18n } from '../../contexts/I18nContext';
@@ -21,15 +21,27 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
     const { t } = useI18n();
     const [activeFileId, setActiveFileId] = useState<string | null>(project.files[0]?.id || null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [expandedCategories, setExpandedCategories] = useState<Set<SuggestionCategory>>(new Set());
+    const [activeTab, setActiveTab] = useState<string | null>(null);
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [bottomPanelTab, setBottomPanelTab] = useState<'suggestions' | 'history'>('suggestions');
 
     const activeFile = project.files.find(f => f.id === activeFileId);
 
     // 使用建议生成Hook
-    const { suggestions, loading: suggestionLoading, removeSuggestions } = useSuggestionGeneration(
+    const {
+        suggestions,
+        loading: suggestionLoading,
+        removeSuggestions,
+        refreshAISuggestions,
+        hasAISuggestions,
+        aiGenerated,
+        error
+    } = useSuggestionGeneration(
         activeFile,
         cleaningTrigger || 0,
-        aiSuggestions
+        aiSuggestions,
+        onProjectUpdate,
+        project
     );
 
     // 使用历史记录Hook
@@ -76,136 +88,15 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
         // 移除已应用的建议
         removeSuggestions(selectedIds);
         setSelectedIds([]); // 清空选中
-    };
-
-    // 展开/收起类别
-    const toggleExpand = (category: SuggestionCategory) => {
-        setExpandedCategories(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(category)) {
-                newSet.delete(category);
-            } else {
-                newSet.add(category);
-            }
-            return newSet;
-        });
+        setRefreshKey(prev => prev + 1);
     };
 
     return (
         <div className="cleanerContainer">
-            {/* AI建议面板 */}
-            <div className="aiActionPanel">
-                <div className="aiPanelHeader">
-                    <div className="aiTitle"><Sparkles size={ICON_SIZE_LARGE} />{t('cleaning.aiSuggestions')}</div>
-                    <div className="aiHeaderActions">
-                        {suggestions.length > 0 && (
-                            <button className="btnGhost" onClick={toggleSelectAll}>
-                                <CheckCircle2 size={ICON_SIZE_MEDIUM} />
-                                {selectedIds.length === suggestions.length ? t('cleaning.deselectAll') : t('cleaning.selectAll')}
-                            </button>
-                        )}
-                        <button className="btnPrimary" onClick={handleApply} disabled={loading || selectedIds.length === 0}>
-                            {loading ? <RefreshCw className="spin" size={ICON_SIZE_MEDIUM} /> : <Play size={ICON_SIZE_MEDIUM} />}
-                            {t('cleaning.applySelected', { count: selectedIds.length })}
-                        </button>
-                    </div>
-                </div>
-
-                {/* 🚀 AI建议生成失败提示 */}
-                {suggestionLoading === false && suggestions.length === 0 && (
-                    <div style={{
-                        background: 'var(--bg-panel)',
-                        border: '1px solid var(--warning)',
-                        borderRadius: 'var(--radius-m)',
-                        padding: 'var(--padding-card)',
-                        margin: 'var(--gap-m)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--gap-m)',
-                        color: 'var(--text-primary)',
-                    }}>
-                        <span style={{ color: 'var(--warning)', display: 'flex', alignItems: 'center' }}>
-                            ⚠️
-                        </span>
-                        <span style={{ flex: 1 }}>
-                            {t('aiRetry.noSuggestionsHint')}
-                        </span>
-                        <button
-                            className="btnPrimary"
-                            onClick={() => window.location.reload()}
-                            style={{
-                                background: 'var(--color-retry-button)',
-                                padding: '8px 16px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                            }}
-                        >
-                            <RefreshCw size={14} />
-                            {t('aiRetry.retryButton')}
-                        </button>
-                    </div>
-                )}
-
-                {suggestions.length === 0 && suggestionLoading === false ? (
-                    <div className="aiEmpty"><CheckCircle2 size={ICON_SIZE_LARGE} />{t('cleaning.noSuggestions')}</div>
-                ) : suggestions.length > 0 ? (
-                    <div className="suggestionsByCategory">
-                        {groupByCategory(suggestions).map(([category, items]) => {
-                            const meta = CATEGORY_META[category as SuggestionCategory];
-                            const isExpanded = expandedCategories.has(category as SuggestionCategory);
-                            const CARDS_PER_ROW = 5;
-                            const needsExpand = items.length > CARDS_PER_ROW;
-                            const displayedItems = isExpanded ? items : items.slice(0, CARDS_PER_ROW);
-                            const remainingCount = items.length - CARDS_PER_ROW;
-
-                            return (
-                                <div key={category} className="categoryRow">
-                                    <div className="categoryHeader">
-                                        <span className="categoryIcon">{meta.icon}</span>
-                                        <span className="categoryName">{t(meta.nameKey as any)}</span>
-                                        <span className="categoryCount">({items.length})</span>
-                                    </div>
-                                    <div className="cardRow">
-                                        {displayedItems.map(s => {
-                                            const isSelected = selectedIds.includes(s.id);
-                                            return (
-                                                <SuggestionCard
-                                                    key={s.id}
-                                                    suggestion={s}
-                                                    isSelected={isSelected}
-                                                    onToggle={toggleSugg}
-                                                />
-                                            );
-                                        })}
-                                        {needsExpand && (
-                                            <button className="btnShowMore" onClick={() => toggleExpand(category as SuggestionCategory)}>
-                                                {isExpanded ? (
-                                                    <>
-                                                        <ChevronUp size={ICON_SIZE_MEDIUM} />
-                                                        {t('cleaning.showLess')}
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <ChevronDown size={ICON_SIZE_MEDIUM} />
-                                                        {t('cleaning.showMore')}
-                                                        <div className="moreCount">{t('cleaning.moreCount', { count: remainingCount })}</div>
-                                                    </>
-                                                )}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : null}
-            </div>
-
-            {/* 数据表格 */}
+            {/* 1. 数据表格 (Top - Order revised as requested) */}
             <div className="cleanerGridWrapper">
                 <DataViewer
-                    key={activeFileId}
+                    key={`${activeFileId}-${refreshKey}`}
                     project={project}
                     activeFileId={activeFileId || undefined}
                     onProjectUpdate={onProjectUpdate}
@@ -213,54 +104,164 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                 />
             </div>
 
-            {/* 历史记录 */}
-            <div className="historyPanel">
-                <div className="historyHeader">
-                    <div className="historyTitle"><History size={ICON_SIZE_MEDIUM} />{t('cleaning.history')}</div>
-                    {history.length > 0 && (
-                        <button className="btnReset" onClick={() => confirmReset()} disabled={loading} title={t('cleaning.resetAll')}>
-                            <RefreshCw size={ICON_SIZE_MEDIUM} />
-                            {t('cleaning.resetAll')}
-                        </button>
+            {/* 2. 底部综合面板 (Suggestions + History integrated) */}
+            <div className="cleanerBottomModule">
+                {/* 模块标签页导航 */}
+                <div className="bottomModuleHeader">
+                    <button
+                        className={`bottomModuleTab ${bottomPanelTab === 'suggestions' ? 'active' : ''}`}
+                        onClick={() => setBottomPanelTab('suggestions')}
+                    >
+                        <Sparkles size={16} />
+                        {t('cleaning.cleaningSuggestions')}
+                        {suggestions.length > 0 && <span className="tabBadge">{suggestions.length}</span>}
+                    </button>
+                    <button
+                        className={`bottomModuleTab ${bottomPanelTab === 'history' ? 'active' : ''}`}
+                        onClick={() => setBottomPanelTab('history')}
+                    >
+                        <History size={16} />
+                        {t('cleaning.history')}
+                        {history.length > 0 && <span className="tabBadge">{history.length}</span>}
+                    </button>
+
+                    {/* 面板全局操作区域 (仅 Suggestions 活跃时可见部分, 或放在内容区) */}
+                    <div className="bottomModuleActions">
+                        {bottomPanelTab === 'suggestions' && suggestions.length > 0 && (
+                            <>
+                                <button className="btnPanelAction" onClick={toggleSelectAll} disabled={loading}>
+                                    <CheckCircle2 size={14} />
+                                    {selectedIds.length === suggestions.length ? t('cleaning.deselectAll') : t('cleaning.selectAll')}
+                                </button>
+                                <button
+                                    className="btnPanelAction btnApply"
+                                    onClick={handleApply}
+                                    disabled={loading || selectedIds.length === 0}
+                                >
+                                    {loading ? <RefreshCw className="spin" size={14} /> : <Play size={14} />}
+                                    {t('cleaning.applySelected', { count: selectedIds.length })}
+                                </button>
+                            </>
+                        )}
+                        {bottomPanelTab === 'history' && history.length > 0 && (
+                            <button className="btnPanelAction btnReset" onClick={() => confirmReset()} disabled={loading}>
+                                <RefreshCw size={14} />
+                                {t('cleaning.resetAll')}
+                            </button>
+                        )}
+                        {bottomPanelTab === 'suggestions' && (
+                            <button
+                                className={`btnPanelAction ${hasAISuggestions ? 'aiRefreshBtn' : 'aiGenerateBtn'}`}
+                                onClick={refreshAISuggestions}
+                                disabled={loading}
+                                title={hasAISuggestions ? t('cleaning.refreshAI') : t('cleaning.generateAI')}
+                            >
+                                {loading ? <RefreshCw className="spin" size={14} /> : (hasAISuggestions ? <RefreshCw size={14} /> : <Sparkles size={14} />)}
+                                {hasAISuggestions ? t('cleaning.refreshAI') : t('cleaning.generateAI')}
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* 模块内容区 */}
+                <div className="bottomModuleContent">
+                    {bottomPanelTab === 'suggestions' ? (
+                        <div className="suggestionsTabContent">
+                            {/* 原 AI Panel 内容 */}
+                            <div className="aiActionPanel">
+                                {suggestions.length > 0 && (
+                                    <div className="aiPanelHeader">
+                                        <div className="suggestionTabs">
+                                            {groupByCategory(suggestions).map(([category, items]) => {
+                                                const isAICategory = items.some(s => s.id.startsWith('ai_'));
+                                                const meta = isAICategory
+                                                    ? { icon: <Sparkles size={14} />, color: 'var(--accent)', nameKey: 'cleaning.aiSuggestions' }
+                                                    : (CATEGORY_META[category as SuggestionCategory] || { icon: '?', color: '#888', nameKey: 'cleaning.unknownAction' });
+                                                const isActive = activeTab === category || (!activeTab && category === groupByCategory(suggestions)[0][0]);
+                                                return (
+                                                    <button
+                                                        key={category}
+                                                        className={`tabItem ${isActive ? 'active' : ''} ${isAICategory ? 'ai-tab' : ''}`}
+                                                        onClick={() => setActiveTab(category)}
+                                                    >
+                                                        <span className="tabIcon">{meta.icon}</span>
+                                                        <span className="tabName">{isAICategory ? t('cleaning.aiSuggestions') : t(meta.nameKey as any)}</span>
+                                                        <span className="tabCount">({items.length})</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="tabContent">
+                                    {(() => {
+                                        if (suggestions.length > 0) {
+                                            const grouped = groupByCategory(suggestions);
+                                            const currentCategory = activeTab || grouped[0]?.[0];
+                                            const currentItems = grouped.find(([c]) => c === currentCategory)?.[1] || [];
+                                            if (currentItems.length === 0) return null;
+                                            return (
+                                                <div className="categoryGroup">
+                                                    <div className="cardRow">
+                                                        {currentItems.map(s => (
+                                                            <SuggestionCard
+                                                                key={s.id}
+                                                                suggestion={s}
+                                                                isSelected={selectedIds.includes(s.id)}
+                                                                onToggle={toggleSugg}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+
+                                        if (loading) return <div className="aiEmpty"><RefreshCw className="spin" size={ICON_SIZE_LARGE} />{t('cleaning.analyzing')}</div>;
+                                        if (history.length > 0) return <div className="aiEmpty"><CheckCircle2 size={ICON_SIZE_LARGE} style={{ color: 'var(--success)' }} />{t('cleaning.allApplied')}</div>;
+                                        if (error) return <div className="aiEmpty" style={{ color: 'var(--warning)' }}><span style={{ fontSize: '24px' }}>⚠️</span>{t('cleaning.serviceUnavailable')}</div>;
+                                        if (aiGenerated) return <div className="aiEmpty"><Sparkles size={ICON_SIZE_LARGE} style={{ color: 'var(--primary)' }} />{t('cleaning.dataGood')}</div>;
+                                        return <div className="aiEmpty"><Sparkles size={ICON_SIZE_LARGE} style={{ color: 'var(--text-tertiary)' }} />{t('cleaning.tryAI')}</div>;
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="historyTabContent">
+                            <div className="historyPanel">
+                                {history.length === 0 ? (
+                                    <div className="historyEmpty">{t('cleaning.noHistory')}</div>
+                                ) : (
+                                    <div className="historyList">
+                                        {history.map(h => {
+                                            const delta = h.rowCountAfter - h.rowCountBefore;
+                                            return (
+                                                <div key={h.id} className="historyItem">
+                                                    <span className="historyTime">[{new Date(h.timestamp).toLocaleTimeString()}]</span>
+                                                    <span className="historyAction">{h.action}</span>
+                                                    <span className={`deltaTag ${delta < 0 ? 'negative' : (delta > 0 ? 'positive' : '')}`}>
+                                                        {h.rowCountBefore} → {h.rowCountAfter} ({delta > 0 ? '+' : ''}{delta})
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     )}
                 </div>
-                {history.length === 0 ? (
-                    <div className="historyEmpty">{t('cleaning.noHistory')}</div>
-                ) : (
-                    <div className="historyList">
-                        {history.map(h => {
-                            const delta = h.rowCountAfter - h.rowCountBefore;
-                            return (
-                                <div key={h.id} className="historyItem">
-                                    <span className="historyTime">[{new Date(h.timestamp).toLocaleTimeString()}]</span>
-                                    <span className="historyAction">{h.action}</span>
-                                    <span className={`deltaTag ${delta < 0 ? 'negative' : (delta > 0 ? 'positive' : '')}`}>
-                                        {h.rowCountBefore} → {h.rowCountAfter} ({delta > 0 ? '+' : ''}{delta})
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
             </div>
 
             {/* 重置确认对话框 */}
             {showResetConfirm && (
                 <div className="confirmOverlay" onClick={cancelReset}>
                     <div className="confirmDialog" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="confirmTitle">
-                            {t('cleaning.resetAll')}
-                        </h3>
-                        <p className="confirmMessage">
-                            {t('cleaning.resetConfirm')}
-                        </p>
+                        <h3 className="confirmTitle">{t('cleaning.resetAll')}</h3>
+                        <p className="confirmMessage">{t('cleaning.resetConfirm')}</p>
                         <div className="confirmActions">
-                            <button className="btnGhost" onClick={cancelReset}>
-                                {t('common.cancel')}
-                            </button>
-                            <button className="btnDanger" onClick={() => confirmReset()}>
-                                {t('common.confirm')}
-                            </button>
+                            <button className="btnGhost" onClick={cancelReset}>{t('common.cancel')}</button>
+                            <button className="btnDanger" onClick={() => confirmReset()}>{t('common.confirm')}</button>
                         </div>
                     </div>
                 </div>

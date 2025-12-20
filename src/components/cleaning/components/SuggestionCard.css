@@ -1,135 +1,106 @@
-/* 建议卡片增强样式 - Cyber Dark主题优化 */
+/* 建议卡片样式 - 网格全展开版 */
 
 .suggestionCard {
-    position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 160px;
-    min-height: 110px;
-    padding: var(--gap-m);
-    background: linear-gradient(135deg, var(--bg-element) 0%, var(--bg-panel) 100%);
+    background: var(--bg-element);
     border: 1px solid var(--border);
     border-radius: var(--radius-m);
+    /* 更大的圆角 */
     cursor: pointer;
     transition: all var(--transition-fast);
+    height: 100%;
+    /* 撑满网格单元 */
+    position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* 卡片背景光效 */
-.suggestionCard::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.05) 100%);
-    border-radius: var(--radius-m);
-    opacity: 0;
-    transition: opacity var(--transition-fast);
-    z-index: 0;
-    pointer-events: none;
-}
-
-/* 彩色左侧条 - 增强霓虹效果 */
-.suggestionCard::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: currentColor;
-    opacity: 0;
-    transition: all var(--transition-fast);
-    box-shadow: 0 0 10px currentColor;
-}
-
-.suggestionCard:hover::before {
-    opacity: 1;
-    width: 4px;
-}
-
-.suggestionCard:hover::after {
-    opacity: 1;
+/* 头部摘要区 */
+.cardHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: var(--gap-xs) var(--gap-s);
+    /* Reduced padding: 4px 8px */
+    background: rgba(var(--primary-rgb, 0, 0, 0), 0.02);
+    border-bottom: 1px solid var(--border-light);
+    box-sizing: border-box;
 }
 
 .suggestionCard:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(var(--primary-rgb, 59, 130, 246), 0.2);
     border-color: var(--primary);
+    box-shadow: var(--shadow-s);
+    transform: translateY(-2px);
 }
 
-/* 选中状态 - 霓虹高亮 */
+/* 选中状态 */
 .suggestionCard.selected {
-    border-width: 2px;
-    border-color: var(--color-accent);
-    background: linear-gradient(135deg,
-            rgba(var(--accent-rgb, 255, 107, 53), 0.1) 0%,
-            var(--bg-element) 100%);
-    box-shadow: 0 0 0 3px var(--color-accent-muted),
-        0 4px 16px rgba(0, 0, 0, 0.5),
-        inset 0 0 20px rgba(var(--accent-rgb, 255, 107, 53), 0.1);
+    border-color: var(--primary);
+    background: var(--bg-element);
+    box-shadow: 0 0 0 1px var(--primary), var(--shadow-m);
 }
 
-.suggestionCard.selected::before {
-    opacity: 1;
-    width: 4px;
-    box-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+/* 选中状态下的 Header 样式增强 (可选) */
+.suggestionCard.selected .cardHeader {
+    background: rgba(var(--primary-rgb, 59, 130, 246), 0.08);
 }
 
-.suggestionCard input[type="checkbox"] {
-    position: absolute;
-    top: var(--gap-s);
-    right: var(--gap-s);
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-    z-index: 10;
-    accent-color: var(--color-accent);
-}
-
-/* 卡片图标 - 增强视觉层次 */
-.cardIcon {
-    font-size: 36px;
-    margin-bottom: var(--gap-xs);
-    line-height: 1;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-    z-index: 1;
-}
-
-.cardBody {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--gap-s);
-    width: 100%;
-    text-align: center;
-    z-index: 1;
-}
-
-.cardText {
-    font-size: var(--fs-s);
-    color: var(--text-primary);
+/* 来源标签 */
+.sourceLabel {
     font-weight: 600;
-    line-height: 1.4;
+    flex-shrink: 0;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sourceLabel.ai {
+    color: var(--color-accent, #8b5cf6);
+}
+
+.sourceLabel.rule {
+    color: var(--success, #22c55e);
+}
+
+/* 建议文本 (标题) */
+.suggestionText {
+    color: var(--text-primary);
+    flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    font-weight: 500;
 }
 
-.cardConfidence {
+/* 推荐度 */
+.confidenceText {
+    color: var(--text-secondary);
+    flex-shrink: 0;
     font-size: var(--fs-xs);
-    font-weight: 700;
-    padding: 4px var(--gap-s);
-    border-radius: var(--radius-s);
-    min-width: 50px;
-    backdrop-filter: blur(8px);
-    border: 1px solid currentColor;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    opacity: 0.8;
+}
+
+/* 详情内容区域 (始终显示) */
+/* 建议内容区域 (始终显示) */
+.detailContent {
+    flex: 1;
+    /* 占据剩余高度 */
+    width: 100%;
+    padding: var(--gap-s);
+    /* Reduced padding: 8px */
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    /* Reduced font size: 12px */
+    line-height: 1.4;
+    /* Tighter line height */
+    box-sizing: border-box;
+
+    /* 文本截断逻辑 - 智能行数限制 */
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    /* Keep 4 lines (or reduce to 3 if requested, but user just said text size smaller) */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

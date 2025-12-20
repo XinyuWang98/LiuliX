@@ -168,8 +168,10 @@ export const enUS: LanguageConfig = {
         cleaning: {
             title: 'Data Cleaning', currentTable: 'Current Table', dedup: 'Dedup', fillNull: 'Fill Missing', normalize: 'Normalize', dropEmpty: 'Drop Empty',
             sqlPlaceholder: 'SQL...', runSQL: 'Run SQL', intentDedup: 'Remove duplicates', intentFillNull: 'Fill NULL', intentNormalize: 'Normalize', intentDropEmpty: 'Drop empty rows',
-            aiSuggestions: 'AI Suggestions', collapse: 'Collapse', expandMore: 'Expand', applySelected: 'Apply ({count})', analyzing: 'Analyzing...', noSuggestions: 'Quality good',
-            promptLib: 'Prompt Lib', recommend: '{percent}% recommended', promptStandardizeDate: 'Standardize Dates', reasonDate: 'Detected date field',
+            aiSuggestions: 'AI Suggestions',
+            cleaningSuggestions: 'Cleaning Suggestions',
+            collapse: 'Collapse', expandMore: 'Expand', applySelected: 'Apply ({count})', analyzing: 'Analyzing...', noSuggestions: 'Quality good',
+            promptLib: 'Prompt Lib', recommend: '{percent}% Rec.', promptStandardizeDate: 'Standardize Dates', reasonDate: 'Detected date field',
             removeDuplicates: 'Remove Duplicates', history: 'History', noHistory: 'No history', applied: 'Applied: {type} on {column}',
             unknownAction: 'Unknown', unknownColumn: 'Unknown', currentFile: 'Current File', switchFile: 'Switch', noData: 'No data', rowsCount: '{count} rows',
             columnFilter: 'Column Filter', statsDistribution: 'Stats', actionDropColumn: 'Drop "{column}"', actionDedup: 'Dedup: {before}→{after}',
@@ -190,7 +192,19 @@ export const enUS: LanguageConfig = {
                 invalidSqlType: 'SQL type invalid', syntaxError: 'Syntax: {error}', dryRunFailed: 'Dry run failed: {error}'
             },
             datasetOverview: 'Overview', columnDetails: 'Columns', qualityIssues: 'Issues', dataIntegrity: 'Integrity',
-            dataConsistency: 'Consistency', dataFormat: 'Format', outputFormat: 'Output'
+            dataConsistency: 'Consistency', dataFormat: 'Format', outputFormat: 'Output',
+            checkDataQuality: 'Check Data Quality',
+            largeFileHint: 'Large file ({size} MB), check quality first',
+            suggRemoveDuplicates: 'Remove Duplicates',
+            tagAISuggestion: 'AI',
+            recommendPercent: '{percent}% Rec.',
+            generateAI: 'Generate AI',
+            refreshAI: 'Refresh AI',
+            suggDropColumnSimple: '{col}',
+            suggFillZero: 'Fill "{col}" with 0',
+            suggFillUnknown: 'Fill "{col}" with "Unknown"',
+            suggFillMedian: 'Fill "{col}" with Median',
+            suggFillMode: 'Fill "{col}" with Mode'
         },
         grid: {
             loading: 'Loading...', loadStatsFailed: 'Stats failed', loadDataFailed: 'Data failed', nullRate: 'Missing: {rate}%',
@@ -208,7 +222,7 @@ export const enUS: LanguageConfig = {
         },
         exploration: {
             title: 'Exploration', addBlock: 'Add Block', placeholder: 'Enter request...', searchPlaceholder: 'Search...',
-            chatPlaceholder: 'Chat with AI...', blocks: { upload: 'Cleaning', cleaning: 'Suggestions', hypothesis: 'Hypothesis', insights: 'Insights', report: 'Report', chat: 'AI Assistant' },
+            chatPlaceholder: 'Chat with AI...', noContent: 'No content', blocks: { upload: 'Cleaning', cleaning: 'Suggestions', hypothesis: 'Hypothesis', insights: 'Insights', report: 'Report', chat: 'AI Assistant' },
             actions: { collapse: 'Collapse', expand: 'Expand', pin: 'Pin', unpin: 'Unpin', quote: 'Quote', addToEvidence: 'Add to Evidence', moveUp: 'Move Up', delete: 'Delete' },
         },
         evidence: {
@@ -222,8 +236,15 @@ export const enUS: LanguageConfig = {
         },
         report: {
             title: 'Report', copy: 'Copy', copied: 'Copied', download: 'Download', copyToClipboard: 'Copy to Clipboard',
-            downloadMarkdown: 'Download MD', noRecords: 'No records', noRecordsHint: 'Generate after operations',
+            downloadMarkdown: 'Download MD', downloadPdf: 'Download Report (PDF)', noRecords: 'No records', noRecordsHint: 'Generate after operations',
+            noInsightChain: 'No insight chain evidence. Complete analysis and adopt evidence first.',
             totalRecords: 'Total', cleaningOps: 'Cleaning Ops', insights: 'Insights', previewHint: 'Copy or download report',
+            aiAssistant: 'AI Report Assistant', evidenceCollected: 'Collected evidence #{start} - #{end}:',
+            hypothesis: 'Hypothesis', conclusion: 'Conclusion', viewCode: 'View Code',
+            overallConclusion: 'Overall Conclusion', basedOnInsights: 'Based on {count} insight chains:',
+            suggestion1: 'Apply layered cleaning, focus on high-impact fields',
+            suggestion2: 'Add missing value strategies to avoid bias',
+            suggestion3: 'Regularly check duplicates for data quality',
         },
         aiCost: {
             title: 'AI Cost Warning', fileCount: 'Uploading {count} files', estimatedCalls: 'Estimated {calls} AI calls',

@@ -5,6 +5,7 @@
     "description": "Future Tech 风格的 AI 主导 EDA 工具",
     "scripts": {
         "dev": "vite",
+        "server": "cd server && node index.js",
         "build": "tsc && vite build",
         "preview": "vite preview",
         "type-check": "tsc --noEmit"
