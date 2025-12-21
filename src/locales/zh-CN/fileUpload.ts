@@ -1,5 +1,6 @@
 // 文件上传模块翻译
 export const fileUpload = {
+    uploadButton: '上传文件',
     clickOrDrag: '点击或拖拽文件到此处上传',
     uploading: '正在解析文件...',
     uploadingProgress: '正在上传 {current}/{total} 个文件...',
@@ -25,4 +26,6 @@ export const fileUpload = {
     errorCorrupted: '文件可能已损坏或格式不正确。',
     errorGeneric: '请检查文件后重试。',
     inputPlaceholder: '询问任何关于数据的问题...',
+    clickOrDragShort: '点击/拖拽文件',
+    dropHere: '释放以上传',
 };
