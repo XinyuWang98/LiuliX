@@ -13,6 +13,8 @@ export const common = {
     no: '否',
     search: '搜索',
     all: '全部',
+    featureInDev: '功能开发中...',
+    collapse: '收起',
 };
 
 export const data = {

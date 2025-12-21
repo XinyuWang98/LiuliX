@@ -25,7 +25,7 @@ export function 生成假设Prompt(数据摘要: {
 
   // 🛠️ BigInt 安全序列化：DuckDB 返回的大数字可能是 BigInt 类型
   const safeStringify = (obj: any) => {
-    return JSON.stringify(obj, (key, value) =>
+    return JSON.stringify(obj, (_key, value) =>
       typeof value === 'bigint' ? value.toString() : value
       , 2);
   };

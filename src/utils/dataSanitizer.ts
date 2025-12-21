@@ -194,15 +194,25 @@ function detectCharType(str: string): string {
 // ==================== 元数据构建 ====================
 
 /**
- * 构建脱敏后的列元数据
+ * 构建脱敏后的列元数据 + 列名映射表
+ * @returns { metadata: 脱敏元数据, columnMapping: Map<脱敏名, 真实名> }
  */
 export function buildDesensitizedMetadata(
     columns: any[],
     stats: any[]
-): DesensitizedColumnInfo[] {
-    return columns.map((col, index) => {
+): {
+    metadata: DesensitizedColumnInfo[];
+    columnMapping: Map<string, string>;
+} {
+    const columnMapping = new Map<string, string>();
+
+    const metadata = columns.map((col, index) => {
         const stat = stats[index] || {};
         const isSensitive = isSensitiveColumn(col.name);
+
+        // 记录列名映射 (真实名 -> 真实名, 因为我们不改列名仅脱敏值)
+        // 但为AI生成的SQL做准备,确保SQL中引用的列名可以找到
+        columnMapping.set(col.name, col.name);
 
         // 构建脱敏样本
         const sampleValues: string[] = [];
@@ -261,6 +271,8 @@ export function buildDesensitizedMetadata(
             sampleValues
         };
     });
+
+    return { metadata, columnMapping };
 }
 
 /**

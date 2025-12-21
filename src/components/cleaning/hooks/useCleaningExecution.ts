@@ -33,18 +33,30 @@ export function useCleaningExecution(
         try {
             const engine = DuckDBEngine.getInstance();
 
-            // 查找表名
+            // ✅ 修复：查找工作表时增强过滤条件，防止误选 dry-run 临时表
             const tables = await engine.queryChunk('information_schema.tables', 0, 100);
             const dataTable = tables
-                .filter((t: any) => t.table_name && String(t.table_name).startsWith('t_'))
+                .filter((t: any) => {
+                    const name = String(t.table_name || '');
+                    return name.startsWith('t_')         // 正式表前缀
+                        && name.endsWith('_working')     // 工作表后缀
+                        && !name.includes('_dryrun_');   // 排除临时表
+                })
                 .sort((a: any, b: any) => String(b.table_name).localeCompare(String(a.table_name)))[0];
 
             if (!dataTable) {
-                console.error('❌ 未找到以t_开头的表');
-                throw new Error('未找到数据表');
+                console.error('❌ 未找到有效的工作表 (_working)');
+                throw new Error('未找到工作表');
             }
 
             const tableName = String(dataTable.table_name);
+
+            // ✅ 防御性验证：二次确认表名不包含 _dryrun_
+            if (tableName.includes('_dryrun_')) {
+                console.error('❌ 严重错误：选中了临时表！', tableName);
+                throw new Error('内部错误：误选临时表');
+            }
+            console.log(`[清洗执行] ✅ 已选择工作表: ${tableName}`);
 
             // 执行前查询行数和列数
             const columnsBefore = await engine.getTableColumns(tableName);
@@ -193,23 +205,34 @@ export function useCleaningExecution(
         try {
             const engine = DuckDBEngine.getInstance();
 
-            // 获取表名
+            // ✅ 修复：查找工作表时增强过滤条件（与 handleApply 保持一致）
             let tableName = activeFile.data.tableName;
 
             if (!tableName) {
                 const tables = await engine.queryChunk('information_schema.tables', 0, 100);
-                const workingTable = tables.find((t: any) =>
-                    String(t.table_name || '').endsWith('_working')
-                );
+                const workingTable = tables.find((t: any) => {
+                    const name = String(t.table_name || '');
+                    return name.startsWith('t_')
+                        && name.endsWith('_working')
+                        && !name.includes('_dryrun_');
+                });
 
                 if (workingTable) {
                     tableName = String(workingTable.table_name);
                 } else {
-                    console.error('❌ 无法找到working表');
-                    alert('无法重置：未找到数据表');
+                    console.error('❌ 无法找到有效的工作表');
+                    alert('无法重置：未找到工作表');
                     return;
                 }
             }
+
+            // ✅ 防御性验证：确认表名有效
+            if (tableName.includes('_dryrun_')) {
+                console.error('❌ 严重错误：尝试重置临时表！', tableName);
+                alert('内部错误：无效的表名');
+                return;
+            }
+            console.log(`[清洗执行] ✅ 重置目标表: ${tableName}`);
 
             // 调用重置方法
             const success = await engine.resetWorkingTable(tableName);

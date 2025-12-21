@@ -1,0 +1,23 @@
+/* 数据探索模块顶部标题栏样式 */
+/* 与 LeftSidebar 和 RightSidebar 的标题栏保持完全一致 */
+
+.exploration-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 24px var(--gap-l) 24px;
+    flexShrink: 0;
+    /* 移除 border-bottom 以消除阴影效果 */
+    /* 背景改为透明，避免与下方内容产生颜色差异的视觉分隔感 */
+    background: transparent;
+    min-height: 65px;
+}
+
+.exploration-title {
+    font-size: var(--fs-xxl);
+    font-weight: var(--fw-bold);
+    margin: 0;
+    color: var(--text-primary);
+    white-space: nowrap;
+    line-height: 1;
+}

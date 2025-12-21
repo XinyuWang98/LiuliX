@@ -9,6 +9,7 @@ import { cleaning } from './cleaning';
 import { themes, welcome, workshop, grid, pagination, workflow } from './misc';
 import { insightChain, exploration, evidence, quality, report } from './analysis';
 import { aiCost, aiRetry, cache } from './ai';
+import { errors } from './errors';
 
 export const zhCN: LanguageConfig = {
     code: 'zh-CN',
@@ -39,5 +40,6 @@ export const zhCN: LanguageConfig = {
         aiCost,
         aiRetry,
         cache,
+        errors,
     },
 };

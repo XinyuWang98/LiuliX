@@ -136,8 +136,9 @@ export async function validateWithDryRun(
 ): Promise<ValidationResult & { affectedRows?: number }> {
 
     // 🛠️ 使用时间戳 + 随机数确保并发调用时表名唯一
+    // ✅ 修复：临时表不再以 t_ 开头，避免与正式表命名冲突
     const randomSuffix = Math.random().toString(36).substring(2, 8);
-    const tempTable = `${tableName}_dryrun_${Date.now()}_${randomSuffix}`;
+    const tempTable = `dryrun_${Date.now()}_${randomSuffix}`;
 
     try {
         // 1. 使用EXPLAIN检查语法

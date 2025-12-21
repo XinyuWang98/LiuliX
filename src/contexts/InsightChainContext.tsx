@@ -32,6 +32,7 @@ export function InsightChainProvider({ children }: { children: ReactNode }) {
     const [insights, setInsights] = useState<InsightNode[]>([]);
     const [activeHypothesisId, setActiveHypothesisId] = useState<string | null>(null);
 
+    // 证据池功能已启用
     const { addRecord } = useEvidence();
 
     // 添加洞察节点
@@ -93,7 +94,7 @@ export function InsightChainProvider({ children }: { children: ReactNode }) {
             )
         );
 
-        console.log('洞察链已采纳', insightChain);
+        console.log('[证据池] 洞察链已采纳并保存', insightChain);
     };
 
     // 重置洞察链

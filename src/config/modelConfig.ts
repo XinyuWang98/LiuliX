@@ -1,6 +1,6 @@
 export const MODEL_CONFIG = {
-    // 默认超时时间（增加到60秒以支持DeepSeek等大模型）
-    TIMEOUT_MS: 60000,
+    // 默认超时时间（增加到120秒以支持DeepSeek等大模型处理完整数据集）
+    TIMEOUT_MS: 120000,
 
     // ANTHROPIC 配置
     ANTHROPIC: {

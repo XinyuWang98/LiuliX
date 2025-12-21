@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { Sparkles, Play, CheckCircle2, RefreshCw, History, Check } from 'lucide-react';
+import { Sparkles, Play, CheckCircle2, RefreshCw, History, X } from 'lucide-react';
 
 import { SuggestionCard } from './components/SuggestionCard';
 import { useI18n } from '../../contexts/I18nContext';
@@ -7,7 +7,6 @@ import { DataViewer } from '../data/DataViewer';
 import {
     DataCleanerProps,
     SuggestionCategory,
-    ICON_SIZE_MEDIUM,
     ICON_SIZE_LARGE,
     CATEGORY_META
 } from './types/cleaning.types';
@@ -21,6 +20,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
     const { t } = useI18n();
     const [activeFileId, setActiveFileId] = useState<string | null>(project.files[0]?.id || null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [ignoredIds, setIgnoredIds] = useState<string[]>([]); // 忽略的建议ID列表
     const [activeTab, setActiveTab] = useState<string | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
     const [bottomPanelTab, setBottomPanelTab] = useState<'suggestions' | 'history'>('suggestions');
@@ -50,7 +50,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
     // 使用清洗执行Hook
     const {
         handleApply: executeApply,
-        confirmReset,
+        confirmReset: originalConfirmReset,
         cancelReset,
         loading: executionLoading,
         showResetConfirm
@@ -62,20 +62,43 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
         clearHistory
     );
 
+    // 重置时同时清空忽略状态
+    const confirmReset = () => {
+        setIgnoredIds([]); // 清空忽略列表
+        setSelectedIds([]); // 清空选中列表
+        originalConfirmReset();
+    };
+
     const loading = suggestionLoading || executionLoading;
 
     // 切换建议选中状态
-    const toggleSugg = (id: string) => setSelectedIds(prev =>
-        prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    const toggleSugg = (id: string) => {
+        // 如果建议已被忽略，不允许被选中
+        if (ignoredIds.includes(id)) return;
+
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        );
+    };
 
     // 全选/取消全选
     const toggleSelectAll = () => {
-        if (selectedIds.length === suggestions.length) {
+        // 过滤掉已忽略的建议
+        const validSuggestions = suggestions.filter(s => !ignoredIds.includes(s.id));
+
+        if (selectedIds.length === validSuggestions.length) {
             setSelectedIds([]);
         } else {
-            setSelectedIds(suggestions.map(s => s.id));
+            setSelectedIds(validSuggestions.map(s => s.id));
         }
+    };
+
+    // 忽略选中的建议
+    const handleIgnore = () => {
+        // 将选中的建议添加到忽略列表
+        setIgnoredIds(prev => [...new Set([...prev, ...selectedIds])]);
+        // 清空选中状态
+        setSelectedIds([]);
     };
 
     // 应用选中的建议
@@ -140,6 +163,14 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                                 >
                                     {loading ? <RefreshCw className="spin" size={14} /> : <Play size={14} />}
                                     {t('cleaning.applySelected', { count: selectedIds.length })}
+                                </button>
+                                <button
+                                    className="btnPanelAction btnIgnore"
+                                    onClick={handleIgnore}
+                                    disabled={loading || selectedIds.length === 0}
+                                >
+                                    <X size={14} />
+                                    {t('cleaning.ignore')}
                                 </button>
                             </>
                         )}
@@ -209,6 +240,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                                                                 key={s.id}
                                                                 suggestion={s}
                                                                 isSelected={selectedIds.includes(s.id)}
+                                                                isIgnored={ignoredIds.includes(s.id)}
                                                                 onToggle={toggleSugg}
                                                             />
                                                         ))}
@@ -217,11 +249,38 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                                             );
                                         }
 
-                                        if (loading) return <div className="aiEmpty"><RefreshCw className="spin" size={ICON_SIZE_LARGE} />{t('cleaning.analyzing')}</div>;
-                                        if (history.length > 0) return <div className="aiEmpty"><CheckCircle2 size={ICON_SIZE_LARGE} style={{ color: 'var(--success)' }} />{t('cleaning.allApplied')}</div>;
-                                        if (error) return <div className="aiEmpty" style={{ color: 'var(--warning)' }}><span style={{ fontSize: '24px' }}>⚠️</span>{t('cleaning.serviceUnavailable')}</div>;
-                                        if (aiGenerated) return <div className="aiEmpty"><Sparkles size={ICON_SIZE_LARGE} style={{ color: 'var(--primary)' }} />{t('cleaning.dataGood')}</div>;
-                                        return <div className="aiEmpty"><Sparkles size={ICON_SIZE_LARGE} style={{ color: 'var(--text-tertiary)' }} />{t('cleaning.tryAI')}</div>;
+                                        if (loading) return (
+                                            <div className="aiEmpty">
+                                                <RefreshCw className="spin" size={ICON_SIZE_LARGE} style={{ color: 'var(--primary)' }} />
+                                                <div className="emptyText">{t('cleaning.analyzing')}</div>
+                                            </div>
+                                        );
+                                        if (history.length > 0) return (
+                                            <div className="aiEmpty">
+                                                <CheckCircle2 size={ICON_SIZE_LARGE} style={{ color: 'var(--success)' }} />
+                                                <div className="emptyText">{t('cleaning.allApplied')}</div>
+                                            </div>
+                                        );
+                                        if (error) return (
+                                            <div className="aiEmpty">
+                                                <span style={{ fontSize: '32px' }}>⚠️</span>
+                                                <div className="emptyText" style={{ color: 'var(--warning)' }}>{t('cleaning.serviceUnavailable')}</div>
+                                            </div>
+                                        );
+                                        if (aiGenerated) return (
+                                            <div className="aiEmpty">
+                                                <Sparkles size={ICON_SIZE_LARGE} style={{ color: 'var(--primary)' }} />
+                                                <div className="emptyText">{t('cleaning.dataGood')}</div>
+                                            </div>
+                                        );
+                                        return (
+                                            <div className="aiEmpty state-initial">
+                                                <div className="emptyIconWrapper">
+                                                    <Sparkles size={24} style={{ color: 'var(--primary)' }} />
+                                                </div>
+                                                <div className="emptyText">{t('cleaning.tryAI') || '暂无规则建议，试试让 AI 深度分析？'}</div>
+                                            </div>
+                                        );
                                     })()}
                                 </div>
                             </div>

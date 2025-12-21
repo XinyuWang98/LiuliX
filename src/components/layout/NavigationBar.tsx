@@ -5,9 +5,10 @@ import { Settings, User } from 'lucide-react';
 
 interface NavigationBarProps {
     onOpenAPISettings?: () => void;
+    backendStatus?: 'connected' | 'disconnected' | 'checking';
 }
 
-export function NavigationBar({ onOpenAPISettings }: NavigationBarProps = {}) {
+export function NavigationBar({ onOpenAPISettings, backendStatus = 'checking' }: NavigationBarProps = {}) {
     const { t, language, setLanguage } = useI18n();
     const [showSettings, setShowSettings] = useState(false);
     const settingsRef = useRef<HTMLDivElement>(null);
@@ -89,6 +90,20 @@ export function NavigationBar({ onOpenAPISettings }: NavigationBarProps = {}) {
                     gap: 'var(--gap-s)',
                 }}
             >
+                {/* 后端状态指示灯 */}
+                <div
+                    title={backendStatus === 'connected' ? '后端服务已连接' : backendStatus === 'disconnected' ? '后端服务未启动，AI 功能已降级' : '正在检测后端服务...'}
+                    style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        background: backendStatus === 'connected' ? 'var(--success)' : backendStatus === 'disconnected' ? 'var(--warning)' : 'var(--text-secondary)',
+                        boxShadow: backendStatus === 'connected' ? '0 0 8px var(--success)' : backendStatus === 'disconnected' ? '0 0 8px var(--warning)' : 'none',
+                        flexShrink: 0,
+                        animation: backendStatus === 'checking' ? 'pulse 1.5s infinite' : 'none',
+                    }}
+                />
+
                 <ThemeSwitcher />
 
                 <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 var(--gap-xs)' }} />

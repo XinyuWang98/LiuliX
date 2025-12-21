@@ -199,6 +199,72 @@ export const askAI = async (
     throw new Error(t('settings.errorAllFailed'));
 };
 
+// ==================== 🆕 专用通道函数 ====================
+
+/**
+ * 清洗建议专用 AI 调用（快速通道）
+ * - 超时：30秒
+ * - 用于：SQL生成、数据质量检测
+ */
+export const askAICleaning = async (prompt: string) => {
+    try {
+        const key = CONFIG.deepseek.key();
+        const res = await ky.post('http://localhost:3001/api/proxy/deepseek-cleaning', {
+            headers: {
+                'x-api-key': key
+            },
+            json: {
+                data: {
+                    model: 'deepseek-chat',
+                    messages: [{ role: 'user', content: prompt }],
+                    stream: false
+                }
+            },
+            timeout: 30000
+        }).json<any>();
+
+        const content = res.choices?.[0]?.message?.content || '';
+        console.log('[AI服务-清洗] ✅ 响应成功，长度:', content.length);
+
+        return { content, model: 'deepseek-cleaning' };
+    } catch (err: any) {
+        console.warn('[AI服务-清洗] ⚠️ 调用失败:', err.message);
+        throw new Error('清洗建议 AI 调用失败');
+    }
+};
+
+/**
+ * 洞察建议专用 AI 调用（深度通道）
+ * - 超时：120秒
+ * - 用于：Python代码生成、复杂数据分析
+ */
+export const askAIInsight = async (prompt: string) => {
+    try {
+        const key = CONFIG.deepseek.key();
+        const res = await ky.post('http://localhost:3001/api/proxy/deepseek-insight', {
+            headers: {
+                'x-api-key': key
+            },
+            json: {
+                data: {
+                    model: 'deepseek-chat',
+                    messages: [{ role: 'user', content: prompt }],
+                    stream: false
+                }
+            },
+            timeout: 120000
+        }).json<any>();
+
+        const content = res.choices?.[0]?.message?.content || '';
+        console.log('[AI服务-洞察] ✅ 响应成功，长度:', content.length);
+
+        return { content, model: 'deepseek-insight' };
+    } catch (err: any) {
+        console.warn('[AI服务-洞察] ⚠️ 调用失败:', err.message);
+        throw new Error('洞察建议 AI 调用失败');
+    }
+};
+
 /**
  * 专门用于生成数据清洗 SQL 的辅助函数
  * 强制输出纯净 SQL

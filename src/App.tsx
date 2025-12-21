@@ -12,6 +12,7 @@ import { PanelRight, PanelLeft } from 'lucide-react';
 import { ExplorationFlow } from './components/exploration/ExplorationFlow';
 import { pyodideManager } from './services/PyodideManager';
 import { AIConfigModal } from './components/AIConfigModal';
+import { useResizable } from '@/hooks/useResizable';
 
 function LoadingScreen() {
     const { t } = useI18n();
@@ -60,6 +61,25 @@ function AppContent() {
     const [showRight, setShowRight] = useState(() => localStorage.getItem('layout.showRight') !== 'false');
     const [showAPISettings, setShowAPISettings] = useState(false);
     const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+    const [backendStatus, setBackendStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+
+    // 左侧边栏拖拽处理
+    const { width: leftWidth, startResizing: startLeftResizing, isResizing: isLeftResizing } = useResizable({
+        initialWidth: 280,
+        minWidth: 220,
+        maxWidth: 500,
+        direction: 'right',
+        storageKey: 'layout.leftWidth'
+    });
+
+    // 右侧边栏拖拽处理
+    const { width: rightWidth, startResizing: startRightResizing, isResizing: isRightResizing } = useResizable({
+        initialWidth: 320,
+        minWidth: 280,
+        maxWidth: 600,
+        direction: 'left',
+        storageKey: 'layout.rightWidth'
+    });
 
     useEffect(() => localStorage.setItem('layout.showLeft', showLeft.toString()), [showLeft]);
     useEffect(() => localStorage.setItem('layout.showRight', showRight.toString()), [showRight]);
@@ -78,13 +98,44 @@ function AppContent() {
         init();
     }, []);
 
-    // 首次加载检测 - 自动弹出API设置
+    // 后端健康检查
     useEffect(() => {
-        const hasConfigured = localStorage.getItem('api_configured');
-        if (!hasConfigured && isPyodideReady) {
-            setShowAPISettings(true);
+        const checkBackendHealth = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/health', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(3000) // 3秒超时
+                });
+                if (response.ok) {
+                    setBackendStatus('connected');
+                    console.log('[系统] 后端服务已连接');
+                } else {
+                    throw new Error('Health check failed');
+                }
+            } catch (error) {
+                setBackendStatus('disconnected');
+                console.warn('[系统] 后端服务未启动，AI 功能已降级');
+            }
+        };
+
+        // 首次检查
+        if (isPyodideReady) {
+            checkBackendHealth();
+            // 每30秒重新检查一次
+            const interval = setInterval(checkBackendHealth, 30000);
+            return () => clearInterval(interval);
         }
     }, [isPyodideReady]);
+
+    // ⚠️ MVP阶段：免费提供API Key服务，暂时禁用自动弹窗
+    // 等到正式部署上线后再启用此功能，引导用户配置自己的Key
+    // 首次加载检测 - 自动弹出API设置（已禁用）
+    // useEffect(() => {
+    //     const hasConfigured = localStorage.getItem('api_configured');
+    //     if (!hasConfigured && isPyodideReady) {
+    //         setShowAPISettings(true);
+    //     }
+    // }, [isPyodideReady]);
 
     if (!isPyodideReady) {
         return <LoadingScreen />;
@@ -98,8 +149,12 @@ function AppContent() {
             width: '100vw',
             background: 'var(--bg-main)',
             color: 'var(--text-primary)',
+            cursor: (isLeftResizing || isRightResizing) ? 'col-resize' : 'default', // 全局光标控制
         }}>
-            <NavigationBar onOpenAPISettings={() => setShowAPISettings(true)} />
+            <NavigationBar
+                onOpenAPISettings={() => setShowAPISettings(true)}
+                backendStatus={backendStatus}
+            />
 
             <div style={{
                 flex: 1,
@@ -108,11 +163,11 @@ function AppContent() {
                 position: 'relative',
             }}>
                 {showLeft ? (
-                    <div style={{
-                        width: '25%',
+                    <div className="sidebar-enter" style={{
+                        width: leftWidth,
                         flexShrink: 0,
                         display: 'flex',
-                        overflow: 'hidden',
+                        position: 'relative',
                     }}>
                         <LeftSidebar
                             onProjectSelect={(project) => {
@@ -121,6 +176,31 @@ function AppContent() {
                             }}
                             onClose={() => setShowLeft(false)}
                         />
+                        {/* Drag Handle */}
+                        <div
+                            onMouseDown={startLeftResizing}
+                            style={{
+                                position: 'absolute',
+                                right: '-4px',
+                                top: 'var(--gap-m)',
+                                bottom: 'var(--gap-m)',
+                                width: '8px',
+                                cursor: 'col-resize',
+                                zIndex: 10,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                            title="Drag to resize"
+                        >
+                            <div style={{
+                                width: '2px',
+                                height: '100%',
+                                background: isLeftResizing ? 'var(--primary)' : 'transparent',
+                                transition: 'background 0.2s',
+                                borderRadius: '1px',
+                            }} />
+                        </div>
                     </div>
                 ) : (
                     <div
@@ -189,77 +269,111 @@ function AppContent() {
                 </div>
 
                 {showRight ? (
-                    <div
-                        className="glass-panel"
-                        style={{
-                            width: '25%',
-                            flexShrink: 0,
-                            overflow: 'hidden',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            margin: 'var(--gap-m)',
-                            height: 'calc(100% - 2 * var(--gap-m))',
-                            marginLeft: 0,
-                            borderLeft: 'none',
-                        }}>
-                        <aside style={{
-                            width: '100%',
-                            height: '100%',
-                            padding: 0,
-                            overflow: 'hidden',
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}>
-                            <div style={{
+                    <div style={{
+                        width: rightWidth,
+                        flexShrink: 0,
+                        display: 'flex',
+                        position: 'relative', // for handle positioning
+                    }}>
+                        {/* 拖拽手柄 (左侧) */}
+                        <div
+                            onMouseDown={startRightResizing}
+                            style={{
+                                position: 'absolute',
+                                left: '-4px', // 向左偏移覆盖空隙
+                                top: 'var(--gap-m)',
+                                bottom: 'var(--gap-m)',
+                                width: '8px',
+                                cursor: 'col-resize',
+                                zIndex: 10,
                                 display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-end',
-                                padding: '24px var(--gap-l) 24px',
-                                flexShrink: 0,
-                            }}>
-                                <h2 style={{
-                                    fontSize: 'var(--fs-xxl)',
-                                    fontWeight: 'var(--fw-bold)',
-                                    margin: 0,
-                                    color: 'var(--text-primary)',
-                                    whiteSpace: 'nowrap',
-                                    lineHeight: 1,
-                                }}>
-                                    {t('workshop.title')}
-                                </h2>
-                                <button
-                                    className="btn-ghost"
-                                    onClick={() => setShowRight(false)}
-                                    style={{
-                                        padding: '4px',
-                                        borderRadius: 'var(--radius-s)',
-                                        color: 'var(--text-secondary)',
-                                        cursor: 'pointer',
-                                    }}
-                                    title={t('sidebar.collapse')}
-                                >
-                                    <PanelRight size={18} />
-                                </button>
-                            </div>
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                            title="Drag to resize"
+                        >
+                            {/* 可视化指示条 */}
                             <div style={{
-                                flex: 1,
-                                overflowY: 'auto',
-                                padding: 'var(--gap-l)',
+                                width: '2px',
+                                height: '100%',
+                                background: isRightResizing ? 'var(--primary)' : 'transparent',
+                                transition: 'background 0.2s',
+                                borderRadius: '1px',
+                            }} />
+                        </div>
+
+                        <div
+                            className="glass-panel"
+                            style={{
+                                width: '100%',
+                                flexShrink: 0,
+                                overflow: 'hidden',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                margin: 'var(--gap-m)',
+                                height: 'calc(100% - 2 * var(--gap-m))',
+                                marginLeft: 0,
+                                borderLeft: 'none',
                             }}>
-                                <AIWorkshopTools
-                                    project={selectedProject}
-                                    onToolClick={(toolId) => {
-                                        if (toolId === 'cleaning') {
-                                            setCleaningTrigger(prev => prev + 1);
-                                        }
-                                    }}
-                                    onSuggestionsGenerated={(suggestions) => {
-                                        setAiSuggestions(suggestions);
-                                        console.log('[App] 收到AI建议:', suggestions.length);
-                                    }}
-                                />
-                            </div>
-                        </aside>
+                            <aside style={{
+                                width: '100%',
+                                height: '100%',
+                                padding: 0,
+                                overflow: 'hidden',
+                                display: 'flex',
+                                flexDirection: 'column',
+                            }}>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-end',
+                                    padding: '24px var(--gap-l) 24px',
+                                    flexShrink: 0,
+                                }}>
+                                    <h2 style={{
+                                        fontSize: 'var(--fs-xxl)',
+                                        fontWeight: 'var(--fw-bold)',
+                                        margin: 0,
+                                        color: 'var(--text-primary)',
+                                        whiteSpace: 'nowrap',
+                                        lineHeight: 1,
+                                    }}>
+                                        {t('workshop.title')}
+                                    </h2>
+                                    <button
+                                        className="btn-ghost"
+                                        onClick={() => setShowRight(false)}
+                                        style={{
+                                            padding: '4px',
+                                            borderRadius: 'var(--radius-s)',
+                                            color: 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                        }}
+                                        title={t('sidebar.collapse')}
+                                    >
+                                        <PanelRight size={18} />
+                                    </button>
+                                </div>
+                                <div style={{
+                                    flex: 1,
+                                    overflowY: 'auto',
+                                    padding: 'var(--gap-l)',
+                                }}>
+                                    <AIWorkshopTools
+                                        project={selectedProject}
+                                        onToolClick={(toolId) => {
+                                            if (toolId === 'cleaning') {
+                                                setCleaningTrigger(prev => prev + 1);
+                                            }
+                                        }}
+                                        onSuggestionsGenerated={(suggestions) => {
+                                            setAiSuggestions(suggestions);
+                                            console.log('[App] 收到AI建议:', suggestions.length);
+                                        }}
+                                    />
+                                </div>
+                            </aside>
+                        </div>
                     </div>
                 ) : (
                     <div

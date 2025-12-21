@@ -116,7 +116,7 @@ export function ExplorationBlock({ block, actions, children }: Props) {
             {/* Content */}
             {!block.isCollapsed && (
                 <div style={{
-                    padding: 'var(--gap-l)',
+                    padding: 'var(--gap-m)',
                     animation: 'fadeIn 0.2s ease-in-out',
                 }}>
                     {children}

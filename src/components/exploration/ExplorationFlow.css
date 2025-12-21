@@ -1,0 +1,186 @@
+/* Container Layout - 垂直布局 */
+.exploration-flow-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-app);
+    overflow: hidden;
+    color: var(--text-primary);
+    position: relative;
+    /* 覆盖glass-panel的inset box-shadow,移除标题栏下方阴影效果 */
+    box-shadow: none !important;
+}
+
+/* 主内容区域 - 水平布局（时间轴 + 内容） */
+.exploration-main-area {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+/* Right Panel Wrapper */
+.right-panel-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.scroll-container {
+    flex: 1;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding: 0;
+}
+
+.content-wrapper {
+    /* max-width: 900px; */
+    /* margin: 0 auto; */
+    padding: var(--gap-l) var(--gap-m) 140px;
+}
+
+
+/* Sections */
+.flow-section {
+    margin-bottom: 120px;
+}
+
+.section-header {
+    margin-bottom: var(--gap-l);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: opacity 0.3s;
+}
+
+.section-number {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.section-faded {
+    opacity: 0.5;
+}
+
+.section-active {
+    opacity: 1;
+}
+
+/* Cleaning Section Specifics */
+.cleaning-content-wrapper {
+    transition: all 0.3s ease;
+}
+
+.cleaning-full-view {
+    animation: fadeIn 0.3s ease;
+}
+
+.collapse-hint-btn {
+    text-align: center;
+    padding: 12px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.collapse-hint-btn:hover {
+    color: var(--text-secondary);
+}
+
+/* Insights Section Specifics */
+.empty-insight-placeholder {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
+/* Report Section Specifics */
+.report-section-container {
+    min-height: 60vh;
+}
+
+/* Floating Chat Input */
+.chat-input-wrapper {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    padding: 0 var(--gap-l);
+    pointer-events: none;
+    z-index: 30;
+}
+
+.chat-input-container {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 6px 12px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 700px;
+    pointer-events: auto;
+    min-height: 45px;
+}
+
+.chat-action-btn {
+    padding: 6px;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.chat-input-field {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    resize: none;
+    min-height: 20px;
+    max-height: 100px;
+    padding: 6px 0;
+    outline: none;
+    font-size: var(--fs-m);
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.chat-send-btn {
+    padding: 0;
+    border-radius: 50%;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

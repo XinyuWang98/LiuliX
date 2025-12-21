@@ -15,8 +15,8 @@
   /* 主背景,黑洞底 */
   --bg-main: #1C1C1E;
 
-  /* 面板色,深蓝灰 */
-  --bg-panel: #2C2C2E;
+  /* 面板色,深蓝灰 (带透明度以支持毛玻璃) */
+  --bg-panel: rgba(44, 44, 46, 0.75);
 
   /* 高亮/按钮主色,霓虹青 */
   --bg-accent: #007AFF;
@@ -36,6 +36,17 @@
   /* 悬浮背景,青透 */
   --hover-bg: rgba(0, 122, 255, 0.1);
 
+  --bg-overlay: rgba(0, 0, 0, 0.6);
+
+  /* Glassmorphism */
+  --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  /* Subtler highlight */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --blur-light: 8px;
+  --blur-medium: 12px;
+  --blur-heavy: 20px;
+
+  /* Shadows */
   /* 边框线,暗蓝 */
   --border: #4A4A4C;
 
@@ -223,7 +234,7 @@
   --z-base: 1;
 
   /* ========== DataGrid 变量 ========== */
-  --grid-row-height: 35px;
+  --grid-row-height: 40px;
   --grid-col-width: 150px;
   --grid-overscan: 5;
   --grid-chunk-size: 100;

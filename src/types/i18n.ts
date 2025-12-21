@@ -20,6 +20,7 @@ export interface LanguageConfig {
             no: string;
             search: string;
             all: string;
+            featureInDev: string;
         };
 
         // 数据统计
@@ -307,6 +308,12 @@ export interface LanguageConfig {
                     action: string;
                 };
             };
+            mindMap: string;
+            mindMapDesc: string;
+            voiceReport: string;
+            voiceReportDesc: string;
+            pptReport: string;
+            pptReportDesc: string;
         };
 
         // 数据清洗
@@ -620,6 +627,19 @@ export interface LanguageConfig {
             staleHint: string;
         };
 
+        // 本地模型进度
+        localModel: {
+            init: string;
+            downloadHint: string;
+            status: {
+                loading: string;
+                fetching: string;
+                processing: string;
+                ready: string;
+                unknown: string;
+            };
+        };
+
         // 缓存/采样标记
         cache: {
             basedOnSample: {
@@ -628,6 +648,16 @@ export interface LanguageConfig {
                 totalSize: string;
                 note: string;
             };
+        };
+
+        // 错误提示文案
+        errors: {
+            tableNotFound: string;
+            autoRecovering: string;
+            loadFailed: string;
+            retry: string;
+            cancel: string;
+            close: string;
         };
     };
 }

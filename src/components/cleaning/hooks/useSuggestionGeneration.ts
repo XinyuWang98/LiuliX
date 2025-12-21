@@ -31,6 +31,9 @@ export function useSuggestionGeneration(
     // 防止Strict Mode双重调用和重复生成
     const loadedOnceRef = useRef<{ [key: string]: boolean }>({});
 
+    // ✅ P0修复：AbortController用于取消过期的AI请求
+    const abortControllerRef = useRef<AbortController | null>(null);
+
     useEffect(() => {
         const generateSuggestions = async () => {
             setLoading(true);
@@ -57,7 +60,7 @@ export function useSuggestionGeneration(
             // 如果内存为空，尝试从DuckDB读取
             else {
                 try {
-                    const { DuckDBEngine } = await import('../../../db/duckdbEngine');
+                    // Removed redundant dynamic import
                     const engine = DuckDBEngine.getInstance();
 
                     let tableName = activeFile.data.tableName;
@@ -250,6 +253,9 @@ export function useSuggestionGeneration(
 
                     // 异步执行，不阻塞规则建议显示
                     (async () => {
+                        // ✅ P0修复：创建新的AbortController
+                        abortControllerRef.current = new AbortController();
+
                         try {
                             const aiResults = await generateAICleaningSuggestions(
                                 activeFile.data.tableName,
@@ -331,6 +337,14 @@ export function useSuggestionGeneration(
         };
 
         generateSuggestions();
+
+        // ✅ P0修复：cleanup时取消未完成的AI请求
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+                abortControllerRef.current = null;
+            }
+        };
     }, [activeFile?.id, activeFile?.data?.tableName, cleaningTrigger, aiSuggestions, t, language.name]); // onProjectUpdate 和 project 不放入依赖，避免循环
 
     // 移除已应用的建议

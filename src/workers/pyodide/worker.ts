@@ -15,10 +15,10 @@ async function loadPyodideAndPackages() {
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
         });
 
-        ctx.postMessage({ type: 'STATUS', message: 'Loading Pandas...' });
+        ctx.postMessage({ type: 'STATUS', message: 'Loading Pandas & Matplotlib...' });
 
-        // Load operational packages
-        await pyodide.loadPackage(['pandas', 'numpy']);
+        // Load operational packages (添加 matplotlib 用于图表生成)
+        await pyodide.loadPackage(['pandas', 'numpy', 'matplotlib']);
 
         ctx.postMessage({ type: 'READY' });
     } catch (error) {

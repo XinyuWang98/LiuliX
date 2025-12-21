@@ -6,6 +6,7 @@ export const cleaning = {
     fillNull: '填充缺失值',
     normalize: '标准化',
     dropEmpty: '删除空行',
+    ignore: '忽略',
     sqlPlaceholder: '输入 SQL 清洗语句...',
     runSQL: '执行 SQL',
     intentDedup: '去除重复数据',
@@ -116,5 +117,6 @@ export const cleaning = {
     tryAI: '暂无规则建议，试试让 AI 深度分析？',
     dataGood: '当前数据质量良好，无需清洗。',
     allApplied: '所有建议已应用，数据已更新。',
-    serviceUnavailable: 'AI 服务暂时不可用，请稍后重试。'
+    serviceUnavailable: 'AI 服务暂时不可用，请稍后重试。',
+    // End of cleaning translations
 };

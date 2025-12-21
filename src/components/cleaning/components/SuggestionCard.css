@@ -104,3 +104,23 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* 被忽略的建议卡片 - 置灰效果 */
+.suggestionCard.ignored {
+    opacity: 0.4;
+    filter: grayscale(1);
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+}
+
+.suggestionCard.ignored::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(var(--bg-primary-rgb, 0, 0, 0), 0.6);
+    border-radius: var(--radius-m);
+    pointer-events: none;
+}

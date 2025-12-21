@@ -22,6 +22,7 @@ export const enUS: LanguageConfig = {
             no: 'No',
             search: 'Search',
             all: 'All',
+            featureInDev: 'Feature in development...',
         },
         data: {
             unique: 'Unique',
@@ -163,7 +164,10 @@ export const enUS: LanguageConfig = {
                 exploration: { title: 'Data Exploration', desc: 'Auto-generate reports', action: 'Explore' },
                 hypothesis: { title: 'Hypothesis', desc: 'Generate hypotheses', action: 'Generate' },
                 suggestions: { title: 'Suggestions', desc: 'AI recommendations', action: 'Get Suggestions' },
-            }
+            },
+            mindMap: 'Mind Map', mindMapDesc: 'Structure your ideas',
+            voiceReport: 'Voice Report', voiceReportDesc: 'Generate audio report',
+            pptReport: 'PPT Report', pptReportDesc: 'Generate presentation',
         },
         cleaning: {
             title: 'Data Cleaning', currentTable: 'Current Table', dedup: 'Dedup', fillNull: 'Fill Missing', normalize: 'Normalize', dropEmpty: 'Drop Empty',
@@ -255,11 +259,30 @@ export const enUS: LanguageConfig = {
             title: 'AI Failed', retryButton: 'Retry', retrying: 'Retrying...', failed: 'AI failed, click to retry',
             staleHint: 'Data cleaned, re-analyzing...',
         },
+        localModel: {
+            init: 'Initializing local model...',
+            downloadHint: '⏳ First download 4.3GB model, approx 10-30 mins, offline forever after',
+            status: {
+                loading: 'Loading model...',
+                fetching: 'Downloading parameters ({progress})',
+                processing: 'Processing weights...',
+                ready: 'Local model ready',
+                unknown: 'Processing...',
+            }
+        },
         cache: {
             basedOnSample: {
                 hint: 'Based on sampled data', sampleSize: 'Sample size: {size}', totalSize: 'Total: {total}',
                 note: 'Using first {size} rows for speed',
             },
+        },
+        errors: {
+            tableNotFound: 'Table not found',
+            autoRecovering: 'Auto recovering...',
+            loadFailed: 'Load failed',
+            retry: 'Retry',
+            cancel: 'Cancel',
+            close: 'Close',
         },
     },
 };

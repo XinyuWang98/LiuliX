@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, TrendingUp, Lightbulb, Target } from 'lucide-react';
+import { Share2, Mic, Presentation } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 import { Project } from '../../utils/projectUtils';
 import { DuckDBEngine } from '../../db/duckdbEngine';
@@ -18,28 +18,22 @@ interface AIWorkshopToolsProps {
 // 工具配置
 const TOOLS = [
     {
-        id: 'cleaning',
-        icon: Sparkles,
-        nameKey: 'workshop.cleaning',
-        descKey: 'workshop.cleaningDesc'
+        id: 'mindMap',
+        icon: Share2,
+        nameKey: 'workshop.mindMap',
+        descKey: 'workshop.mindMapDesc'
     },
     {
-        id: 'exploration',
-        icon: TrendingUp,
-        nameKey: 'workshop.exploration',
-        descKey: 'workshop.explorationDesc'
+        id: 'voiceReport',
+        icon: Mic,
+        nameKey: 'workshop.voiceReport',
+        descKey: 'workshop.voiceReportDesc'
     },
     {
-        id: 'hypothesis',
-        icon: Lightbulb,
-        nameKey: 'workshop.hypothesis',
-        descKey: 'workshop.hypothesisDesc'
-    },
-    {
-        id: 'suggestions',
-        icon: Target,
-        nameKey: 'workshop.suggestions',
-        descKey: 'workshop.suggestionsDesc'
+        id: 'pptReport',
+        icon: Presentation,
+        nameKey: 'workshop.pptReport',
+        descKey: 'workshop.pptReportDesc'
     }
 ];
 
@@ -59,7 +53,15 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
             return;
         }
 
+        // Mock Tools
+        if (['mindMap', 'voiceReport', 'pptReport'].includes(toolId)) {
+            alert(t('common.featureInDev'));
+            return;
+        }
+
         if (toolId === 'cleaning' && project) {
+            // Keep existing cleaning logic for future restoration if needed
+            // ... (Logic is preserved but currently unreachable via UI)
             setIsGenerating(true); // 🚀 标记开始生成
             setLoadingTool(toolId);
             setProgress(0);

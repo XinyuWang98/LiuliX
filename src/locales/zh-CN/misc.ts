@@ -38,6 +38,12 @@ export const workshop = {
     hypothesisDesc: '基于数据特征生成分析假设',
     suggestions: '分析建议',
     suggestionsDesc: 'AI推荐合适的分析方法和步骤',
+    mindMap: '思维导图',
+    mindMapDesc: 'AI自动生成分析思路导图',
+    voiceReport: '语音报告',
+    voiceReportDesc: '生成分析结果的语音解读',
+    pptReport: 'PPT报告',
+    pptReportDesc: '自动生成演示文稿',
     tools: {
         cleaning: {
             title: '数据清洗建议',
@@ -94,6 +100,6 @@ export const workflow = {
     upload: '上传文件',
     cleaning: '数据清洗',
     hypothesis: '分析假设',
-    insights: '数据洞察',
+    insights: '洞察分析',
     report: '分析报告',
 };

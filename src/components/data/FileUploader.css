@@ -1,0 +1,125 @@
+.file-uploader-dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-m);
+    padding: var(--gap-xl);
+    text-align: center;
+    cursor: pointer;
+    background: transparent;
+    transition: all var(--transition-s);
+}
+
+.file-uploader-dropzone.dragging {
+    border-color: var(--bg-accent);
+    background: var(--hover-bg);
+}
+
+.file-uploader-dropzone .upload-icon {
+    margin: 0 auto var(--gap-m);
+    color: var(--text-secondary);
+}
+
+.file-uploader-dropzone.dragging .upload-icon {
+    color: var(--bg-accent);
+}
+
+.file-uploader-dropzone .upload-text {
+    font-size: var(--fs-base);
+    color: var(--text-primary);
+    margin-bottom: var(--gap-s);
+}
+
+.file-uploader-dropzone .upload-hint {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--gap-s);
+}
+
+.file-uploader-dropzone .supported-formats {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+/* Error Container */
+.upload-error-container {
+    margin-top: var(--gap-m);
+    padding: var(--gap-m);
+    background: var(--warning);
+    border-radius: var(--radius-m);
+}
+
+.upload-error-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-s);
+}
+
+.upload-error-title {
+    font-size: var(--fs-sm);
+    font-weight: var(--btn-font-weight);
+}
+
+.upload-error-item {
+    font-size: var(--fs-xs);
+    margin-top: var(--gap-xs);
+}
+
+.error-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Batch Sample Modal Content */
+.batch-modal-content {
+    max-width: 500px;
+    padding: var(--gap-l);
+}
+
+.batch-modal-header {
+    font-size: var(--fs-lg);
+    margin-bottom: var(--gap-m);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+}
+
+.batch-modal-desc {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--gap-m);
+}
+
+.batch-file-list {
+    margin-bottom: var(--gap-m);
+    padding: var(--gap-m);
+    background: var(--bg-main);
+    border-radius: var(--radius-m);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.batch-file-item {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--gap-xs);
+    display: flex;
+    justify-content: space-between;
+}
+
+.batch-control-group {
+    margin-bottom: var(--gap-m);
+}
+
+.batch-range-label {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: var(--gap-s);
+}
+
+.batch-action-buttons {
+    display: flex;
+    gap: var(--gap-m);
+    justify-content: flex-end;
+}

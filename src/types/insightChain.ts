@@ -22,6 +22,13 @@ export interface HypothesisCard {
     description: string;                 // 假设详细描述
     verificationMethod: string;          // 验证方式（如"计算相关系数"）
     isExpanded: boolean;                 // 是否展开显示洞察节点
+    // 🆕 P0 新增：批量执行结果（Pyodide Base64输出）
+    executionResult?: {
+        image: string;                   // Base64图片: data:image/png;base64,...
+        summary: string;                 // 统计摘要文本
+        code: string;                    // 生成的Python代码
+    };
+    executionStatus?: 'pending' | 'success' | 'error'; // 执行状态
 }
 
 // Chart.js 图表数据结构

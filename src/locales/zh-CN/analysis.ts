@@ -1,6 +1,6 @@
 // 洞察链、探索流、证据池、质量、报告模块翻译
 export const insightChain = {
-    title: '洞察链分析',
+    title: '洞察分析',
     loading: '正在挖掘洞察...',
     loadingHypothesis: '正在生成假设...',
     noHypotheses: '暂无假设卡片',
@@ -43,7 +43,7 @@ export const exploration = {
         upload: '数据清洗',
         cleaning: '数据清洗建议',
         hypothesis: '分析假设生成',
-        insights: '关键数据洞察',
+        insights: '洞察分析',
         report: '分析报告',
         chat: 'AI 助手',
     }

@@ -6,25 +6,96 @@ require('dotenv').config({ path: '.env.local' });
 const app = express();
 const port = process.env.PORT || 3001;
 
+// 读取环境变量（支持通道拆分）
+const DEEPSEEK_CLEANING_KEY = process.env.DEEPSEEK_API_KEY_CLEANING || process.env.DEEPSEEK_API_KEY;
+const DEEPSEEK_INSIGHT_KEY = process.env.DEEPSEEK_API_KEY_INSIGHT || 'sk-33b37922d18d4783a4664b86022c5e5e';
+
 // 调试：检查环境变量是否加载（脱敏输出）
-if (process.env.DEEPSEEK_API_KEY) {
-    console.log('✅ 环境变量已加载: DEEPSEEK_API_KEY =', process.env.DEEPSEEK_API_KEY.substring(0, 10) + '...');
+if (DEEPSEEK_CLEANING_KEY) {
+    console.log('✅ 清洗建议 API Key:', DEEPSEEK_CLEANING_KEY.substring(0, 10) + '...');
 } else {
-    console.log('❌ 警告: DEEPSEEK_API_KEY 环境变量未设置');
+    console.log('❌ 警告: DEEPSEEK_API_KEY_CLEANING 环境变量未设置');
+}
+if (DEEPSEEK_INSIGHT_KEY) {
+    console.log('✅ 洞察建议 API Key:', DEEPSEEK_INSIGHT_KEY.substring(0, 10) + '...');
 }
 
 // 启用 CORS，允许前端请求
-app.use(cors({
-    origin: 'http://localhost:5173', // Vite 默认端口
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
-}));
+app.use(cors());
 
-app.use(express.json());
+// 🔧 增加body size限制以支持大数据集洞察生成（从1mb增加到10mb）
+app.use(express.json({ limit: '10mb' }));  // 增加JSON body限制
+app.use(express.urlencoded({ limit: '10mb', extended: true }));  // 增加URL-encoded限制
 
 // 健康检查接口
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// 🆕 清洗建议专用通道（快速响应）
+app.post('/api/proxy/deepseek-cleaning', async (req, res) => {
+    const { data } = req.body;
+    // 优先使用客户端Key
+    const clientKey = req.headers['x-api-key'];
+    const finalKey = (clientKey && clientKey !== 'default') ? clientKey : DEEPSEEK_CLEANING_KEY;
+
+    try {
+        console.log('[代理-清洗] 转发请求至 DeepSeek');
+
+        const config = {
+            method: 'POST',
+            url: 'https://api.deepseek.com/v1/chat/completions',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${finalKey}`
+            },
+            data,
+            timeout: 30000 // 清洗：30秒超时
+        };
+
+        const response = await axios(config);
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        console.error('[代理-清洗错误]', error.message);
+        if (error.response) {
+            res.status(error.response.status).json(error.response.data);
+        } else {
+            res.status(500).json({ error: error.message, channel: 'cleaning' });
+        }
+    }
+});
+
+// 🆕 洞察建议专用通道（深度分析）
+app.post('/api/proxy/deepseek-insight', async (req, res) => {
+    const { data } = req.body;
+    // 优先使用客户端Key
+    const clientKey = req.headers['x-api-key'];
+    const finalKey = (clientKey && clientKey !== 'default') ? clientKey : DEEPSEEK_INSIGHT_KEY;
+
+    try {
+        console.log('[代理-洞察] 转发请求至 DeepSeek');
+
+        const config = {
+            method: 'POST',
+            url: 'https://api.deepseek.com/v1/chat/completions',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${finalKey}`
+            },
+            data,
+            timeout: 120000 // 洞察：120秒超时
+        };
+
+        const response = await axios(config);
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        console.error('[代理-洞察错误]', error.message);
+        if (error.response) {
+            res.status(error.response.status).json(error.response.data);
+        } else {
+            res.status(500).json({ error: error.message, channel: 'insight' });
+        }
+    }
 });
 
 // 通用代理接口
@@ -66,7 +137,8 @@ app.post('/api/proxy', async (req, res) => {
                 origin: undefined,
                 referer: undefined
             },
-            data
+            data,
+            timeout: 120000 // 后端也同步增加到120秒
         };
 
         const response = await axios(config);

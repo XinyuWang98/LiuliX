@@ -8,6 +8,7 @@ import './SuggestionCard.css';
 interface SuggestionCardProps {
     suggestion: SimpleSuggestion;
     isSelected: boolean;
+    isIgnored?: boolean; // 是否被忽略
     onToggle: (id: string) => void;
 }
 
@@ -16,7 +17,7 @@ interface SuggestionCardProps {
  * 格式：【AI/规则建议】操作描述 推荐度XX%
  * 点击高亮选中，支持多选，选中后直接在卡片内展开详情
  */
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, onToggle }) => {
+export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, isIgnored, onToggle }) => {
     const { t } = useI18n();
 
     // 置信度百分比
@@ -27,7 +28,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
 
     return (
         <div
-            className={`suggestionCard ${isSelected ? 'selected' : ''}`}
+            className={`suggestionCard ${isSelected ? 'selected' : ''} ${isIgnored ? 'ignored' : ''}`}
             onClick={() => onToggle(suggestion.id)}
         >
             {/* 头部摘要区 - 始终显示 */}

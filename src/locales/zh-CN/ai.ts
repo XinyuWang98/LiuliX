@@ -29,3 +29,16 @@ export const cache = {
         note: '为提升分析速度，仅使用前 {size} 行数据',
     },
 };
+
+// 本地模型模块翻译（新增）
+export const localModel = {
+    init: '初始化本地模型...',
+    downloadHint: '⏳ 首次下载 4.3GB 模型，约需 10-30 分钟，完成后永久离线可用',
+    status: {
+        loading: '正在加载模型...',
+        fetching: '正在下载模型参数 ({progress})',
+        processing: '正在处理模型权重...',
+        ready: '本地模型已就绪',
+        unknown: '正在处理...',
+    }
+};

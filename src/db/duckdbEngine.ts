@@ -5,6 +5,7 @@ import duckdb_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js
 import duckdb_eh_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url';
 import { IngestionOptions, IngestionResult, ColumnMetadata } from '../types/duckdb';
 import { globalT } from '../contexts/I18nContext';
+import { logger } from '../utils/logger';
 
 /**
  * 极简务实的 DuckDB Singleton 引擎
@@ -52,8 +53,8 @@ export class DuckDBEngine {
         worker.onmessageerror = (e) => console.error("❌ DuckDB Worker 消息错误:", e);
 
         // 3. 启动 DB (使用VoidLogger禁用DuckDB内部日志)
-        const logger = new duckdb.VoidLogger();
-        this.db = new duckdb.AsyncDuckDB(logger, worker);
+        const voidLogger = new duckdb.VoidLogger();
+        this.db = new duckdb.AsyncDuckDB(voidLogger, worker);
         await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
         // 4. 挂载 OPFS (用于持久化) - 务实策略：暂禁用 OPFS 以确保稳定性 (修复 Write Mode Error)
@@ -72,7 +73,7 @@ export class DuckDBEngine {
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
-        console.log(globalT('settings.opfsSuccess'));
+        logger.log('DuckDB', '初始化完成');
     }
 
     /**
@@ -119,9 +120,9 @@ export class DuckDBEngine {
         try {
             await this.conn.query(`DROP TABLE IF EXISTS ${originalTable}`);
             await this.conn.query(`DROP TABLE IF EXISTS ${workingTable}`);
-            console.log(`DuckDB: 准备为文件创建双表 ${originalTable} + ${workingTable}`);
+            logger.log('DuckDB', '创建双表', { data: `${originalTable} + ${workingTable}` });
         } catch (cleanupErr) {
-            console.warn(`DuckDB: 清理表失败（忽略）`, cleanupErr);
+            logger.warn('DuckDB', '清理表失败(忽略)', cleanupErr);
         }
 
         // 1. 注册文件句柄（零拷贝）
@@ -155,14 +156,13 @@ export class DuckDBEngine {
         await this.conn.query(sql);
 
         if (onProgress) onProgress(50);
-        console.log(`✅ 原始表创建成功: ${originalTable}`);
 
         // 5. 从 original 复制数据到 working 表
         await this.conn.query(`CREATE TABLE ${workingTable} AS SELECT * FROM ${originalTable}`);
 
         if (onProgress) onProgress(100);
-        console.log(`✅ 工作表创建成功: ${workingTable}`);
-        console.log(globalT('settings.parseSuccess', { time: (performance.now() - start).toFixed(2) }));
+        const time = (performance.now() - start).toFixed(2);
+        logger.log('DuckDB', '双表创建完成', { duration: Number(time) });
 
         // 6. 获取 Schema 和行数（从 working 表查询）
         const info = await this.conn.query(`SELECT count(*) as c FROM ${workingTable}`);
@@ -226,9 +226,9 @@ export class DuckDBEngine {
 
         const start = performance.now();
         await this.conn.query(cleanSQL);
-        const time = (performance.now() - start).toFixed(2);
+        const time = Number((performance.now() - start).toFixed(2));
 
-        console.log(`[DuckDB] Clean SQL Executed (${time}ms): ${cleanSQL}`);
+        logger.log('DuckDB', '清洗SQL执行完成', { duration: time });
         return `Execution successful (${time}ms)`;
     }
 
@@ -244,7 +244,7 @@ export class DuckDBEngine {
         // 例如：t_1234567890_working → t_1234567890_original
         const originalTableName = workingTableName.replace('_working', '_original');
 
-        console.log(`🔄 开始重置工作表: ${workingTableName} ← ${originalTableName}`);
+        logger.log('DuckDB', '开始重置工作表', { data: `${workingTableName} ← ${originalTableName}` });
 
         try {
             // 1. 检查 original 表是否存在
@@ -255,24 +255,23 @@ export class DuckDBEngine {
             `);
 
             if (checkResult.numRows === 0) {
-                console.error(`❌ 原始表不存在: ${originalTableName}`);
+                logger.error('DuckDB', '原始表不存在', originalTableName);
                 return false;
             }
 
             // 2. 删除当前 working 表
             await this.conn.query(`DROP TABLE IF EXISTS ${workingTableName}`);
-            console.log(`✓ 已删除工作表: ${workingTableName}`);
 
             // 3. 从 original 重新复制数据到 working
             await this.conn.query(`
                 CREATE TABLE ${workingTableName} AS 
                 SELECT * FROM ${originalTableName}
             `);
-            console.log(`✅ 工作表重置成功: ${workingTableName}`);
+            logger.log('DuckDB', '工作表重置完成');
 
             return true;
         } catch (error) {
-            console.error(`❌ 重置工作表失败:`, error);
+            logger.error('DuckDB', '重置工作表失败', error);
             return false;
         }
     }
@@ -463,11 +462,11 @@ export class DuckDBEngine {
                                     }
                                 }
                             } catch (histError) {
-                                console.warn(`Failed to get histogram for ${col.name}`, histError);
+                                logger.warn('DuckDB', `获取列直方图失败: ${col.name}`, histError);
                             }
                         }
                     } catch (numericError) {
-                        console.warn(`Failed to get numeric stats for ${col.name}`, numericError);
+                        logger.warn('DuckDB', `获取数值统计失败: ${col.name}`, numericError);
                     }
                 } else if (nonNull > 0) {
                     // 非数值类型：获取 TOP 5 VALUES
@@ -497,7 +496,7 @@ export class DuckDBEngine {
 
                         categoricalStats = { topValues };
                     } catch (catError) {
-                        console.warn(`Failed to get categorical stats for ${col.name}`, catError);
+                        logger.warn('DuckDB', `获取分类统计失败: ${col.name}`, catError);
                     }
                 }
 
@@ -513,7 +512,7 @@ export class DuckDBEngine {
                 });
 
             } catch (e) {
-                console.warn(`Failed to get stats for column ${col.name}`, e);
+                logger.warn('DuckDB', `获取列统计失败: ${col.name}`, e);
                 stats.push({
                     name: col.name,
                     type: col.type,

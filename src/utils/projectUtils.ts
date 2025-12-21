@@ -137,11 +137,19 @@ export interface ProjectFile {
         };
         /** 洞察假设 */
         insight?: {
-            hypotheses: Array<any>; // 详细类型见Hypothesis
+            hypotheses: Array<any>;
             status: 'pending' | 'ready' | 'failed';
-            /** 数据清洗后标记为过期 */
             isStale?: boolean;
-            /** 采样元数据 */
+
+            // 🆕 新增字段
+            prefetchedSuggestions?: Array<{
+                title: string;
+                description: string;
+                code: string;
+                result?: any
+            }>;
+            generatedAt?: number;
+
             basedOnSample?: {
                 isSampled: boolean;
                 sampleSize: number;

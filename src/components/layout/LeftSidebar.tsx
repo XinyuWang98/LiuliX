@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '@contexts/I18nContext';
 import { FolderPlus, FileText, X, ChevronDown, ChevronRight, PanelLeft } from 'lucide-react';
-import { FileUploader } from '@components/data/FileUploader';
+import { FileUploader, FileUploaderRef } from '@components/data/FileUploader';
 import { ParsedFileData } from '@utils/fileParser';
 import { createProject, Project } from '@utils/projectUtils';
 import { loadProjects, saveProjects, deleteProject as deleteProjectFromDB } from '@utils/indexedDB';
 import { pyodideManager } from '../../services/PyodideManager';
 import { DuckDBEngine } from '../../db/duckdbEngine';
+import { logger } from '@/utils/logger';
 
 interface LeftSidebarProps {
     onProjectSelect?: (project: Project) => void;
@@ -22,6 +23,7 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [editingProject, setEditingProject] = useState<{ id: string; name: string } | null>(null);
+    const fileUploaderRef = useRef<FileUploaderRef>(null);
     // const [selectedFileId, setSelectedFileId] = useState<string | null>(null); // TODO: 文件选中功能待实现
 
     // 组件加载时从 IndexedDB 加载项目
@@ -44,7 +46,7 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
                 }
             }
         }).catch(error => {
-            console.error('Failed to load projects:', error);
+            logger.error('文件管理', '加载项目失败', error);
         });
     }, []);
 
@@ -52,14 +54,13 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
     useEffect(() => {
         if (projects.length > 0) {
             saveProjects(projects).catch(error => {
-                console.error('Failed to save projects:', error);
+                logger.error('文件管理', '保存项目失败', error);
             });
         }
     }, [projects]);
 
     const handleFilesUploaded = async (filesData: ParsedFileData[], sampledFlags: boolean[]) => {
-        console.log('批量文件上传成功:', filesData);
-        console.log('抽样标记:', sampledFlags);
+        logger.log('文件管理', '批量文件上传成功', { count: filesData.length });
 
         // 🆕 为CSV文件预先ingest到DuckDB并获取tableName
         const engine = DuckDBEngine.getInstance();
@@ -71,7 +72,7 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
             // 如果是CSV文件，立即ingest到DuckDB获取tableName
             if (fileData.fileName.toLowerCase().endsWith('.csv') && fileData.originalFile) {
                 try {
-                    console.log(`🔵 Ingesting ${fileData.fileName} to DuckDB...`);
+                    logger.log('DuckDB', `开始导入CSV: ${fileData.fileName}`);
                     const result = await engine.ingestCSV(fileData.originalFile, {
                         sampleSize: fileData.isSampled ? 200000 : -1,
                         sampleRate: 0.2,
@@ -80,35 +81,20 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
 
                     // 将tableName存储到fileData中（working表名）
                     fileData.tableName = result.tableName;
-                    console.log(`✅ CSV ingested, tableName: ${result.tableName}`);
+                    logger.log('DuckDB', `CSV导入完成: ${result.tableName}`);
                 } catch (err) {
-                    console.error('Failed to ingest CSV to DuckDB:', err);
+                    logger.error('DuckDB', 'CSV导入失败', err);
                 }
             }
 
             // Send data to Pyodide
             if (fileData.rawContent) {
                 try {
-                    console.log(`Sending ${fileData.fileName} to Python Engine...`);
+                    logger.log('Python', `发送数据到Python引擎: ${fileData.fileName}`);
                     const result = await pyodideManager.loadData(fileData.fileName, fileData.rawContent);
-                    console.log('Python Load Result:', result);
-
-                    // Show a simple alert/toast for Verification (Temporary)
-                    const message = `Python Engine Loaded: ${fileData.fileName}\nShape: (${result.shape[0]}, ${result.shape[1]})`;
-                    const toast = document.createElement('div');
-                    toast.style.cssText = `
-                        position: fixed; top: 20px; right: 20px;
-                        background: var(--bg-panel); border: 1px solid var(--primary);
-                        color: var(--text-primary); padding: 16px; borderRadius: 8px;
-                        zIndex: 10000; boxShadow: 0 4px 12px rgba(0,0,0,0.5);
-                        animation: slideIn 0.3s ease-out;
-                    `;
-                    toast.innerText = message;
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 5000);
-
+                    logger.log('Python', `数据加载完成 shape: [${result.shape.join(', ')}]`);
                 } catch (error) {
-                    console.error('Failed to load data into Pyodide:', error);
+                    logger.error('Python', '数据加载失败', error);
                 }
             }
         }
@@ -147,7 +133,7 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
         if (confirm(t('dataSource.project.confirmDelete'))) {
             // 从数据库删除
             deleteProjectFromDB(projectId).catch(error => {
-                console.error('Failed to delete project from DB:', error);
+                logger.error('文件管理', '删除项目失败', error);
             });
 
             setProjects(prev => prev.filter(p => p.id !== projectId));
@@ -167,7 +153,7 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
                 // 如果项目没有文件了,删除整个项目
                 if (newFiles.length === 0) {
                     deleteProjectFromDB(projectId).catch(error => {
-                        console.error('Failed to delete project from DB:', error);
+                        logger.error('文件管理', '删除项目失败', error);
                     });
                     return null;
                 }
@@ -282,12 +268,10 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
                 flexDirection: 'column',
                 gap: 'var(--gap-m)',
             }}>
-                {/* 新增项目按钮 */}
+                {/* 上传文件按钮 */}
                 <button
                     className="btn-primary"
-                    onClick={() => {
-                        console.log('新增项目');
-                    }}
+                    onClick={() => fileUploaderRef.current?.openFileDialog()}
                     style={{
                         width: '100%',
                         padding: 'var(--gap-m)',
@@ -298,11 +282,11 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
                     }}
                 >
                     <FolderPlus size={18} />
-                    {t('dataSource.project.newProject')}
+                    {t('fileUpload.uploadButton')}
                 </button>
 
-                {/* 文件上传器 - 常驻显示 */}
-                <FileUploader onFilesUploaded={handleFilesUploaded} />
+                {/* 文件上传器 - 不可见，通过ref触发 */}
+                <FileUploader ref={fileUploaderRef} onFilesUploaded={handleFilesUploaded} />
 
                 {/* 项目列表 - 树状视图 */}
                 {projects.length > 0 && (

@@ -246,12 +246,12 @@
 }
 
 /* 导出按钮（底部固定） */
+/* 导出按钮（不再固定） */
 .report-actions {
-    position: fixed;
-    bottom: var(--gap-l);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: var(--z-sticky);
+    margin-top: var(--gap-xl);
+    display: flex;
+    justify-content: center;
+    padding-bottom: var(--gap-l);
 }
 
 .btn-export {

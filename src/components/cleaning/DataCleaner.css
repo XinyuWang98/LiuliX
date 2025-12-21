@@ -24,13 +24,18 @@
 
 /* ==================== 2. 底部综合面板 (Integrated) ==================== */
 .cleanerBottomModule {
-    flex: 0 0 350px;
-    /* Fixed height for bottom module */
+    flex: 0 1 auto;
+    /* Adaptive height: flex-shrink allowed, auto basis */
+    max-height: 60%;
+    /* Max height constraint */
+    min-height: 48px;
+    /* Min height for header */
     display: flex;
     flex-direction: column;
     background-color: var(--bg-panel);
     border-top: 1px solid var(--border);
     overflow: hidden;
+    transition: flex-basis 0.3s ease;
 }
 
 .bottomModuleHeader {

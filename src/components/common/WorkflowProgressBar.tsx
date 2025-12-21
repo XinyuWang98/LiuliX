@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useI18n } from '@contexts/I18nContext';
-import { UploadCloud, Sparkles, Lightbulb, LineChart, FileText, CheckCircle2 } from 'lucide-react';
+import { UploadCloud, Sparkles, LineChart, FileText, CheckCircle2 } from 'lucide-react';
 
 export type WorkflowStep = 'upload' | 'cleaning' | 'hypothesis' | 'insights' | 'report';
 
@@ -17,13 +17,12 @@ export function WorkflowProgressBar({ currentStep = 'upload', onStepClick, orien
     const steps: { id: WorkflowStep; icon: React.ElementType }[] = [
         { id: 'upload', icon: UploadCloud },
         { id: 'cleaning', icon: Sparkles },
-        { id: 'hypothesis', icon: Lightbulb },
         { id: 'insights', icon: LineChart },
         { id: 'report', icon: FileText },
     ];
 
     const getStepStatus = (stepId: WorkflowStep, current: WorkflowStep) => {
-        const stepOrder = ['upload', 'cleaning', 'hypothesis', 'insights', 'report'];
+        const stepOrder = ['upload', 'cleaning', 'insights', 'report'];
         const currentIndex = stepOrder.indexOf(current);
         const stepIndex = stepOrder.indexOf(stepId);
 

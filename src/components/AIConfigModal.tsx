@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { askAI, AIModel } from '../services/aiService';
 import { X, GripVertical, CheckCircle, AlertCircle, Play } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
+import { localLLMService, SUPPORTED_MODELS } from '../services/localLLMService';
 
 interface AIConfigModalProps {
     isOpen: boolean;
@@ -34,6 +35,11 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
     const [testStatus, setTestStatus] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
     const [testMsg, setTestMsg] = useState<Record<string, string>>({});
 
+    // 本地模型状态
+    const [useLocalModel, setUseLocalModel] = useState(() => {
+        return localStorage.getItem('use_local_model') === 'true';
+    });
+
     // DnD State
     const dragItem = useRef<number | null>(null);
     const dragOverItem = useRef<number | null>(null);
@@ -52,6 +58,11 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
     useEffect(() => {
         localStorage.setItem('ai_priority', JSON.stringify(priority));
     }, [priority]);
+
+    // 保存本地模型设置
+    useEffect(() => {
+        localStorage.setItem('use_local_model', useLocalModel.toString());
+    }, [useLocalModel]);
 
     const handleKeyChange = (model: string, val: string) => {
         sessionStorage.setItem(`${model}_key`, val);
@@ -162,6 +173,68 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
 
                 {/* Body */}
                 <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    {/* 本地模型开关 */}
+                    <div style={{
+                        backgroundColor: 'var(--bg-main)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        padding: '16px',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <div>
+                                <div style={{ fontWeight: 500, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                                    启用本地模型 (推荐)
+                                </div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                    首次下载 4.3GB 模型，约 10-30 分钟，之后永久离线可用
+                                </div>
+                            </div>
+                            <label style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={useLocalModel}
+                                    onChange={(e) => setUseLocalModel(e.target.checked)}
+                                    style={{ opacity: 0, width: 0, height: 0 }}
+                                />
+                                <span style={{
+                                    position: 'absolute',
+                                    cursor: 'pointer',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: useLocalModel ? 'var(--success)' : 'var(--bg-hover)',
+                                    transition: '0.3s',
+                                    borderRadius: '24px',
+                                }}>
+                                    <span style={{
+                                        position: 'absolute',
+                                        content: '',
+                                        height: '18px',
+                                        width: '18px',
+                                        left: useLocalModel ? '23px' : '3px',
+                                        bottom: '3px',
+                                        backgroundColor: 'white',
+                                        transition: '0.3s',
+                                        borderRadius: '50%',
+                                    }} />
+                                </span>
+                            </label>
+                        </div>
+                        {useLocalModel && (
+                            <div style={{
+                                fontSize: '12px',
+                                color: 'var(--primary)',
+                                marginTop: '8px',
+                                padding: '8px',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                borderRadius: '4px',
+                            }}>
+                                💡 模型: {SUPPORTED_MODELS.QWEN} (中文强，速度快)
+                            </div>
+                        )}
+                    </div>
+
                     <div style={{
                         fontSize: '14px',
                         color: 'var(--text-secondary, #9ca3af)',
