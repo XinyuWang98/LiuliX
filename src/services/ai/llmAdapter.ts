@@ -15,6 +15,7 @@ export interface LLMResponse {
         name: string;
         arguments: Record<string, any>;
     }>;
+    isMultiStep?: boolean;  // 🆕 Phase 2: 标识是否为多步调用
 }
 
 /** LLM 适配器类 */
@@ -76,7 +77,8 @@ export class LLMAdapter {
                 logger.groupEnd();
                 return {
                     content: message.content || '',
-                    toolCalls
+                    toolCalls,
+                    isMultiStep: toolCalls.length > 1  // 🆕 Phase 2
                 };
             }
 
@@ -130,7 +132,8 @@ export class LLMAdapter {
 
                 return {
                     content,
-                    toolCalls
+                    toolCalls,
+                    isMultiStep: toolCalls.length > 1  // 🆕 Phase 2
                 };
             }
 
@@ -166,7 +169,16 @@ export class LLMAdapter {
             // 2. 尝试解析
             let parsed = JSON.parse(jsonStr);
 
-            // 3. 标准化格式
+            // 3. 🆕 Phase 2: 支持多步格式
+            if (Array.isArray(parsed.steps)) {
+                logger.log('Skills', '检测到多步调用格式');
+                return parsed.steps.map((step: any) => ({
+                    name: step.tool,
+                    arguments: step.arguments || step.args || {}
+                }));
+            }
+
+            // 4. 标准化单步格式
             if (parsed.tool && parsed.arguments) {
                 return [{
                     name: parsed.tool,
