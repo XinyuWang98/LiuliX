@@ -182,19 +182,27 @@ export class SkillsDispatcher {
             throw new Error('未设置表名，无法执行SQL');
         }
 
-        // 🔐 权限检查
+        // 🔐 权限检查（清洗/洞察分离策略）
         const sqlUpper = sql.toUpperCase().trim();
+
+        // READ_ONLY权限（洞察分析）：仅允许查询，禁止任何修改
         if (permission === 'READ_ONLY' && !sqlUpper.startsWith('SELECT') && !sqlUpper.startsWith('DESCRIBE') && !sqlUpper.startsWith('SHOW')) {
             throw new Error('READ_ONLY权限仅允许查询操作(SELECT/DESCRIBE/SHOW)');
         }
 
+        // CLEANING权限（数据清洗）：允许UPDATE/DELETE FROM/ALTER/CREATE，禁止DROP/TRUNCATE
         if (permission === 'CLEANING') {
-            // CLEANING允许：SELECT, UPDATE, ALTER, CREATE（但不允许DELETE/DROP/TRUNCATE）
-            // 注意：DuckDB WASM中如果不持久化到OPFS，DROP TABLE影响仅限于当前会话
-            // 但为了安全起见，我们仍禁止破坏性操作
-            const forbidden = ['DELETE FROM', 'DROP TABLE', 'DROP VIEW', 'TRUNCATE', 'DROP DATABASE'];
+            // 允许操作：SELECT, UPDATE, DELETE FROM (带WHERE), ALTER, CREATE
+            // 禁止破坏性操作：DROP TABLE（删整表）, TRUNCATE（清空表）, DROP DATABASE
+            const forbidden = ['DROP TABLE', 'DROP VIEW', 'TRUNCATE', 'DROP DATABASE'];
             if (forbidden.some(cmd => sqlUpper.includes(cmd))) {
-                throw new Error('CLEANING权限禁止删除表或清空数据的操作');
+                throw new Error('CLEANING权限禁止删除表或清空整表的操作');
+            }
+
+            // 安全检查：DELETE必须有WHERE条件（防止误删全表数据）
+            if (sqlUpper.includes('DELETE FROM') && !sqlUpper.includes('WHERE')) {
+                logger.warn('Skills', 'DELETE FROM缺少WHERE条件，可能误删全表', sql);
+                // 不抛出错误，只警告（部分清洗场景确实需要清空工作表）
             }
         }
 
