@@ -8,6 +8,10 @@ import { useInsightLoader } from '@/hooks/useInsightLoader';
 import { useInsightRefresh } from '@/hooks/useInsightRefresh';
 import { InsightCardGrid } from './InsightCardGrid';
 import { LocalModelProgress } from './LocalModelProgress';
+import { useInsightLoaderWithSkills } from '@/hooks/useInsightLoaderWithSkills';
+import { isSkillsEnabled } from '@/config/skillsConfig';
+import { SkillsProgressIndicator } from '@/components/skills/SkillsProgressIndicator';
+import { logger } from '@/utils/logger';
 
 interface InsightChainFlowProps {
     columns: string[];
@@ -32,13 +36,46 @@ export function InsightChainFlow({ columns, rowCount, sampleData: _sampleData, t
         adoptChain,
     } = useInsightChain();
 
-    // 使用洞察加载 Hook
+    // 检查是否启用Skills模式
+    const useSkillsMode = isSkillsEnabled('INSIGHT_CHAIN');
+
+    // 传统模式Hook
     const { isLoading, isLoadingLocalModel, executionProgress, loadInsights, cancelLoading } = useInsightLoader();
 
-    // 加载洞察函数
+    // Skills模式Hook
+    const {
+        isLoading: isSkillsLoading,
+        executionProgress: skillsProgress,
+        loadInsightsWithSkills
+    } = useInsightLoaderWithSkills();
+
+    // 统一处理：根据模式选择对应的加载状态
+    const actualIsLoading = useSkillsMode ? isSkillsLoading : isLoading;
+    const actualProgress = useSkillsMode ? skillsProgress : executionProgress;
+
+    // 加载洞察函数（支持Skills模式和降级）
     const handleLoadInsights = async () => {
-        const result = await loadInsights(columns, rowCount, tableName);
-        setHypotheses(result);
+        try {
+            if (useSkillsMode) {
+                logger.log('AI洞察', 'Skills模式启用，使用Function Calling');
+                const result = await loadInsightsWithSkills(columns, rowCount, tableName);
+                setHypotheses(result);
+            } else {
+                logger.log('AI洞察', '使用传统模式');
+                const result = await loadInsights(columns, rowCount, tableName);
+                setHypotheses(result);
+            }
+        } catch (error: any) {
+            logger.error('AI洞察', 'Skills模式执行失败，降级到传统模式', error);
+            // 降级：使用传统模式
+            try {
+                const result = await loadInsights(columns, rowCount, tableName);
+                setHypotheses(result);
+            } catch (fallbackError: any) {
+                logger.error('AI洞察', '传统模式也失败', fallbackError);
+                // 最终降级失败，让上层组件处理
+            }
+        }
     };
 
     // 使用智能刷新 Hook
@@ -93,15 +130,24 @@ export function InsightChainFlow({ columns, rowCount, sampleData: _sampleData, t
             {/* 本地模型加载进度 */}
             {isLoadingLocalModel && <LocalModelProgress isLoading={isLoadingLocalModel} />}
 
-            {/* 加载状态 + 执行进度 */}
-            {isLoading && !isLoadingLocalModel && (
+            {/* Skills进度指示器 */}
+            {actualIsLoading && !isLoadingLocalModel && actualProgress && useSkillsMode && (
+                <SkillsProgressIndicator
+                    current={actualProgress.current}
+                    total={actualProgress.total}
+                    message="Skills多步执行中，智能分析数据特征..."
+                />
+            )}
+
+            {/* 加载状态 + 执行进度（传统模式或无进度信息） */}
+            {actualIsLoading && !isLoadingLocalModel && (!actualProgress || !useSkillsMode) && (
                 <div style={{ textAlign: 'center', padding: 'var(--gap-xl)', color: 'var(--text-secondary)' }}>
                     <Loader size={32} className="spinning" />
                     <p>{t('insightChain.loadingHypothesis')}</p>
-                    {/* 显示Pyodide执行进度 */}
-                    {executionProgress && (
+                    {/* 显示传统模式执行进度 */}
+                    {actualProgress && (
                         <p style={{ marginTop: 'var(--gap-s)', fontSize: 'var(--fs-s)', color: 'var(--primary)' }}>
-                            正在执行洞察分析... {executionProgress.current}/{executionProgress.total}
+                            正在执行洞察分析... {actualProgress.current}/{actualProgress.total}
                         </p>
                     )}
                 </div>

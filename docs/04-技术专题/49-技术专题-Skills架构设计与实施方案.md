@@ -427,28 +427,281 @@ Week 5+: 移除传统模式（可选）
 
 ---
 
-## 9. 总结与下一步
+## 9. Generic Skills改造方案（通用函数策略） 🚀
+
+> [!IMPORTANT]
+> **战略转型**：从"注册50+专用Skills"转向"<10个Generic Skills"，解决函数爆炸和Token消耗问题。
+
+### 9.1 背景与动机
+
+**当前问题**（Specific Skills模式）:
+- **维护成本高**: 每个操作需独立定义（`clean_dedup`, `clean_fillna`, `viz_bar_chart`...）
+- **Token消耗大**: System Prompt塞入几十个工具定义，挤占上下文
+- **扩展性差**: 新增功能需写定义、实现、Prompt，周期长
+
+**解决方案**（Generic Skills模式）:
+- **通用执行**: `sys_run_python`可执行任意Python代码，`sys_run_sql`可执行任意SQL
+- **注册表瘦身**: 从50+ 缩减到<10个
+- **Prompt驱动**: 具体怎么"清洗日期"由Prompt库定义，而非硬编码Skill
+
+---
+
+### 9.2 核心Generic Skills清单
+
+| 类别 | Skill Name | 说明 | 示例参数 |
+|:---|:---|:---|:---|
+| **通用计算** | `sys_run_python` | 执行任意Python代码（Pyodide） | `{code: "df['新列'] = df['A'] + df['B']"}` |
+| **数据查询** | `sys_run_sql` | 执行SQL查询（权限分级） | `{sql: "SELECT * FROM t_data_working", permission: "READ_ONLY"}` |
+| **UI交互** | `ui_render_chart` | 渲染图表 | `{type: "bar", data: [...]}` |
+| **系统反馈** | `ui_ask_user` | 请求用户确认 | `{question: "检测到异常，是否删除?", options: ["删除", "保留"]}` |
+
+**优势**:
+1. **无限能力**: `sys_run_python`理论上可执行pandas/numpy/scipy能做的所有操作
+2. **Token效率**: 仅4个工具定义 vs 50+个，节省>80% Token
+3. **灵活性**: AI可组合调用（先SQL查询→Python处理→Chart渲染）
+
+---
+
+### 9.3 SQL权限分级策略（解决数据清洗需求）
+
+**问题**: 原方案简单黑名单（禁止UPDATE/DELETE）**无法满足数据清洗**（需要UPDATE去重、ALTER删列）
+
+**解决方案**: **权限分级 + 沙箱隔离**
+
+```typescript
+export enum SQLPermissionLevel {
+    READ_ONLY = 'read_only',      // 仅SELECT（默认，数据查询）
+    CLEANING = 'cleaning',         // SELECT+UPDATE+ALTER+CREATE（限工作表）
+    FULL = 'full'                  // 所有操作（系统内部）
+}
+
+export function validateSQL(sql: string, level: SQLPermissionLevel): ValidationResult {
+    const upperSQL = sql.toUpperCase();
+    
+    // Level 1: READ_ONLY
+    if (level === SQLPermissionLevel.READ_ONLY) {
+        const forbidden = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE'];
+        for (const keyword of forbidden) {
+            if (upperSQL.includes(keyword)) {
+                return { valid: false, error: `只读模式禁止${keyword}操作` };
+            }
+        }
+        // 强制LIMIT
+        if (!upperSQL.includes('LIMIT')) {
+            sql += ' LIMIT 10000';
+        }
+    }
+    
+    // Level 2: CLEANING（数据清洗专用）
+    if (level === SQLPermissionLevel.CLEANING) {
+        // ✅ 允许：UPDATE/ALTER/CREATE（限工作表）
+        // ❌ 禁止：DELETE FROM/DROP TABLE/TRUNCATE（防整表删除）
+        const forbidden = ['DELETE FROM', 'DROP TABLE', 'TRUNCATE'];
+        for (const keyword of forbidden) {
+            if (upperSQL.includes(keyword)) {
+                return { valid: false, error: `清洗模式禁止${keyword}操作` };
+            }
+        }
+        
+        // 沙箱隔离：仅允许操作工作表（t_*_working）
+        const targetTables = extractTableNames(sql);
+        for (const table of targetTables) {
+            if (!table.endsWith('_working') || !table.startsWith('t_')) {
+                return { valid: false, error: `仅允许操作工作表，不允许: ${table}` };
+            }
+        }
+    }
+    
+    return { valid: true, sql };
+}
+```
+
+**权限使用指南**:
+| 场景 | 权限级别 | 允许操作 | 典型SQL |
+|------|---------|---------|---------|
+| Agent询问数据 | READ_ONLY | SELECT | `SELECT AVG(price) FROM t_data_working` |
+| 数据清洗 | CLEANING | SELECT/UPDATE/ALTER/CREATE | `UPDATE t_data_working SET ...` |
+| 文件导入 | FULL | 所有 | `CREATE TABLE t_xxx ...` |
+
+---
+
+### 9.4 数据清洗Skills化改造
+
+**当前实现**（`useCleaningExecution.ts`）:
+```typescript
+// 旧方案：直接调用DuckDB
+await engine.executeCleaningSQL(sql);
+```
+
+**改造后**（通过Generic Skills）:
+```typescript
+// 新方案：统一入口
+const result = await skillsDispatcher.execute('sys_run_sql', {
+    sql,
+    permission: SQLPermissionLevel.CLEANING  // 清洗权限
+});
+
+if (!result.success) {
+    // 降级：回退到原方案
+    logger.warn('Skills', 'Skills执行失败，降级直连DuckDB');
+    await engine.executeCleaningSQL(sql);
+}
+```
+
+**优势**:
+- 统一SQL入口，便于监控和审计
+- 为Agent直接调用清洗功能铺路
+- 权限分级提升安全性
+
+**风险缓解**:
+- 降级兜底：Skills失败仍可回退
+- 性能开销：预计<10ms
+
+---
+
+### 9.5 Pyodide库支持清单
+
+**必需验证库**（任务2.5实施内容）:
+- **核心**: numpy, pandas
+- **科学计算**: scipy, statsmodels
+- **机器学习**: scikit-learn（需验证完整性）
+- **其他**: matplotlib（浏览器环境可能受限）
+
+**验证脚本**:
+```python
+import sys, micropip
+
+for lib in ['numpy', 'pandas', 'scipy', 'sklearn']:
+    try:
+        __import__(lib)
+        print(f"✅ {lib} 可用")
+    except ImportError:
+        print(f"❌ {lib} 不可用")
+```
+
+**白名单配置**:
+```typescript
+// src/config/pyodideLibs.ts
+export const PYODIDE_AVAILABLE_LIBS = [
+    'numpy', 'pandas', 'scipy', 'statsmodels',
+    'scikit-learn',  // 需验证
+    'matplotlib',    // 需验证
+    'micropip'
+];
+```
+
+---
+
+### 9.6 实施计划（两阶段）
+
+#### 阶段1：基础改造（本周，任务2.5）
+**工时**: 4-6小时  
+**内容**:
+- [x] 实现`sys_run_python`（3h）
+  - 封装Pyodide调用
+  - 30秒超时保护
+  - 错误分类处理
+- [x] 实现`sys_run_sql`（1.5h）
+  - 权限分级验证
+  - 沙箱隔离（限工作表）
+  - SQL注入防护
+- [x] Pyodide库验证（1.5h）
+- [x] 注册到Skills Dispatcher（0.5h）
+
+**交付物**:
+- `src/services/skills/generic/sys_run_python.ts`
+- `src/services/skills/generic/sys_run_sql.ts`
+- `src/config/pyodideLibs.ts`
+- 单元测试
+
+#### 阶段2：数据清洗Skills化（下周，任务11）
+**工时**: 2-3小时  
+**前置条件**: 阶段1完成  
+**内容**:
+- [ ] 修改`useCleaningExecution.ts`调用Generic Skills
+- [ ] 添加降级逻辑
+- [ ] 性能对比测试（Skills vs 直连）
+- [ ] 浏览器验证清洗功能
+
+**优先级**: P1（可延后到12/26-27，非阻塞）
+
+---
+
+### 9.7 与本地Agent的关系
+
+Generic Skills是**本地Agent的基础设施**：
+- Agent需要`sys_run_python`来执行数据分析代码
+- Agent需要`sys_run_sql`来查询和清洗数据
+- 先完成Generic Skills改造，再开发本地Agent Phase 1
+
+**依赖链**:
+```
+Generic Skills改造 → 本地Agent Phase 1 → 本地Agent Phase 2
+```
+
+---
+
+### 9.8 对比总结
+
+| 维度 | Specific Skills | Generic Skills |
+|------|----------------|----------------|
+| 注册数量 | 50+ | <10 |
+| Token消耗 | 高（完整定义） | 低（简洁定义） |
+| 扩展性 | 差（需逐个注册） | 强（Python无限可能） |
+| 维护成本 | 高 | 低 |
+| 幻觉风险 | 低（参数受限） | 中（需Context Injection） |
+| 安全性 | 高 | 中（需权限控制） |
+
+**推荐**: 采用**混合策略**
+- UI交互类：保留Specific Skills（`ui_render_chart`）
+- 计算执行类：使用Generic Skills（`sys_run_python/sql`）
+
+---
+
+## 10. 总结与下一步
 
 ### 当前状态
 
 - ✅ **Phase 1**: 100%完成（Schema、Dispatcher、Adapter、日志）
-- 🔄 **Phase 2**: 待实施（多步执行、错误修正）
-- 📋 **兼容性保障**: 设计完成，待实施
+- ✅ **Phase 2**: 100%完成（多步执行、错误修正）
+- ✅ **Phase 3 UI集成**: 100%完成（InsightChainFlow、AIConfigModal）
+- 🔄 **Generic Skills改造**: 待实施（阶段1：基础改造，阶段2：数据清洗）
 
-### Phase 2 预计工时
+### 预计工时
 
-- **总耗时**: 8-12小时（1-1.5天）
-- **复杂度**: 🟡 中等
-- **优先级**: P1（高价值）
+#### Generic Skills改造
+- **阶段1**: 4-6小时（任务2.5，12/23）
+- **阶段2**: 2-3小时（任务11，12/26-27）
+- **总耗时**: 6-9小时
+
+#### 本地Agent（依赖Generic Skills）
+- **Phase 1**: 2周（基础设施）
+- **Phase 2**: 3周（Agent核心）
+- **Phase 3**: 2周（用户交互）
 
 ### 推荐行动
 
-1. **立即优先**: 修复AI洞察超时（智能列过滤，20分钟）
-2. **本周末/下周**: 实施Phase 2 + 兼容性开关（1-1.5天）
-3. **Week 2**: 灰度测试Skills模式（AI Chat先行）
-4. **Week 3-4**: 全面迁移，监控稳定性
-5. **Week 5+**: 移除传统模式（可选）
+1. **今天（12/22）**: 
+   - 👤 用户验证Skills Phase 3（30分钟）
+   
+2. **明天（12/23）**:
+   - 🤖 Generic Skills改造（4-6小时）
+   - 验证Pyodide库支持
+   - 实现权限分级SQL
+   
+3. **12/24-25**:
+   - 🤖 错误兜底UI + 特征开关（P0任务）
+   - 🤖 真实AI接入（依赖Generic Skills）
+   
+4. **12/26-27**:
+   - 🤖 数据清洗Skills化（阶段2）
+   - 🤖 HTML报告（P1任务）
+
+5. **2026-01+ (MVP后)**:
+   - 🤖 本地Agent Phase 1开发
 
 ---
 
-**附录**：详细实施方案见 [Skills Phase 2评估文档](../artifacts/skills_phase2_evaluation.md)
+**文档归档**: `docs/04-技术专题/49-技术专题-Skills架构设计与实施方案.md`  
+**最后更新**: 2025-12-22 13:13
+

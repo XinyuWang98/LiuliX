@@ -8,6 +8,7 @@ import { HypothesisCard as HypothesisCardType } from '@/types/insightChain';
 import { executeWithRecovery } from '@/services/skills/errorRecovery';
 import { logger } from '@/utils/logger';
 import { getSkillsConfig } from '@/config/skillsConfig';
+import { skillsDispatcher } from '@/services/skills/dispatcher';  // 🔧 新增
 
 export function useInsightLoaderWithSkills() {
     const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +44,11 @@ export function useInsightLoaderWithSkills() {
 
             // 构建AI提示词
             const prompt = buildInsightPrompt(columns, rowCount, tableName);
+
+            // 🔧 设置dispatcher当前表名（Skills执行需要）
+            if (tableName) {
+                skillsDispatcher.setCurrentTable(tableName);
+            }
 
             // 使用错误修正循环执行
             const result = await executeWithRecovery(prompt, {
@@ -94,6 +100,7 @@ export function useInsightLoaderWithSkills() {
 function buildInsightPrompt(columns: string[], rowCount: number, tableName?: string): string {
     // 智能列过滤（解决99列问题）
     const importantColumns = filterImportantColumns(columns);
+    const config = getAnalysisConfig();
 
     return `
 作为数据分析专家，请分析以下数据集并生成2-3个关键洞察。
@@ -101,22 +108,30 @@ function buildInsightPrompt(columns: string[], rowCount: number, tableName?: str
 **数据集信息**：
 - 表名：${tableName || 'data'}
 - 总行数：${rowCount}
-- 关键列（${importantColumns.length}列）：${importantColumns.join(', ')}
+- 总列数：${columns.length}
+- 分析列数：${importantColumns.length}列（用户配置：最多${config.maxColumns}列）
+- 关键列：${importantColumns.join(', ')}
 
 **要求**：
 1. 分析数据特征，识别潜在问题或有价值的模式
-2. 使用可用的工具（viz_create_chart等）生成可视化证据
+2. 使用可用的工具（viz_create_chart、sys_run_sql等）生成可视化证据
 3. 每个洞察必须基于真实数据，不要编造
+4. 如需查询其他列，可通过sys_run_sql工具访问完整数据
 
 请调用相应的工具来生成洞察分析。
 `.trim();
 }
 
+import { getAnalysisConfig } from '@/config/analysisConfig';
+
 /**
  * 智能列过滤（解决99列Prompt过大问题）
  */
 function filterImportantColumns(columns: string[]): string[] {
-    if (columns.length <= 20) {
+    const config = getAnalysisConfig();
+    const maxColumns = config.maxColumns;
+
+    if (columns.length <= maxColumns) {
         return columns;
     }
 
@@ -134,10 +149,10 @@ function filterImportantColumns(columns: string[]): string[] {
             acc + (pattern.test(col) ? (4 - idx) : 0), 0)
     }));
 
-    // 按得分排序，取Top20
+    // 按得分排序，取Top N（N=用户配置）
     return scored
         .sort((a, b) => b.score - a.score)
-        .slice(0, 20)
+        .slice(0, maxColumns)
         .map(c => c.name);
 }
 

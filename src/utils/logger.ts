@@ -21,7 +21,8 @@ export type ServiceName =
     | 'Python'
     | 'Skills'
     | 'UI'
-    | '系统';
+    | '系统'
+    | '报告';  // 🆕 报告生成服务
 
 export interface LogOptions {
     data?: any; // 附加数据

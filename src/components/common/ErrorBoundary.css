@@ -1,0 +1,104 @@
+/**
+ * 错误边界组件样式
+ */
+
+.error-boundary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: var(--gap-2xl);
+    background: var(--bg-card);
+    border-radius: var(--radius-m);
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 64px;
+    margin-bottom: var(--gap-m);
+    opacity: 0.8;
+}
+
+.error-title {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--gap-s);
+}
+
+.error-message {
+    font-size: var(--fs-m);
+    color: var(--text-secondary);
+    margin-bottom: var(--gap-l);
+    max-width: 500px;
+    line-height: 1.5;
+}
+
+.error-details {
+    margin-top: var(--gap-m);
+    margin-bottom: var(--gap-l);
+    text-align: left;
+    max-width: 600px;
+    width: 100%;
+}
+
+.error-details summary {
+    cursor: pointer;
+    padding: var(--gap-s);
+    background: var(--bg-hover);
+    border-radius: var(--radius-s);
+    font-size: var(--fs-s);
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.error-details summary:hover {
+    background: var(--bg-active);
+}
+
+.error-stack {
+    margin-top: var(--gap-s);
+    padding: var(--gap-m);
+    background: var(--bg-hover);
+    border-radius: var(--radius-s);
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.error-actions {
+    display: flex;
+    gap: var(--gap-m);
+}
+
+.error-btn {
+    padding: var(--gap-s) var(--gap-l);
+    border: none;
+    border-radius: var(--radius-m);
+    font-size: var(--fs-m);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+}
+
+.error-btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.error-btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.error-btn-secondary {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.error-btn-secondary:hover {
+    background: var(--bg-active);
+}

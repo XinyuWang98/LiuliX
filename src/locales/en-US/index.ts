@@ -23,6 +23,7 @@ export const enUS: LanguageConfig = {
             search: 'Search',
             all: 'All',
             featureInDev: 'Feature in development...',
+            collapse: 'Collapse',
         },
         data: {
             unique: 'Unique',
@@ -275,6 +276,13 @@ export const enUS: LanguageConfig = {
                 hint: 'Based on sampled data', sampleSize: 'Sample size: {size}', totalSize: 'Total: {total}',
                 note: 'Using first {size} rows for speed',
             },
+        },
+        config: {
+            performanceQuality: 'Performance & Quality',
+            maxColumns: 'Max Columns to Analyze',
+            maxColumnsDesc: 'Maximum number of columns to include in AI analysis',
+            timeout: 'Analysis Timeout (seconds)',
+            timeoutDesc: 'Maximum time to wait for AI response'
         },
         errors: {
             tableNotFound: 'Table not found',

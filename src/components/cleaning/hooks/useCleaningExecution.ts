@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useI18n } from '../../../contexts/I18nContext';
 import { useEvidence } from '../../../contexts/EvidenceContext';
 import { DuckDBEngine } from '../../../db/duckdbEngine';
+import { skillsDispatcher } from '../../../services/skills/dispatcher';
 import { SimpleSuggestion, Project } from '../types/cleaning.types';
 import { buildCleaningSQL } from '../utils/sqlBuilder';
 import { renderActionText } from '../utils/suggestionUtils';
@@ -62,11 +63,23 @@ export function useCleaningExecution(
             const columnsBefore = await engine.getTableColumns(tableName);
             const rowCountBefore = activeFile?.data.rowCount || 0;
 
-            // 依次执行所有清洗操作
+            // 🆕 设置当前表名供Skills使用
+            skillsDispatcher.setCurrentTable(tableName);
+
+            // 依次执行所有清洗操作（通过Skills统一入口）
             for (const sugg of selectedSuggestions) {
                 const sqlTemplate = buildCleaningSQL(sugg);
                 const sql = sqlTemplate.replace(/__TABLE_NAME__/g, tableName);
-                await engine.executeCleaningSQL(sql);
+
+                // ✅ 通过Skills执行SQL清洗
+                const result = await skillsDispatcher.execute('sys_run_sql', {
+                    sql,
+                    permission: 'CLEANING'
+                });
+
+                if (!result.success) {
+                    throw new Error(result.error || '清洗SQL执行失败');
+                }
             }
 
             // 执行后重新查询列数

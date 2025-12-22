@@ -21,6 +21,7 @@ export interface LanguageConfig {
             search: string;
             all: string;
             featureInDev: string;
+            collapse: string;  // 新增：收起/折叠
         };
 
         // 数据统计
@@ -648,6 +649,15 @@ export interface LanguageConfig {
                 totalSize: string;
                 note: string;
             };
+        };
+
+        // 分析配置翻译
+        config: {
+            performanceQuality: string;
+            maxColumns: string;
+            maxColumnsDesc: string;
+            timeout: string;
+            timeoutDesc: string;
         };
 
         // 错误提示文案

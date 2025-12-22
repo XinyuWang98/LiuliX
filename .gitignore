@@ -38,3 +38,8 @@ backup*/
 # Temporary files
 *.tmp
 *.temp
+# Pyodide 离线包（大文件，不提交到Git）
+# 其他开发者使用 public/pyodide/download.ps1 自行下载
+public/pyodide/*
+!public/pyodide/README.md
+!public/pyodide/download.ps1

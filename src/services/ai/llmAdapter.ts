@@ -51,16 +51,18 @@ export class LLMAdapter {
 
             const response = await ky.post('http://localhost:3001/api/proxy/deepseek-skills', {
                 json: {
-                    messages: [
-                        { role: 'user', content: prompt }
-                    ],
-                    model: 'deepseek-chat',
-                    tools
+                    data: {  // 🔧 包装在data字段中，匹配后端格式
+                        messages: [
+                            { role: 'user', content: prompt }
+                        ],
+                        model: 'deepseek-chat',
+                        tools
+                    }
                 },
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`
+                    'x-api-key': apiKey
                 },
-                timeout: 30000
+                timeout: 120000  // 延长到120秒
             }).json<any>();
 
             const message = response.choices[0].message;

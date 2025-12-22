@@ -1,5 +1,8 @@
 /* DataCleaner.css - 数据清洗模块完整样式 */
 
+/* ==================== CSS导入（必须在最前面�?==================== */
+@import './components/SuggestionCard.css';
+
 .cleanerContainer {
     display: flex;
     flex-direction: column;
@@ -135,7 +138,7 @@
     color: #fff;
 }
 
-/* ==================== 3. 模块内容区 ==================== */
+/* ==================== 3. 模块内容�?==================== */
 .bottomModuleContent {
     flex: 1;
     overflow-y: auto;
@@ -247,7 +250,7 @@
     color: var(--success);
 }
 
-/* 空状态 */
+/* 空状�?*/
 .aiEmpty,
 .historyEmpty {
     display: flex;
@@ -275,7 +278,7 @@
     }
 }
 
-/* 确认对话框 - 保持原有样式并微调 */
+/* 确认对话�?- 保持原有样式并微�?*/
 .confirmOverlay {
     position: fixed;
     top: 0;
@@ -328,5 +331,3 @@
     border-radius: 4px;
     cursor: pointer;
 }
-
-@import './components/SuggestionCard.css';

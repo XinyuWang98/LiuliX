@@ -98,6 +98,39 @@ app.post('/api/proxy/deepseek-insight', async (req, res) => {
     }
 });
 
+// 🆕 Skills模式专用通道（Function Calling）
+app.post('/api/proxy/deepseek-skills', async (req, res) => {
+    const { data } = req.body;
+    // 优先使用客户端Key
+    const clientKey = req.headers['x-api-key'];
+    const finalKey = (clientKey && clientKey !== 'default') ? clientKey : DEEPSEEK_INSIGHT_KEY;
+
+    try {
+        console.log('[代理-Skills] 转发请求至 DeepSeek (Function Calling)');
+
+        const config = {
+            method: 'POST',
+            url: 'https://api.deepseek.com/v1/chat/completions',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${finalKey}`
+            },
+            data,
+            timeout: 120000 // Skills：120秒超时
+        };
+
+        const response = await axios(config);
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        console.error('[代理-Skills错误]', error.message);
+        if (error.response) {
+            res.status(error.response.status).json(error.response.data);
+        } else {
+            res.status(500).json({ error: error.message, channel: 'skills' });
+        }
+    }
+});
+
 // 通用代理接口
 app.post('/api/proxy', async (req, res) => {
     const { targetUrl, method = 'POST', headers = {}, data } = req.body;

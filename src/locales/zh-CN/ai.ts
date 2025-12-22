@@ -42,3 +42,12 @@ export const localModel = {
         unknown: '正在处理...',
     }
 };
+
+/** 分析配置翻译（新增） */
+export const config = {
+    performanceQuality: '性能与质量',
+    maxColumns: '最大分析列数',
+    maxColumnsDesc: '更多列 = 更全面分析，但速度更慢',
+    timeout: '分析超时时间',
+    timeoutDesc: '愿意等待的最长时间（秒）'
+};

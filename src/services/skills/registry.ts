@@ -11,12 +11,15 @@ import {
     SYS_EXPORT_REPORT,
     SYS_SWITCH_THEME
 } from './definitions';
+import { SYS_RUN_PYTHON_SKILL } from './generic/sys_run_python';
+import { SYS_RUN_SQL_SKILL } from './generic/sys_run_sql';
 
 /** Skills 分类 */
 export enum SkillCategory {
     VISUALIZATION = 'visualization',
     DATA_CLEANING = 'data_cleaning',
-    SYSTEM = 'system'
+    SYSTEM = 'system',
+    GENERIC = 'generic'  // 🆕 Generic Skills分类
 }
 
 /** Skill 注册条目 */
@@ -36,10 +39,14 @@ class SkillRegistry {
 
     /** 注册默认 Skills */
     private registerDefaultSkills() {
-        // 可视化技能
+        // 🆕 通用技能（Generic Skills）- 最高优先级
+        this.register(SYS_RUN_PYTHON_SKILL, SkillCategory.GENERIC);
+        this.register(SYS_RUN_SQL_SKILL, SkillCategory.GENERIC);
+
+        // 可视化技能（保留示例）
         this.register(VIZ_CREATE_CHART, SkillCategory.VISUALIZATION);
 
-        // 数据清洗技能
+        // 数据清洗技能（保留示例，未来可移除）
         this.register(CLEAN_REMOVE_DUPLICATES, SkillCategory.DATA_CLEANING);
         this.register(CLEAN_FILL_MISSING, SkillCategory.DATA_CLEANING);
 

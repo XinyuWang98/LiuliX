@@ -1,5 +1,7 @@
 /* eslint-disable no-restricted-globals */
-import { loadPyodide } from 'pyodide';
+// 注意：不能使用 import { loadPyodide } from 'pyodide'
+// 因为会导致Node模块被打包到浏览器bundle中
+// 必须在运行时动态加载
 
 // Define the worker scope
 const ctx: Worker = self as any;
@@ -10,9 +12,19 @@ async function loadPyodideAndPackages() {
     try {
         ctx.postMessage({ type: 'STATUS', message: 'Loading Pyodide...' });
 
-        // Load Pyodide
+        // 🚀 性能优化：环境自适应加载
+        // 开发环境：使用CDN（快速迭代，无需下载离线包）
+        // 生产环境：使用本地路径（10-50倍速度提升，支持离线）
+        const indexURL = import.meta.env.PROD
+            ? '/pyodide/'  // 生产：从 public/pyodide/ 加载
+            : 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';  // 开发：CDN
+
+        // 动态加载Pyodide（运行时加载，不打包进bundle）
+        // @ts-ignore - Pyodide会通过script标签加载到全局
+        const loadPyodide = (self as any).loadPyodide || (await import(/* @vite-ignore */ `${indexURL}pyodide.mjs`)).loadPyodide;
+
         pyodide = await loadPyodide({
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
+            indexURL
         });
 
         ctx.postMessage({ type: 'STATUS', message: 'Loading Pandas & Matplotlib...' });

@@ -5,6 +5,7 @@
 
 import { DuckDBEngine } from '@/db/duckdbEngine';
 import { logger } from '@/utils/logger';
+import { pyodideManager } from '@/services/PyodideManager';
 import {
     SkillDefinition,
     SkillExecutionArgs,
@@ -65,6 +66,12 @@ export class SkillsDispatcher {
                     break;
                 case 'sys_switch_theme':
                     result = await this.executeSysSwitchTheme(args);
+                    break;
+                case 'sys_run_sql':  // 🆕 Generic Skill
+                    result = await this.executeSysRunSQL(args);
+                    break;
+                case 'sys_run_python':  // 🆕 Generic Skill - Python执行
+                    result = await this.executeSysRunPython(args);
                     break;
                 default:
                     throw new Error(`Skill ${skillName} 尚未实现`);
@@ -152,6 +159,109 @@ export class SkillsDispatcher {
             throw new Error('DuckDB 连接未就绪');
         }
         return conn;
+    }
+
+    // ============================================================
+    // Generic Skills 执行实现
+    // ============================================================
+
+    // ============================================================
+    // Generic Skills 执行实现
+    // ============================================================
+
+    /**
+     * 执行 sys_run_sql（通用SQL查询）
+     */
+    private async executeSysRunSQL(args: SkillExecutionArgs): Promise<any> {
+        const { sql, permission = 'READ_ONLY', resultLimit = 10000 } = args;
+
+        // 确保DuckDB已连接
+        await this.ensureConnected();
+
+        if (!this.currentTableName) {
+            throw new Error('未设置表名，无法执行SQL');
+        }
+
+        // 🔐 权限检查
+        const sqlUpper = sql.toUpperCase().trim();
+        if (permission === 'READ_ONLY' && !sqlUpper.startsWith('SELECT') && !sqlUpper.startsWith('DESCRIBE') && !sqlUpper.startsWith('SHOW')) {
+            throw new Error('READ_ONLY权限仅允许查询操作(SELECT/DESCRIBE/SHOW)');
+        }
+
+        if (permission === 'CLEANING') {
+            // CLEANING允许：SELECT, UPDATE, ALTER, CREATE（但不允许DELETE/DROP/TRUNCATE）
+            // 注意：DuckDB WASM中如果不持久化到OPFS，DROP TABLE影响仅限于当前会话
+            // 但为了安全起见，我们仍禁止破坏性操作
+            const forbidden = ['DELETE FROM', 'DROP TABLE', 'DROP VIEW', 'TRUNCATE', 'DROP DATABASE'];
+            if (forbidden.some(cmd => sqlUpper.includes(cmd))) {
+                throw new Error('CLEANING权限禁止删除表或清空数据的操作');
+            }
+        }
+
+        // P1修复：sys_run_sql 实际执行逻辑
+        if (permission !== 'READ_ONLY' && permission !== 'CLEANING' && permission !== 'FULL') {
+            throw new Error(`未知的权限级别: ${permission}`);
+        }
+
+        // 执行SQL
+        logger.log('Skills', `执行SQL (${permission})`, sql);
+
+        try {
+            // 如果是清洗操作(UPDATE/CREATE/ALTER)，使用 executeCleaningSQL (它会记录耗时)
+            // 如果是查询操作，使用 runQuery
+            if (permission === 'CLEANING' && !sqlUpper.startsWith('SELECT') && !sqlUpper.startsWith('DESCRIBE') && !sqlUpper.startsWith('SHOW')) {
+                const resultMsg = await this.db.executeCleaningSQL(sql);
+                return {
+                    message: resultMsg,
+                    affectedRows: -1, // DuckDB WASM 暂时不方便获取受影响行数，或者需要解析resultMsg
+                    success: true
+                };
+            } else {
+                const result = await this.db.runQuery(sql);
+
+                // 限制结果集大小（仅READ_ONLY）
+                if (permission === 'READ_ONLY' && result.length > resultLimit) {
+                    logger.warn('Skills', `结果集超限，截断 ${result.length} → ${resultLimit}`);
+                    return {
+                        rows: result.slice(0, resultLimit),
+                        rowCount: result.length,
+                        truncated: true
+                    };
+                }
+
+                return {
+                    rows: result,
+                    rowCount: result.length,
+                    truncated: false
+                };
+            }
+        } catch (err: any) {
+            logger.error('Skills', 'SQL执行错误', err);
+            throw new Error(`SQL执行失败: ${err.message}`);
+        }
+    }
+
+
+    /**
+     * 执行 sys_run_python（通用Python代码执行）
+     */
+    private async executeSysRunPython(args: SkillExecutionArgs): Promise<any> {
+        const { code } = args;
+
+        // 确保Pyodide已初始化
+        logger.log('Skills', '初始化Pyodide引擎');
+        pyodideManager.initialize();
+        await pyodideManager.waitForReady();
+
+        // 执行Python代码
+        logger.log('Skills', `Python代码执行 (${code.length}字符)`);
+        const result = await pyodideManager.runPython(code);
+
+        return {
+            output: result,
+            success: true,
+            codeLength: code.length
+        };
     }
 
     // ============================================================
