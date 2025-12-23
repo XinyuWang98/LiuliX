@@ -77,13 +77,19 @@ export function queryResultToChartData(
     xColumn: string,
     yColumn: string
 ): ChartData {
+    // 获取CSS变量的颜色值
+    const chartBg = getComputedStyle(document.documentElement)
+        .getPropertyValue('--chart-primary-bg').trim() || 'rgba(102, 126, 234, 0.6)';
+    const chartBorder = getComputedStyle(document.documentElement)
+        .getPropertyValue('--chart-primary').trim() || 'rgba(102, 126, 234, 1)';
+
     return {
         labels: rows.map(row => String(row[xColumn])),
         datasets: [{
             label: yColumn,
             data: rows.map(row => Number(row[yColumn])),
-            backgroundColor: 'rgba(102, 126, 234, 0.6)',
-            borderColor: 'rgba(102, 126, 234, 1)'
+            backgroundColor: chartBg,
+            borderColor: chartBorder
         }]
     };
 }

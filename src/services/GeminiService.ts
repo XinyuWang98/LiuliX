@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { logger } from '../utils/logger';
 
 /**
  * Gemini API 服务封装
@@ -42,7 +43,9 @@ class GeminiService {
             console.warn('SDK 初始化失败 (可能是因为 Key 格式)，将尝试使用 REST API');
         }
 
-        console.log(`✅ Gemini API 已初始化 (模型: ${modelId}, 代理: ${baseUrl || '无'})`);
+        logger.log('AI服务', 'Gemini API初始化完成', {
+            data: { model: modelId, proxy: baseUrl || '无' }
+        });
     }
 
     /**
@@ -210,7 +213,7 @@ class GeminiService {
         this.model = null;
         this.apiKey = '';
         this.baseUrl = undefined;
-        console.log('🔒 Gemini API 已清除');
+        logger.log('AI服务', 'Gemini API已清除');
     }
 }
 

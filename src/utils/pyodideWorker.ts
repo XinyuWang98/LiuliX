@@ -3,6 +3,8 @@
  * 提供简洁的 API 来使用 Pyodide Web Worker
  */
 
+import { logger } from './logger';
+
 export interface PyodideWorkerMessage {
     id: string;
     type: string;
@@ -31,13 +33,13 @@ export class PyodideWorkerManager {
             const { id, type, payload } = event.data;
 
             if (type === 'WORKER_READY') {
-                console.log('Pyodide Worker is ready');
+                logger.log('Python', 'Pyodide Worker就绪');
                 return;
             }
 
             const pending = this.pendingMessages.get(id);
             if (!pending) {
-                console.warn(`No pending message found for id: ${id}`);
+                console.warn(`No pending message found for id: ${id} `);
                 return;
             }
 
@@ -66,7 +68,7 @@ export class PyodideWorkerManager {
             throw new Error('Worker not initialized. Call initialize() first.');
         }
 
-        const id = `msg_${this.messageId++}`;
+        const id = `msg_${this.messageId++} `;
 
         return new Promise((resolve, reject) => {
             this.pendingMessages.set(id, { resolve, reject });

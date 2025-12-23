@@ -1,6 +1,7 @@
 import { Project } from '@utils/projectUtils';
 import { DuckDBEngine } from '../db/duckdbEngine';
 import { ColumnMetadata } from '../types/duckdb';
+import { logger } from '../utils/logger';
 
 /**
  * 数据加载服务
@@ -46,7 +47,7 @@ export class DataLoadingService {
 
             const blob = new Blob([csvContent], { type: 'text/csv' });
             rawFile = new File([blob], file.data.fileName, { type: 'text/csv' });
-            console.log('✅ 从 JSON 重建 CSV 成功，行数:', data.length);
+            logger.log('数据分析', '从 JSON 重建CSV成功', { count: data.length });
         }
 
         const result = await engine.ingestCSV(rawFile, {

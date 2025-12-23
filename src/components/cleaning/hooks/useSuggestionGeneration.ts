@@ -4,6 +4,7 @@ import { SimpleSuggestion } from '../types/cleaning.types';
 import { isMissing } from '../utils/dataValidator';
 import { generateAICleaningSuggestions } from '../../../services/aiCleaningService';
 import { DuckDBEngine } from '../../../db/duckdbEngine';
+import { logger } from '../../../utils/logger';
 
 // 常量定义：避免魔法数字
 const QUERY_CHUNK_SIZE = 1000;          // DuckDB 查询分页大小
@@ -69,13 +70,13 @@ export function useSuggestionGeneration(
                     try {
                         await engine.queryChunk(tableName, 0, 1);
                         // tableName有效，继续使用
-                        console.log('[建议生成] ✅ tableName有效:', tableName);
+                        logger.log('数据清洗', 'tableName有效', { data: { tableName } });
                         const rows = await engine.queryChunk(tableName, 0, QUERY_CHUNK_SIZE);
                         data = rows;
                     } catch (tableError: any) {
                         // 🟢 表不存在，查找最新表
                         if (tableError.message?.includes('does not exist')) {
-                            console.log('[建议生成] ⚠️ 缓存tableName失效，查找最新表:', tableName);
+                            logger.warn('数据清洗', '缓存tableName失效，查找最新表', { data: { tableName } });
 
                             const tables = await engine.queryChunk('information_schema.tables', 0, 100);
                             const latestTable = tables
@@ -84,11 +85,11 @@ export function useSuggestionGeneration(
 
                             if (latestTable) {
                                 tableName = String(latestTable.table_name);
-                                console.log('[建议生成] 🔄 更新为最新表:', tableName);
+                                logger.log('数据清洗', '更新为最新表', { data: { tableName } });
                                 const rows = await engine.queryChunk(tableName, 0, QUERY_CHUNK_SIZE);
                                 data = rows;
                             } else {
-                                console.log('[建议生成] ⏳ 数据表暂未就绪，跳过建议生成');
+                                logger.log('数据清洗', '数据表暂未就绪，跳过建议生成');
                                 setLoading(false);
                                 return;
                             }
@@ -98,7 +99,7 @@ export function useSuggestionGeneration(
                     }
                 } catch (err: any) {
                     if (err.message && (err.message.includes('未找到数据表') || err.message.includes('Calendar Error'))) {
-                        console.log('⚠️ 等待数据表就绪...');
+                        logger.warn('数据清洗', '等待数据表就绪');
                         setLoading(false);
                         return;
                     }
@@ -212,7 +213,7 @@ export function useSuggestionGeneration(
             let aiMapped: SimpleSuggestion[] = [];
 
             if (aiSuggestions && aiSuggestions.length > 0) {
-                console.log('[建议生成] 使用手动触发的 AI 建议');
+                logger.log('数据清洗', '使用手动触发的AI建议');
                 aiMapped = (aiSuggestions || []).map((s: any) => ({
                     id: `ai_${s.id || Math.random()}`,
                     label: s.label,
@@ -228,7 +229,7 @@ export function useSuggestionGeneration(
             }
             // 2. 其次尝试读取缓存 (Analysis Cache)
             else if (activeFile?.analysisCache?.cleaning?.suggestions?.length > 0 && !activeFile.analysisCache.cleaning.isStale) {
-                console.log('[建议生成] 🚀 命中 AI 建议缓存');
+                logger.log('数据清洗', '命中AI建议缓存');
                 const cachedSuggestions = activeFile.analysisCache.cleaning.suggestions;
 
                 aiMapped = cachedSuggestions.map((s: any) => ({
@@ -248,7 +249,7 @@ export function useSuggestionGeneration(
                     project &&
                     activeFile.data.tableName &&
                     (!activeFile.analysisCache?.cleaning || activeFile.analysisCache.cleaning.isStale === true)) {
-                    console.log('[建议生成] 🤖 触发 AI 建议自动预加载 (后台静默)');
+                    logger.log('数据清洗', '触发AI建议自动预加载');
                     loadedOnceRef.current[cacheKey] = true;
 
                     // 异步执行，不阻塞规则建议显示
@@ -269,7 +270,7 @@ export function useSuggestionGeneration(
                             );
 
                             if (aiResults && aiResults.length > 0) {
-                                console.log('[建议生成] ✅ 自动预加载完成，生成', aiResults.length, '条AI建议');
+                                logger.log('数据清洗', '自动预加载完成', { count: aiResults.length });
 
                                 // 🎯 立即更新 suggestions 状态，让用户看到
                                 const aiMappedNew: SimpleSuggestion[] = aiResults.map((s: any) => ({
@@ -290,7 +291,9 @@ export function useSuggestionGeneration(
                                     // 过滤掉已存在的 AI 建议，防止重复
                                     const rulesOnly = prev.filter(s => !s.id.startsWith('ai_'));
                                     const merged = [...aiMappedNew, ...rulesOnly];
-                                    console.log('[建议生成] 📊 更新UI: AI建议', aiMappedNew.length, '条 + 规则建议', rulesOnly.length, '条');
+                                    logger.log('数据清洗', '更新UI', {
+                                        data: { aiCount: aiMappedNew.length, ruleCount: rulesOnly.length }
+                                    });
                                     return merged;
                                 });
 

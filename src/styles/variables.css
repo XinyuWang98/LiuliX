@@ -233,6 +233,25 @@
   --z-sticky: 100;
   --z-base: 1;
 
+  /* ========== 颜色系统 ========== */
+  /* 主色调 */
+  --primary: hsl(231, 76%, 66%);
+  --primary-hover: hsl(231, 76%, 56%);
+  --primary-active: hsl(231, 76%, 46%);
+  --primary-light: hsla(231, 76%, 66%, 0.1);
+
+  /* 图表颜色 */
+  --chart-primary: rgba(102, 126, 234, 1);
+  --chart-primary-bg: rgba(102, 126, 234, 0.6);
+  --chart-secondary: rgba(75, 192, 192, 1);
+  --chart-secondary-bg: rgba(75, 192, 192, 0.6);
+  --chart-success: rgba(76, 175, 80, 1);
+  --chart-success-bg: rgba(76, 175, 80, 0.6);
+  --chart-warning: rgba(255, 193, 7, 1);
+  --chart-warning-bg: rgba(255, 193, 7, 0.6);
+  --chart-danger: rgba(244, 67, 54, 1);
+  --chart-danger-bg: rgba(244, 67, 54, 0.6);
+
   /* ========== DataGrid 变量 ========== */
   --grid-row-height: 40px;
   --grid-col-width: 150px;

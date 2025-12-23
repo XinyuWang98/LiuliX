@@ -4,6 +4,7 @@ import { useI18n } from '../../contexts/I18nContext';
 import { Project } from '../../utils/projectUtils';
 import { DuckDBEngine } from '../../db/duckdbEngine';
 import { generateAICleaningSuggestions } from '../../services/aiCleaningService';
+import { logger } from '../../utils/logger';
 // removed DataQualityService
 import { EvidencePool } from '../evidence/EvidencePool';
 import './AIWorkshopTools.css';
@@ -49,7 +50,7 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
     const handleToolClick = async (toolId: string) => {
         // 🚀 防重复点击保护
         if (isGenerating) {
-            console.log('[AI工坊] ⏸️ 正在生成中，请勿重复点击');
+            logger.warn('UI', '正在生成中，请勿重复点击');
             return;
         }
 
@@ -81,9 +82,13 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
                     return;
                 }
 
-                console.log('[AI工坊] 当前文件:', currentFile.id);
-                console.log('[AI工坊] tableName:', currentFile.data.tableName);
-                console.log('[AI工坊] columns:', currentFile.data.columns?.length || 0);
+                logger.log('UI', '当前文件信息', {
+                    data: {
+                        fileId: currentFile.id,
+                        tableName: currentFile.data.tableName,
+                        columnCount: currentFile.data.columns?.length || 0
+                    }
+                });
 
                 let columns = currentFile.data.columns;
                 let tableName = currentFile.data.tableName; // 🚀 改为let，允许更新
@@ -100,7 +105,7 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
 
                 // DuckDB fallback
                 if (!columns || columns.length === 0) {
-                    console.log('[AI工坊] ⚠️ columns为空，尝试从DuckDB获取schema');
+                    logger.warn('UI', 'columns为空，尝试从 DuckDB获取schema');
                     const engine = DuckDBEngine.getInstance();
                     const tables = await engine.queryChunk('information_schema.tables', 0, 100);
                     const latestTable = tables
@@ -109,11 +114,13 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
 
                     if (latestTable) {
                         const latestTableName = String(latestTable.table_name);
-                        console.log('[AI工坊] ✅ 最新表:', latestTableName);
+                        logger.log('UI', '最新表查询结果', { data: { latestTableName } });
 
                         // 🚀 更新tableName为最新表名
                         if (tableName !== latestTableName) {
-                            console.log('[AI工坊] 🔄 更新tableName:', tableName, '→', latestTableName);
+                            logger.log('UI', '更新tableName', {
+                                data: { from: tableName, to: latestTableName }
+                            });
                             tableName = latestTableName;
                         }
 
@@ -122,7 +129,7 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
                         columnInfos = schema.map((c: any) => ({ name: c.name, type: c.type }));
 
                         await engine.queryChunk(latestTableName, 0, 100);
-                        console.log('[AI工坊] ✅ 从DuckDB获取columns:', columns.length);
+                        logger.log('UI', '从DuckDB获取columns', { count: columns.length });
                     }
                 }
 
@@ -131,7 +138,7 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
                     return;
                 }
 
-                console.log('[AI工坊] ✅ DuckDB fallback成功');
+                logger.log('UI', 'DuckDB fallback成功');
 
 
                 const suggestions = await generateAICleaningSuggestions(
@@ -141,7 +148,7 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
                     t,
                     undefined,
                     (progressMsg: string) => {
-                        console.log('[AI工坊]', progressMsg);
+                        logger.log('UI', progressMsg);
                         // 简单的进度估算
                         if (progressMsg.includes('Step 1')) setProgress(25);
                         else if (progressMsg.includes('Step 2')) setProgress(50);
@@ -158,16 +165,16 @@ export const AIWorkshopTools: React.FC<AIWorkshopToolsProps> = ({ project, onToo
 
                 setProgress(100);
 
-                console.log('[AI工坊] ✅ 成功获得', suggestions.length, '条建议');
+                logger.log('UI', '成功获得建议', { count: suggestions.length });
                 suggestions.forEach((sugg: any, idx: number) => {
-                    console.log(`  ${idx + 1}. [${sugg.type}] ${sugg.label}`);
-                    console.log(`     ${sugg.reason}`);
+                    logger.debug('UI', `${idx + 1}. [${sugg.type}] ${sugg.label}`);
+                    logger.debug('UI', `   ${sugg.reason}`);
                 });
 
                 // Final guarantee update
                 if (onSuggestionsGenerated) {
                     onSuggestionsGenerated(suggestions);
-                    console.log('[AI工坊] ✅ 建议已传递到DataCleaner (Final)');
+                    logger.log('UI', '建议已传递到DataCleaner');
                 }
 
             } catch (error: any) {

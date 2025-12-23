@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Project } from '@utils/projectUtils';
 import { DuckDBEngine } from '../../../db/duckdbEngine';
 import { DataLoadingService } from '../../../services/dataLoadingService';
+import { logger } from '../../../utils/logger';
 import { ColumnMetadata } from '../../../types/duckdb';
 import { ColumnStats } from '@/types/data';
 import { pyodideManager } from '../../../services/PyodideManager';
@@ -68,7 +69,7 @@ export function useDataLoader(
                                 tableName
                             );
                             onProjectUpdate(updatedProject);
-                            console.log('🔄 已更新Project状态中的tableName', tableName);
+                            logger.log('文件管理', '已更新Project状态中的tableName', { data: { tableName } });
                         }
                     };
 
@@ -77,7 +78,7 @@ export function useDataLoader(
 
                     // 优先使用已存在的tableName
                     if (file.data.tableName) {
-                        console.log('📌 使用已有tableName:', file.data.tableName);
+                        logger.log('文件管理', '使用已有tableName', { data: { tableName: file.data.tableName } });
 
                         const isValid = await DataLoadingService.validateTable(file.data.tableName, engine);
                         if (isValid) {

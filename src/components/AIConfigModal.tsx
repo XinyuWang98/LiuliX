@@ -4,9 +4,9 @@ import { X, GripVertical, CheckCircle, AlertCircle, Play } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 import { SUPPORTED_MODELS } from '../services/localLLMService';
 import { getSkillsConfig, setSkillsConfig, SkillsConfigType } from '../config/skillsConfig';
-import { getAnalysisConfig, setAnalysisConfig, ANALYSIS_CONFIG_LIMITS } from '../config/analysisConfig';
-import Slider from 'rc-slider';
-import 'rc-slider/assets/index.css';
+import { getAnalysisConfig, setAnalysisConfig } from '../config/analysisConfig';
+import { SkillsConfigSection } from './settings/SkillsConfigSection';
+import { PerformanceConfigSection } from './settings/PerformanceConfigSection';
 
 interface AIConfigModalProps {
     isOpen: boolean;
@@ -212,10 +212,10 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                             <div>
                                 <div style={{ fontWeight: 500, color: 'var(--text-primary)', marginBottom: '4px' }}>
-                                    启用本地模型 (推荐)
+                                    {t('settings.localModelTitle')}
                                 </div>
                                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                                    首次下载 4.3GB 模型，约 10-30 分钟，之后永久离线可用
+                                    {t('settings.localModelDesc')}
                                 </div>
                             </div>
                             <label style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px' }}>
@@ -259,215 +259,24 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                                 borderRadius: '4px',
                             }}>
-                                💡 模型: {SUPPORTED_MODELS.QWEN} (中文强，速度快)
+                                {t('settings.localModelInfo', { model: SUPPORTED_MODELS.QWEN })}
                             </div>
                         )}
                     </div>
 
                     {/* Skills架构配置 */}
-                    <div style={{
-                        backgroundColor: 'var(--bg-main)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '8px',
-                        padding: '16px',
-                    }}>
-                        {/* 全局总开关 */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                            <div>
-                                <div style={{ fontWeight: 500, color: 'var(--text-primary)', marginBottom: '4px' }}>
-                                    启用Skills架构 (实验性)
-                                </div>
-                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                                    Function Calling模式，提升AI推理准确率
-                                </div>
-                            </div>
-                            <label style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={skillsConfig.GLOBAL_ENABLED}
-                                    onChange={(e) => handleSkillsConfigUpdate({ GLOBAL_ENABLED: e.target.checked })}
-                                    style={{ opacity: 0, width: 0, height: 0 }}
-                                />
-                                <span style={{
-                                    position: 'absolute',
-                                    cursor: 'pointer',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    backgroundColor: skillsConfig.GLOBAL_ENABLED ? 'var(--success)' : 'var(--bg-hover)',
-                                    transition: '0.3s',
-                                    borderRadius: '24px',
-                                }}>
-                                    <span style={{
-                                        position: 'absolute',
-                                        content: '',
-                                        height: '18px',
-                                        width: '18px',
-                                        left: skillsConfig.GLOBAL_ENABLED ? '23px' : '3px',
-                                        bottom: '3px',
-                                        backgroundColor: 'white',
-                                        transition: '0.3s',
-                                        borderRadius: '50%',
-                                    }} />
-                                </span>
-                            </label>
-                        </div>
-
-                        {/* 模块级开关（展开区域） */}
-                        {skillsConfig.GLOBAL_ENABLED && (
-                            <>
-                                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px', marginTop: '12px' }}>
-                                    <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: 'var(--text-primary)' }}>
-                                        模块启用
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={skillsConfig.MODULES.INSIGHT_CHAIN}
-                                                onChange={(e) => handleSkillsConfigUpdate({ MODULES: { ...skillsConfig.MODULES, INSIGHT_CHAIN: e.target.checked } })}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                            <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>洞察链分析</span>
-                                        </label>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={skillsConfig.MODULES.DATA_CLEANING}
-                                                onChange={(e) => handleSkillsConfigUpdate({ MODULES: { ...skillsConfig.MODULES, DATA_CLEANING: e.target.checked } })}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                            <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>数据清洗</span>
-                                        </label>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={skillsConfig.MODULES.CHAT_PANEL}
-                                                onChange={(e) => handleSkillsConfigUpdate({ MODULES: { ...skillsConfig.MODULES, CHAT_PANEL: e.target.checked } })}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                            <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>AI聊天面板</span>
-                                        </label>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={skillsConfig.MODULES.AUTO_REPORT}
-                                                onChange={(e) => handleSkillsConfigUpdate({ MODULES: { ...skillsConfig.MODULES, AUTO_REPORT: e.target.checked } })}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                            <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>自动报告</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                {/* 高级功能开关 */}
-                                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px', marginTop: '12px' }}>
-                                    <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: 'var(--text-primary)' }}>
-                                        高级功能
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={skillsConfig.ADVANCED.MULTI_STEP}
-                                                onChange={(e) => handleSkillsConfigUpdate({ ADVANCED: { ...skillsConfig.ADVANCED, MULTI_STEP: e.target.checked } })}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                            <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>多步执行</span>
-                                        </label>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={skillsConfig.ADVANCED.ERROR_RECOVERY}
-                                                onChange={(e) => handleSkillsConfigUpdate({ ADVANCED: { ...skillsConfig.ADVANCED, ERROR_RECOVERY: e.target.checked } })}
-                                                style={{ cursor: 'pointer' }}
-                                            />
-                                            <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>AI错误修正</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                    <SkillsConfigSection
+                        skillsConfig={skillsConfig}
+                        onConfigUpdate={handleSkillsConfigUpdate}
+                    />
 
                     {/* 性能与质量配置 */}
-                    <div style={{
-                        backgroundColor: 'var(--bg-secondary, #1a1a1a)',
-                        padding: '20px',
-                        borderRadius: '12px',
-                        marginBottom: '20px',
-                        border: '1px solid var(--border, rgba(255,255,255,0.1))'
-                    }}>
-                        <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)' }}>
-                            {t('config.performanceQuality')}
-                        </div>
-
-                        {/* 最大分析列数 */}
-                        <div style={{ marginBottom: '20px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <label style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
-                                    {t('config.maxColumns')}
-                                </label>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#3b82f6' }}>
-                                    {analysisConfig.maxColumns} 列
-                                    {analysisConfig.maxColumns > 50 && <span style={{ marginLeft: '8px', fontSize: '12px', color: '#f59e0b' }}>⚠️ 可能较慢</span>}
-                                </span>
-                            </div>
-                            <Slider
-                                min={ANALYSIS_CONFIG_LIMITS.MAX_COLUMNS_MIN}
-                                max={ANALYSIS_CONFIG_LIMITS.MAX_COLUMNS_MAX}
-                                step={5}
-                                value={analysisConfig.maxColumns}
-                                onChange={(val) => handleAnalysisConfigUpdate('maxColumns', val as number)}
-                                trackStyle={{ backgroundColor: '#3b82f6', height: 6 }}
-                                handleStyle={{
-                                    borderColor: '#3b82f6',
-                                    backgroundColor: '#3b82f6',
-                                    height: 20,
-                                    width: 20,
-                                    marginTop: -7,
-                                    opacity: 1
-                                }}
-                                railStyle={{ backgroundColor: '#374151', height: 6 }}
-                            />
-                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                {t('config.maxColumnsDesc')}
-                            </div>
-                        </div>
-
-                        {/* 分析超时时间 */}
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <label style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
-                                    {t('config.timeout')}
-                                </label>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#3b82f6' }}>
-                                    {analysisConfig.timeout} 秒
-                                </span>
-                            </div>
-                            <Slider
-                                min={ANALYSIS_CONFIG_LIMITS.TIMEOUT_MIN}
-                                max={ANALYSIS_CONFIG_LIMITS.TIMEOUT_MAX}
-                                step={30}
-                                value={analysisConfig.timeout}
-                                onChange={(val) => handleAnalysisConfigUpdate('timeout', val as number)}
-                                trackStyle={{ backgroundColor: '#3b82f6', height: 6 }}
-                                handleStyle={{
-                                    borderColor: '#3b82f6',
-                                    backgroundColor: '#3b82f6',
-                                    height: 20,
-                                    width: 20,
-                                    marginTop: -7,
-                                    opacity: 1
-                                }}
-                                railStyle={{ backgroundColor: '#374151', height: 6 }}
-                            />
-                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                {t('config.timeoutDesc')}
-                            </div>
-                        </div>
-                    </div>
+                    <PerformanceConfigSection
+                        maxColumns={analysisConfig.maxColumns}
+                        timeout={analysisConfig.timeout}
+                        onMaxColumnsChange={(value) => handleAnalysisConfigUpdate('maxColumns', value)}
+                        onTimeoutChange={(value) => handleAnalysisConfigUpdate('timeout', value)}
+                    />
 
                     <div style={{
                         fontSize: '14px',

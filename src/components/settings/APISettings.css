@@ -1,0 +1,234 @@
+/* APISettings 组件样式 */
+
+.api-settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+}
+
+.api-settings-modal {
+    max-width: 600px;
+    width: 90%;
+    padding: var(--gap-xl);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.api-settings-header {
+    display: flex;
+    align-items: center;
+    justifySelf: space-between;
+    margin-bottom: var(--gap-l);
+}
+
+.api-settings-title {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    margin: 0;
+}
+
+.api-settings-close {
+    padding: 4px;
+}
+
+/* Form sections */
+.form-section {
+    margin-bottom: var(--gap-l);
+}
+
+.form-label {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: var(--gap-s);
+}
+
+.model-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+}
+
+/* Model tags */
+.model-tags {
+    display: flex;
+    gap: var(--gap-xs);
+    margin-top: var(--gap-s);
+    flex-wrap: wrap;
+}
+
+.tag-free {
+    font-size: var(--fs-xs);
+    padding: 2px 8px;
+    background: rgba(0, 200, 100, 0.1);
+    color: var(--primary);
+    border-radius: var(--radius-s);
+}
+
+.tag-rate-limit {
+    font-size: var(--fs-xs);
+    padding: 2px 8px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: var(--radius-s);
+}
+
+.tag-requires-key {
+    font-size: var(--fs-xs);
+    padding: 2px 8px;
+    background: var(--warning);
+    border-radius: var(--radius-s);
+}
+
+.tag-no-key {
+    font-size: var(--fs-xs);
+    padding: 2px 8px;
+    background: rgba(0, 200, 100, 0.1);
+    color: var(--primary);
+    border-radius: var(--radius-s);
+}
+
+/* Security warning */
+.security-warning {
+    background: var(--warning);
+    padding: var(--gap-m);
+    border-radius: var(--radius-m);
+    margin-bottom: var(--gap-l);
+    font-size: var(--fs-sm);
+}
+
+.security-warning p {
+    margin: 8px 0 0 0;
+    line-height: var(--line-height);
+}
+
+/* API Key input */
+.api-key-wrapper {
+    position: relative;
+}
+
+.api-key-input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    font-family: monospace;
+}
+
+.api-key-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 4px;
+}
+
+.api-key-saved {
+    font-size: var(--fs-xs);
+    color: var(--primary);
+    margin-top: var(--gap-xs);
+}
+
+/* Base URL input */
+.base-url-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    font-family: monospace;
+}
+
+.base-url-hint {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.label-optional {
+    color: var(--text-secondary);
+    font-weight: normal;
+    font-size: var(--fs-xs);
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: var(--gap-m);
+    margin-bottom: var(--gap-l);
+}
+
+.action-buttons .btn-secondary,
+.action-buttons .btn-primary {
+    flex: 1;
+}
+
+/* Test result */
+.test-result {
+    padding: var(--gap-m);
+    border-radius: var(--radius-m);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+}
+
+.test-result-success {
+    background: rgba(0, 200, 100, 0.1);
+    border: 1px solid var(--primary);
+}
+
+.test-result-error {
+    background: var(--warning);
+    border: 1px solid transparent;
+}
+
+.test-result-content {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-s);
+}
+
+.test-result-text {
+    flex: 1;
+}
+
+.test-result-title {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+}
+
+.test-result-message {
+    font-size: var(--fs-xs);
+    margin-top: 4px;
+}
+
+.test-result-doc-link {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    font-size: var(--fs-xs);
+    color: var(--primary);
+    text-decoration: none;
+}

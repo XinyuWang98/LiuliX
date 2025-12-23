@@ -7,6 +7,7 @@ import { logger } from '@/utils/logger';
 export function generateBatchInsightsPrompt(
     columns: string[],
     rowCount: number,
+    totalRows: number,
     sampleData: any[]
 ): string {
     const columnList = columns.join(', ');
@@ -26,9 +27,49 @@ export function generateBatchInsightsPrompt(
 
 **数据集信息**：
 - 列名：${columnList}
-- 总行数：${rowCount}
+- 采样行数：${rowCount}（用于理解数据分布）
+- 总行数：${totalRows}（实际数据规模）
 - 示例数据：
 ${sampleJson}
+
+**重要要求**：
+每条洞察建议必须提供 **两种执行模式**：
+1. **full_mode**：用于小数据集（<50万行），直接使用pandas全量数据分析
+2. **aggregated_mode**：用于大数据集（>50万行），使用DuckDB预聚合后再可视化
+
+**双模式代码规范**：
+
+**full_mode** - pandas全量分析：
+- 使用全局变量 \`df\`（已加载全量数据）
+- 导入：\`import matplotlib.pyplot as plt\`, \`import pandas as pd\`, \`import numpy as np\`, \`import base64\`, \`from io import BytesIO\`, \`import json\`
+- 使用 \`plt.switch_backend('Agg')\`
+- 返回格式：\`json.dumps({"image": "data:image/png;base64,...", "summary": "统计文本"})\`
+
+**aggregated_mode** - DuckDB预聚合：
+- **sql**：DuckDB SQL查询（使用 \`__TABLE_NAME__\` 占位符代表表名）
+- **viz_code**：基于聚合结果的Pyodide可视化代码（使用 \`df\` 代表聚合后的小数据集）
+
+**输出格式（JSON数组）**：
+[
+    {
+        "title": "洞察标题",
+        "description": "洞察描述",
+        "columns_used": ["列名1", "列名2"],
+        "full_mode": {
+            "code": "完整Python代码（使用全量df）"
+        },
+        "aggregated_mode": {
+            "sql": "DuckDB预聚合SQL（使用__TABLE_NAME__占位符）",
+            "viz_code": "Pyodide可视化代码（使用聚合后df）"
+        }
+    }
+]
+
+**关键注意事项**：
+1. aggregated_mode的SQL必须返回较少的行（<1000行），通过GROUP BY聚合
+2. viz_code使用的df是SQL聚合后的结果，不是原始数据
+3. 两种模式最终生成的图表应该**视觉上一致**（只是数据粒度不同）
+4. 必须在columns_used中列出使用的列名（用于内存评估）
 
 **要求**：
 1. 生成 3-5 条有价值的数据洞察建议
@@ -86,7 +127,17 @@ json.dumps(result)
 export interface InsightSuggestion {
     title: string;
     description: string;
-    code: string;
+    /** AI分析用到的列 */
+    columns_used: string[];
+    /** 全量模式 */
+    full_mode: {
+        code: string;
+    };
+    /** 聚合模式 */
+    aggregated_mode: {
+        sql: string;
+        viz_code: string;
+    };
 }
 
 /**
@@ -109,7 +160,12 @@ export function parseBatchInsightsResponse(aiResponse: string): InsightSuggestio
         }
 
         return parsed.filter((item: any) =>
-            item.title && item.description && item.code
+            item.title &&
+            item.description &&
+            item.columns_used &&
+            item.full_mode?.code &&
+            item.aggregated_mode?.sql &&
+            item.aggregated_mode?.viz_code
         );
     } catch (error) {
         logger.log('AI服务', 'AI响应解析失败', { data: String(error) });

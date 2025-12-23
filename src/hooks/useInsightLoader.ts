@@ -9,7 +9,7 @@ import { sampleDataForAI } from '@/utils/sampleData';
 import { DuckDBEngine } from '@/db/duckdbEngine';
 import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/batchInsightGenerator';
 import { executeBatchInsights } from '@/services/insightExecutor';
-import { logger } from '@/utils/logger';
+import { logger } from '../utils/logger';
 import { localLLMService, SUPPORTED_MODELS } from '@/services/localLLMService';
 
 export function useInsightLoader() {
@@ -81,12 +81,12 @@ export function useInsightLoader() {
                         await localLLMService.reload(SUPPORTED_MODELS.QWEN);
                         logger.log('本地模型', '模型加载完成');
                         setIsLoadingLocalModel(false);
-                        console.log('✅ 本地模型就绪，洞察分析超快！');
+                        logger.log('本地模型', '本地模型就绪，洞察分析超快');
                     } catch (loadError) {
                         logger.error('本地模型', '加载失败，降级DeepSeek', loadError);
                         setIsLoadingLocalModel(false);
                         // 降级到云端
-                        const prompt = generateBatchInsightsPrompt(有效列名, rowCount || 0, 采样数据);
+                        const prompt = generateBatchInsightsPrompt(有效列名, rowCount || 0, rowCount || 0, 采样数据);
                         const aiResult = await askAIInsight(prompt);
                         aiResponse = aiResult.content;
                     }
@@ -96,19 +96,19 @@ export function useInsightLoader() {
                 const localStatus = localLLMService.getStatus();
                 if (localStatus.isReady) {
                     logger.log('本地模型', '使用本地模型生成洞察');
-                    const prompt = generateBatchInsightsPrompt(有效列名, rowCount || 0, 采样数据);
+                    const prompt = generateBatchInsightsPrompt(有效列名, rowCount || 0, rowCount || 0, 采样数据);
                     aiResponse = await localLLMService.generateInsight(prompt);
                     logger.log('本地模型', '本地生成完成');
                 } else {
                     logger.warn('本地模型', '模型未就绪，降级DeepSeek');
-                    const prompt = generateBatchInsightsPrompt(有效列名, rowCount || 0, 采样数据);
+                    const prompt = generateBatchInsightsPrompt(有效列名, rowCount || 0, rowCount || 0, 采样数据);
                     const aiResult = await askAIInsight(prompt);
                     aiResponse = aiResult.content;
                 }
             } else {
                 // 使用云端模型（DeepSeek）
                 logger.log('AI洞察', '使用云端模型（DeepSeek）');
-                const prompt = generateBatchInsightsPrompt(有效列名, rowCount || 0, 采样数据);
+                const prompt = generateBatchInsightsPrompt(有效列名, rowCount || 0, rowCount || 0, 采样数据);
                 const aiResult = await askAIInsight(prompt);
                 aiResponse = aiResult.content;
             }
@@ -139,7 +139,7 @@ export function useInsightLoader() {
             // 步骤6：批量执行Python代码（串行，显示进度）
             logger.log('Python', 'Pyodide批量执行开始', { count: insightSuggestions.length });
 
-            const codes = insightSuggestions.map(s => s.code);
+            const codes = insightSuggestions.map(s => s.full_mode.code);
             const results = await executeBatchInsights(codes, (current, total) => {
                 logger.log('Python', '执行进度更新', { count: current, data: `${current}/${total}` });
                 setExecutionProgress({ current, total });
@@ -160,7 +160,7 @@ export function useInsightLoader() {
                 executionResult: results[idx] ? {
                     image: results[idx]!.image,
                     summary: results[idx]!.summary,
-                    code: suggestion.code
+                    code: suggestion.full_mode.code
                 } : undefined,
                 executionStatus: results[idx] ? 'success' : 'error'
             }));

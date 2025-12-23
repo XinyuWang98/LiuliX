@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 export interface PyodideResponse {
     id: string;
     type: 'SUCCESS' | 'ERROR' | 'STATUS' | 'READY';
@@ -31,11 +33,11 @@ class PyodideManager {
             const data = event.data as PyodideResponse;
 
             if (data.type === 'READY') {
-                console.log('🐍 Pyodide Engine Ready');
                 this.isReady = true;
+                logger.log('Python', '引擎就绪');
                 if (this.readyResolver) this.readyResolver();
             } else if (data.type === 'STATUS') {
-                console.log(`🐍 Pyodide Status: ${data.message}`);
+                logger.log('Python', `状态: ${data.message}`);
             } else {
                 // Handle request responses
                 if (data.id && this.listeners.has(data.id)) {

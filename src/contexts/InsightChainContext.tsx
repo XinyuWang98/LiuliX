@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { HypothesisCard, InsightNode, InsightChain } from '@/types/insightChain';
 import { useEvidence } from './EvidenceContext';
+import { logger } from '../utils/logger';
 
 // 洞察链上下文接口
 interface InsightChainContextType {
@@ -79,7 +80,7 @@ export function InsightChainProvider({ children }: { children: ReactNode }) {
         // 存入证据池
         addRecord({
             type: 'insightChain',
-            title: `洞察链：${hypothesis.title}`,
+            title: `洞察链：${hypothesis.title} `,
             description: `假设："${hypothesis.title}"，包含 ${chainInsights.length} 个洞察节点`,
             tags: ['洞察链', '分析假设'],
             metadata: {
@@ -94,7 +95,7 @@ export function InsightChainProvider({ children }: { children: ReactNode }) {
             )
         );
 
-        console.log('[证据池] 洞察链已采纳并保存', insightChain);
+        logger.log('UI', '洞察链已采纳并保存', { data: insightChain });
     };
 
     // 重置洞察链

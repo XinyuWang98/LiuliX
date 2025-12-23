@@ -115,6 +115,28 @@ export const enUS: LanguageConfig = {
             keyPlaceholder: 'Enter {model} API Key',
             connectionSuccessShort: 'Connected',
             settingComplete: 'Done',
+
+            // Skills Architecture
+            skillsTitle: 'Enable Skills Architecture (Experimental)',
+            skillsDesc: 'Function Calling mode, improves AI reasoning accuracy',
+            skillsModules: 'Module Activation',
+            skillsModuleInsightChain: 'Insight Chain Analysis',
+            skillsModuleDataCleaning: 'Data Cleaning',
+            skillsModuleChatPanel: 'AI Chat Panel',
+            skillsModuleAutoReport: 'Auto Report',
+            skillsAdvanced: 'Advanced Features',
+            skillsAdvancedMultiStep: 'Multi-Step Execution',
+            skillsAdvancedErrorRecovery: 'AI Error Recovery',
+
+            // Local Model
+            localModelTitle: 'Enable Local Model (Recommended)',
+            localModelDesc: 'First-time download 4.3GB model, takes 10-30 minutes, then permanently available offline',
+            localModelInfo: '💡 Model: {model} (Strong in Chinese, Fast)',
+
+            // Performance
+            performanceSlowWarning: '⚠️ May Be Slow',
+            performanceColumnsUnit: 'columns',
+            performanceTimeoutUnit: 'seconds',
         },
         prompt: {
             library: { title: 'Prompt Library', description: 'Collection of high-quality analysis strategies and prompts' },

@@ -13,40 +13,19 @@ import { ExplorationFlow } from './components/exploration/ExplorationFlow';
 import { pyodideManager } from './services/PyodideManager';
 import { AIConfigModal } from './components/AIConfigModal';
 import { useResizable } from '@/hooks/useResizable';
+import './App.css';
 
 function LoadingScreen() {
     const { t } = useI18n();
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'var(--bg-main)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            color: 'var(--text-primary)',
-        }}>
-            <div style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: '50%',
-                border: '3px solid var(--bg-panel)',
-                borderTopColor: 'var(--primary)',
-                animation: 'spin 1s linear infinite',
-                marginBottom: 'var(--gap-l)',
-            }} />
-            <h2 style={{ fontSize: 'var(--fs-xl)', fontWeight: '600', marginBottom: 'var(--gap-s)' }}>
+        <div className="loading-screen">
+            <div className="loading-spinner" />
+            <h2 className="loading-title">
                 DataPrism AI Engine
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-m)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <p className="loading-text">
                 {t('common.initializing')}
             </p>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 }
@@ -142,33 +121,15 @@ function AppContent() {
     }
 
     return (
-        <div className="app-container" style={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100vh',
-            width: '100vw',
-            background: 'var(--bg-main)',
-            color: 'var(--text-primary)',
-            cursor: (isLeftResizing || isRightResizing) ? 'col-resize' : 'default', // 全局光标控制
-        }}>
+        <div className={`app-container ${(isLeftResizing || isRightResizing) ? 'resizing' : ''}`}>
             <NavigationBar
                 onOpenAPISettings={() => setShowAPISettings(true)}
                 backendStatus={backendStatus}
             />
 
-            <div style={{
-                flex: 1,
-                display: 'flex',
-                overflow: 'hidden',
-                position: 'relative',
-            }}>
+            <div className="main-content-wrapper">
                 {showLeft ? (
-                    <div className="sidebar-enter" style={{
-                        width: leftWidth,
-                        flexShrink: 0,
-                        display: 'flex',
-                        position: 'relative',
-                    }}>
+                    <div className="sidebar-container" style={{ width: leftWidth }}>
                         <LeftSidebar
                             onProjectSelect={(project) => {
                                 setSelectedProject(project);
@@ -179,78 +140,26 @@ function AppContent() {
                         {/* Drag Handle */}
                         <div
                             onMouseDown={startLeftResizing}
-                            style={{
-                                position: 'absolute',
-                                right: '-4px',
-                                top: 'var(--gap-m)',
-                                bottom: 'var(--gap-m)',
-                                width: '8px',
-                                cursor: 'col-resize',
-                                zIndex: 10,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
+                            className="drag-handle drag-handle-left"
                             title="Drag to resize"
                         >
-                            <div style={{
-                                width: '2px',
-                                height: '100%',
-                                background: isLeftResizing ? 'var(--primary)' : 'transparent',
-                                transition: 'background 0.2s',
-                                borderRadius: '1px',
-                            }} />
+                            <div className={`drag-indicator ${isLeftResizing ? 'active' : ''}`} />
                         </div>
                     </div>
                 ) : (
-                    <div
-                        className="glass-panel"
-                        style={{
-                            width: '48px',
-                            margin: 'var(--gap-m)',
-                            marginRight: 0,
-                            height: 'calc(100% - 2 * var(--gap-m))',
-                            borderRadius: 'var(--radius-l)',
-                            overflow: 'hidden',
-                            border: 'none',
-                            background: 'var(--bg-panel)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            paddingTop: 'var(--gap-m)',
-                            flexShrink: 0,
-                        }}>
+                    <div className="collapsed-sidebar left">
                         <button
-                            className="btn-ghost"
+                            className="btn-ghost sidebar-toggle-btn"
                             onClick={() => setShowLeft(true)}
                             title="展开侧边栏"
-                            style={{ padding: '8px', color: 'var(--text-secondary)' }}
                         >
                             <PanelLeft size={20} />
                         </button>
                     </div>
                 )}
 
-                <div
-                    className="glass-panel"
-                    style={{
-                        flex: 1,
-                        minWidth: 0,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        margin: 'var(--gap-m)',
-                        height: 'calc(100% - 2 * var(--gap-m))',
-                        borderRadius: 'var(--radius-l)',
-                        overflow: 'hidden',
-                        border: 'none',
-                    }}>
-                    <div style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'hidden',
-                        minWidth: 0,
-                    }}>
+                <div className="glass-panel main-panel-wrapper">
+                    <div className="main-panel-content">
                         {activeView === 'dashboard' ? (
                             <ExplorationFlow
                                 project={selectedProject}
@@ -269,96 +178,32 @@ function AppContent() {
                 </div>
 
                 {showRight ? (
-                    <div style={{
-                        width: rightWidth,
-                        flexShrink: 0,
-                        display: 'flex',
-                        position: 'relative', // for handle positioning
-                    }}>
+                    <div className="sidebar-container" style={{ width: rightWidth }}>
                         {/* 拖拽手柄 (左侧) */}
                         <div
                             onMouseDown={startRightResizing}
-                            style={{
-                                position: 'absolute',
-                                left: '-4px', // 向左偏移覆盖空隙
-                                top: 'var(--gap-m)',
-                                bottom: 'var(--gap-m)',
-                                width: '8px',
-                                cursor: 'col-resize',
-                                zIndex: 10,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
+                            className="drag-handle drag-handle-right"
                             title="Drag to resize"
                         >
                             {/* 可视化指示条 */}
-                            <div style={{
-                                width: '2px',
-                                height: '100%',
-                                background: isRightResizing ? 'var(--primary)' : 'transparent',
-                                transition: 'background 0.2s',
-                                borderRadius: '1px',
-                            }} />
+                            <div className={`drag-indicator ${isRightResizing ? 'active' : ''}`} />
                         </div>
 
-                        <div
-                            className="glass-panel"
-                            style={{
-                                width: '100%',
-                                flexShrink: 0,
-                                overflow: 'hidden',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                margin: 'var(--gap-m)',
-                                height: 'calc(100% - 2 * var(--gap-m))',
-                                marginLeft: 0,
-                                borderLeft: 'none',
-                            }}>
-                            <aside style={{
-                                width: '100%',
-                                height: '100%',
-                                padding: 0,
-                                overflow: 'hidden',
-                                display: 'flex',
-                                flexDirection: 'column',
-                            }}>
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'flex-end',
-                                    padding: '24px var(--gap-l) 24px',
-                                    flexShrink: 0,
-                                }}>
-                                    <h2 style={{
-                                        fontSize: 'var(--fs-xxl)',
-                                        fontWeight: 'var(--fw-bold)',
-                                        margin: 0,
-                                        color: 'var(--text-primary)',
-                                        whiteSpace: 'nowrap',
-                                        lineHeight: 1,
-                                    }}>
+                        <div className="glass-panel right-panel-container">
+                            <aside className="right-panel-aside">
+                                <div className="workshop-header">
+                                    <h2 className="workshop-title">
                                         {t('workshop.title')}
                                     </h2>
                                     <button
-                                        className="btn-ghost"
+                                        className="btn-ghost workshop-close-btn"
                                         onClick={() => setShowRight(false)}
-                                        style={{
-                                            padding: '4px',
-                                            borderRadius: 'var(--radius-s)',
-                                            color: 'var(--text-secondary)',
-                                            cursor: 'pointer',
-                                        }}
                                         title={t('sidebar.collapse')}
                                     >
                                         <PanelRight size={18} />
                                     </button>
                                 </div>
-                                <div style={{
-                                    flex: 1,
-                                    overflowY: 'auto',
-                                    padding: 'var(--gap-l)',
-                                }}>
+                                <div className="workshop-content">
                                     <AIWorkshopTools
                                         project={selectedProject}
                                         onToolClick={(toolId) => {
@@ -376,28 +221,11 @@ function AppContent() {
                         </div>
                     </div>
                 ) : (
-                    <div
-                        className="glass-panel"
-                        style={{
-                            width: '48px',
-                            margin: 'var(--gap-m)',
-                            marginLeft: 0,
-                            height: 'calc(100% - 2 * var(--gap-m))',
-                            borderRadius: 'var(--radius-l)',
-                            overflow: 'hidden',
-                            border: 'none',
-                            background: 'var(--bg-panel)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            paddingTop: 'var(--gap-m)',
-                            flexShrink: 0,
-                        }}>
+                    <div className="collapsed-sidebar right">
                         <button
-                            className="btn-ghost"
+                            className="btn-ghost sidebar-toggle-btn"
                             onClick={() => setShowRight(true)}
                             title="展开侧边栏"
-                            style={{ padding: '8px', color: 'var(--text-secondary)' }}
                         >
                             <PanelRight size={20} />
                         </button>

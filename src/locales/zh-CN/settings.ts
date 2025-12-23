@@ -63,4 +63,26 @@ export const settings = {
     keyPlaceholder: '输入 {model} API Key',
     connectionSuccessShort: '连接成功',
     settingComplete: '完成设置',
+
+    // Skills架构配置
+    skillsTitle: '启用Skills架构 (实验性)',
+    skillsDesc: 'Function Calling模式，提升AI推理准确率',
+    skillsModules: '模块启用',
+    skillsModuleInsightChain: '洞察链分析',
+    skillsModuleDataCleaning: '数据清洗',
+    skillsModuleChatPanel: 'AI聊天面板',
+    skillsModuleAutoReport: '自动报告',
+    skillsAdvanced: '高级功能',
+    skillsAdvancedMultiStep: '多步执行',
+    skillsAdvancedErrorRecovery: 'AI错误修正',
+
+    // 本地模型配置
+    localModelTitle: '启用本地模型 (推荐)',
+    localModelDesc: '首次下载 4.3GB 模型，约 10-30 分钟，之后永久离线可用',
+    localModelInfo: '💡 模型: {model} (中文强，速度快)',
+
+    // 性能配置
+    performanceSlowWarning: '⚠️ 可能较慢',
+    performanceColumnsUnit: '列',
+    performanceTimeoutUnit: '秒',
 };

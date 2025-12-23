@@ -1,6 +1,7 @@
 // src/services/aiService.ts
 import ky from 'ky';
 import { MODEL_CONFIG } from '../config/modelConfig';
+import { logger } from '../utils/logger';
 
 // ==================== 常量定义 ====================
 const PROXY_URL = 'http://localhost:3001/api/proxy';
@@ -52,11 +53,11 @@ const CONFIG: Record<AIModel, ModelConfig> = {
         key: () => {
             const advancedKey = localStorage.getItem('deepseek_advanced_key');
             if (advancedKey) {
-                console.log('[AIService] 使用高级模式DeepSeek Key');
+                logger.log('AI服务', '使用高级模式DeepSeek Key');
                 return advancedKey;
             }
             // 返回'default'标记，让代理服务器使用环境变量中的Key
-            console.log('[AIService] 使用环境变量默认DeepSeek Key');
+            logger.log('AI服务', '使用环境变量默认DeepSeek Key');
             return 'default';
         },
         model: MODEL_CONFIG.DEEPSEEK.DEFAULT_MODEL,
@@ -179,7 +180,13 @@ export const askAI = async (
             // 🎯 提取 Token 使用信息
             const usage = res.usage;
             if (usage) {
-                console.log(`[AI服务] 📊 Token消耗: 输入=${usage.prompt_tokens || 0}, 输出=${usage.completion_tokens || 0}, 总计=${usage.total_tokens || 0}`);
+                logger.log('AI服务', 'Token消耗统计', {
+                    data: {
+                        input: usage.prompt_tokens || 0,
+                        output: usage.completion_tokens || 0,
+                        total: usage.total_tokens || 0
+                    }
+                });
             }
 
             const content =
@@ -187,7 +194,7 @@ export const askAI = async (
                 res.message?.content ||
                 t('settings.errorModelEmpty');
 
-            console.log(`[AI服务] ✅ ${model}响应成功，内容长度: ${content.length}`);
+            logger.log('AI服务', `${model}响应成功`, { data: { length: content.length } });
 
             return { content, model, usage };
         } catch (err: any) {
@@ -224,7 +231,7 @@ export const askAICleaning = async (prompt: string) => {
         }).json<any>();
 
         const content = res.choices?.[0]?.message?.content || '';
-        console.log('[AI服务-清洗] ✅ 响应成功，长度:', content.length);
+        logger.log('AI清洗', '响应成功', { data: { length: content.length } });
 
         return { content, model: 'deepseek-cleaning' };
     } catch (err: any) {
@@ -256,7 +263,7 @@ export const askAIInsight = async (prompt: string) => {
         }).json<any>();
 
         const content = res.choices?.[0]?.message?.content || '';
-        console.log('[AI服务-洞察] ✅ 响应成功，长度:', content.length);
+        logger.log('AI洞察', '响应成功', { data: { length: content.length } });
 
         return { content, model: 'deepseek-insight' };
     } catch (err: any) {

@@ -144,6 +144,28 @@ export interface LanguageConfig {
             keyPlaceholder: string;
             connectionSuccessShort: string;
             settingComplete: string;
+
+            // Skills架构配置
+            skillsTitle: string;
+            skillsDesc: string;
+            skillsModules: string;
+            skillsModuleInsightChain: string;
+            skillsModuleDataCleaning: string;
+            skillsModuleChatPanel: string;
+            skillsModuleAutoReport: string;
+            skillsAdvanced: string;
+            skillsAdvancedMultiStep: string;
+            skillsAdvancedErrorRecovery: string;
+
+            // 本地模型配置
+            localModelTitle: string;
+            localModelDesc: string;
+            localModelInfo: string;
+
+            // 性能配置
+            performanceSlowWarning: string;
+            performanceColumnsUnit: string;
+            performanceTimeoutUnit: string;
         };
 
         // Prompt 库

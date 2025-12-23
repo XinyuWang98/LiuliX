@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { InsightNode } from './InsightNode';
 import { useInsightChain } from '@/contexts/InsightChainContext';
+import { logger } from '../../utils/logger';
 import { InsightNode as InsightNodeType } from '@/types/insightChain';
 import { Loader } from 'lucide-react';
 import { useInsightLoader } from '@/hooks/useInsightLoader';
@@ -11,7 +12,6 @@ import { LocalModelProgress } from './LocalModelProgress';
 import { useInsightLoaderWithSkills } from '@/hooks/useInsightLoaderWithSkills';
 import { isSkillsEnabled } from '@/config/skillsConfig';
 import { SkillsProgressIndicator } from '@/components/skills/SkillsProgressIndicator';
-import { logger } from '@/utils/logger';
 
 interface InsightChainFlowProps {
     columns: string[];
@@ -98,10 +98,10 @@ export function InsightChainFlow({ columns, rowCount, sampleData: _sampleData, t
         if (activeHypothesisId) {
             const existingInsights = insights.filter(i => i.hypothesisId === activeHypothesisId);
             if (existingInsights.length === 0) {
-                console.log('🎯 自动生成Mock洞察节点 for hypothesis:', activeHypothesisId);
+                logger.log('AI洞察', '自动生成Mock洞察节点', { data: { hypothesisId: activeHypothesisId } });
                 // 自动生成一个 Mock 洞察节点
                 const mockNode: InsightNodeType = {
-                    id: `insight-${Date.now()}`,
+                    id: `insight - ${Date.now()} `,
                     hypothesisId: activeHypothesisId,
                     chartType: 'table',
                     tableData: [

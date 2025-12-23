@@ -3,6 +3,7 @@
  * 负责：Strict Mode防重、tableName变化检测、智能刷新判断
  */
 import { useEffect, useRef } from 'react';
+import { logger } from '../utils/logger';
 
 interface UseInsightRefreshOptions {
     hypothesesLength: number;
@@ -30,13 +31,12 @@ export function useInsightRefresh({
     });
 
     useEffect(() => {
-        console.log('🔍 InsightChainFlow mounted/updated, hypotheses.length:', hypothesesLength);
+        logger.log('AI洞察', 'InsightChainFlow挂载/更新', { data: { hypothesesCount: hypothesesLength } });
 
         // tableName变化时重置loadedOnceRef（表重建后重新加载）
         if (prevTableNameRef.current !== tableName) {
-            console.log('[洞察链] 📌 tableName变化，重置状态:', {
-                旧表: prevTableNameRef.current,
-                新表: tableName
+            logger.log('AI洞察', 'tableName变化，重置状态', {
+                data: { prev: prevTableNameRef.current, current: tableName }
             });
             loadedOnceRef.current = false;
             prevTableNameRef.current = tableName;
@@ -58,15 +58,12 @@ export function useInsightRefresh({
 
             // 仅在Strict Mode双重调用时阻止（依赖未变）
             if (!depsChanged && loadedOnceRef.current) {
-                console.log('[InsightChainFlow] ⏭️ Strict Mode重复调用已拦截');
+                logger.warn('AI洞察', 'Strict Mode重复调用已拦截');
                 return;
             }
 
-            console.log('[洞察链] 🔄 触发刷新:', {
-                原因: hypothesesLength === 0 ? '无缓存' : 'isStale=true',
-                isStale: insightCache?.isStale,
-                status: insightCache?.status,
-                depsChanged
+            logger.log('AI洞察', '触发刷新', {
+                data: { tableName, hypothesesCount: hypothesesLength }
             });
 
             loadedOnceRef.current = true;
@@ -77,7 +74,7 @@ export function useInsightRefresh({
 
             onRefresh();
         } else if (需要刷新 && !可以执行) {
-            console.log('[洞察链] ⏸️ 刷新被阻止（防重复）:', { status: insightCache?.status });
+            logger.warn('AI洞察', '刷新被阻止（防重复）', { data: { status: insightCache?.status } });
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps

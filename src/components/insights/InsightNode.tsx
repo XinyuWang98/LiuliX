@@ -5,6 +5,7 @@ import { createChart, destroyChart, chartToBase64 } from '@/utils/chartGenerator
 import { Chart } from 'chart.js';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css'; // 暗色主题
+import { logger } from '../../utils/logger';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-sql';
 import './InsightNode.css';
@@ -33,7 +34,7 @@ export function InsightNode({ node, onAdopt, onIgnore }: InsightNodeProps) {
                     const base64 = chartToBase64(chartInstanceRef.current);
                     if (base64) {
                         setChartBase64(base64);
-                        console.log('✅ 图表Base64已生成:', base64.substring(0, 50) + '...');
+                        logger.log('UI', '图表Base64已生成', { data: { preview: base64.substring(0, 50) + '...' } });
                     }
                 }
             }, 100); // 等待图表完全渲染
@@ -144,7 +145,7 @@ export function InsightNode({ node, onAdopt, onIgnore }: InsightNodeProps) {
                     <button
                         className="btn-adopt"
                         onClick={() => {
-                            console.log('👍 采纳洞察，Base64:', chartBase64 ? '✅ 已生成' : '❌ 未生成');
+                            logger.log('UI', '采纳洞察', { data: { hasChart: chartBase64 ? '已生成' : '未生成' } });
                             onAdopt();
                         }}
                     >
