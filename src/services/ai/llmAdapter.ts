@@ -49,7 +49,7 @@ export class LLMAdapter {
             const tools = skillRegistry.toOpenAITools();
             logger.log('Skills', `注册了 ${tools.length} 个工具`);
 
-            const response = await ky.post('http://localhost:3001/api/proxy/deepseek-skills', {
+            const response = await ky.post('/api/proxy/deepseek-skills', {
                 json: {
                     data: {  // 🔧 包装在data字段中，匹配后端格式
                         messages: [
@@ -113,7 +113,7 @@ export class LLMAdapter {
             logger.log('Skills', `System Prompt 长度: ${systemPrompt.length} 字符`);
 
             // 2. 调用 Qwen 本地模型（通过 /api/proxy/qwen-skills）
-            const response = await ky.post('http://localhost:3001/api/proxy/qwen-skills', {
+            const response = await ky.post('/api/proxy/qwen-skills', {
                 json: {
                     messages: [
                         { role: 'system', content: systemPrompt },

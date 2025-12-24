@@ -4,7 +4,7 @@ import { MODEL_CONFIG } from '../config/modelConfig';
 import { logger } from '../utils/logger';
 
 // ==================== 常量定义 ====================
-const PROXY_URL = 'http://localhost:3001/api/proxy';
+const PROXY_URL = '/api/proxy';
 
 
 
@@ -216,7 +216,7 @@ export const askAI = async (
 export const askAICleaning = async (prompt: string) => {
     try {
         const key = CONFIG.deepseek.key();
-        const res = await ky.post('http://localhost:3001/api/proxy/deepseek-cleaning', {
+        const res = await ky.post('/api/proxy/deepseek-cleaning', {
             headers: {
                 'x-api-key': key
             },
@@ -248,7 +248,7 @@ export const askAICleaning = async (prompt: string) => {
 export const askAIInsight = async (prompt: string) => {
     try {
         const key = CONFIG.deepseek.key();
-        const res = await ky.post('http://localhost:3001/api/proxy/deepseek-insight', {
+        const res = await ky.post('/api/proxy/deepseek-insight', {
             headers: {
                 'x-api-key': key
             },
