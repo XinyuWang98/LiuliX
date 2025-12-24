@@ -14,6 +14,7 @@ import { pyodideManager } from './services/PyodideManager';
 import { AIConfigModal } from './components/AIConfigModal';
 import { useResizable } from '@/hooks/useResizable';
 import { logger } from './utils/logger';
+import { Logo } from './components/common/Logo/Logo';
 import './App.css';
 
 function LoadingScreen() {
@@ -21,9 +22,20 @@ function LoadingScreen() {
     return (
         <div className="loading-screen">
             <div className="loading-spinner" />
-            <h2 className="loading-title">
-                DataPrism AI Engine
-            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                    <Logo layout="vertical" size="m" variant="neon" />
+                    <span style={{ fontSize: '10px', opacity: 0.5 }}>Neon Pulse</span>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                    <Logo layout="vertical" size="m" variant="flow" />
+                    <span style={{ fontSize: '10px', opacity: 0.5 }}>Beam Flow</span>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                    <Logo layout="vertical" size="m" variant="glass" />
+                    <span style={{ fontSize: '10px', opacity: 0.5 }}>Glass Shimmer</span>
+                </div>
+            </div>
             <p className="loading-text">
                 {t('common.initializing')}
             </p>

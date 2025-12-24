@@ -90,6 +90,8 @@
 }
 
 .logo-layout-vertical .logo-text {
+    flex-direction: row;
+    /* Keep text inline */
     align-items: center;
     margin-top: var(--gap-xs);
 }
@@ -131,10 +133,100 @@
     font-size: 36px;
 }
 
-/* THEME ADAPTATION: Light Theme Overrides */
-/* Assuming [data-theme='light'] or body:not(.dark) context, but best to rely on variables. */
-/* If var(--bg-main) is light, we might want less glow */
+/* Animations */
+@keyframes beam-flow {
+    0% {
+        stroke-dasharray: 0 100;
+        stroke-dashoffset: 0;
+        opacity: 0.2;
+    }
 
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        stroke-dasharray: 100 0;
+        stroke-dashoffset: -100;
+        opacity: 0.2;
+    }
+}
+
+@keyframes prism-pulse {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 5px rgba(0, 122, 255, 0.4));
+        opacity: 0.9;
+    }
+
+    50% {
+        filter: drop-shadow(0 0 12px rgba(191, 90, 242, 0.6));
+        opacity: 1;
+    }
+}
+
+@keyframes glass-shimmer {
+    0% {
+        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+    }
+}
+
+/* Variant: Neon (Pulse) */
+.logo-container.variant-neon .logo-icon-svg path:first-child {
+    animation: prism-pulse 3s infinite ease-in-out;
+}
+
+/* Variant: Flow (Beam logic) */
+.logo-container.variant-flow .logo-beam-enter,
+.logo-container.variant-flow .logo-beam-exit-1,
+.logo-container.variant-flow .logo-beam-exit-2,
+.logo-container.variant-flow .logo-beam-exit-3 {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: beam-flow 2s infinite linear;
+}
+
+.logo-container.variant-flow .logo-beam-exit-1 {
+    animation-delay: 0.5s;
+}
+
+.logo-container.variant-flow .logo-beam-exit-2 {
+    animation-delay: 0.7s;
+}
+
+.logo-container.variant-flow .logo-beam-exit-3 {
+    animation-delay: 0.9s;
+}
+
+/* Variant: Glass (Shimmer) */
+.logo-container.variant-glass .logo-icon-svg {
+    animation: glass-shimmer 4s infinite ease-in-out;
+}
+
+.logo-container.variant-glass .logo-icon-svg path {
+    stroke-width: 5;
+    /* Thicker for glass feel */
+    opacity: 0.9;
+}
+
+/* Hover acceleration for all */
+.logo-container:hover .logo-beam-enter,
+.logo-container:hover .logo-beam-exit-1,
+.logo-container:hover .logo-beam-exit-2,
+.logo-container:hover .logo-beam-exit-3 {
+    animation-duration: 1s;
+}
+
+/* THEME ADAPTATION: Light Theme Overrides */
 @media (prefers-color-scheme: light) {
     /* Fallback if variables aren't enough, but variables should handle colors */
 }

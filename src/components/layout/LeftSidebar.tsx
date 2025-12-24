@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '@contexts/I18nContext';
-import { FolderPlus, FileText, X, ChevronDown, ChevronRight, PanelLeft } from 'lucide-react';
+import { FolderPlus, FileText, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { FileUploader, FileUploaderRef } from '@components/data/FileUploader';
 import { ParsedFileData } from '@utils/fileParser';
 import { createProject, Project } from '@utils/projectUtils';
@@ -8,7 +8,7 @@ import { loadProjects, saveProjects, deleteProject as deleteProjectFromDB } from
 import { pyodideManager } from '../../services/PyodideManager';
 import { DuckDBEngine } from '../../db/duckdbEngine';
 import { logger } from '@/utils/logger';
-import { Logo } from '../common/Logo/Logo';
+import { SidebarHeader } from './sidebar/SidebarHeader';
 
 interface LeftSidebarProps {
     onProjectSelect?: (project: Project) => void;
@@ -260,30 +260,10 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
                 marginRight: 0,
             }}>
             {/* 标题栏 */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                padding: '24px var(--gap-l) 24px',
-                flexShrink: 0,
-            }}>
-                <Logo layout="horizontal" size="l" />
-                {onClose && (
-                    <button
-                        className="btn-ghost"
-                        onClick={onClose}
-                        style={{
-                            padding: '4px',
-                            color: 'var(--text-secondary)',
-                            borderRadius: 'var(--radius-s)',
-                            cursor: 'pointer',
-                        }}
-                        title={t('sidebar.collapse')}
-                    >
-                        <PanelLeft size={18} />
-                    </button>
-                )}
-            </div>
+            <SidebarHeader
+                title={t('dataSource.title')}
+                onClose={onClose}
+            />
 
             {/* 滚动内容区域 */}
             <div style={{

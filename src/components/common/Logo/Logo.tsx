@@ -14,6 +14,8 @@ interface LogoProps {
     onClick?: () => void;
     /** Custom class name */
     className?: string;
+    /** Visual variant: 'default' | 'neon' | 'flow' | 'glass' */
+    variant?: 'default' | 'neon' | 'flow' | 'glass';
 }
 
 const LogoIcon: React.FC = () => {
@@ -84,6 +86,7 @@ const LogoIcon: React.FC = () => {
                 strokeWidth="3"
                 strokeLinecap="round"
                 opacity="0.8"
+                className="logo-beam-exit-1"
             />
             <path
                 d="M58 55L110 55"
@@ -91,6 +94,7 @@ const LogoIcon: React.FC = () => {
                 strokeWidth="3"
                 strokeLinecap="round"
                 opacity="0.8"
+                className="logo-beam-exit-2"
             />
             <path
                 d="M58 55L110 70"
@@ -98,6 +102,7 @@ const LogoIcon: React.FC = () => {
                 strokeWidth="3"
                 strokeLinecap="round"
                 opacity="0.8"
+                className="logo-beam-exit-3"
             />
         </svg>
     );
@@ -109,11 +114,12 @@ export const Logo: React.FC<LogoProps> = ({
     showText = true,
     interactive = false,
     onClick,
-    className = ''
+    className = '',
+    variant = 'default'
 }) => {
     return (
         <div
-            className={`logo-container logo-layout-${layout} logo-size-${size} ${interactive ? 'interactive' : ''} ${className}`}
+            className={`logo-container logo-layout-${layout} logo-size-${size} ${interactive ? 'interactive' : ''} variant-${variant} ${className}`}
             onClick={onClick}
         >
             <div className="logo-icon-wrapper">
@@ -123,7 +129,7 @@ export const Logo: React.FC<LogoProps> = ({
             {showText && (
                 <div className="logo-text">
                     <span className="logo-text-primary">Liuli</span>
-                    <span className="logo-text-primary" style={{ color: 'var(--bg-accent)' }}>X</span>
+                    <span className="logo-text-secondary">X</span>
                 </div>
             )}
         </div>

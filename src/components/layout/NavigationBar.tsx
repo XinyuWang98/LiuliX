@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '@contexts/I18nContext';
 import { ThemeSwitcher } from '@components/common/ThemeSwitcher';
 import { Settings, User } from 'lucide-react';
+import { Logo } from '@/components/common/Logo/Logo';
 
 interface NavigationBarProps {
     onOpenAPISettings?: () => void;
@@ -39,48 +40,8 @@ export function NavigationBar({ onOpenAPISettings, backendStatus = 'checking' }:
                 background: 'transparent', // No rectangle/background
             }}
         >
-            {/* 左侧:应用标题 */}
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    minWidth: '220px',
-                }}
-            >
-                {/* Logo Icon */}
-                <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 10px rgba(var(--primary-rgb), 0.3)',
-                    flexShrink: 0,
-                }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                    </svg>
-                </div>
-
-                {/* Logo Text */}
-                <h1
-                    style={{
-                        fontSize: '20px',
-                        fontWeight: '700',
-                        letterSpacing: '-0.5px',
-                        margin: 0,
-                        background: 'linear-gradient(90deg, var(--text-primary) 0%, var(--text-secondary) 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                    }}
-                >
-                    DataPrism
-                </h1>
-            </div>
+            {/* 左侧: LiuliX Logo */}
+            <Logo layout="horizontal" size="m" />
 
             {/* 右侧:工具栏 */}
             <div
