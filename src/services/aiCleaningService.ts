@@ -38,14 +38,23 @@ export async function generateAICleaningSuggestions(
     duckdbEngine?: any,
     onProgress?: (progressMsg: string) => void,
     onSuggestionUpdate?: (suggestions: CleaningSuggestion[]) => void,
-    language: string = 'Chinese (Simplified)'
+    signal?: AbortSignal,
+    language?: string
 ): Promise<CleaningSuggestion[]> {
+    logger.group('AI服务', '开始生成清洗建议 (Function Call)');
+    logger.log('AI服务', `Language: ${language}`);
+
+    if (signal?.aborted) {
+        throw new DOMException('Aborted', 'AbortError');
+    }
+
     try {
         logger.group('AI清洗', '生成清洗建议流程');
 
         // 1. 数据脱敏
         logger.log('AI清洗', '数据脱敏中');
         onProgress?.(t('cleaning.desensitizing'));
+
         const { metadata: desensitizedData, columnMapping } = buildDesensitizedMetadata(columns, stats);
         const qualityIssues = generateQualityIssues(desensitizedData);
         // 1.5. 大文件采样（性能优化）
@@ -60,6 +69,9 @@ export async function generateAICleaningSuggestions(
         // 2. 构建 AI Prompt
         const prompt = buildCleaningPrompt(tableName, desensitizedData, qualityIssues, t, language);
         logger.log('AI清洗', '构建Prompt完成', { data: `${prompt.length}字符` });
+        logger.groupCollapsed('AI清洗', '完整Prompt内容（点击展开）');
+        console.log(prompt);
+        logger.groupEnd();
         onProgress?.(t('cleaning.generatingSuggestions'));
         // 3. 调用AI（使用清洗专用通道，30s超时）
         const { content } = await askAICleaning(prompt);
@@ -98,6 +110,7 @@ export async function generateAICleaningSuggestions(
         // 6. 初始化建议状态
         const processedSuggestions: CleaningSuggestion[] = safeSuggestions.map(s => ({
             ...s,
+            sql: s.sql, // ✅ 透传原始SQL
             dryRunStatus: 'pending' as const
         }));
         // 立即发送初步建议到UI

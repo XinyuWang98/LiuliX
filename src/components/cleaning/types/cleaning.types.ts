@@ -53,6 +53,7 @@ export interface SimpleSuggestion {
     category: SuggestionCategory; // 建议类型分类
     expectedImpact?: string;
     dryRunStatus?: 'pending' | 'success' | 'failed';
+    sql?: string; // ✅ 新增：AI生成的SQL语句
 }
 
 /**

@@ -230,6 +230,53 @@ json.dumps(replace_nan(preview))
             const result = JSON.parse(resultStr);
 
             ctx.postMessage({ id, type: 'SUCCESS', result });
+        } else if (type === 'LOAD_FONT_URL') {
+            // 动态加载字体
+            const { url, name } = content;
+
+            try {
+                ctx.postMessage({ type: 'STATUS', message: `Downloading font ${name}...` });
+
+                // 1. Fetch字体文件
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Failed to fetch font: ${response.statusText}`);
+                const buffer = await response.arrayBuffer();
+                const data = new Uint8Array(buffer);
+
+                // 2. 写入虚拟文件系统
+                const fontPath = `/home/pyodide/${name}`;
+                pyodide.FS.writeFile(fontPath, data);
+
+                // 3. 配置Matplotlib
+                const pythonCode = `
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import os
+
+font_path = '${fontPath}'
+
+# 注册字体
+if os.path.exists(font_path):
+    fm.fontManager.addfont(font_path)
+    
+    # 尝试推断Family Name，通常文件名去掉后缀即可，或者硬编码
+    font_prop = fm.FontProperties(fname=font_path)
+    font_name = font_prop.get_name()
+    
+    # 设置为默认字体 (保留sans-serif作为后备)
+    plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+    plt.rcParams['axes.unicode_minus'] = False # 解决负号显示问题
+    
+    print(f"Font loaded: {font_name}")
+else:
+    print("Font file not found")
+`;
+                await pyodide.runPythonAsync(pythonCode);
+                ctx.postMessage({ id, type: 'SUCCESS', result: 'Font loaded' });
+            } catch (err) {
+                console.error("Font loading error:", err);
+                ctx.postMessage({ id, type: 'ERROR', error: String(err) });
+            }
         }
     } catch (error) {
         ctx.postMessage({ id, type: 'ERROR', error: String(error) });

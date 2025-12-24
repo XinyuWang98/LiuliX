@@ -4,6 +4,7 @@
  */
 
 import { logger } from '@/utils/logger';
+import { calculateMaxRowsForPyodide } from '@/utils/memoryAssessment';
 import { DuckDBEngine } from '@/db/duckdbEngine';
 import { pyodideManager } from '@/services/PyodideManager';
 import { ExecutionMode } from '@/utils/memoryAssessment';
@@ -33,7 +34,7 @@ export async function executeInsightWithMode(
 
         if (mode === 'full' || mode === 'sampled') {
             // full和sampled都使用full_mode代码（数据已经在Pyodide中加载）
-            return await executeFullMode(suggestion, mode);
+            return await executeFullMode(suggestion, mode, tableName);  // ✅ 传递tableName
         } else {
             // aggregated模式：先DuckDB聚合，再Pyodide可视化
             return await executeAggregatedMode(suggestion, tableName);
@@ -53,17 +54,55 @@ export async function executeInsightWithMode(
  */
 async function executeFullMode(
     suggestion: InsightSuggestion,
-    mode: ExecutionMode
+    mode: ExecutionMode,
+    tableName: string  // ✅ 添加tableName参数
 ): Promise<ModeExecutionResult> {
     const code = suggestion.full_mode.code;
 
     logger.log('Skills', `执行full_mode代码`, { data: { codeLength: code.length } });
 
-    // 确保Pyodide已初始化
-    pyodideManager.initialize();
-    await pyodideManager.waitForReady();
+    // ✅ 从DuckDB导出数据到Pyodide
+    const db = DuckDBEngine.getInstance();
+    await db.init();
 
-    // 执行Python代码
+    try {
+        // ✅ 优化：使用动态内存计算替代魔法数字
+        const schema = await db.runQuery(`DESCRIBE ${tableName}`);
+        const columnCount = schema.length;
+        const maxRows = calculateMaxRowsForPyodide(columnCount, 512);
+
+        const countResult = await db.runQuery(`SELECT COUNT(*) as total FROM ${tableName}`);
+        const totalRows = Number(countResult[0]?.total || 0);
+
+        let query = `SELECT * FROM ${tableName}`;
+        let isLimited = false;
+
+        if (totalRows > maxRows) {
+            query = `SELECT * FROM ${tableName} LIMIT ${maxRows}`;
+            isLimited = true;
+            logger.warn('Skills', `数据量过大（${totalRows}行），已限制到${maxRows}行（基于${columnCount}列内存评估）`);
+        }
+
+        const data = await db.runQuery(query);
+
+        pyodideManager.initialize();
+        await pyodideManager.waitForReady();
+
+        const dataScript = `
+import pandas as pd
+import json
+
+data_json = '''${JSON.stringify(data, (_key, value) => typeof value === 'bigint' ? value.toString() : value)}'''
+df = pd.DataFrame(json.loads(data_json))
+`;
+        await pyodideManager.runPython(dataScript);
+        logger.log('Skills', `数据已加载到Pyodide`, { data: { rows: data.length, limited: isLimited, maxRows } });
+
+    } catch (loadError: any) {
+        logger.error('Skills', '数据加载失败', loadError);
+        throw new Error(`数据加载失败: ${loadError.message}`);
+    }
+
     const result = await pyodideManager.runPython(code);
 
     // 尝试解析JSON结果

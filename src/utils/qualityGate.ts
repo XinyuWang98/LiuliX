@@ -147,16 +147,25 @@ function evaluateAIConfidence(insight: InsightForValidation): number {
         score += 10;
     }
 
-    // 双模式完整性（20分）
+    // ⚠️ 严格要求：必须双模式完整（20分）
     const hasBothModes =
         insight.full_mode?.code &&
         insight.aggregated_mode?.sql &&
         insight.aggregated_mode?.viz_code;
+
     if (hasBothModes) {
-        score += 20;
-    } else if (insight.full_mode?.code) {
-        // 至少有full_mode（10分）
-        score += 10;
+        score += 20; // 双模式完整
+    } else {
+        // ❌ 缺少双模式直接置0，拒绝此洞察
+        logger.warn('质量门控', 'AI未生成双模式Skills，直接拒绝', {
+            data: {
+                title: insight.title,
+                hasFull: !!insight.full_mode?.code,
+                hasAggSQL: !!insight.aggregated_mode?.sql,
+                hasAggViz: !!insight.aggregated_mode?.viz_code
+            }
+        });
+        return 0; // 直接返回0分，必定不通过
     }
 
     return score;
@@ -194,20 +203,59 @@ function evaluateSignificance(_insight: InsightForValidation): number {
 /**
  * 批量验证洞察
  * @param insights 洞察列表
- * @returns 通过质量门控的洞察及其评分
+ * @returns 通过和被拒绝的洞察及其评分
  */
 export function batchValidateInsights(
     insights: InsightForValidation[]
-): Array<{ insight: InsightForValidation; score: QualityScore }> {
+): {
+    passed: Array<{ insight: InsightForValidation; score: QualityScore }>;
+    rejected: Array<{ insight: InsightForValidation; score: QualityScore }>;
+} {
     const validated = insights.map(insightItem => ({
         insight: insightItem,
         score: validateInsight(insightItem)
     }));
 
-    // 仅返回通过的
+    // 分组：通过 vs 被拒绝
     const passed = validated.filter(v => v.score.passed);
+    const rejected = validated.filter(v => !v.score.passed);
 
-    logger.log('质量门控', `批量验证完成: ${passed.length}/${insights.length} 通过`);
+    // 详细日志：总览
+    logger.log('质量门控', `批量验证完成: ${passed.length}/${insights.length} 通过`, {
+        data: {
+            total: insights.length,
+            passed: passed.length,
+            rejected: rejected.length
+        }
+    });
 
-    return passed;
+    // 详细日志：被拒绝的洞察（用于产品分析）
+    if (rejected.length > 0) {
+        logger.groupCollapsed('质量门控', '🔍 被拒绝洞察详情（产品分析）');
+
+        rejected.forEach((item, index) => {
+            logger.log('质量门控', `被拒绝 #${index + 1}: ${item.insight.title}`, {
+                data: {
+                    title: item.insight.title,
+                    totalScore: item.score.total,
+                    breakdown: {
+                        codeQuality: item.score.codeQuality,
+                        aiConfidence: item.score.aiConfidence,
+                        dataCoverage: item.score.dataCoverage,
+                        significance: item.score.significance
+                    },
+                    reasons: item.score.reasons,
+                    hasFullMode: !!item.insight.full_mode?.code,
+                    hasAggregatedMode: !!(
+                        item.insight.aggregated_mode?.sql &&
+                        item.insight.aggregated_mode?.viz_code
+                    )
+                }
+            });
+        });
+
+        logger.groupEnd();
+    }
+
+    return { passed, rejected };
 }

@@ -4,6 +4,7 @@ import { Sparkles, Play, CheckCircle2, RefreshCw, History, X } from 'lucide-reac
 import { SuggestionCard } from './components/SuggestionCard';
 import { useI18n } from '../../contexts/I18nContext';
 import { DataViewer } from '../data/DataViewer';
+import { AILoading } from '../common/AILoading';
 import {
     DataCleanerProps,
     SuggestionCategory,
@@ -31,6 +32,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
     const {
         suggestions,
         loading: suggestionLoading,
+        aiProgressMsg,
         removeSuggestions,
         refreshAISuggestions,
         hasAISuggestions,
@@ -227,6 +229,21 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
 
                                 <div className="tabContent">
                                     {(() => {
+                                        console.log('DataCleaner Render:', { suggestionLoading, executionLoading, count: suggestions.length });
+                                        // 优先级 1: 加载状态 (AI生成) - 覆盖在列表之上
+                                        if (suggestionLoading) return (
+                                            <AILoading visible={true} message={aiProgressMsg} />
+                                        );
+
+                                        // 优先级 1.1: 执行状态 (应用/重置)
+                                        if (executionLoading) return (
+                                            <div className="aiEmpty">
+                                                <RefreshCw className="spin" size={ICON_SIZE_LARGE} style={{ color: 'var(--primary)' }} />
+                                                <div className="emptyText">{t('cleaning.processing')}</div>
+                                            </div>
+                                        );
+
+                                        // 优先级 2: 显示列表
                                         if (suggestions.length > 0) {
                                             const grouped = groupByCategory(suggestions);
                                             const currentCategory = activeTab || grouped[0]?.[0];
@@ -249,12 +266,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                                             );
                                         }
 
-                                        if (loading) return (
-                                            <div className="aiEmpty">
-                                                <RefreshCw className="spin" size={ICON_SIZE_LARGE} style={{ color: 'var(--primary)' }} />
-                                                <div className="emptyText">{t('cleaning.analyzing')}</div>
-                                            </div>
-                                        );
+                                        // 优先级 3: 其他空状态
                                         if (history.length > 0) return (
                                             <div className="aiEmpty">
                                                 <CheckCircle2 size={ICON_SIZE_LARGE} style={{ color: 'var(--success)' }} />

@@ -1,0 +1,5 @@
+        if (chainInsights.length === 0) {
+            logger.warn('用户操作', '该假设下无洞察节点');
+            logger.groupEnd();
+            return;
+        }

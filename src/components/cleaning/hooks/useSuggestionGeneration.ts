@@ -26,6 +26,7 @@ export function useSuggestionGeneration(
     const { t, language } = useI18n();
     const [suggestions, setSuggestions] = useState<SimpleSuggestion[]>([]);
     const [loading, setLoading] = useState(false);
+    const [aiProgressMsg, setAiProgressMsg] = useState(''); // Real-time AI progress message
     const [aiGenerated, setAiGenerated] = useState(false); // 是否已生成AI建议
     const [error, setError] = useState<string | null>(null);
 
@@ -211,6 +212,7 @@ export function useSuggestionGeneration(
 
             // 1. 优先使用传入的 prop AI 建议 (手动触发优先)
             let aiMapped: SimpleSuggestion[] = [];
+            let shouldKeepLoading = false;
 
             if (aiSuggestions && aiSuggestions.length > 0) {
                 logger.log('数据清洗', '使用手动触发的AI建议');
@@ -244,85 +246,117 @@ export function useSuggestionGeneration(
                 // 检查是否已经请求过 (防止 Strict Mode 双重调用)
                 const cacheKey = `${activeFile.id}_${activeFile.data.tableName}`;
 
-                if (!loadedOnceRef.current[cacheKey] &&
-                    onProjectUpdate &&
+                if (onProjectUpdate &&
                     project &&
                     activeFile.data.tableName &&
                     (!activeFile.analysisCache?.cleaning || activeFile.analysisCache.cleaning.isStale === true)) {
-                    logger.log('数据清洗', '触发AI建议自动预加载');
-                    loadedOnceRef.current[cacheKey] = true;
 
-                    // 异步执行，不阻塞规则建议显示
-                    (async () => {
-                        // ✅ P0修复：创建新的AbortController
-                        abortControllerRef.current = new AbortController();
+                    // 🚀 保持 Loading 状态，直到 AI 返回
+                    shouldKeepLoading = true;
+                    // 如果尚未加载过，才触发请求 (或依赖 AbortController 取消前一次)
+                    if (!loadedOnceRef.current[cacheKey]) {
+                        logger.log('数据清洗', '触发AI建议自动预加载');
+                        loadedOnceRef.current[cacheKey] = true;
 
-                        try {
-                            const aiResults = await generateAICleaningSuggestions(
-                                activeFile.data.tableName,
-                                activeFile.data.columns.map((c: string) => ({ name: c, type: 'VARCHAR' })), // 简化的 Schema
-                                [], // stats (optional)
-                                t,
-                                DuckDBEngine.getInstance(),
-                                undefined,
-                                undefined,
-                                language.name // 🌍 Pass current language
-                            );
-
-                            if (aiResults && aiResults.length > 0) {
-                                logger.log('数据清洗', '自动预加载完成', { count: aiResults.length });
-
-                                // 🎯 立即更新 suggestions 状态，让用户看到
-                                const aiMappedNew: SimpleSuggestion[] = aiResults.map((s: any) => ({
-                                    id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`,
-                                    label: s.label,
-                                    reason: s.reason,
-                                    confidence: s.confidence || CONFIDENCE_MEDIUM,
-                                    action: s.action || 'normalize',
-                                    category: s.category || 'normalize',
-                                    column: s.column,
-                                    sql: s.sql,
-                                    expectedImpact: s.expectedImpact,
-                                    dryRunStatus: s.dryRunStatus
-                                }));
-
-                                // 合并到当前建议列表（先显示 AI，后显示规则）
-                                setSuggestions(prev => {
-                                    // 过滤掉已存在的 AI 建议，防止重复
-                                    const rulesOnly = prev.filter(s => !s.id.startsWith('ai_'));
-                                    const merged = [...aiMappedNew, ...rulesOnly];
-                                    logger.log('数据清洗', '更新UI', {
-                                        data: { aiCount: aiMappedNew.length, ruleCount: rulesOnly.length }
-                                    });
-                                    return merged;
-                                });
-
-                                // 同时保存到缓存
-                                const updatedFile = {
-                                    ...activeFile,
-                                    analysisCache: {
-                                        ...activeFile.analysisCache,
-                                        cleaning: {
-                                            suggestions: aiResults,
-                                            status: 'ready',
-                                            isStale: false,
-                                            generatedAt: Date.now()
-                                        }
-                                    }
-                                };
-
-                                const updatedProject = {
-                                    ...project,
-                                    files: project.files.map((f: any) => f.id === activeFile.id ? updatedFile : f)
-                                };
-
-                                onProjectUpdate(updatedProject);
+                        // 异步执行
+                        (async () => {
+                            // ✅ P0修复：创建新的AbortController
+                            // 取消之前的请求 (如果有)
+                            if (abortControllerRef.current) {
+                                abortControllerRef.current.abort();
                             }
-                        } catch (err: any) {
-                            console.warn('[建议生成] ⚠️ 自动预加载失败 (静默忽略):', err);
-                            // Auto-preload failure doesn't set global error to avoid blocking UI
-                        }
-                    })();
+                            abortControllerRef.current = new AbortController();
+
+                            try {
+                                setLoading(true); // 确保 Loading UI 显示
+                                setAiProgressMsg(t('cleaning.processing')); // 设置初始文案
+                                // ✅ P0修复：查询列统计信息
+                                const duckdb = DuckDBEngine.getInstance();
+                                const stats = await duckdb.getColumnStats(activeFile.data.tableName);
+
+                                // 🚀 修复#19：若activeFile.data.columns为空，从stats构建
+                                const columns = (activeFile.data.columns && activeFile.data.columns.length > 0)
+                                    ? activeFile.data.columns
+                                    : stats.map(s => ({ name: s.name, type: s.type }));
+
+                                // ✅ P0修复：data.columns已包含{name,type}，直接传递
+                                const aiResults = await generateAICleaningSuggestions(
+                                    activeFile.data.tableName,
+                                    columns,
+                                    stats, // 传递真实stats
+                                    t,
+                                    duckdb,
+                                    (msg) => setAiProgressMsg(msg), // ✅ 实时更新进度文案
+                                    undefined, // onSuggestionUpdate
+                                    abortControllerRef.current.signal, // signal ✅
+                                    language.name // language
+                                );
+
+                                if (aiResults && aiResults.length > 0) {
+                                    logger.log('数据清洗', '自动预加载完成', { count: aiResults.length });
+                                    setAiGenerated(true);
+
+                                    // 🎯 立即更新 suggestions 状态，让用户看到
+                                    const aiMappedNew: SimpleSuggestion[] = aiResults.map((s: any) => ({
+                                        id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`,
+                                        label: s.label,
+                                        reason: s.reason,
+                                        confidence: s.confidence || CONFIDENCE_MEDIUM,
+                                        action: s.action || 'normalize',
+                                        category: s.category || 'normalize',
+                                        column: s.column,
+                                        sql: s.sql,
+                                        expectedImpact: s.expectedImpact,
+                                        dryRunStatus: s.dryRunStatus
+                                    }));
+
+                                    // 合并到当前建议列表（先显示 AI，后显示规则）
+                                    setSuggestions(prev => {
+                                        // 过滤掉已存在的 AI 建议，防止重复
+                                        const rulesOnly = prev.filter(s => !s.id.startsWith('ai_'));
+                                        const merged = [...aiMappedNew, ...rulesOnly];
+                                        logger.log('数据清洗', '更新UI', {
+                                            data: { aiCount: aiMappedNew.length, ruleCount: rulesOnly.length }
+                                        });
+                                        return merged;
+                                    });
+
+                                    // 同时保存到缓存
+                                    const updatedFile = {
+                                        ...activeFile,
+                                        analysisCache: {
+                                            ...activeFile.analysisCache,
+                                            cleaning: {
+                                                suggestions: aiResults,
+                                                status: 'ready',
+                                                isStale: false,
+                                                generatedAt: Date.now()
+                                            }
+                                        }
+                                    };
+
+                                    const updatedProject = {
+                                        ...project,
+                                        files: project.files.map((f: any) => f.id === activeFile.id ? updatedFile : f)
+                                    };
+
+                                    onProjectUpdate(updatedProject);
+                                } else {
+                                    // AI 返回空建议 (数据良好) - 也需要设置状态，否则一直 Loading
+                                    setAiGenerated(true);
+                                }
+                            } catch (err: any) {
+                                if (err.name === 'AbortError') {
+                                    console.log('AI Request Aborted');
+                                } else {
+                                    console.warn('[建议生成] ⚠️ 自动预加载失败 (静默忽略):', err);
+                                }
+                            } finally {
+                                setLoading(false);
+                                setAiProgressMsg(''); // 清除进度文案
+                            }
+                        })();
+                    }
                 }
             }
 
@@ -336,7 +370,10 @@ export function useSuggestionGeneration(
                 return b.confidence - a.confidence;
             }));
 
-            setLoading(false);
+            // 只有当不需要继续等待AI时，才关闭Loading
+            if (!shouldKeepLoading) {
+                setLoading(false);
+            }
         };
 
         generateSuggestions();
@@ -345,7 +382,7 @@ export function useSuggestionGeneration(
         return () => {
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
-                abortControllerRef.current = null;
+                // 不要置空，让后续逻辑处理 AbortError
             }
         };
     }, [activeFile?.id, activeFile?.data?.tableName, cleaningTrigger, aiSuggestions, t, language.name]); // onProjectUpdate 和 project 不放入依赖，避免循环
@@ -360,53 +397,69 @@ export function useSuggestionGeneration(
         if (!activeFile?.data?.tableName || !onProjectUpdate || !project) return;
 
         setLoading(true);
+        setAiProgressMsg(t('cleaning.processing'));
         setError(null);
         console.log('[建议生成] 手动刷新 AI 建议...');
 
         try {
+            // ✅ P0修复：查询列统计信息
+            const duckdb = DuckDBEngine.getInstance();
+            const stats = await duckdb.getColumnStats(activeFile.data.tableName);
+
+            // 🔍 调试日志：验证stats结果
+            console.log('📊 [调试-刷新] stats查询结果:', stats);
+            console.log('📊 [调试-刷新] stats长度:', stats.length);
+            if (stats.length > 0) {
+                console.log('📊 [调试-刷新] 第一个stat:', stats[0]);
+            }
+
             const aiResults = await generateAICleaningSuggestions(
                 activeFile.data.tableName,
-                activeFile.data.columns.map((c: string) => ({ name: c, type: 'VARCHAR' })),
-                [],
+                activeFile.data.columns, // ✅ 直接使用，不需要map
+                stats, // ✅ 传递真实stats
                 t,
-                DuckDBEngine.getInstance(),
-                undefined,
-                undefined,
+                duckdb,
+                (msg) => setAiProgressMsg(msg), // ✅ 实时更新进度文案
+                undefined, // onSuggestionUpdate
+                undefined, // signal (Manual refresh doesn't support abort yet, or add AbortController if needed but undefined fixes type error)
                 language.name // 🌍 Pass current language
             );
 
-            if (aiResults && aiResults.length > 0) {
+            if (aiResults) {
                 console.log('[建议生成] 刷新完成，获得', aiResults.length, '条AI建议');
                 setAiGenerated(true);
 
-                const aiMappedNew: SimpleSuggestion[] = aiResults.map((s: any) => ({
-                    id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`,
-                    label: s.label,
-                    reason: s.reason,
-                    confidence: s.confidence || CONFIDENCE_MEDIUM,
-                    action: s.action || 'normalize',
-                    category: s.category || 'normalize',
-                    column: s.column,
-                    sql: s.sql,
-                    expectedImpact: s.expectedImpact,
-                    dryRunStatus: s.dryRunStatus
-                }));
+                if (aiResults.length > 0) {
+                    const aiMappedNew: SimpleSuggestion[] = aiResults.map((s: any) => ({
+                        id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`,
+                        label: s.label,
+                        reason: s.reason,
+                        confidence: s.confidence || CONFIDENCE_MEDIUM,
+                        action: s.action || 'normalize',
+                        category: s.category || 'normalize',
+                        column: s.column,
+                        sql: s.sql,
+                        expectedImpact: s.expectedImpact,
+                        dryRunStatus: s.dryRunStatus
+                    }));
 
-                setSuggestions(prev => {
-                    const rulesOnly = prev.filter(s => !s.id.startsWith('ai_'));
-                    return [...aiMappedNew, ...rulesOnly];
-                });
+                    setSuggestions(prev => {
+                        const rulesOnly = prev.filter(s => !s.id.startsWith('ai_'));
+                        return [...aiMappedNew, ...rulesOnly];
+                    });
+                }
             }
         } catch (err: any) {
             console.warn('[建议生成] 刷新失败:', err);
             setError(err.message || 'AI Generation Failed');
         } finally {
             setLoading(false);
+            setAiProgressMsg('');
         }
     };
 
     // 检查是否有 AI 建议
     const hasAISuggestions = suggestions.some(s => s.id.startsWith('ai_'));
 
-    return { suggestions, loading, removeSuggestions, refreshAISuggestions, hasAISuggestions, aiGenerated, error };
+    return { suggestions, loading, aiProgressMsg, removeSuggestions, refreshAISuggestions, hasAISuggestions, aiGenerated, error };
 }

@@ -24,7 +24,7 @@ export const data = {
 };
 
 export const nav = {
-    appName: 'DataPrism',
+    appName: 'LiuliX',
     noProject: 'No Project Selected',
     dashboard: 'Data Explorer',
     promptLibrary: 'Prompt Library',

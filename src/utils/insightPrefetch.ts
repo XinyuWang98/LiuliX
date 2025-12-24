@@ -22,6 +22,7 @@ import { assessMemoryBeforeExecution } from './memoryAssessment';
 import { batchValidateInsights } from './qualityGate';
 import { getFallbackInsights } from './fallbackTemplates';
 import { executeInsightWithMode } from '@/services/skills/modeExecutor';
+import { validateExecutionResult } from './postExecutionGate';
 
 const CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30分钟缓存有效期
 
@@ -94,7 +95,15 @@ export async function prefetchInsightsForFile(
         }
 
         // ========== 步骤3：质量门控 ==========
-        const validated = batchValidateInsights(insightSuggestions);
+        const { passed: validated, rejected } = batchValidateInsights(insightSuggestions);
+
+        // 📊 预加载阶段记录拒绝情况
+        if (rejected.length > 0) {
+            logger.log('AI洞察预加载', `拒绝${rejected.length}个洞察`, {
+                data: { rejectedTitles: rejected.map(r => r.insight.title) }
+            });
+        }
+
         if (validated.length === 0) {
             logger.warn('AI洞察预加载', '质量门控全拒，使用预置模板');
             insightSuggestions = getFallbackInsights();
@@ -121,11 +130,28 @@ export async function prefetchInsightsForFile(
             );
 
             if (result.success) {
-                executedInsights.push({
-                    ...suggestion,
-                    executionMode: assessment.mode,
-                    executionResult: result.data
-                });
+                // 执行后质量评估
+                const postScore = validateExecutionResult(
+                    suggestion,
+                    {
+                        image: result.data?.image || '',
+                        summary: result.data?.summary || ''
+                    }
+                );
+
+                if (postScore.passed) {
+                    // ✅ 高价值洞察 - 缓存
+                    executedInsights.push({
+                        ...suggestion,
+                        executionMode: assessment.mode,
+                        executionResult: result.data
+                    });
+                } else {
+                    // ⚠️ 低价值洞察 - 跳过缓存
+                    logger.log('AI洞察预加载', `跳过低质量洞察: ${suggestion.title}`, {
+                        data: { score: postScore.total, reasons: postScore.reasons }
+                    });
+                }
             }
         }
 

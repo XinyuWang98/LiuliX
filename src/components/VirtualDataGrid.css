@@ -299,6 +299,25 @@
     overflow: auto;
     /* 同时处理横向和纵向滚动 */
     scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.simpleTableBody::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.simpleTableBody::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+
+.simpleTableBody::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: var(--radius-full);
+}
+
+.simpleTableBody::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
 }
 
 .simpleTableRow {

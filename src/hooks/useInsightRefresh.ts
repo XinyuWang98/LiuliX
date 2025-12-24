@@ -47,8 +47,8 @@ export function useInsightRefresh({
             hypothesesLength === 0 ||  // 场景1：无缓存假设
             (insightCache?.isStale === true);  // 场景2：数据已清洗，标记为过时
 
-        // 防重复：检查status不为pending（避免并发调用）
-        const 可以执行 = insightCache?.status !== 'pending';
+        // 防重复：检查status不为pending（但如果是Stale状态，说明数据变了，必须强制刷新）
+        const 可以执行 = (insightCache?.isStale === true) || (insightCache?.status !== 'pending');
 
         if (需要刷新 && 可以执行) {
             // 检测依赖是否真正变化

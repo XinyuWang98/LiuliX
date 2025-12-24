@@ -107,19 +107,21 @@ ${issuesList || t('common.none')}
 2. **可用表名**：
    - "${tableName}" (当前工作表)
    - 禁止使用：${tableName}_backup, ${tableName}_temp 等不存在的表
-3. **禁止的操作**：
+3. **可用列名清单**（SQL中必须只使用以下列名）：
+${desensitizedData.map(col => `   - "${col.name}" (${col.type})`).join('\n')}
+4. **禁止的操作**：
    - DROP TABLE, TRUNCATE TABLE（数据安全）
    - BACKUP TABLE, RESTORE TABLE（DuckDB 不支持）
    - ALTER TABLE ADD/DROP COLUMN（结构变更）
-4. **禁止的语法**：
+5. **禁止的语法**：
    - VALUES (NULL AS placeholder)（DuckDB 不支持此语法）
    - 任何包含 AS 关键字在 VALUES 子句中的语句
-5. **推荐的安全模式**：
+6. **推荐的安全模式**：
    - 使用 CREATE OR REPLACE TABLE ${tableName} AS SELECT ... FROM ${tableName} WHERE ...
    - 对于 UPDATE 语句，必须有明确的 WHERE 条件
    - 去重：SELECT DISTINCT * FROM ${tableName}
    - 删除空值：SELECT * FROM ${tableName} WHERE "列名" IS NOT NULL
-6. **优先级**: ${t('cleaning.dataIntegrity')} > ${t('cleaning.dataConsistency')} > ${t('cleaning.dataFormat')}
+7. **优先级**: ${t('cleaning.dataIntegrity')} > ${t('cleaning.dataConsistency')} > ${t('cleaning.dataFormat')}
 
 【${t('cleaning.outputFormat')}】
 - 只返回JSON，不要包含任何markdown标记（如\`\`\`json）

@@ -259,7 +259,7 @@ export const askAIInsight = async (prompt: string) => {
                     stream: false
                 }
             },
-            timeout: 120000
+            timeout: 180000  // ✅ 增加到3分钟，支持大数据集
         }).json<any>();
 
         const content = res.choices?.[0]?.message?.content || '';

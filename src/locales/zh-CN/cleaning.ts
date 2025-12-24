@@ -118,5 +118,12 @@ export const cleaning = {
     dataGood: '当前数据质量良好，无需清洗。',
     allApplied: '所有建议已应用，数据已更新。',
     serviceUnavailable: 'AI 服务暂时不可用，请稍后重试。',
+    // AI Loading States
+    aiProgressThink: 'AI 正在思考数据特征...',
+    aiProgressAnalyzing: '正在深度分析数据模式...',
+    aiProgressGenerating: '正在构建清洗建议...',
+    aiProgressValidating: '正在验证 SQL 安全性...',
+    aiProgressFinalizing: '正在生成最终报告...',
+    processing: '正在处理...',
     // End of cleaning translations
 };

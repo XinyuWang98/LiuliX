@@ -16,6 +16,7 @@ export type ServiceName =
     | '本地模型'
     | 'DuckDB'
     | '数据清洗'
+    | '清洗执行'  // 🆕 清洗执行服务
     | '数据分析'
     | '数据隐私'  // 🆕 数据脱敏服务
     | '内存评估'  // 🆕 内存评估服务
@@ -25,6 +26,7 @@ export type ServiceName =
     | 'Python'
     | 'Skills'
     | 'UI'
+    | '用户操作'  // 🆕 用户操作（采纳洞察等）
     | '系统'
     | '报告';  // 🆕 报告生成服务
 
@@ -73,6 +75,15 @@ class Logger {
     group(service: ServiceName, title: string) {
         if (!this.isDev) return;
         console.group(`[${service}] ${title}`);
+    }
+
+    /**
+     * 开始分组日志（默认收起）
+     * 用于详细调试信息或低优先级内容
+     */
+    groupCollapsed(service: ServiceName, title: string) {
+        if (!this.isDev) return;
+        console.groupCollapsed(`[${service}] ${title}`);
     }
 
     /**

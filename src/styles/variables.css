@@ -279,6 +279,11 @@
   --spinner-border: 3px;
   --opacity-disabled: 0.4;
 
+  /* ========== 滚动条变量 (Issue #6 Fix) ========== */
+  --scrollbar-track: rgba(255, 255, 255, 0.02);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+
   /* ========== 通用颜色别名 ========== */
   --color-white: #FFFFFF;
   --text-inverse: #FFFFFF;

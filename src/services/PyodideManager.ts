@@ -102,6 +102,16 @@ class PyodideManager {
         return this.sendMessage('GET_PREVIEW', { rows });
     }
 
+    /**
+     * 动态加载字体文件到 Pyodide (解决中文乱码)
+     * @param fontUrl - 字体文件URL
+     * @param fontName - 字体文件名 (如 'SimHei.ttf')
+     */
+    public async loadFont(fontUrl: string, fontName: string): Promise<any> {
+        await this.waitForReady();
+        return this.sendMessage('LOAD_FONT_URL', { url: fontUrl, name: fontName });
+    }
+
     private sendMessage(type: string, content: any): Promise<any> {
         return new Promise((resolve, reject) => {
             if (!this.worker) {

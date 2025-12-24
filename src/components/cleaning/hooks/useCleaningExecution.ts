@@ -6,6 +6,7 @@ import { skillsDispatcher } from '../../../services/skills/dispatcher';
 import { SimpleSuggestion, Project } from '../types/cleaning.types';
 import { buildCleaningSQL } from '../utils/sqlBuilder';
 import { renderActionText } from '../utils/suggestionUtils';
+import { logger } from '../../../utils/logger';
 
 /**
  * 清洗执行Hook
@@ -30,6 +31,7 @@ export function useCleaningExecution(
         if (selectedSuggestions.length === 0) return;
 
         setLoading(true);
+        logger.group('清洗执行', `⚙️ 应用 ${selectedSuggestions.length} 条建议`);
 
         try {
             const engine = DuckDBEngine.getInstance();
@@ -57,7 +59,7 @@ export function useCleaningExecution(
                 console.error('❌ 严重错误：选中了临时表！', tableName);
                 throw new Error('内部错误：误选临时表');
             }
-            console.log(`[清洗执行] ✅ 已选择工作表: ${tableName}`);
+            logger.log('清洗执行', `选中工作表: ${tableName}`);
 
             // 执行前查询行数和列数
             const columnsBefore = await engine.getTableColumns(tableName);
@@ -68,7 +70,13 @@ export function useCleaningExecution(
 
             // 依次执行所有清洗操作（通过Skills统一入口）
             for (const sugg of selectedSuggestions) {
-                const sqlTemplate = buildCleaningSQL(sugg);
+                // ✅ P0修复：优先使用AI生成的SQL（经过Dry-Run校验的），否则回退到本地模板
+                let sqlTemplate = sugg.sql;
+                if (!sqlTemplate) {
+                    logger.warn('清洗执行', `建议${sugg.id}缺失SQL，回退到本地模板构建`);
+                    sqlTemplate = buildCleaningSQL(sugg);
+                }
+
                 const sql = sqlTemplate.replace(/__TABLE_NAME__/g, tableName);
 
                 // ✅ 通过Skills执行SQL清洗
@@ -81,6 +89,8 @@ export function useCleaningExecution(
                     throw new Error(result.error || '清洗SQL执行失败');
                 }
             }
+
+            logger.log('清洗执行', `SQL执行完成`, { count: selectedSuggestions.length });
 
             // 执行后重新查询列数
             const columnsAfter = await engine.getTableColumns(tableName);
@@ -184,11 +194,21 @@ export function useCleaningExecution(
 
                     console.log('✅ 数据清洗完成，洞察缓存已失效，等待后台刷新');
                 } catch (err) {
-                    console.error('❌ 更新文件元数据失败:', err);
+
                 }
             }
+
+            logger.log('清洗执行', `✅ 完成`, {
+                data: {
+                    before: rowCountBefore,
+                    after: rowCountAfter,
+                    delta: rowCountAfter - rowCountBefore
+                }
+            });
+            logger.groupEnd();
         } catch (err) {
-            console.error('❌ 应用建议失败:', err);
+            logger.groupEnd();
+            logger.error('清洗执行', '应用建议失败', err);
             alert(`应用清洗建议失败: ${err instanceof Error ? err.message : String(err)}`);
         } finally {
             setLoading(false);

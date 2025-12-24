@@ -1,6 +1,7 @@
 import React from 'react';
 import { PanelLeft, Plus, Upload } from 'lucide-react';
 import { useI18n } from '@contexts/I18nContext';
+import { Logo } from '@/components/common/Logo/Logo';
 
 interface SidebarHeaderProps {
     title: string;
@@ -23,16 +24,20 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({ title, onClose, co
             borderBottom: '1px solid var(--border)',
             background: 'var(--bg-panel)',
         }}>
-            <h2 style={{
-                fontSize: 'var(--fs-xl)',
-                fontWeight: 'var(--fw-bold)',
-                margin: 0,
-                color: 'var(--text-primary)',
-                whiteSpace: 'nowrap',
-                lineHeight: 1,
-            }}>
-                {title}
-            </h2>
+            {title === 'LiuliX' ? (
+                <Logo layout="horizontal" size="m" />
+            ) : (
+                <h2 style={{
+                    fontSize: 'var(--fs-xl)',
+                    fontWeight: 'var(--fw-bold)',
+                    margin: 0,
+                    color: 'var(--text-primary)',
+                    whiteSpace: 'nowrap',
+                    lineHeight: 1,
+                }}>
+                    {title}
+                </h2>
+            )}
             <div style={{ display: 'flex', gap: '8px' }}>
                 {onAddProject && (
                     <button

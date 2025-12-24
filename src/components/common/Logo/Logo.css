@@ -1,0 +1,140 @@
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    user-select: none;
+    transition: opacity 0.2s ease;
+    text-decoration: none;
+    cursor: default;
+}
+
+.logo-container.interactive {
+    cursor: pointer;
+}
+
+.logo-container.interactive:hover {
+    opacity: 0.9;
+}
+
+/* Icon Styles */
+.logo-icon-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Default color logic: use CSS variable specifically for brand/accent */
+    color: var(--bg-accent);
+    transition: all 0.3s ease;
+}
+
+/* Add a subtle glow in dark mode/default */
+.logo-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Glow effect using drop-shadow */
+.logo-icon-svg {
+    filter: drop-shadow(0 0 8px rgba(0, 122, 255, 0.4));
+}
+
+/* Hover effect on Icon */
+.logo-container:hover .logo-icon-svg {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px rgba(0, 122, 255, 0.6));
+}
+
+/* Text Styles */
+.logo-text {
+    font-family: var(--font-family);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text-primary);
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+}
+
+/* "Data" part */
+.logo-text-primary {
+    /* Solid color */
+    color: var(--text-primary);
+}
+
+/* "Prism" part - gradient or distinct weight */
+.logo-text-secondary {
+    font-weight: 400;
+    /* Lighter weight for modern contrast */
+    color: var(--text-secondary);
+}
+
+/* Single line layout (horizontal) */
+.logo-layout-horizontal .logo-text {
+    flex-direction: row;
+    gap: 0px;
+    align-items: baseline;
+}
+
+/* In horizontal, make "Prism" connect nicely */
+.logo-layout-horizontal .logo-text-secondary {
+    color: var(--text-primary);
+    /* Keep it same color in horizontal usually, or slight dim */
+    opacity: 0.9;
+}
+
+/* Vertical layout (stack) */
+.logo-layout-vertical {
+    flex-direction: column;
+}
+
+.logo-layout-vertical .logo-text {
+    align-items: center;
+    margin-top: var(--gap-xs);
+}
+
+/* Size Variants */
+.logo-size-s .logo-icon-wrapper {
+    width: 24px;
+    height: 24px;
+}
+
+.logo-size-s .logo-text {
+    font-size: 16px;
+}
+
+.logo-size-m .logo-icon-wrapper {
+    width: 32px;
+    height: 32px;
+}
+
+.logo-size-m .logo-text {
+    font-size: 20px;
+}
+
+.logo-size-l .logo-icon-wrapper {
+    width: 48px;
+    height: 48px;
+}
+
+.logo-size-l .logo-text {
+    font-size: 28px;
+}
+
+.logo-size-xl .logo-icon-wrapper {
+    width: 64px;
+    height: 64px;
+}
+
+.logo-size-xl .logo-text {
+    font-size: 36px;
+}
+
+/* THEME ADAPTATION: Light Theme Overrides */
+/* Assuming [data-theme='light'] or body:not(.dark) context, but best to rely on variables. */
+/* If var(--bg-main) is light, we might want less glow */
+
+@media (prefers-color-scheme: light) {
+    /* Fallback if variables aren't enough, but variables should handle colors */
+}

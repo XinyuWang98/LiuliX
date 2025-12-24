@@ -13,6 +13,7 @@ import { ExplorationFlow } from './components/exploration/ExplorationFlow';
 import { pyodideManager } from './services/PyodideManager';
 import { AIConfigModal } from './components/AIConfigModal';
 import { useResizable } from '@/hooks/useResizable';
+import { logger } from './utils/logger';
 import './App.css';
 
 function LoadingScreen() {
@@ -65,13 +66,19 @@ function AppContent() {
 
     useEffect(() => {
         const init = async () => {
+            logger.group('系统', '🚀 应用初始化');
             try {
+                logger.log('Python', '引擎加载中...');
                 await pyodideManager.initialize();
                 await pyodideManager.waitForReady();
+                logger.log('Python', '引擎加载完成');
+
                 setTimeout(() => setIsPyodideReady(true), 500);
             } catch (err) {
-                console.error("Failed to initialize Pyodide:", err);
+                logger.error('Python', '引擎加载失败', err);
                 setIsPyodideReady(true);
+            } finally {
+                logger.groupEnd();
             }
         };
         init();
@@ -87,13 +94,13 @@ function AppContent() {
                 });
                 if (response.ok) {
                     setBackendStatus('connected');
-                    console.log('[系统] 后端服务已连接');
+                    logger.log('系统', '后端服务已连接');
                 } else {
                     throw new Error('Health check failed');
                 }
             } catch (error) {
                 setBackendStatus('disconnected');
-                console.warn('[系统] 后端服务未启动，AI 功能已降级');
+                logger.warn('系统', 'AI后端服务未启动，功能降级');
             }
         };
 
@@ -213,7 +220,7 @@ function AppContent() {
                                         }}
                                         onSuggestionsGenerated={(suggestions) => {
                                             setAiSuggestions(suggestions);
-                                            console.log('[App] 收到AI建议:', suggestions.length);
+                                            logger.log('UI', `收到AI清洗建议: ${suggestions.length}条`);
                                         }}
                                     />
                                 </div>

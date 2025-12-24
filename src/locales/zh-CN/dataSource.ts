@@ -1,6 +1,6 @@
 // 数据源模块翻译
 export const dataSource = {
-    title: '数据源',
+    title: 'LiuliX',
     noProjects: '暂无项目',
     uploadHint: '点击上方按钮上传数据文件',
     uploadFile: '上传文件',

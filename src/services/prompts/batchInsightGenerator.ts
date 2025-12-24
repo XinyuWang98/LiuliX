@@ -114,8 +114,13 @@ json.dumps(result)
 
 **输出格式（JSON数组）**：
 [
-    {"title": "年龄分布", "description": "用户年龄集中在25-35岁", "code": "完整Python代码"},
-    {"title": "销售趋势", "description": "销售额逐月增长", "code": "完整Python代码"}
+    {
+        "title": "年龄分布",
+        "description": "用户年龄集中在25-35岁", 
+        "columns_used": ["age"],
+        "full_mode": { "code": "..." },
+        "aggregated_mode": { "sql": "...", "viz_code": "..." }
+    }
 ]
 
 请直接返回JSON数组，无需任何解释。`;
@@ -152,6 +157,9 @@ export function parseBatchInsightsResponse(aiResponse: string): InsightSuggestio
             cleaned = cleaned.replace(/```\n?/g, '');
         }
 
+        // ✅ P0修复：尝试修复截断的JSON
+        cleaned = attemptJSONRepair(cleaned);
+
         const parsed = JSON.parse(cleaned);
 
         if (!Array.isArray(parsed)) {
@@ -168,7 +176,35 @@ export function parseBatchInsightsResponse(aiResponse: string): InsightSuggestio
             item.aggregated_mode?.viz_code
         );
     } catch (error) {
-        logger.log('AI服务', 'AI响应解析失败', { data: String(error) });
+        logger.error('AI服务', 'AI响应解析失败', error);
+        // ✅ 增强日志：显示截断位置
+        const preview = aiResponse.substring(0, 500);
+        const suffix = aiResponse.substring(Math.max(0, aiResponse.length - 100));
+        logger.log('AI服务', 'AI响应预览', { data: `开头: ${preview}...\n结尾: ...${suffix}` });
         return [];
     }
+}
+
+/**
+ * 尝试修复截断的JSON响应
+ * 如果JSON字符串未正确结束，尝试补全
+ */
+function attemptJSONRepair(jsonStr: string): string {
+    const trimmed = jsonStr.trim();
+
+    // 检查是否以完整的}或]结尾
+    if (!trimmed.endsWith('}') && !trimmed.endsWith(']')) {
+        logger.warn('AI服务', 'JSON响应可能被截断，尝试修复');
+
+        // 找到最后一个完整的对象（以},结尾）
+        const lastCompleteObj = trimmed.lastIndexOf('},');
+        if (lastCompleteObj > 0) {
+            // 截取到最后一个完整对象，并补充结尾
+            const repaired = trimmed.substring(0, lastCompleteObj + 1) + ']';
+            logger.log('AI服务', 'JSON修复成功', { data: `原长度: ${jsonStr.length}, 修复后: ${repaired.length}` });
+            return repaired;
+        }
+    }
+
+    return jsonStr;
 }

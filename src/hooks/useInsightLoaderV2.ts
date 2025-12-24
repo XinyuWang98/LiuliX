@@ -16,8 +16,9 @@ import { executeInsightWithMode } from '@/services/skills/modeExecutor';
 import { batchValidateInsights } from '@/utils/qualityGate';
 import { getFallbackInsights } from '@/utils/fallbackTemplates';
 import { RESOURCE_LIMITS, checkAvailableMemory } from '@/utils/resourceLimits';
+import { validateExecutionResult } from '@/utils/postExecutionGate';
 
-export function useInsightLoader() {
+export function useInsightLoaderV2() {
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingLocalModel, setIsLoadingLocalModel] = useState(false);
     const [executionProgress, setExecutionProgress] = useState<{ current: number; total: number } | null>(null);
@@ -34,6 +35,9 @@ export function useInsightLoader() {
         setIsLoading(true);
         setExecutionProgress(null);
 
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
         abortControllerRef.current = new AbortController();
 
         try {
@@ -56,6 +60,16 @@ export function useInsightLoader() {
 
             logger.log('AI洞察', '数据规模', { data: { columns: 有效列名.length, totalRows } });
 
+            // ========== 🆕 步骤1.5：列数限制（避免Prompt过大）==========
+            const MAX_COLUMNS = 50;
+            let 选中列名 = 有效列名;
+            if (有效列名.length > MAX_COLUMNS) {
+                选中列名 = 有效列名.slice(0, MAX_COLUMNS);
+                logger.warn('AI洞察', `列数过多，限制到${MAX_COLUMNS}列`, {
+                    data: { original: 有效列名.length, limited: 选中列名.length }
+                });
+            }
+
             // ========== 步骤2：数据采样 ==========
             let 采样数据: any[] = [];
             if (tableName) {
@@ -74,24 +88,50 @@ export function useInsightLoader() {
             const useLocalModel = localStorage.getItem('use_local_model') === 'true';
             let aiResponse: string;
 
-            // 构造Prompt（传入totalRows）
+            // 构造Prompt（传入totalRows，使用限制后的列名）
             const prompt = generateBatchInsightsPrompt(
-                有效列名,
+                选中列名,  // ✅ 使用限制后的列名
                 采样数据.length,
                 totalRows,
                 privacyMode === 'auto_sanitize' ? [] : 采样数据  // 脱敏模式下传空
             );
 
             if (useLocalModel) {
+                // ✅ 检查GPU内存是否足够
+                const MIN_GPU_MEMORY_MB = 4500;
+                let hasEnoughMemory = true;
+
+                try {
+                    if ('gpu' in navigator) {
+                        const adapter = await (navigator as any).gpu.requestAdapter();
+                        if (adapter && adapter.limits) {
+                            const maxBufferSize = adapter.limits.maxBufferSize || 0;
+                            const gpuMemoryMB = maxBufferSize / (1024 * 1024);
+
+                            logger.log('本地模型', `GPU内存检测`, {
+                                data: { available: `${gpuMemoryMB.toFixed(0)}MB`, required: `${MIN_GPU_MEMORY_MB}MB` }
+                            });
+
+                            if (gpuMemoryMB < MIN_GPU_MEMORY_MB) {
+                                hasEnoughMemory = false;
+                                logger.warn('本地模型', `GPU内存不足，降级到API模式`);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    logger.warn('本地模型', 'GPU检测失败，降级到API模式', err);
+                    hasEnoughMemory = false;
+                }
+
                 const status = localLLMService.getStatus();
-                if (!status.isReady && !status.isInitializing) {
+                if (hasEnoughMemory && !status.isReady && !status.isInitializing) {
                     setIsLoadingLocalModel(true);
                     await localLLMService.reload(SUPPORTED_MODELS.QWEN);
                     setIsLoadingLocalModel(false);
                 }
 
                 const localStatus = localLLMService.getStatus();
-                if (localStatus.isReady) {
+                if (hasEnoughMemory && localStatus.isReady) {
                     aiResponse = await localLLMService.generateInsight(prompt);
                 } else {
                     const aiResult = await askAIInsight(prompt);
@@ -113,7 +153,17 @@ export function useInsightLoader() {
             logger.log('AI洞察', '解析成功', { data: { count: insightSuggestions.length } });
 
             // ========== 步骤5：质量门控（过滤低质量） ==========
-            const validated = batchValidateInsights(insightSuggestions);
+            const { passed: validated, rejected } = batchValidateInsights(insightSuggestions);
+
+            // 📊 产品分析：记录被拒绝数量（未来可展示"AI探索日志"）
+            if (rejected.length > 0) {
+                logger.log('AI服务', `质量门控拒绝了${rejected.length}个低质量洞察`, {
+                    data: {
+                        rejectedTitles: rejected.map(r => r.insight.title),
+                        rejectedReasons: rejected.map(r => r.score.reasons?.join(', ') || '未知')
+                    }
+                });
+            }
 
             if (validated.length === 0) {
                 logger.warn('AI服务', '质量门控全部被拒绝，使用预置模板');
@@ -165,20 +215,41 @@ export function useInsightLoader() {
                 );
 
                 if (result.success) {
-                    validCount++;
-                    洞察卡片.push({
-                        id: `insight-${Date.now()}-${i}`,
-                        title: suggestion.title,
-                        description: suggestion.description,
-                        verificationMethod: `执行模式：${assessment.mode}`,
-                        isExpanded: false,
-                        executionResult: {
+                    // ========== 执行后质量评估 ==========
+                    const postScore = validateExecutionResult(
+                        suggestion,
+                        {
                             image: result.data?.image || '',
-                            summary: result.data?.summary || '',
-                            code: suggestion.full_mode.code
-                        },
-                        executionStatus: 'success'
-                    });
+                            summary: result.data?.summary || ''
+                        }
+                    );
+
+                    if (postScore.passed) {
+                        // ✅ 高价值洞察 - 展示给用户
+                        validCount++;
+                        洞察卡片.push({
+                            id: `insight-${Date.now()}-${i}`,
+                            title: suggestion.title,
+                            description: suggestion.description,
+                            verificationMethod: `执行模式：${assessment.mode}`,
+                            isExpanded: false,
+                            executionResult: {
+                                image: result.data?.image || '',
+                                summary: result.data?.summary || '',
+                                code: suggestion.full_mode.code
+                            },
+                            executionStatus: 'success'
+                        });
+                    } else {
+                        // ⚠️ 低价值洞察 - 记录到日志，不展示
+                        logger.log('AI服务', `洞察${i + 1}质量不足，不展示`, {
+                            data: {
+                                title: suggestion.title,
+                                score: postScore.total,
+                                reasons: postScore.reasons
+                            }
+                        });
+                    }
                 } else {
                     logger.warn('Skills', `洞察${i + 1}执行失败`, { data: result.error });
                 }

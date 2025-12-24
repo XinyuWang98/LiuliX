@@ -56,7 +56,8 @@ export async function assessMemoryBeforeExecution(
     try {
         // 计算数据点
         const columnCount = columns.length;
-        const dataPoints = totalRows * columnCount;
+        const totalRowsNum = Number(totalRows);  // ✅ BigInt转Number
+        const dataPoints = totalRowsNum * columnCount;
 
         // 计算预估内存占用（MB）
         // 每个数据点：8 bytes (number) × 3 (pandas开销系数)
@@ -170,3 +171,31 @@ export function calculateRecommendedSampleRows(
     // 不超过总行数
     return Math.min(recommendedRows, totalRows);
 }
+
+/**
+ * 计算Pyodide可安全加载的最大行数
+ * 根据列数和可用内存动态计算，避免硬编码魔法数字
+ * 
+ * @param columnCount 列数
+ * @param availableMemoryMB 可用内存（MB），默认512MB
+ * @returns 最大行数
+ */
+export function calculateMaxRowsForPyodide(
+    columnCount: number,
+    availableMemoryMB: number = 512
+): number {
+    // 每个数据点：8 bytes (number) × 3 (pandas开销系数)
+    const BYTES_PER_DATAPOINT = 8 * 3;
+    const SAFETY_MARGIN = 0.7; // 安全系数70%，保留30%缓冲
+
+    const availableBytes = availableMemoryMB * 1024 * 1024 * SAFETY_MARGIN;
+    const maxDataPoints = availableBytes / BYTES_PER_DATAPOINT;
+    const maxRows = Math.floor(maxDataPoints / columnCount);
+
+    // 限制范围：最小1000行，最大50000行
+    const MIN_ROWS = 1000;
+    const MAX_ROWS = 50000;
+
+    return Math.max(MIN_ROWS, Math.min(maxRows, MAX_ROWS));
+}
+

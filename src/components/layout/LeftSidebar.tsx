@@ -8,6 +8,7 @@ import { loadProjects, saveProjects, deleteProject as deleteProjectFromDB } from
 import { pyodideManager } from '../../services/PyodideManager';
 import { DuckDBEngine } from '../../db/duckdbEngine';
 import { logger } from '@/utils/logger';
+import { Logo } from '../common/Logo/Logo';
 
 interface LeftSidebarProps {
     onProjectSelect?: (project: Project) => void;
@@ -60,7 +61,12 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
     }, [projects]);
 
     const handleFilesUploaded = async (filesData: ParsedFileData[], sampledFlags: boolean[]) => {
-        logger.log('文件管理', '批量文件上传成功', { count: filesData.length });
+        const filesSummary = filesData.map((f, i) => ({
+            name: f.fileName,
+            size: f.originalFile ? `${(f.originalFile.size / 1024 / 1024).toFixed(2)}MB` : 'N/A',
+            sampled: sampledFlags[i]
+        }));
+        logger.log('文件管理', '批量文件上传成功', { count: filesData.length, data: filesSummary });
 
         // 🆕 为CSV文件预先ingest到DuckDB并获取tableName
         const engine = DuckDBEngine.getInstance();
@@ -79,9 +85,38 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
                         autoSampleThreshold: 200000
                     });
 
-                    // 将tableName存储到fileData中（working表名）
+                    // ✅ P0修复：正确设置file.data，包含columns信息
+                    // 🔍 调试日志：验证result.columns
+                    console.log('📊 [LeftSidebar调试] result.columns:', result.columns);
+                    console.log('📊 [LeftSidebar调试] result.columns长度:', result.columns?.length);
+                    if (result.columns && result.columns.length > 0) {
+                        console.log('📊 [LeftSidebar调试] 第一个column:', result.columns[0]);
+                    } else {
+                        console.warn('⚠️ [LeftSidebar调试] result.columns为空！');
+                    }
+
+                    (fileData as any).data = {
+                        tableName: result.tableName,
+                        columns: result.columns || [],
+                        rowCount: result.rowCount,
+                        isSampled: result.isSampled
+                    };
+
+                    // 🔍 调试日志：验证设置后的值
+                    console.log('📊 [LeftSidebar调试] 设置后fileData.data:', (fileData as any).data);
+                    console.log('📊 [LeftSidebar调试] 设置后fileData.data.columns长度:', (fileData as any).data.columns?.length);
+
+                    // 同时设置tableName（向后兼容）
                     fileData.tableName = result.tableName;
-                    logger.log('DuckDB', `CSV导入完成: ${result.tableName}`);
+
+                    logger.log('DuckDB', `CSV导入完成`, {
+                        data: {
+                            table: result.tableName,
+                            rows: result.rowCount,
+                            columns: result.columns?.length || 0,
+                            sampled: result.isSampled
+                        }
+                    });
                 } catch (err) {
                     logger.error('DuckDB', 'CSV导入失败', err);
                 }
@@ -232,16 +267,7 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
                 padding: '24px var(--gap-l) 24px',
                 flexShrink: 0,
             }}>
-                <h2 style={{
-                    fontSize: 'var(--fs-xxl)',
-                    fontWeight: 'var(--fw-bold)',
-                    margin: 0,
-                    color: 'var(--text-primary)',
-                    whiteSpace: 'nowrap',
-                    lineHeight: 1,
-                }}>
-                    {t('dataSource.title')}
-                </h2>
+                <Logo layout="horizontal" size="l" />
                 {onClose && (
                     <button
                         className="btn-ghost"

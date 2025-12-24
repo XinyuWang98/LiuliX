@@ -1,126 +1,186 @@
-/* 建议卡片样式 - 网格全展开版 */
+﻿/* 建议卡片样式 - Refactored for Flex & Variables */
 
+/* 1. 卡片容器 */
 .suggestionCard {
     display: flex;
     flex-direction: column;
     background: var(--bg-element);
     border: 1px solid var(--border);
     border-radius: var(--radius-m);
-    /* 更大的圆角 */
+    padding: 0;
+    /* padding inner elements */
     cursor: pointer;
-    transition: all var(--transition-fast);
-    height: 100%;
-    /* 撑满网格单元 */
+    transition: all var(--transition-s) var(--ease-out);
     position: relative;
     overflow: hidden;
-}
-
-/* 头部摘要区 */
-.cardHeader {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: var(--gap-s);
-    padding: var(--gap-xs) var(--gap-s);
-    /* Reduced padding: 4px 8px */
-    background: rgba(var(--primary-rgb, 0, 0, 0), 0.02);
-    border-bottom: 1px solid var(--border-light);
-    box-sizing: border-box;
+    margin-bottom: var(--gap-s);
 }
 
 .suggestionCard:hover {
     border-color: var(--primary);
-    box-shadow: var(--shadow-s);
-    transform: translateY(-2px);
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lv1);
 }
 
-/* 选中状态 */
 .suggestionCard.selected {
     border-color: var(--primary);
-    background: var(--bg-element);
-    box-shadow: 0 0 0 1px var(--primary), var(--shadow-m);
+    background: rgba(var(--primary-rgb), 0.05);
+    box-shadow: 0 0 0 1px var(--primary);
 }
 
-/* 选中状态下的 Header 样式增强 (可选) */
+.suggestionCard.ignored {
+    opacity: var(--opacity-disabled);
+    filter: grayscale(1);
+    pointer-events: none;
+}
+
+/* 2. 头部区域 (Header) */
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px var(--gap-m);
+    border-bottom: 1px solid transparent;
+    gap: var(--gap-s);
+}
+
 .suggestionCard.selected .cardHeader {
-    background: rgba(var(--primary-rgb, 59, 130, 246), 0.08);
+    border-bottom-color: var(--border-light);
 }
 
-/* 来源标签 */
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    flex: 1;
+    overflow: hidden;
+}
+
 .sourceLabel {
-    font-weight: 600;
-    flex-shrink: 0;
     font-size: var(--fs-xs);
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: var(--radius-s);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    flex-shrink: 0;
 }
 
 .sourceLabel.ai {
-    color: var(--color-accent, #8b5cf6);
+    background: linear-gradient(135deg, var(--primary), #8b5cf6);
+    color: var(--text-inverse);
 }
 
 .sourceLabel.rule {
-    color: var(--success, #22c55e);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
 }
 
-/* 建议文本 (标题) */
-.suggestionText {
+.suggestionTitle {
+    font-size: var(--fs-sm);
+    font-weight: 600;
     color: var(--text-primary);
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
-    font-weight: 500;
-}
-
-/* 推荐度 */
-.confidenceText {
-    color: var(--text-secondary);
-    flex-shrink: 0;
-    font-size: var(--fs-xs);
-    opacity: 0.8;
-}
-
-/* 详情内容区域 (始终显示) */
-/* 建议内容区域 (始终显示) */
-.detailContent {
-    flex: 1;
-    /* 占据剩余高度 */
-    width: 100%;
-    padding: var(--gap-s);
-    /* Reduced padding: 8px */
-    color: var(--text-secondary);
-    font-size: var(--fs-xs);
-    /* Reduced font size: 12px */
-    line-height: 1.4;
-    /* Tighter line height */
-    box-sizing: border-box;
-
-    /* 文本截断逻辑 - 智能行数限制 */
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    /* Keep 4 lines (or reduce to 3 if requested, but user just said text size smaller) */
-    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-/* �����ԵĽ��鿨Ƭ - �û�Ч�� */
-.suggestionCard.ignored {
-    opacity: 0.4;
-    filter: grayscale(1);
-    cursor: not-allowed;
-    pointer-events: none;
+    transition: color var(--transition-s);
     position: relative;
+    /* For tooltip context if needed */
 }
 
-.suggestionCard.ignored::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(var(--bg-primary-rgb, 0, 0, 0), 0.6);
-    border-radius: var(--radius-m);
-    pointer-events: none;
+/* 
+   Issue #12: 鼠标悬停时标题颜色高亮，提示用户可查看完整内容 (Tooltip already via title attr)
+*/
+.suggestionTitle:hover {
+    color: var(--primary);
+    cursor: help;
+}
+
+.confidenceText {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+}
+
+/* 3. 详情内容 (Detail) */
+.detailContent {
+    padding: 0 var(--gap-m) 12px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+    flex: 1;
+}
+
+.reasonText {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+/* 4. SQL 区域 */
+
+/* The Footer contains the toggle and copy button, always at the bottom */
+.sqlFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--border-light);
+    transition: background var(--transition-s);
+    margin-top: auto;
+    /* Just in case, though flex:1 in detailContent handles it */
+}
+
+.sqlFooter:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.sqlToggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-tertiary);
+}
+
+.sqlLabel {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* The Body is now inside detailContent */
+.sqlBody {
+    position: relative;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-s);
+    border: 1px solid var(--border-light);
+
+    /* Allow full expansion (No scrollbars) */
+    height: auto;
+    overflow: visible;
+
+    /* Grow to fill the card height (Consistent Height) */
+    flex: 1;
+    display: flex;
+    /* To handle code block sizing */
+
+    margin-top: 4px;
+    /* Space from reason text */
+}
+
+.sqlCode {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: #a5d6ff;
+    /* Soft cyan for code */
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
 }

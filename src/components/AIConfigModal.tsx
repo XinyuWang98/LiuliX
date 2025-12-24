@@ -3,9 +3,7 @@ import { askAI, AIModel } from '../services/aiService';
 import { X, GripVertical, CheckCircle, AlertCircle, Play } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 import { SUPPORTED_MODELS } from '../services/localLLMService';
-import { getSkillsConfig, setSkillsConfig, SkillsConfigType } from '../config/skillsConfig';
 import { getAnalysisConfig, setAnalysisConfig } from '../config/analysisConfig';
-import { SkillsConfigSection } from './settings/SkillsConfigSection';
 import { PerformanceConfigSection } from './settings/PerformanceConfigSection';
 
 interface AIConfigModalProps {
@@ -44,20 +42,7 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
         return localStorage.getItem('use_local_model') === 'true';
     });
 
-    // Skills配置状态
-    const [skillsConfig, setSkillsConfigState] = useState<SkillsConfigType>(getSkillsConfig());
 
-    // 更新Skills配置
-    const handleSkillsConfigUpdate = (updated: Partial<SkillsConfigType>) => {
-        const newConfig = {
-            ...skillsConfig,
-            ...updated,
-            MODULES: { ...skillsConfig.MODULES, ...(updated.MODULES || {}) },
-            ADVANCED: { ...skillsConfig.ADVANCED, ...(updated.ADVANCED || {}) }
-        };
-        setSkillsConfig(newConfig);
-        setSkillsConfigState(newConfig);
-    };
 
     // 分析配置状态
     const [analysisConfig, setAnalysisConfigState] = useState(getAnalysisConfig());
@@ -264,11 +249,7 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                         )}
                     </div>
 
-                    {/* Skills架构配置 */}
-                    <SkillsConfigSection
-                        skillsConfig={skillsConfig}
-                        onConfigUpdate={handleSkillsConfigUpdate}
-                    />
+
 
                     {/* 性能与质量配置 */}
                     <PerformanceConfigSection
