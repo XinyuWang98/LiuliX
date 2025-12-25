@@ -1,3 +1,4 @@
+/* Logo Container */
 .logo-container {
     display: flex;
     align-items: center;
@@ -6,6 +7,9 @@
     transition: opacity 0.2s ease;
     text-decoration: none;
     cursor: default;
+    /* 强制 GPU 加速以获得最平滑的抗锯齿体验 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .logo-container.interactive {
@@ -13,20 +17,20 @@
 }
 
 .logo-container.interactive:hover {
-    opacity: 0.9;
+    opacity: 0.85;
+    /* 微妙的反馈 */
 }
 
-/* Icon Styles */
+/* Icon Styles - 极简几何 */
 .logo-icon-svg {
     display: block;
     width: 100%;
     height: 100%;
-    /* Default color logic: use CSS variable specifically for brand/accent */
-    color: var(--bg-accent);
-    transition: all 0.3s ease;
+    color: var(--text-primary);
+    /* 默认单色 */
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Add a subtle glow in dark mode/default */
 .logo-icon-wrapper {
     position: relative;
     display: flex;
@@ -34,94 +38,120 @@
     justify-content: center;
 }
 
-/* Glow effect using drop-shadow */
-.logo-icon-svg {
-    filter: drop-shadow(0 0 8px rgba(0, 122, 255, 0.4));
-}
-
-/* Hover effect on Icon */
-.logo-container:hover .logo-icon-svg {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 12px rgba(0, 122, 255, 0.6));
-}
-
-/* Text Styles */
+/* Text Styles - 极简科技排版 + 高端流光 */
 .logo-text {
-    font-family: var(--font-family);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.04em;
     line-height: 1;
-    color: var(--text-primary);
     white-space: nowrap;
     display: flex;
-    flex-direction: column;
+    align-items: baseline;
+    position: relative;
+
+    /* 核心流光背景：基底色 + 扫光带 */
+    /* 使用 CSS 变量确保适配亮/暗模式，中间的 high-light 是纯白或高亮色 */
+    background: linear-gradient(120deg,
+            var(--text-primary) 40%,
+            rgba(255, 255, 255, 0.9) 50%,
+            var(--text-primary) 60%);
+    background-size: 200% auto;
+
+    /* 必须的裁切属性 */
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    /* 默认文字颜色透明，显示背景 */
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+
+    /* 动画：慢速、优雅的扫光 */
+    animation: shimmer 6s infinite linear;
 }
 
-/* "Data" part */
-.logo-text-primary {
-    /* Solid color */
-    color: var(--text-primary);
+/* 扫光动画定义 */
+@keyframes shimmer {
+    0% {
+        background-position: 100% center;
+    }
+
+    100% {
+        background-position: -100% center;
+    }
 }
 
-/* "Prism" part - gradient or distinct weight */
+/* 暗黑模式优化：增强对比度 */
+[data-theme='dark'] .logo-text {
+    background: linear-gradient(120deg,
+            #94a3b8 40%,
+            /* Slate 400 - 基底 */
+            #ffffff 50%,
+            /* White - 高光带 */
+            #94a3b8 60%
+            /* Slate 400 */
+        );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    /* 添加极其微妙的白色辉光，增加通透感，非霓虹 */
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.15));
+}
+
+/* Liuli 部分 - 继承父级样式 */
+/* .logo-text-primary 规则已移除，因为不需要额外样式 */
+
+/* X 部分 - 作为品牌核心符号 */
 .logo-text-secondary {
     font-weight: 400;
-    /* Lighter weight for modern contrast */
-    color: var(--text-secondary);
+    /* 移除 opacity，因为它会干扰 background-clip: text */
+    /* opacity: 0.8; */
+    margin-left: 1px;
 }
 
-/* Single line layout (horizontal) */
+/* Layouts */
 .logo-layout-horizontal .logo-text {
     flex-direction: row;
-    gap: 0px;
     align-items: baseline;
 }
 
-/* In horizontal, make "Prism" connect nicely */
-.logo-layout-horizontal .logo-text-secondary {
-    color: var(--text-primary);
-    /* Keep it same color in horizontal usually, or slight dim */
-    opacity: 0.9;
-}
-
-/* Vertical layout (stack) */
 .logo-layout-vertical {
     flex-direction: column;
 }
 
 .logo-layout-vertical .logo-text {
-    flex-direction: row;
-    /* Keep text inline */
-    align-items: center;
     margin-top: var(--gap-xs);
+    align-items: center;
 }
 
 /* Size Variants */
 .logo-size-s .logo-icon-wrapper {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
 }
 
 .logo-size-s .logo-text {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .logo-size-m .logo-icon-wrapper {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
 }
 
 .logo-size-m .logo-text {
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .logo-size-l .logo-icon-wrapper {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
 }
 
 .logo-size-l .logo-text {
-    font-size: 28px;
+    font-size: 24px;
+    letter-spacing: -0.05em;
 }
 
 .logo-size-xl .logo-icon-wrapper {
@@ -130,103 +160,23 @@
 }
 
 .logo-size-xl .logo-text {
-    font-size: 36px;
+    font-size: 48px;
+    letter-spacing: -0.06em;
+    font-weight: 800;
 }
 
-/* Animations */
-@keyframes beam-flow {
-    0% {
-        stroke-dasharray: 0 100;
-        stroke-dashoffset: 0;
-        opacity: 0.2;
-    }
-
-    50% {
-        opacity: 1;
-    }
-
-    100% {
-        stroke-dasharray: 100 0;
-        stroke-dashoffset: -100;
-        opacity: 0.2;
-    }
+/* 
+   交互状态：极其克制
+   Hover 时，图标稍微变亮/变色，不做大范围移动
+*/
+.logo-container:hover .logo-icon-svg {
+    /* 仅改变透明度或微妙的单色变化 */
+    color: var(--text-primary);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+    /* 微妙光晕 */
 }
 
-@keyframes prism-pulse {
-
-    0%,
-    100% {
-        filter: drop-shadow(0 0 5px rgba(0, 122, 255, 0.4));
-        opacity: 0.9;
-    }
-
-    50% {
-        filter: drop-shadow(0 0 12px rgba(191, 90, 242, 0.6));
-        opacity: 1;
-    }
-}
-
-@keyframes glass-shimmer {
-    0% {
-        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
-    }
-
-    50% {
-        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
-    }
-
-    100% {
-        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
-    }
-}
-
-/* Variant: Neon (Pulse) */
-.logo-container.variant-neon .logo-icon-svg path:first-child {
-    animation: prism-pulse 3s infinite ease-in-out;
-}
-
-/* Variant: Flow (Beam logic) */
-.logo-container.variant-flow .logo-beam-enter,
-.logo-container.variant-flow .logo-beam-exit-1,
-.logo-container.variant-flow .logo-beam-exit-2,
-.logo-container.variant-flow .logo-beam-exit-3 {
-    stroke-dasharray: 100;
-    stroke-dashoffset: 100;
-    animation: beam-flow 2s infinite linear;
-}
-
-.logo-container.variant-flow .logo-beam-exit-1 {
-    animation-delay: 0.5s;
-}
-
-.logo-container.variant-flow .logo-beam-exit-2 {
-    animation-delay: 0.7s;
-}
-
-.logo-container.variant-flow .logo-beam-exit-3 {
-    animation-delay: 0.9s;
-}
-
-/* Variant: Glass (Shimmer) */
-.logo-container.variant-glass .logo-icon-svg {
-    animation: glass-shimmer 4s infinite ease-in-out;
-}
-
-.logo-container.variant-glass .logo-icon-svg path {
-    stroke-width: 5;
-    /* Thicker for glass feel */
-    opacity: 0.9;
-}
-
-/* Hover acceleration for all */
-.logo-container:hover .logo-beam-enter,
-.logo-container:hover .logo-beam-exit-1,
-.logo-container:hover .logo-beam-exit-2,
-.logo-container:hover .logo-beam-exit-3 {
-    animation-duration: 1s;
-}
-
-/* THEME ADAPTATION: Light Theme Overrides */
-@media (prefers-color-scheme: light) {
-    /* Fallback if variables aren't enough, but variables should handle colors */
+/* 暗黑模式下的 Hover 增强 */
+[data-theme='dark'] .logo-container:hover .logo-icon-svg {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
 }

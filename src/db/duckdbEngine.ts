@@ -89,7 +89,8 @@ export class DuckDBEngine {
         await this.db.registerFileHandle(file.name, file, duckdb.DuckDBDataProtocol.BROWSER_FILEREADER, true);
 
         // 快速 Count (忽略错误行，防止因个别脏数据导致全盘失败)
-        const result = await this.conn.query(`SELECT count(*) as c FROM read_csv_auto('${file.name}', ignore_errors=true)`);
+        // 添加 max_line_size 参数支持超长行（默认2MB，这里设置为10MB）
+        const result = await this.conn.query(`SELECT count(*) as c FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=10485760)`);
         const row = result.get(0);
         const count = row ? Number(row['c']) : 0;
 
@@ -120,7 +121,7 @@ export class DuckDBEngine {
         try {
             await this.conn.query(`DROP TABLE IF EXISTS ${originalTable}`);
             await this.conn.query(`DROP TABLE IF EXISTS ${workingTable}`);
-            logger.log('DuckDB', '创建双表', { data: `${originalTable} + ${workingTable}` });
+            logger.log('DuckDB', '创建双表', { data: `${file.name} → ${originalTable} + ${workingTable}` });
         } catch (cleanupErr) {
             logger.warn('DuckDB', '清理表失败(忽略)', cleanupErr);
         }
@@ -143,7 +144,7 @@ export class DuckDBEngine {
         }
 
         // 3. 构建SQL - 先创建 original 表（原始数据，只读）
-        let sql = `CREATE TABLE ${originalTable} AS SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true)`;
+        let sql = `CREATE TABLE ${originalTable} AS SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=10485760)`;
 
         if (shouldSample && options.sampleSize !== -1) {
             sql += ` USING SAMPLE ${Math.floor(sampleRate * 100)}%`;
@@ -162,7 +163,7 @@ export class DuckDBEngine {
 
         if (onProgress) onProgress(100);
         const time = (performance.now() - start).toFixed(2);
-        logger.log('DuckDB', '双表创建完成', { duration: Number(time) });
+        logger.log('DuckDB', '双表创建完成', { data: `${file.name}`, duration: Number(time) });
 
         // 6. 获取 Schema 和行数（从 working 表查询）
         const info = await this.conn.query(`SELECT count(*) as c FROM ${workingTable}`);

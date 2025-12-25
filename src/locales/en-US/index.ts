@@ -1,6 +1,7 @@
 // English translations main entry (importing from old en-US.ts temporarily)
 // TODO: Split this into modules like zh-CN after full migration
 import { LanguageConfig } from '@/types/i18n';
+import { prompt } from './prompt';
 
 // Temporarily import from old file structure
 // Will be split into modules in next refactor
@@ -53,6 +54,23 @@ export const enUS: LanguageConfig = {
         },
         settings: {
             apiConfig: 'API Configuration',
+            aiConfig: 'AI Configuration',
+            commonlyUsed: 'Commonly Used',
+            commonlyUsedDesc: 'Quick access to most used settings',
+            appearanceAndLanguage: 'Appearance & Language',
+            interfaceLanguage: 'Interface Language',
+            interfaceLanguageDesc: 'Select application display language',
+            localModelEnableTitle: 'Enable Local AI Acceleration (WebGPU)',
+            aiConfigDesc: 'Manage model sources and API keys',
+            hardwareEnvironment: 'Hardware Environment',
+            apiPriorityAndKeys: 'API Priority & Keys',
+            performanceDesc: 'Tune analysis performance and sampling',
+            dataProcessing: 'Data Processing',
+            advanced: 'Advanced Settings',
+            advancedDesc: 'Developer use only',
+            devMode: 'Developer Mode',
+            devModeDesc: 'Enable experimental features (None currently)',
+            searchPlaceholder: 'Search settings...',
             apiProvider: 'LLM Service Provider',
             modelSelection: 'Select Model',
             currentModel: 'Current Model',
@@ -138,17 +156,7 @@ export const enUS: LanguageConfig = {
             performanceColumnsUnit: 'columns',
             performanceTimeoutUnit: 'seconds',
         },
-        prompt: {
-            library: { title: 'Prompt Library', description: 'Collection of high-quality analysis strategies and prompts' },
-            category: { analysis: 'Data Analysis', cleaning: 'Data Cleaning', visualization: 'Visualization' },
-            action: { copy: 'Copy Prompt', use: 'Use this Prompt', copied: 'Prompt copied to clipboard' },
-            examples: {
-                dataCleaningExpert: { title: 'Data Cleaning Expert', description: 'Professional CSV data cleaning assistant', content: '...', tags: ['Cleaning', 'CSV'] },
-                salesTrend: { title: 'Sales Trend Analysis', description: 'Analyze sales trends', content: '...', tags: ['Analysis', 'Sales'] },
-                userPersona: { title: 'User Persona Generation', description: 'Generate user personas', content: '...', tags: ['Analysis'] },
-                complexChart: { title: 'Complex Chart Generation', description: 'Generate combination charts', content: '...', tags: ['Visualization'] },
-            },
-        },
+        prompt,
         dataSource: {
             title: 'Data Sources',
             noProjects: 'No Projects',
@@ -162,7 +170,11 @@ export const enUS: LanguageConfig = {
             },
         },
         fileUpload: {
-            clickOrDrag: 'Click or drag files here to upload', uploading: 'Parsing file...', uploadingProgress: 'Uploading {current}/{total} files...',
+            uploadButton: 'Upload File',
+            clickOrDrag: 'Click or drag files here to upload',
+            clickOrDragShort: 'Click/Drop Files',
+            dropHere: 'Drop Here',
+            uploading: 'Parsing file...', uploadingProgress: 'Uploading {current}/{total} files...',
             supportedFormats: 'Supports CSV, XLSX, JSON formats', largeFileTitle: 'Large Dataset',
             largeFileMessage: 'File contains {rows} rows. Sampling recommended.', batchLargeFiles: 'Detected {count} large files',
             batchSampleHint: 'Sampling recommended:', sampleRatio: 'Sample Ratio', sampleResult: '~{rows} rows after sampling',
@@ -246,6 +258,22 @@ export const enUS: LanguageConfig = {
             generateHypothesis: 'Generate', customHypothesis: 'Custom', customPlaceholder: 'Enter hypothesis...', submit: 'Run Analysis',
             adopt: 'Adopt', ignore: 'Ignore', adopted: 'Adopted', viewCode: 'View Code', copyCode: 'Copy Code', codeCopied: 'Copied',
             conclusion: 'Conclusion', analysisMethod: 'Method', dataSource: 'Source', selectHypothesis: 'Select hypothesis', or: 'or',
+            analyzing: 'Analyzing insights...',
+            results: 'Insight Results',
+        },
+        insight: {
+            recommendedAction: 'AI Recommended',
+            recommendedActions: 'Recommended Analysis',
+            customAnalysis: 'Custom Analysis',
+            selectMethod: 'Select Method',
+            selectColumn: 'Select Column',
+            selectColumn2: 'Select Second Column',
+            pleaseSelect: 'Please select...',
+            execute: 'Execute',
+            analyzing: 'Analyzing...',
+            viewCode: 'View Code',
+            drillDown: 'Drill Down',
+            maxDepthReached: 'Maximum drill-down depth reached',
         },
         exploration: {
             title: 'Exploration', addBlock: 'Add Block', placeholder: 'Enter request...', searchPlaceholder: 'Search...',
@@ -291,6 +319,9 @@ export const enUS: LanguageConfig = {
                 processing: 'Processing weights...',
                 ready: 'Local model ready',
                 unknown: 'Processing...',
+                loadingFromCache: 'Loading model from local cache...',
+                downloading: 'Downloading model files...',
+                finish: 'Loading complete',
             }
         },
         cache: {
@@ -313,6 +344,48 @@ export const enUS: LanguageConfig = {
             retry: 'Retry',
             cancel: 'Cancel',
             close: 'Close',
+        },
+        hardware: {
+            detection: 'Hardware Detection',
+            detecting: 'Detecting hardware configuration...',
+            detectionFailed: 'Detection failed',
+            platform: 'Platform',
+            gpu: 'GPU',
+            memory: 'Memory',
+            score: 'Score',
+            recommendation: 'Recommendation',
+            // Platform
+            macM1Plus: 'MacBook (Apple Silicon)',
+            macIntel: 'MacBook (Intel)',
+            windows: 'Windows PC',
+            linux: 'Linux',
+            unknown: 'Unknown Device',
+            // GPU
+            gpuNotDetected: 'No GPU Detected',
+            gpuSoftware: 'Software Renderer (No Acceleration)',
+            gpuHigh: 'Discrete GPU (High Performance)',
+            gpuMedium: 'Discrete GPU (Medium Performance)',
+            gpuIntegrated: 'Integrated GPU',
+            // Modes
+            recommendedMode: 'Recommended Mode',
+            localMode: 'Local AI Model',
+            apiMode: 'Cloud AI',
+            confidence: 'Confidence',
+            confidenceHigh: 'Highly Recommended',
+            confidenceMedium: 'Suggested',
+            confidenceLow: 'Optional',
+            // Reason
+            reason: 'Reason',
+            technicalDetails: 'Technical Details',
+            expectedLoadTime: 'Expected Load Time',
+            expectedInferenceTime: 'Expected Inference Time',
+            // Pros/Cons
+            pros: 'Pros',
+            cons: 'Notes',
+            // Buttons
+            useRecommended: 'Use Recommended Config',
+            keepCurrent: 'Keep Current Config',
+            redetect: 'Redetect',
         },
     },
 };

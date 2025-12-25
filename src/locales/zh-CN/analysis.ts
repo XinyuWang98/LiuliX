@@ -4,6 +4,9 @@ export const insightChain = {
     loading: '正在挖掘洞察...',
     loadingHypothesis: '正在生成假设...',
     noHypotheses: '暂无假设卡片',
+    initializing: '正在准备分析环境...',
+    waitingForData: '等待数据就绪...',
+    readyHint: '点击"生成假设"开始分析',
     noInsights: '暂无洞察结果',
     generateHypothesis: '生成假设',
     customHypothesis: '自定义假设',
@@ -20,6 +23,24 @@ export const insightChain = {
     dataSource: '数据来源',
     selectHypothesis: '选择一个假设开始分析',
     or: '或',
+    results: '洞察结果',
+    analyzing: '正在执行洞察分析...',
+};
+
+// 森林式下钻交互相关翻译
+export const insight = {
+    recommendedAction: 'AI 推荐',
+    recommendedActions: '推荐分析',
+    customAnalysis: '自选分析',
+    selectMethod: '选择分析方法',
+    selectColumn: '选择列',
+    selectColumn2: '选择第二列',
+    pleaseSelect: '请选择...',
+    execute: '执行',
+    analyzing: '正在分析...',
+    viewCode: '查看代码',
+    drillDown: '下钻分析',
+    maxDepthReached: '已达到最大下钻深度',
 };
 
 export const exploration = {

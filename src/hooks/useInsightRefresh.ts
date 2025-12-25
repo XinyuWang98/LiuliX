@@ -24,6 +24,7 @@ export function useInsightRefresh({
     // Strict Mode 防重
     const loadedOnceRef = useRef(false);
     const prevTableNameRef = useRef<string | undefined>(tableName);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);  // 🆕 追踪timer，防止Strict Mode清理
 
     const prevDepsRef = useRef({
         hypotheses: hypothesesLength,
@@ -40,6 +41,11 @@ export function useInsightRefresh({
             });
             loadedOnceRef.current = false;
             prevTableNameRef.current = tableName;
+            // 🆕 清理旧timer
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
         }
 
         // 判断是否需要刷新
@@ -56,15 +62,21 @@ export function useInsightRefresh({
                 prevDepsRef.current.hypotheses !== hypothesesLength ||
                 prevDepsRef.current.isStale !== insightCache?.isStale;
 
-            // 仅在Strict Mode双重调用时阻止（依赖未变）
-            if (!depsChanged && loadedOnceRef.current) {
-                logger.warn('AI洞察', 'Strict Mode重复调用已拦截');
+            // 🆕 修复：只在依赖未变且已有timer时跳过
+            if (!depsChanged && loadedOnceRef.current && timerRef.current) {
+                logger.warn('AI洞察', 'Strict Mode重复调用已拦截（timer已设置）');
                 return;
             }
 
             logger.log('AI洞察', '触发刷新', {
-                data: { tableName, hypothesesCount: hypothesesLength }
+                data: { tableName, hypothesesCount: hypothesesLength, hasExistingTimer: !!timerRef.current }
             });
+
+            // 清理旧timer（如果有）
+            if (timerRef.current) {
+                logger.log('AI洞察', '清理旧timer');
+                clearTimeout(timerRef.current);
+            }
 
             loadedOnceRef.current = true;
             prevDepsRef.current = {
@@ -72,7 +84,21 @@ export function useInsightRefresh({
                 isStale: insightCache?.isStale
             };
 
-            onRefresh();
+            // ⚡ 延迟 3000ms 触发，确保高优先级的 DataCleaner (数据清洗) 能优先抢占本地模型
+            logger.log('AI洞察', '延迟触发刷新 (等待DataCleaner优先)...');
+            timerRef.current = setTimeout(() => {
+                logger.log('AI洞察', '延迟结束，执行刷新');
+                timerRef.current = null;
+                onRefresh();
+            }, 3000);
+
+            return () => {
+                if (timerRef.current) {
+                    logger.log('AI洞察', 'useEffect cleanup - 清理timer');
+                    clearTimeout(timerRef.current);
+                    timerRef.current = null;
+                }
+            };
         } else if (需要刷新 && !可以执行) {
             logger.warn('AI洞察', '刷新被阻止（防重复）', { data: { status: insightCache?.status } });
         }

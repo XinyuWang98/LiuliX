@@ -31,25 +31,27 @@ export interface 洞察结果 {
  * @param 数据字段列表 - 数据集的列名数组
  * @param 用户指令 - 用户输入的深挖指令（如"用 age 和 salary 做散点图"）
  * @param 代码语言 - 优先生成的代码语言
+ * @param t - i18n翻译函数
  * @returns Prompt 字符串
  */
 export function 生成洞察Prompt(
     假设描述: string,
     数据字段列表: string[],
     用户指令: string,
-    代码语言: CodeLanguage = 'python'
+    代码语言: CodeLanguage = 'python',
+    t: (key: string) => string  // i18n函数
 ): string {
     const 字段文本 = 数据字段列表.join(', ');
     const 语言提示 = 代码语言 === 'python' ? 'Python (pandas)' : 'SQL (DuckDB)';
 
     return `
-你是一个专业的数据分析师，当前正在验证以下假设：
+${t('prompt.insightGen.systemRole')}
 
-假设：${假设描述}
-可用字段：${字段文本}
-用户指令：${用户指令}
+${t('prompt.insightGen.hypothesis')}${假设描述}
+${t('prompt.insightGen.availableFields')}${字段文本}
+${t('prompt.insightGen.userInstruction')}${用户指令}
 
-请根据用户指令生成洞察分析，输出必须是纯 JSON，严格符合以下结构（不要任何解释、markdown、\`\`\`json 标记）：
+${t('prompt.insightGen.outputInstruction')}
 
 {
   "chartType": "scatter | histogram | bar | line | box | table",
@@ -67,13 +69,13 @@ export function 生成洞察Prompt(
   "codeLanguage": "${代码语言}"
 }
 
-要求：
-1. 图表类型根据用户指令选择（散点/柱状/折线/直方图/箱线图）
-2. 如果无法生成图表，chartType 设为 "table"，并填充 tableData（数组，每项是一个对象）
-3. chartData.labels 和 datasets[0].data 长度必须一致
-4. conclusion 必须是一句话，不超过 50 字
-5. code 必须是完整可运行的 ${语言提示} 代码，带中文注释
-6. 只输出纯 JSON，不要任何其他文字
+${t('prompt.insightGen.requirements')}
+${t('prompt.insightGen.req1')}
+${t('prompt.insightGen.req2')}
+${t('prompt.insightGen.req3')}
+${t('prompt.insightGen.req4')}
+${t('prompt.insightGen.req5Prefix')}${语言提示}${t('prompt.insightGen.req5Suffix')}
+${t('prompt.insightGen.req6')}
 `.trim();
 }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
-import { Plus, Send } from 'lucide-react';
+// import { Plus, Send } from 'lucide-react'; // MVP阶段暂不需要
 import { ExplorationHeader } from './ExplorationHeader';
 import { TimelineSidebar } from './TimelineSidebar';
 import { CleaningSummaryCard } from './CleaningSummaryCard';
@@ -21,7 +21,7 @@ interface ExplorationFlowProps {
 
 export function ExplorationFlow({ project, cleaningTrigger, onProjectUpdate, aiSuggestions }: ExplorationFlowProps) {
     const { t } = useI18n();
-    const [inputValue, setInputValue] = useState('');
+    // const [inputValue, setInputValue] = useState(''); // MVP阶段暂不需要
     const [currentStep, setCurrentStep] = useState<WorkflowStep>('upload');
 
     // Collapsible states for cleaner
@@ -161,6 +161,8 @@ export function ExplorationFlow({ project, cleaningTrigger, onProjectUpdate, aiS
                                     <div className="minimal-insight-wrapper">
                                         <InsightChainFlow
                                             {...insightProps}
+                                            fileName={(project?.files[0] as any)?.fileName}
+                                            hideTitle={true}
                                         />
                                     </div>
                                 ) : (
@@ -181,8 +183,9 @@ export function ExplorationFlow({ project, cleaningTrigger, onProjectUpdate, aiS
                         </div>
                     </div>
 
-                    {/* 底部聊天输入框（悬浮） */}
-                    <div className="chat-input-wrapper">
+
+                    {/* 底部聊天输入框（MVP阶段暂不提供） */}
+                    {/* <div className="chat-input-wrapper">
                         <div className="chat-input-container">
                             <button className="btn-ghost chat-action-btn">
                                 <Plus size={18} />
@@ -208,7 +211,7 @@ export function ExplorationFlow({ project, cleaningTrigger, onProjectUpdate, aiS
                                 <Send size={16} />
                             </button>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>

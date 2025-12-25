@@ -4,6 +4,8 @@ import { ColumnMetadata } from '../types/duckdb';
 import { useI18n } from '../contexts/I18nContext';
 import { formatTimestamp } from '../utils/dateUtils';
 import './VirtualDataGrid.css';
+import { NumericStatsPanel } from './datagrid/NumericStatsPanel';
+import { CategoricalStatsPanel } from './datagrid/CategoricalStatsPanel';
 
 interface VirtualDataGridProps {
     tableName: string;
@@ -109,13 +111,7 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
 
 
 
-    // 数值格式化工具函数
-    const formatNumber = useCallback((num: number): string => {
-        if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-        if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-        if (Number.isInteger(num)) return num.toString();
-        return num.toFixed(2);
-    }, []);
+
 
 
 
@@ -157,12 +153,61 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
         loadPage(currentPage);
     }, [currentPage, loadPage]);
 
-    // 计算自适应列宽
-    const getColumnWidth = (col: ColumnMetadata) => {
+    // 根据选中的列过滤显示的列 (Move up to fix reference error)
+    const visibleColumns = columns.filter((_, idx) => selectedColumns.includes(idx));
+
+    // 自适应列宽逻辑
+    const [containerWidth, setContainerWidth] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [bonusWidth, setBonusWidth] = useState(0);
+
+    // 监听容器宽度变化
+    useEffect(() => {
+        if (!containerRef.current) return;
+
+        const observer = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                setContainerWidth(entry.contentRect.width);
+            }
+        });
+
+        observer.observe(containerRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    // 计算基础列宽总和并分配剩余空间
+    useEffect(() => {
+        if (containerWidth === 0 || visibleColumns.length === 0) return;
+
+        // 计算所有可见列的基础宽度总和
+        let totalBaseWidth = 序号列宽度; // 加上序号列
+        const baseWidths = visibleColumns.map(col => {
+            const nameLength = col.name.length;
+            // 基础宽度计算逻辑复用
+            return Math.max(最小列宽, Math.min(最大列宽, nameLength * 列名字符宽度系数 + 列宽基础偏移));
+        });
+
+        totalBaseWidth += baseWidths.reduce((a, b) => a + b, 0);
+
+        // 如果总基础宽度小于容器宽度，计算需要分配的额外宽度
+        // 预留少量 padding (e.g. 20px) 避免滚动条闪烁
+        const availableSpace = containerWidth - 20;
+
+        if (totalBaseWidth < availableSpace) {
+            const extra = availableSpace - totalBaseWidth;
+            // 平均分配给每个数据列 (不分给序号列)
+            setBonusWidth(Math.floor(extra / visibleColumns.length));
+        } else {
+            setBonusWidth(0);
+        }
+    }, [containerWidth, visibleColumns]); // 依赖项：容器宽度或可见列变化
+
+    // 计算自适应列宽 (基础 + Bonus)
+    const getColumnWidth = useCallback((col: ColumnMetadata) => {
         const nameLength = col.name.length;
-        const estimatedWidth = Math.max(最小列宽, Math.min(最大列宽, nameLength * 列名字符宽度系数 + 列宽基础偏移));
-        return estimatedWidth;
-    };
+        const baseWidth = Math.max(最小列宽, Math.min(最大列宽, nameLength * 列名字符宽度系数 + 列宽基础偏移));
+        return baseWidth + bonusWidth;
+    }, [bonusWidth]);
 
     // 同步表头和数据体的水平滚动
     const syncScroll = () => {
@@ -172,76 +217,14 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
     };
 
 
-    // 根据选中的列过滤显示的列
-    const visibleColumns = columns.filter((_, idx) => selectedColumns.includes(idx));
 
-    // ========== 内部组件：数值统计面板 ==========
-    const NumericStatsPanel: React.FC<{ stat: NonNullable<ColumnStats['numericStats']> }> = ({ stat }) => (
-        <div className="numericStatsPanel">
-            <div className="statRow">
-                <span>MIN</span>
-                <span>{formatNumber(stat.min)}</span>
-            </div>
-            <div className="statRow">
-                <span>Q1</span>
-                <span>{formatNumber(stat.q1)}</span>
-            </div>
-            <div className="statRow">
-                <span>MEDIAN</span>
-                <span>{formatNumber(stat.median)}</span>
-            </div>
-            <div className="statRow">
-                <span>Q3</span>
-                <span>{formatNumber(stat.q3)}</span>
-            </div>
-            <div className="statRow">
-                <span>MAX</span>
-                <span>{formatNumber(stat.max)}</span>
-            </div>
-            <div className="statRow">
-                <span>STD DEV</span>
-                <span>{formatNumber(stat.stddev)}</span>
-            </div>
-            <div className="statRow">
-                <span>SKEWNESS</span>
-                <span>{formatNumber(stat.skewness)}</span>
-            </div>
-        </div>
-    );
 
-    // ========== 内部组件：分类统计面板 ==========
-    const CategoricalStatsPanel: React.FC<{ stat: NonNullable<ColumnStats['categoricalStats']>, type: string, columnName: string }> = ({ stat, type, columnName }) => (
-        <div className="categoricalStatsPanel">
-            <div className="statHeader">TOP 5 VALUES</div>
-            {stat.topValues.map((item, idx) => {
-                let displayValue = String(item.value);
-                const typeUpper = type.toUpperCase();
-                // 使用统一的格式化逻辑
-                if (typeUpper === 'DATE' || typeUpper === 'TIMESTAMP') {
-                    displayValue = formatTimestamp(item.value, typeUpper === 'TIMESTAMP');
-                } else if ((typeof item.value === 'number' || !isNaN(Number(item.value))) && (columnName.toLowerCase().includes('time') || columnName.toLowerCase().includes('date'))) {
-                    // 启发式：数值型且名字像时间
-                    displayValue = formatTimestamp(item.value);
-                } else {
-                    // 其他情况尝试用 formatCellValue (比如 boolean, numeric formatter)
-                    displayValue = formatCellValue(item.value, type);
-                }
+    // 引入外部组件 (Removed internal definitions)
 
-                return (
-                    <div key={idx} className="statRow">
-                        <span className="valueText" title={String(displayValue)}>
-                            {displayValue}
-                        </span>
-                        <span className="valueCount">{item.count}</span>
-                    </div>
-                );
-            })}
-        </div>
-    );
-
-    // ========== 内部组件：微型直方图 ==========
+    // ========== 内部组件：微型直方图 (保持内部，因为依赖 t 和复杂的 tooltip 逻辑较难拆分，且行数占比不大) ==========
     const MiniHistogram: React.FC<{ distribution: NonNullable<ColumnStats['distribution']> & { labels?: (string | number)[] }, type: string, columnName: string }> = ({ distribution, type, columnName }) => {
         const { counts, min, max } = distribution;
+        // ... (保持原逻辑不变)
         const maxCount = Math.max(...counts);
         if (maxCount === 0) return null;
 
@@ -271,8 +254,6 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
                         tooltipText = `${t('grid.value')}: ${displayVal}\n${tooltipText}`;
                     } else if (hasRange) {
                         // 连续模式：显示区间
-                        // 对于连续区间，min/max本身是数值，不一定是时间戳，除非是数值型时间戳。
-                        // 如果是 Date/Timestamp 类型，DuckDB 返回的 min/max 可能是数字时间戳。
                         const start = min + idx * binWidth;
                         const end = min + (idx + 1) * binWidth;
 
@@ -342,8 +323,23 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
         );
     };
 
+    // ========== 内部组件：单一值指示器（唯一值=1的兜底展示） ==========
+    const SingleValueIndicator: React.FC<{ value: any, type: string }> = ({ value, type }) => {
+        // 格式化显示值
+        let displayValue = formatCellValue(value, type);
+
+        return (
+            <div className="headerMiniHistogram single-value-indicator">
+                <div className="single-value-badge" title={`常量列：所有值均为 ${displayValue}`}>
+                    <span className="single-value-label">唯一值：</span>
+                    <span className="single-value-text">{displayValue}</span>
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="virtualGridContainer">
+        <div className="virtualGridContainer" ref={containerRef}>
             {/* 增强表头（带统计） */}
             <div className="enhancedGridHeader" ref={headerRef} style={{ overflowX: 'hidden' }}>
                 {/* 序号列表头 */}
@@ -404,10 +400,18 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
                                 <span className="missing-rate-text">{nullRate.toFixed(1)}%</span>
                             </div>
 
-                            {/* 微型可视化：数值列显示直方图，字符串列显示条形图 */}
-                            {stat?.distribution ? (
+                            {/* 微型可视化：优先级判断 */}
+                            {stat?.uniqueCount === 1 ? (
+                                // 唯一值=1：显示兜底指示器
+                                <SingleValueIndicator
+                                    value={stat.categoricalStats?.topValues?.[0]?.value ?? stat.numericStats?.min ?? 'N/A'}
+                                    type={col.type}
+                                />
+                            ) : stat?.distribution ? (
+                                // 数值列：显示直方图
                                 <MiniHistogram distribution={stat.distribution} type={col.type} columnName={col.name} />
                             ) : stat?.categoricalStats ? (
+                                // 分类列：显示条形图
                                 <MiniBarChart categoricalStats={stat.categoricalStats} type={col.type} columnName={col.name} />
                             ) : null}
 

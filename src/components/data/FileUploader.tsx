@@ -1,4 +1,5 @@
 import { useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import { createPortal } from 'react-dom';
 import { useI18n } from '@contexts/I18nContext';
 import { AlertCircle, X } from 'lucide-react';
 import { parseFile, ParsedFileData } from '@utils/fileParser';
@@ -18,6 +19,7 @@ interface FileError {
 export interface FileUploaderRef {
     openFileDialog: () => void;
     handleFiles: (files: FileList) => void;
+    triggerUpload: () => void; // Alias for openFileDialog
 }
 
 export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ onFilesUploaded }, ref) => {
@@ -40,7 +42,8 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
 
     useImperativeHandle(ref, () => ({
         openFileDialog: () => fileInputRef.current?.click(),
-        handleFiles: (files: FileList) => handleFiles(files)
+        handleFiles: (files: FileList) => handleFiles(files),
+        triggerUpload: () => fileInputRef.current?.click()
     }));
 
     const handleFiles = async (files: FileList) => {
@@ -190,7 +193,7 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
                 </div>
             )}
 
-            {showBatchSampleModal && warnFiles.length > 0 && (
+            {showBatchSampleModal && warnFiles.length > 0 && createPortal(
                 <div className="modal-overlay">
                     <div className="card batch-modal-content">
                         <h3 className="batch-modal-header">
@@ -212,14 +215,23 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
                             <label className="batch-range-label">
                                 {t('fileUpload.sampleRatio')}: {(sampleRatio * 100).toFixed(0)}%
                             </label>
-                            <input type="range" min="5" max="20" step="5" value={sampleRatio * 100} onChange={(e) => setSampleRatio(parseInt(e.target.value) / 100)} style={{ width: '100%' }} />
+                            <input
+                                type="range"
+                                className="custom-slider"
+                                min="5"
+                                max="20"
+                                step="5"
+                                value={sampleRatio * 100}
+                                onChange={(e) => setSampleRatio(parseInt(e.target.value) / 100)}
+                            />
                         </div>
                         <div className="batch-action-buttons">
                             <button className="btn-secondary" onClick={handleForceImportAll}>{t('fileUpload.forceImport')}</button>
                             <button className="btn-primary" onClick={handleConfirmBatchSample}>{t('fileUpload.startSample')}</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

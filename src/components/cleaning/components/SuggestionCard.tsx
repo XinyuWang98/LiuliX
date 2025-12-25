@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { SimpleSuggestion } from '../types/cleaning.types';
 import { useI18n } from '../../../contexts/I18nContext';
-import { ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
+import { ChevronDown, ChevronRight, Copy, Check, Sparkles, Trash2, Eraser, FileX, Calculator } from 'lucide-react';
 import { formatSQL } from '../../../utils/sqlFormatter';
 import './SuggestionCard.css';
 
@@ -29,6 +29,19 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
 
     // 置信度百分比
     const confidencePercent = Math.round(suggestion.confidence * 100);
+
+    // 根据标签或内容判断图标
+    const getIcon = () => {
+        if (isAI) return <Sparkles size={16} className="icon-ai" />;
+
+        const labelLower = suggestion.label.toLowerCase();
+        if (labelLower.includes('删除') || labelLower.includes('drop')) return <Trash2 size={16} className="icon-delete" />;
+        if (labelLower.includes('去重') || labelLower.includes('duplicate')) return <FileX size={16} className="icon-dedup" />;
+        if (labelLower.includes('填充') || labelLower.includes('fill')) return <Eraser size={16} className="icon-fill" />;
+        if (labelLower.includes('标准化') || labelLower.includes('normalize')) return <Calculator size={16} className="icon-calc" />;
+
+        return <Sparkles size={16} className="icon-default" />; // 默认图标
+    };
 
     const handleCopyObj = (e: React.MouseEvent, text: string) => {
         e.stopPropagation();
@@ -56,18 +69,25 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
 
     return (
         <div
-            className={`suggestionCard ${isSelected ? 'selected' : ''} ${isIgnored ? 'ignored' : ''}`}
+            className={`suggestionCard ${isSelected ? 'selected' : ''} ${isIgnored ? 'ignored' : ''} ${isAI ? 'card-ai' : 'card-rule'}`}
             onClick={() => onToggle(suggestion.id)}
         >
             {/* 1. 头部：来源标签 + 标题 + 置信度 */}
             <div className="cardHeader">
                 <div className="headerLeft">
-                    <span className={`sourceLabel ${isAI ? 'ai' : 'rule'}`}>
-                        {isAI ? 'AI' : 'Rule'}
-                    </span>
-                    <span className="suggestionTitle" title={suggestion.label}>
-                        {suggestion.label}
-                    </span>
+                    {/* 图标容器 */}
+                    <div className={`iconContainer ${isAI ? 'bg-ai' : 'bg-rule'}`}>
+                        {getIcon()}
+                    </div>
+
+                    <div className="titleGroup">
+                        <span className={`sourceLabel ${isAI ? 'ai' : 'rule'}`}>
+                            {isAI ? 'AI' : 'RULE'}
+                        </span>
+                        <span className="suggestionTitle" title={suggestion.label}>
+                            {suggestion.label}
+                        </span>
+                    </div>
                 </div>
                 <span
                     className="confidenceText"
@@ -79,7 +99,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
 
             {/* 2. 中部：详细说明 + SQL代码 */}
             <div className="detailContent">
-                <div className="reasonText">{suggestion.reason || suggestion.label}</div>
+                <div className="reasonText">{suggestion.reason || t('cleaning.defaultReason')}</div>
 
                 {/* SQL Code Body (Above the Toggle) */}
                 {suggestion.sql && isSqlExpanded && (

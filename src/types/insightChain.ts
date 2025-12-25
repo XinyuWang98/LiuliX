@@ -22,6 +22,9 @@ export interface HypothesisCard {
     description: string;                 // 假设详细描述
     verificationMethod: string;          // 验证方式（如"计算相关系数"）
     isExpanded: boolean;                 // 是否展开显示洞察节点
+    // 🆕 元数据：文件来源和涉及列名
+    fileName?: string;                   // 文件名（如："turkish_song_lyrics.csv"）
+    columnsUsed?: string[];              // 涉及的列名（如：["artist", "genre", "lyrics"]）
     // 🆕 P0 新增：批量执行结果（Pyodide Base64输出）
     executionResult?: {
         image: string;                   // Base64图片: data:image/png;base64,...

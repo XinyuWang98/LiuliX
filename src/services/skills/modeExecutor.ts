@@ -50,6 +50,18 @@ export async function executeInsightWithMode(
 }
 
 /**
+ * 为 Python 字符串字面量转义 JSON 字符串
+ * Python 的 json.loads 需要一个合法的 JSON 字符串
+ * 但这个 JSON 字符串是嵌入在 Python 代码的 '''...''' 中的
+ * 因此需要处理转义字符和三引号
+ */
+function escapeJsonForPython(jsonStr: string): string {
+    return jsonStr
+        .replace(/\\/g, '\\\\') // 将 \ 变为 \\ (让 Python 看到字面量的 \)
+        .replace(/'''/g, "\\'\\'\\'"); // 转义三引号，防止提前闭合
+}
+
+/**
  * 执行全量模式（full/sampled）
  */
 async function executeFullMode(
@@ -88,38 +100,38 @@ async function executeFullMode(
         pyodideManager.initialize();
         await pyodideManager.waitForReady();
 
+        // 1. 序列化 JSON (处理 BigInt)
+        const rawJson = JSON.stringify(data, (_key, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+        );
+
+        // 2. 转义以嵌入 Python 字符串
+        const safeJsonData = escapeJsonForPython(rawJson);
+
         const dataScript = `
 import pandas as pd
 import json
 
-data_json = '''${JSON.stringify(data, (_key, value) => typeof value === 'bigint' ? value.toString() : value)}'''
-df = pd.DataFrame(json.loads(data_json))
+try:
+    data_json = '''${safeJsonData}'''
+    df = pd.DataFrame(json.loads(data_json))
+except Exception as e:
+    print(f"Error loading JSON data: {str(e)}")
+    raise e
 `;
         await pyodideManager.runPython(dataScript);
         logger.log('Skills', `数据已加载到Pyodide`, { data: { rows: data.length, limited: isLimited, maxRows } });
 
-    } catch (loadError: any) {
-        logger.error('Skills', '数据加载失败', loadError);
-        throw new Error(`数据加载失败: ${loadError.message}`);
-    }
+        const result = await pyodideManager.runPython(code);
 
-    const result = await pyodideManager.runPython(code);
-
-    // 尝试解析JSON结果
-    try {
-        const parsed = JSON.parse(result);
         return {
             success: true,
-            data: parsed,
+            data: result, // 包含 plotImage, textOutput 等所有字段
             mode
         };
-    } catch {
-        // 如果不是JSON，直接返回原始输出
-        return {
-            success: true,
-            data: { output: result },
-            mode
-        };
+    } catch (error) {
+        logger.error('Skills', `full_mode执行失败`, { error });
+        throw error;
     }
 }
 

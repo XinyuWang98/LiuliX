@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { askAI, AIModel } from '../services/aiService';
-import { X, GripVertical, CheckCircle, AlertCircle, Play } from 'lucide-react';
+import { X, GripVertical, CheckCircle, AlertCircle, Play, Cpu, Zap } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 import { SUPPORTED_MODELS } from '../services/localLLMService';
 import { getAnalysisConfig, setAnalysisConfig } from '../config/analysisConfig';
 import { PerformanceConfigSection } from './settings/PerformanceConfigSection';
+import { detectHardware, getHardwareDescription, type HardwareDetectionResult } from '../utils/hardwareDetection';
+import { getAIModeRecommendation, getRecommendationDetails, type AIModeRecommendation } from '../utils/aiModeRecommendation';
 
 interface AIConfigModalProps {
     isOpen: boolean;
@@ -42,7 +44,10 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
         return localStorage.getItem('use_local_model') === 'true';
     });
 
-
+    // 硬件检测状态
+    const [hardwareDetection, setHardwareDetection] = useState<HardwareDetectionResult | null>(null);
+    const [recommendation, setRecommendation] = useState<AIModeRecommendation | null>(null);
+    const [isDetecting, setIsDetecting] = useState(false);
 
     // 分析配置状态
     const [analysisConfig, setAnalysisConfigState] = useState(getAnalysisConfig());
@@ -68,14 +73,48 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
         setKeys(newKeys);
     }, [isOpen]);
 
+    // 硬件检测（首次打开时执行）
+    useEffect(() => {
+        if (isOpen && !hardwareDetection) {
+            setIsDetecting(true);
+            detectHardware()
+                .then(result => {
+                    setHardwareDetection(result);
+                    const rec = getAIModeRecommendation(result);
+                    setRecommendation(rec);
+                })
+                .catch(err => {
+                    console.error('[硬件检测] 检测失败:', err);
+                })
+                .finally(() => {
+                    setIsDetecting(false);
+                });
+        }
+    }, [isOpen, hardwareDetection]);
+
     // Save priority when changed
     useEffect(() => {
         localStorage.setItem('ai_priority', JSON.stringify(priority));
     }, [priority]);
 
-    // 保存本地模型设置
+    // 保存本地模型设置并自动卸载
     useEffect(() => {
-        localStorage.setItem('use_local_model', useLocalModel.toString());
+        const handleModelToggle = async () => {
+            localStorage.setItem('use_local_model', useLocalModel.toString());
+
+            // 如果关闭本地模型，立即卸载以释放内存
+            if (!useLocalModel) {
+                try {
+                    const { localLLMService } = await import('../services/localLLMService');
+                    await localLLMService.unload();
+                    console.log('✅ 本地模型已卸载，已释放 ~4GB 内存');
+                } catch (error) {
+                    console.error('卸载模型失败:', error);
+                }
+            }
+        };
+
+        handleModelToggle();
     }, [useLocalModel]);
 
     const handleKeyChange = (model: string, val: string) => {
@@ -187,6 +226,143 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
 
                 {/* Body */}
                 <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    {/* 硬件检测与智能推荐卡片 */}
+                    {isDetecting ? (
+                        <div style={{
+                            backgroundColor: 'var(--bg-main)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            padding: '24px',
+                            textAlign: 'center'
+                        }}>
+                            <Cpu size={32} style={{ margin: '0 auto 12px', color: 'var(--primary)' }} />
+                            <div style={{ color: 'var(--text-secondary)' }}>
+                                {t('hardware.detecting')}
+                            </div>
+                        </div>
+                    ) : hardwareDetection && recommendation ? (
+                        <div style={{
+                            backgroundColor: 'var(--bg-main)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            overflow: 'hidden'
+                        }}>
+                            {/* 标题栏 */}
+                            <div style={{
+                                padding: '16px',
+                                borderBottom: '1px solid var(--border)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                background: 'linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(192, 132, 252, 0.1))'
+                            }}>
+                                <Zap size={20} style={{ color: 'var(--primary)' }} />
+                                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                                    {t('hardware.recommendation')}
+                                </span>
+                                {recommendation.confidence === 'high' && (
+                                    <span style={{
+                                        fontSize: '12px',
+                                        padding: '2px 8px',
+                                        borderRadius: '4px',
+                                        backgroundColor: 'var(--success)',
+                                        color: 'white',
+                                        marginLeft: 'auto'
+                                    }}>
+                                        {t('hardware.confidenceHigh')}
+                                    </span>
+                                )}
+                            </div>
+
+                            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                {/* 硬件信息 */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                                    <div>
+                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                            {t('hardware.platform')}
+                                        </div>
+                                        <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
+                                            {getHardwareDescription(hardwareDetection).platform}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                            {t('hardware.gpu')}
+                                        </div>
+                                        <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
+                                            {getHardwareDescription(hardwareDetection).gpu}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                            {t('hardware.score')}
+                                        </div>
+                                        <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
+                                            {hardwareDetection.overallScore} / 100
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 推荐模式 */}
+                                <div style={{
+                                    padding: '12px',
+                                    borderRadius: '6px',
+                                    backgroundColor: recommendation.mode === 'local'
+                                        ? 'rgba(34, 197, 94, 0.1)'
+                                        : 'rgba(59, 130, 246, 0.1)',
+                                    border: `1px solid ${recommendation.mode === 'local'
+                                        ? 'rgba(34, 197, 94, 0.3)'
+                                        : 'rgba(59, 130, 246, 0.3)'}`
+                                }}>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                        {t('hardware.recommendedMode')}
+                                    </div>
+                                    <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                                        {recommendation.mode === 'local' ? t('hardware.localMode') : t('hardware.apiMode')}
+                                    </div>
+                                    <div style={{ fontSize: '13px', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                                        {recommendation.reason}
+                                    </div>
+                                    {recommendation.expectedLoadTime && (
+                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                                            {t('hardware.expectedLoadTime')}: {recommendation.expectedLoadTime} | {' '}
+                                            {t('hardware.expectedInferenceTime')}: {recommendation.expectedInferenceTime}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 优缺点 */}
+                                {(() => {
+                                    const details = getRecommendationDetails(recommendation);
+                                    return (
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '12px' }}>
+                                            <div>
+                                                <div style={{ fontWeight: 600, color: 'var(--success)', marginBottom: '6px' }}>
+                                                    {t('hardware.pros')}
+                                                </div>
+                                                <ul style={{ margin: 0, paddingLeft: '16px', color: 'var(--text-secondary)' }}>
+                                                    {details.pros.map((pro, i) => (
+                                                        <li key={i}>{pro}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 600, color: 'var(--warning)', marginBottom: '6px' }}>
+                                                    {t('hardware.cons')}
+                                                </div>
+                                                <ul style={{ margin: 0, paddingLeft: '16px', color: 'var(--text-secondary)' }}>
+                                                    {details.cons.map((con, i) => (
+                                                        <li key={i}>{con}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                    ) : null}
+
                     {/* 本地模型开关 */}
                     <div style={{
                         backgroundColor: 'var(--bg-main)',

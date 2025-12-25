@@ -13,6 +13,7 @@ export type ServiceName =
     | 'AI洞察'
     | 'AI洞察预加载'
     | 'AI服务'
+    | 'AI配置'  // 🆕 AI配置与推荐
     | '本地模型'
     | 'DuckDB'
     | '数据清洗'
@@ -40,10 +41,21 @@ class Logger {
     private isDev = import.meta.env.DEV;
 
     /**
+     * 获取当前时间戳
+     */
+    private getTimestamp(): string {
+        const now = new Date();
+        const time = now.toLocaleTimeString('en-US', { hour12: false });
+        const ms = now.getMilliseconds().toString().padStart(3, '0');
+        return `${time}.${ms}`;
+    }
+
+    /**
      * 格式化日志消息
      */
     private format(service: ServiceName, message: string, options?: LogOptions): string {
-        let result = `[${service}] ${message}`;
+        const timestamp = this.getTimestamp();
+        let result = `[${timestamp}] [${service}] ${message}`;
 
         if (options?.count !== undefined) {
             result += `: ${options.count}条`;
@@ -98,7 +110,8 @@ class Logger {
      * 警告日志(生产环境保留)
      */
     warn(service: ServiceName, message: string, data?: any) {
-        const formatted = `[${service}] ${message}`;
+        const timestamp = this.getTimestamp();
+        const formatted = `[${timestamp}] [${service}] ${message}`;
         if (data !== undefined) {
             console.warn(formatted, data);
         } else {
@@ -110,7 +123,8 @@ class Logger {
      * 错误日志(生产环境保留)
      */
     error(service: ServiceName, message: string, error?: any) {
-        const formatted = `[${service}] ${message}`;
+        const timestamp = this.getTimestamp();
+        const formatted = `[${timestamp}] [${service}] ${message}`;
         if (error !== undefined) {
             console.error(formatted, error);
         } else {

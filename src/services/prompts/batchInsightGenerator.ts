@@ -8,7 +8,8 @@ export function generateBatchInsightsPrompt(
     columns: string[],
     rowCount: number,
     totalRows: number,
-    sampleData: any[]
+    sampleData: any[],
+    t: (key: string) => string  // i18n函数
 ): string {
     const columnList = columns.join(', ');
 
@@ -21,35 +22,35 @@ export function generateBatchInsightsPrompt(
         return cleaned;
     });
 
-    const sampleJson = JSON.stringify(sampleDataCleaned, null, 2);
+    const sampleJson = JSON.stringify(sampleDataCleaned);
 
-    return `你是专业的数据分析专家，请基于以下数据集生成 3-5 条洞察分析建议。
+    return `${t('prompt.batchInsight.systemRole')}
 
-**数据集信息**：
-- 列名：${columnList}
-- 采样行数：${rowCount}（用于理解数据分布）
-- 总行数：${totalRows}（实际数据规模）
-- 示例数据：
+${t('prompt.batchInsight.datasetInfo')}
+${t('prompt.batchInsight.columns')}${columnList}
+${t('prompt.batchInsight.sampledRows')}${rowCount}${t('prompt.batchInsight.sampledRowsHint')}
+${t('prompt.batchInsight.totalRows')}${totalRows}${t('prompt.batchInsight.totalRowsHint')}
+${t('prompt.batchInsight.sampleData')}
 ${sampleJson}
 
-**重要要求**：
-每条洞察建议必须提供 **两种执行模式**：
-1. **full_mode**：用于小数据集（<50万行），直接使用pandas全量数据分析
-2. **aggregated_mode**：用于大数据集（>50万行），使用DuckDB预聚合后再可视化
+${t('prompt.batchInsight.requirements')}
+${t('prompt.batchInsight.dualModeIntro')}
+${t('prompt.batchInsight.fullMode')}
+${t('prompt.batchInsight.aggregatedMode')}
 
-**双模式代码规范**：
+${t('prompt.batchInsight.codeStandards')}
 
-**full_mode** - pandas全量分析：
-- 使用全局变量 \`df\`（已加载全量数据）
-- 导入：\`import matplotlib.pyplot as plt\`, \`import pandas as pd\`, \`import numpy as np\`, \`import base64\`, \`from io import BytesIO\`, \`import json\`
-- 使用 \`plt.switch_backend('Agg')\`
-- 返回格式：\`json.dumps({"image": "data:image/png;base64,...", "summary": "统计文本"})\`
+${t('prompt.batchInsight.fullModeTitle')}
+${t('prompt.batchInsight.fullModeRule1')}
+${t('prompt.batchInsight.fullModeRule2')}
+${t('prompt.batchInsight.fullModeRule3')}
+${t('prompt.batchInsight.fullModeRule4')}
 
-**aggregated_mode** - DuckDB预聚合：
-- **sql**：DuckDB SQL查询（使用 \`__TABLE_NAME__\` 占位符代表表名）
-- **viz_code**：基于聚合结果的Pyodide可视化代码（使用 \`df\` 代表聚合后的小数据集）
+${t('prompt.batchInsight.aggregatedModeTitle')}
+${t('prompt.batchInsight.aggregatedModeRule1')}
+${t('prompt.batchInsight.aggregatedModeRule2')}
 
-**输出格式（JSON数组）**：
+${t('prompt.batchInsight.outputFormat')}
 [
     {
         "title": "洞察标题",
@@ -65,23 +66,23 @@ ${sampleJson}
     }
 ]
 
-**关键注意事项**：
-1. aggregated_mode的SQL必须返回较少的行（<1000行），通过GROUP BY聚合
-2. viz_code使用的df是SQL聚合后的结果，不是原始数据
-3. 两种模式最终生成的图表应该**视觉上一致**（只是数据粒度不同）
-4. 必须在columns_used中列出使用的列名（用于内存评估）
+${t('prompt.batchInsight.keyNotes')}
+${t('prompt.batchInsight.note1')}
+${t('prompt.batchInsight.note2')}
+${t('prompt.batchInsight.note3')}
+${t('prompt.batchInsight.note4')}
 
-**要求**：
-1. 生成 3-5 条有价值的数据洞察建议
-2. 每条建议必须包含：title（标题）、description（描述）、code（Python代码）
+${t('prompt.batchInsight.generalRequirements')}
+${t('prompt.batchInsight.req1')}
+${t('prompt.batchInsight.req2')}
 
-**代码规范**：
-- 使用全局变量 \`df\`（已加载数据）
-- 必须导入：\`import matplotlib.pyplot as plt\`, \`import base64\`, \`from io import BytesIO\`
-- 使用 \`plt.switch_backend('Agg')\`
-- 代码最后一行必须返回：\`json.dumps({"image": "data:image/png;base64,...", "summary": "统计文本"})\`
+${t('prompt.batchInsight.codeNorms')}
+${t('prompt.batchInsight.codeNorm1')}
+${t('prompt.batchInsight.codeNorm2')}
+${t('prompt.batchInsight.codeNorm3')}
+${t('prompt.batchInsight.codeNorm4')}
 
-**代码模板**：
+${t('prompt.batchInsight.codeTemplate')}
 \`\`\`python
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -112,7 +113,7 @@ result = {"image": f"data:image/png;base64,{image_base64}", "summary": "统计�
 json.dumps(result)
 \`\`\`
 
-**输出格式（JSON数组）**：
+${t('prompt.batchInsight.outputFormat')}
 [
     {
         "title": "年龄分布",
@@ -123,7 +124,7 @@ json.dumps(result)
     }
 ]
 
-请直接返回JSON数组，无需任何解释。`;
+${t('prompt.batchInsight.finalInstruction')}`;
 }
 
 /**
@@ -188,9 +189,14 @@ export function parseBatchInsightsResponse(aiResponse: string): InsightSuggestio
 /**
  * 尝试修复截断的JSON响应
  * 如果JSON字符串未正确结束，尝试补全
+ * 同时修复AI生成代码中的控制字符问题
  */
 function attemptJSONRepair(jsonStr: string): string {
-    const trimmed = jsonStr.trim();
+    let trimmed = jsonStr.trim();
+
+    // 🔧 移除危险的正则替换逻辑，避免破坏JSON结构
+    // 现在的LLM通常能生成合法的JSON转义，如果生成了未转义的换行符，简单的正则很难完美修复
+    // 我们信任LLM的输出，或者只处理截断问题
 
     // 检查是否以完整的}或]结尾
     if (!trimmed.endsWith('}') && !trimmed.endsWith(']')) {
@@ -206,5 +212,5 @@ function attemptJSONRepair(jsonStr: string): string {
         }
     }
 
-    return jsonStr;
+    return trimmed;
 }

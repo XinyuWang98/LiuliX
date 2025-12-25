@@ -41,7 +41,8 @@
 
 .hypothesis-card__content {
   flex: 1;
-  min-width: 0; /* 防止溢出 */
+  min-width: 0;
+  /* 防止溢出 */
 }
 
 .hypothesis-card__title {
@@ -80,4 +81,40 @@
 
 .hypothesis-card:hover .hypothesis-card__expand-icon {
   transform: translateY(2px);
+}
+
+/* ========== 元数据标签 ========== */
+.hypothesis-card__metadata {
+  display: flex;
+  gap: var(--gap-xs);
+  margin: var(--gap-xs) 0;
+  flex-wrap: wrap;
+}
+
+.metadata-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: var(--fs-xxs);
+  border-radius: var(--radius-s);
+  color: var(--text-secondary);
+  background: var(--bg-element);
+  border: 1px solid var(--border);
+  transition: all var(--transition-fast);
+}
+
+.metadata-file {
+  border-color: var(--primary-dim, rgba(99, 102, 241, 0.3));
+  color: var(--primary);
+  background: var(--bg-accent, rgba(99, 102, 241, 0.05));
+}
+
+.metadata-columns {
+  border-color: var(--accent-dim, rgba(168, 85, 247, 0.3));
+  color: var(--accent);
+  background: rgba(168, 85, 247, 0.05);
+}
+
+.metadata-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

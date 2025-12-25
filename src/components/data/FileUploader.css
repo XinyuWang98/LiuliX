@@ -105,6 +105,9 @@
     margin-bottom: var(--gap-xs);
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: var(--gap-m);
+    /* 增加间距 */
 }
 
 .batch-control-group {
@@ -122,4 +125,116 @@
     display: flex;
     gap: var(--gap-m);
     justify-content: flex-end;
+}
+
+/* Global Modal Overlay (via Portal) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Custom Slider Styling */
+.custom-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    /* 确保占满容器 */
+    display: block;
+    /* 防止 inline 元素间隙 */
+    height: 6px;
+    background: var(--bg-hover);
+    border-radius: 3px;
+    outline: none;
+    transition: background 0.2s;
+    cursor: pointer;
+    margin: 12px 0;
+    /* 适当的垂直间距 */
+    padding: 0;
+    /* 移除 padding 确保滑块能到边缘 */
+}
+
+.custom-slider:hover {
+    background: var(--border);
+}
+
+/* Webkit Slider Thumb */
+.custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    /* 稍微加大滑块 */
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 0 0 2px var(--bg-panel), 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-top: -7px;
+    /* (height - trackHeight) / 2 */
+    border: none;
+    /* 移除默认边框 */
+}
+
+.custom-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px var(--bg-panel), 0 3px 8px rgba(var(--primary-rgb), 0.5);
+}
+
+.custom-slider::-webkit-slider-thumb:active {
+    transform: scale(0.95);
+    background: var(--primary-hover);
+}
+
+/* Webkit Slider Runnable Track */
+.custom-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--primary) 0%, var(--primary) var(--value-percent, 0%), var(--bg-hover) var(--value-percent, 0%), var(--bg-hover) 100%);
+    background: var(--bg-hover);
+    border: none;
+    cursor: pointer;
+}
+
+/* Firefox Styles */
+.custom-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 0 0 2px var(--bg-panel), 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s;
+}
+
+.custom-slider::-moz-range-progress {
+    background-color: var(--primary);
+    height: 6px;
+    border-radius: 3px;
+}
+
+.custom-slider::-moz-range-track {
+    background-color: var(--bg-hover);
+    height: 6px;
+    border-radius: 3px;
 }

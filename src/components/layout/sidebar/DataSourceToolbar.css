@@ -1,0 +1,57 @@
+/* 数据源管理工具栏样式 */
+
+.data-source-toolbar {
+    display: flex;
+    align-items: center;
+    padding: var(--gap-s) var(--gap-m);
+    gap: var(--gap-s);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-panel);
+}
+
+/* 工具栏按钮基础样式 */
+.toolbar-button {
+    flex: 1;
+    justify-content: center;
+}
+
+/* 禁用状态按钮 */
+.toolbar-button--disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* 重命名按钮（禁用时） */
+.toolbar-button--rename-disabled {
+    opacity: 0.4;
+}
+
+/* 删除按钮（普通状态） */
+.toolbar-button--delete {
+    color: var(--warning);
+}
+
+/* 删除按钮（禁用状态） */
+.toolbar-button--delete-disabled {
+    opacity: 0.4;
+}
+
+/* 删除按钮（确认状态） */
+.toolbar-button--delete-confirming {
+    color: var(--highlight);
+    background: rgba(var(--warning-rgb), 0.1);
+    transition: all 0.2s;
+    font-weight: bold;
+}
+
+/* 确认文字样式 */
+.toolbar-confirm-text {
+    font-size: 12px;
+}
+
+/* 分隔线 */
+.toolbar-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--border);
+}

@@ -30,24 +30,46 @@ export function useSuggestionGeneration(
     const [aiGenerated, setAiGenerated] = useState(false); // 是否已生成AI建议
     const [error, setError] = useState<string | null>(null);
 
+    // 🔧 提取关键属性作为独立依赖，确保React能检测变化
+    const tableName = activeFile?.data?.tableName;
+    const rowCount = activeFile?.data?.rowCount;
+
     // 防止Strict Mode双重调用和重复生成
     const loadedOnceRef = useRef<{ [key: string]: boolean }>({});
 
     // ✅ P0修复：AbortController用于取消过期的AI请求
     const abortControllerRef = useRef<AbortController | null>(null);
 
+    // 🔧 追踪上次处理的tableName，确保tableName变化时强制刷新
+    const lastProcessedTableNameRef = useRef<string | undefined>(undefined);
+
     useEffect(() => {
+        // 🔍 调试日志：追踪useEffect触发
+        logger.log('数据清洗', 'useEffect触发', {
+            data: {
+                activeFileId: activeFile?.id,
+                tableName: tableName,
+                lastProcessedTableName: lastProcessedTableNameRef.current,
+                tableNameChanged: tableName !== lastProcessedTableNameRef.current,
+                hasData: !!activeFile?.data,
+                rowCount: rowCount,
+                aiSuggestionsCount: aiSuggestions?.length || 0
+            }
+        });
+
         const generateSuggestions = async () => {
             setLoading(true);
             setError(null);
 
             if (!activeFile) {
+                logger.log('数据清洗', '跳过：无activeFile');
                 setSuggestions([]);
                 setLoading(false);
                 return;
             }
 
             if (!activeFile.data) {
+                logger.log('数据清洗', '跳过：activeFile.data为空');
                 setSuggestions([]);
                 setLoading(false);
                 return;
@@ -231,14 +253,26 @@ export function useSuggestionGeneration(
             }
             // 2. 其次尝试读取缓存 (Analysis Cache)
             else if (activeFile?.analysisCache?.cleaning?.suggestions?.length > 0 && !activeFile.analysisCache.cleaning.isStale) {
-                logger.log('数据清洗', '命中AI建议缓存');
-                const cachedSuggestions = activeFile.analysisCache.cleaning.suggestions;
+                // 🆕 队列优化：检查缓存新鲜度
+                const isFresh = !activeFile.analysisCache.cleaning.timestamp ||
+                    (Date.now() - activeFile.analysisCache.cleaning.timestamp < 24 * 60 * 60 * 1000);
 
-                aiMapped = cachedSuggestions.map((s: any) => ({
-                    ...s,
-                    // 确保 ID 格式统一
-                    id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`
-                }));
+                if (isFresh) {
+                    logger.log('数据清洗', '命中AI建议缓存');
+                    const cachedSuggestions = activeFile.analysisCache.cleaning.suggestions;
+
+                    aiMapped = cachedSuggestions.map((s: any) => ({
+                        ...s,
+                        // 确保 ID 格式统一
+                        id: s.id.startsWith('ai_') ? s.id : `ai_${s.id}`
+                    }));
+                } else {
+                    logger.log('数据清洗', '缓存已过期（>24小时），重新生成');
+                    // 标记为过期，走下面的重新生成逻辑
+                    if (activeFile.analysisCache.cleaning) {
+                        activeFile.analysisCache.cleaning.isStale = true;
+                    }
+                }
             }
             // 3. 自动触发预加载 (无缓存 or 过期)
             else {
@@ -330,7 +364,8 @@ export function useSuggestionGeneration(
                                                 suggestions: aiResults,
                                                 status: 'ready',
                                                 isStale: false,
-                                                generatedAt: Date.now()
+                                                generatedAt: Date.now(),
+                                                timestamp: Date.now()  // 🆕 队列优化：记录缓存时间
                                             }
                                         }
                                     };
@@ -370,6 +405,19 @@ export function useSuggestionGeneration(
                 return b.confidence - a.confidence;
             }));
 
+            // 🔧 记录已处理的tableName
+            if (activeFile?.data?.tableName) {
+                lastProcessedTableNameRef.current = activeFile.data.tableName;
+                logger.log('数据清洗', '建议生成完成', {
+                    data: {
+                        tableName: activeFile.data.tableName,
+                        totalSuggestions: allSuggestions.length,
+                        aiCount: aiMapped.length,
+                        ruleCount: generated.length
+                    }
+                });
+            }
+
             // 只有当不需要继续等待AI时，才关闭Loading
             if (!shouldKeepLoading) {
                 setLoading(false);
@@ -385,7 +433,9 @@ export function useSuggestionGeneration(
                 // 不要置空，让后续逻辑处理 AbortError
             }
         };
-    }, [activeFile?.id, activeFile?.data?.tableName, cleaningTrigger, aiSuggestions, t, language.name]); // onProjectUpdate 和 project 不放入依赖，避免循环
+        // 🔧 修复：使用独立提取的tableName和rowCount变量
+        // 确保React能检测到这些原始值的变化，而不是对象引用变化
+    }, [activeFile?.id, tableName, rowCount, aiSuggestions, t, language.name, cleaningTrigger]); // onProjectUpdate 和 project 不放入依赖，避免循环
 
     // 移除已应用的建议
     const removeSuggestions = (idsToRemove: string[]) => {

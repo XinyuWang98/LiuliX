@@ -112,6 +112,16 @@ class PyodideManager {
         return this.sendMessage('LOAD_FONT_URL', { url: fontUrl, name: fontName });
     }
 
+    /**
+     * 写入文件到 Pyodide 虚拟文件系统
+     * @param filename - 文件名
+     * @param binaryContent - 二进制内容
+     */
+    public async writeFile(filename: string, binaryContent: Uint8Array): Promise<any> {
+        await this.waitForReady();
+        return this.sendMessage('WRITE_FILE', { filename, content: binaryContent });
+    }
+
     private sendMessage(type: string, content: any): Promise<any> {
         return new Promise((resolve, reject) => {
             if (!this.worker) {

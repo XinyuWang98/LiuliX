@@ -1,14 +1,32 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="LiuliX - 透明如琉璃的数据探索平台" />
-    <title>LiuliX - 数据探索平台</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LiuliX - 透明如琉璃的数据探索平台" />
+  <title>LiuliX - 数据探索平台</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+  <!-- Service Worker 注册（用于缓存模型文件） -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('[SW] 注册成功:', registration.scope);
+          })
+          .catch(error => {
+            console.warn('[SW] 注册失败:', error);
+          });
+      });
+    }
+  </script>
+</body>
+
 </html>

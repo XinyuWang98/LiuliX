@@ -128,6 +128,8 @@ export interface ProjectFile {
             isStale?: boolean;
             /** 后台生成的时间戳 */
             generatedAt?: number;
+            /** 🆕 缓存生成时间戳（队列优化） */
+            timestamp?: number;
             /** 采样元数据 */
             basedOnSample?: {
                 isSampled: boolean;
@@ -140,6 +142,8 @@ export interface ProjectFile {
             hypotheses: Array<any>;
             status: 'pending' | 'ready' | 'failed';
             isStale?: boolean;
+            /** 🆕 缓存生成时间戳（队列优化） */
+            timestamp?: number;
 
             // 🆕 新增字段
             prefetchedSuggestions?: Array<{
@@ -155,6 +159,17 @@ export interface ProjectFile {
                 sampleSize: number;
                 totalSize: number;
             };
+        };
+        /** 🆕 Prompt预处理缓存（队列优化） */
+        promptCache?: {
+            /** 洞察Prompt缓存 */
+            insight?: string;
+            /** 洞察Prompt缓存时间戳 */
+            insightTimestamp?: number;
+            /** 清洗Prompt缓存 */
+            cleaning?: string;
+            /** 清洗Prompt缓存时间戳 */
+            cleaningTimestamp?: number;
         };
     };
 }

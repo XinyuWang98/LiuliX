@@ -32,6 +32,17 @@ async function loadPyodideAndPackages() {
         // Load operational packages (添加 matplotlib 用于图表生成)
         await pyodide.loadPackage(['pandas', 'numpy', 'matplotlib']);
 
+        // 🔧 配置 matplotlib 使用 Agg 后端(非交互式)，避免 Worker 环境访问 DOM
+        await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use('Agg')  # 必须在 import pyplot 之前设置
+import matplotlib.pyplot as plt
+# 设置默认图表样式
+plt.rcParams['figure.figsize'] = (10, 6)
+plt.rcParams['font.size'] = 10
+plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示
+`);
+
         ctx.postMessage({ type: 'READY' });
     } catch (error) {
         console.error("Pyodide loading failed:", error);

@@ -1,6 +1,7 @@
 // 设置模块翻译
 export const settings = {
     apiConfig: 'API 配置',
+    aiConfig: 'AI 配置',
     apiProvider: 'LLM 服务提供商',
     modelSelection: '选择模型',
     currentModel: '当前模型',
@@ -85,4 +86,23 @@ export const settings = {
     performanceSlowWarning: '⚠️ 可能较慢',
     performanceColumnsUnit: '列',
     performanceTimeoutUnit: '秒',
+
+    // 设置页分类
+    commonlyUsed: '常用设置',
+    commonlyUsedDesc: '快速访问最常用的配置项',
+    appearanceAndLanguage: '外观与语言',
+    interfaceLanguage: '界面语言',
+    interfaceLanguageDesc: '选择应用的显示语言',
+    localModelEnableTitle: '启用本地 AI 加速 (WebGPU)',
+    aiConfigDesc: '管理模型源与 API 密钥',
+    hardwareEnvironment: '硬件环境',
+    apiPriorityAndKeys: 'API 优先级与密钥',
+    performanceDesc: '调整分析性能和结果抽样',
+    dataProcessing: '数据处理',
+    advanced: '高级设置',
+    advancedDesc: '仅供开发者使用',
+    devMode: '开发模式',
+    devModeDesc: '启用实验性功能（当前无）',
+    searchPlaceholder: '搜索设置 (如:模型/API)...',
 };
+

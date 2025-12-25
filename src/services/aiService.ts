@@ -227,7 +227,7 @@ export const askAICleaning = async (prompt: string) => {
                     stream: false
                 }
             },
-            timeout: 30000
+            timeout: 60000  // 与后端保持一致
         }).json<any>();
 
         const content = res.choices?.[0]?.message?.content || '';
@@ -438,14 +438,17 @@ export const generateCleaningSuggestions = async (
  * @param 数据摘要 - 数据集元信息
  * @returns 3 条假设数组
  */
-export const generateHypotheses = async (数据摘要: {
-    columns?: string[];
-    rowCount?: number;
-    sampleData?: any[];
-}): Promise<Array<{ assumption: string; verification: string }>> => {
+export const generateHypotheses = async (
+    数据摘要: {
+        columns?: string[];
+        rowCount?: number;
+        sampleData?: any[];
+    },
+    t: (key: string) => string  // i18n翻译函数
+): Promise<Array<{ assumption: string; verification: string }>> => {
     const { 生成假设Prompt, 解析假设结果 } = await import('@/services/prompts/hypothesis');
 
-    const prompt = 生成假设Prompt(数据摘要);
+    const prompt = 生成假设Prompt(数据摘要, t);
     const { content } = await askAI(prompt);
     return 解析假设结果(content);
 };
@@ -462,11 +465,12 @@ export const generateInsight = async (
     假设描述: string,
     数据字段列表: string[],
     用户指令: string,
-    代码语言: 'python' | 'sql' = 'python'
+    代码语言: 'python' | 'sql' = 'python',
+    t: (key: string) => string  // i18n翻译函数
 ): Promise<any> => {
     const { 生成洞察Prompt, 解析洞察结果 } = await import('@/services/prompts/insightGenerator');
 
-    const prompt = 生成洞察Prompt(假设描述, 数据字段列表, 用户指令, 代码语言);
+    const prompt = 生成洞察Prompt(假设描述, 数据字段列表, 用户指令, 代码语言, t);
     const { content } = await askAI(prompt);
     return 解析洞察结果(content);
 };

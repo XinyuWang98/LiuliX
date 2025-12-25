@@ -63,6 +63,7 @@ export interface LanguageConfig {
         // 设置
         settings: {
             apiConfig: string;
+            aiConfig: string;
             apiProvider: string;
             modelSelection: string;
             currentModel: string;
@@ -77,6 +78,7 @@ export interface LanguageConfig {
             baseUrlPlaceholder: string;
             baseUrlHint: string;
             optional: string;
+            searchPlaceholder: string;
 
             // 安全提示
             securityWarning: string;
@@ -166,6 +168,24 @@ export interface LanguageConfig {
             performanceSlowWarning: string;
             performanceColumnsUnit: string;
             performanceTimeoutUnit: string;
+
+            // 设置页分类
+            commonlyUsed: string;
+            commonlyUsedDesc: string;
+            appearanceAndLanguage: string;
+            interfaceLanguage: string;
+            interfaceLanguageDesc: string;
+            localModelEnableTitle: string;
+            aiConfigDesc: string;
+            hardwareEnvironment: string;
+            apiPriorityAndKeys: string;
+            performanceDesc: string;
+
+            dataProcessing: string;
+            advanced: string;
+            advancedDesc: string;
+            devMode: string;
+            devModeDesc: string;
         };
 
         // Prompt 库
@@ -240,7 +260,10 @@ export interface LanguageConfig {
 
         // 文件上传
         fileUpload: {
+            uploadButton: string;
             clickOrDrag: string;
+            clickOrDragShort: string;
+            dropHere: string;
             uploading: string;
             uploadingProgress: string;
             supportedFormats: string;
@@ -660,6 +683,9 @@ export interface LanguageConfig {
                 processing: string;
                 ready: string;
                 unknown: string;
+                loadingFromCache: string;
+                downloading: string;
+                finish: string;
             };
         };
 
@@ -690,6 +716,56 @@ export interface LanguageConfig {
             retry: string;
             cancel: string;
             close: string;
+        };
+
+        // 硬件检测与推荐
+        hardware: {
+            detection: string;
+            detecting: string;
+            detectionFailed: string;
+            platform: string;
+            gpu: string;
+            memory: string;
+            score: string;
+            recommendation: string;
+
+            // 平台描述
+            macM1Plus: string;
+            macIntel: string;
+            windows: string;
+            linux: string;
+            unknown: string;
+
+            // GPU描述
+            gpuNotDetected: string;
+            gpuSoftware: string;
+            gpuHigh: string;
+            gpuMedium: string;
+            gpuIntegrated: string;
+
+            // 推荐模式
+            recommendedMode: string;
+            localMode: string;
+            apiMode: string;
+            confidence: string;
+            confidenceHigh: string;
+            confidenceMedium: string;
+            confidenceLow: string;
+
+            // 推荐理由
+            reason: string;
+            technicalDetails: string;
+            expectedLoadTime: string;
+            expectedInferenceTime: string;
+
+            // 优缺点
+            pros: string;
+            cons: string;
+
+            // 按钮
+            useRecommended: string;
+            keepCurrent: string;
+            redetect: string;
         };
     };
 }

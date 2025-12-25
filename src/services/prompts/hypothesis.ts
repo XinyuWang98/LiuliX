@@ -6,21 +6,25 @@
 /**
  * 生成分析假设的 prompt
  * @param 数据摘要 - 当前数据集的基本统计信息
+ * @param t - i18n翻译函数
  * @returns prompt 字符串
  */
-export function 生成假设Prompt(数据摘要: {
-  description?: string;       // 可选：异常描述，例如"第37行数据重复"或"缺失值占比30%"
-  stats?: string;             // 可选：额外统计信息
-  columns?: string[];         // 可选：数据集列名
-  rowCount?: number;          // 可选：行数
-  sampleData?: any[];         // 可选：样本数据（前5行）
-}): string {
+export function 生成假设Prompt(
+  数据摘要: {
+    description?: string;       // 可选：异常描述，例如"第37行数据重复"或"缺失值占比30%"
+    stats?: string;             // 可选：额外统计信息
+    columns?: string[];         // 可选：数据集列名
+    rowCount?: number;          // 可选：行数
+    sampleData?: any[];         // 可选：样本数据（前5行）
+  },
+  t: (key: string) => string   // i18n函数
+): string {
   const 上下文描述 = 数据摘要.description
-    ? `数据异常：${数据摘要.description}`
-    : `数据集信息：${数据摘要.rowCount || '未知'} 行，${数据摘要.columns?.length || '未知'} 列`;
+    ? `${t('prompt.hypothesis.dataAnomaly')}${数据摘要.description}`
+    : `${t('prompt.hypothesis.datasetInfo')}${数据摘要.rowCount || '未知'}${t('prompt.hypothesis.rows')}${数据摘要.columns?.length || '未知'}${t('prompt.hypothesis.columns')}`;
 
   const 字段信息 = 数据摘要.columns
-    ? `\n可用字段：${数据摘要.columns.join(', ')}`
+    ? `${t('prompt.hypothesis.availableFields')}${数据摘要.columns.join(', ')}`
     : '';
 
   // 🛠️ BigInt 安全序列化：DuckDB 返回的大数字可能是 BigInt 类型
@@ -31,26 +35,25 @@ export function 生成假设Prompt(数据摘要: {
   };
 
   const 样本信息 = 数据摘要.sampleData && 数据摘要.sampleData.length > 0
-    ? `\n样本数据（前3行）：\n${safeStringify(数据摘要.sampleData.slice(0, 3))}`
+    ? `${t('prompt.hypothesis.sampleData')}\n${safeStringify(数据摘要.sampleData.slice(0, 3))}`
     : '';
 
   return `
-你是一个专业的数据分析师，当前数据集情况如下：
+${t('prompt.hypothesis.systemRole')}
 
 ${上下文描述}${字段信息}${样本信息}
-${数据摘要.stats ? '额外统计：' + 数据摘要.stats : ''}
+${数据摘要.stats ? t('prompt.hypothesis.extraStats') + 数据摘要.stats : ''}
 
-请生成 3 条可检验的分析假设，每条假设提出一个值得探索的数据关系或趋势。
-每条假设严格遵循以下格式（不要编号，不要多余说明）：
+${t('prompt.hypothesis.generateInstruction')}
+${t('prompt.hypothesis.formatInstruction')}
 
-- 假设：[简短假设描述，最多25字]
-  验证方式：[如何快速验证该假设，最多20字]
+${t('prompt.hypothesis.formatExample')}
 
-要求：
-- 用中文回复
-- 假设必须具体、可操作
-- 优先考虑变量关系、分布特征、趋势变化三类方向
-- 只输出 3 条假设，不要开头结尾废话
+${t('prompt.hypothesis.requirements')}
+${t('prompt.hypothesis.req1')}
+${t('prompt.hypothesis.req2')}
+${t('prompt.hypothesis.req3')}
+${t('prompt.hypothesis.req4')}
 `.trim();
 }
 

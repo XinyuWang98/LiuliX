@@ -140,7 +140,7 @@ export function useCleaningExecution(
                         type: 'cleaning',
                         title: actionText,
                         description: sugg.reason,
-                        sql: buildCleaningSQL(sugg).replace(/__TABLE_NAME__/g, tableName),
+                        sql: (sugg.sql || buildCleaningSQL(sugg)).replace(/__TABLE_NAME__/g, tableName),
                         beforeCount: rowCountBefore,
                         afterCount: rowCountAfter,
                         affectedRows: sugg.action === 'dedup' ? rowDiff : (sugg.column ? colDiff : undefined),

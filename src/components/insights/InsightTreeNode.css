@@ -1,0 +1,227 @@
+/**
+ * InsightTreeNode 组件样式
+ */
+
+.insight-tree-node {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+}
+
+.insight-tree-node:hover {
+    border-color: var(--primary-color-light);
+}
+
+/* 深度样式 */
+.insight-tree-node--depth-0 {
+    border-left: 3px solid var(--primary-color);
+}
+
+.insight-tree-node--depth-1 {
+    border-left: 3px solid var(--secondary-color);
+}
+
+.insight-tree-node--depth-2 {
+    border-left: 3px solid var(--warning-color);
+}
+
+.insight-tree-node--depth-3 {
+    border-left: 3px solid var(--text-muted);
+}
+
+/* 节点头部 */
+.insight-tree-node__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-tertiary);
+    cursor: pointer;
+}
+
+.insight-tree-node__header:hover {
+    background: var(--bg-hover);
+}
+
+.insight-tree-node__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.insight-tree-node__toggle:hover {
+    color: var(--primary-color);
+}
+
+.insight-tree-node__depth-indicator {
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.insight-tree-node__icon {
+    display: flex;
+    align-items: center;
+    color: var(--primary-color);
+}
+
+.insight-tree-node__icon--error {
+    color: var(--error-color);
+}
+
+.insight-tree-node__title {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.insight-tree-node__columns {
+    display: flex;
+    gap: 4px;
+}
+
+.insight-tree-node__column-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.insight-tree-node__column-more {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+/* 节点内容 */
+.insight-tree-node__content {
+    padding: var(--spacing-md);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.insight-tree-node__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    color: var(--text-muted);
+}
+
+.insight-tree-node__error {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--error-color-light);
+    border-radius: var(--radius-sm);
+    color: var(--error-color);
+    font-size: var(--font-size-sm);
+}
+
+/* 执行结果 */
+.insight-tree-node__result {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.insight-tree-node__chart {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+}
+
+.insight-tree-node__chart img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+}
+
+.insight-tree-node__summary {
+    padding: var(--spacing-sm);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* 代码区域 */
+.insight-tree-node__code-details {
+    margin-top: var(--spacing-sm);
+}
+
+.insight-tree-node__code-details summary {
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    padding: var(--spacing-xs);
+}
+
+.insight-tree-node__code-details summary:hover {
+    color: var(--primary-color);
+}
+
+.insight-tree-node__code {
+    margin-top: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    background: var(--bg-code);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    overflow-x: auto;
+    max-height: 300px;
+}
+
+/* 子节点容器 */
+.insight-tree-node__children {
+    margin-top: var(--spacing-md);
+    padding-left: var(--spacing-sm);
+    border-left: 2px dashed var(--border-color);
+}
+
+/* 旋转动画 */
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

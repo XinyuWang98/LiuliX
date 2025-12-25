@@ -26,8 +26,8 @@ export function buildCleaningPrompt(
         const details = [
             `${t('common.column')}: ${col.name}`,
             `${t('common.type')}: ${col.type}`,
-            `${t('cleaning.nullRate', { rate: col.stats.nullRate.toFixed(1) })}`,
-            `${t('cleaning.uniqueValues', { count: col.stats.uniqueCount })}`
+            `缺失率: ${col.stats.nullRate.toFixed(1)}%`,  // 直接拼接，不依赖i18n参数
+            `唯一值数量: ${col.stats.uniqueCount}个`      // 直接拼接，不依赖i18n参数
         ];
 
         // 数值列统计
@@ -105,8 +105,8 @@ ${issuesList || t('common.none')}
 【SQL${t('cleaning.requirements')}】
 1. **必须使用 DuckDB SQL 方言** - DuckDB 不支持所有 PostgreSQL/MySQL 语法
 2. **可用表名**：
-   - "${tableName}" (当前工作表)
-   - 禁止使用：${tableName}_backup, ${tableName}_temp 等不存在的表
+   - "__TABLE_NAME__" (此占位符代表当前工作表，必须严格使用此名称)
+   - 禁止使用真实表名 "${tableName}"
 3. **可用列名清单**（SQL中必须只使用以下列名）：
 ${desensitizedData.map(col => `   - "${col.name}" (${col.type})`).join('\n')}
 4. **禁止的操作**：

@@ -50,3 +50,53 @@ export const language = {
     title: '语言',
     priority: '优先级',
 };
+
+// 硬件检测
+export const hardware = {
+    detection: '硬件检测',
+    detecting: '正在检测硬件配置...',
+    detectionFailed: '硬件检测失败',
+    platform: '设备平台',
+    gpu: '显卡',
+    memory: '内存',
+    score: '综合评分',
+    recommendation: '智能推荐',
+
+    // 平台描述
+    macM1Plus: 'MacBook (M系列)',
+    macIntel: 'MacBook (Intel)',
+    windows: 'Windows PC',
+    linux: 'Linux',
+    unknown: '未知设备',
+
+    // GPU描述
+    gpuNotDetected: '未检测到GPU',
+    gpuSoftware: '软件模拟（无硬件加速）',
+    gpuHigh: '独立显卡（高性能）',
+    gpuMedium: '独立显卡（中等性能）',
+    gpuIntegrated: '集成显卡',
+
+    // 推荐模式
+    recommendedMode: '推荐模式',
+    localMode: '本地AI模型',
+    apiMode: '云端AI',
+    confidence: '置信度',
+    confidenceHigh: '强烈推荐',
+    confidenceMedium: '建议',
+    confidenceLow: '可选',
+
+    // 推荐理由
+    reason: '推荐理由',
+    technicalDetails: '技术详情',
+    expectedLoadTime: '预期加载时间',
+    expectedInferenceTime: '预期推理时间',
+
+    // 优缺点
+    pros: '优点',
+    cons: '注意事项',
+
+    // 按钮
+    useRecommended: '使用推荐配置',
+    keepCurrent: '保持当前配置',
+    redetect: '重新检测',
+};

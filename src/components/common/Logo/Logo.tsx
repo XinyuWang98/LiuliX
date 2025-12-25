@@ -28,13 +28,11 @@ const LogoIcon: React.FC = () => {
             aria-hidden="true"
         >
             {/* 
-               Geometric Prism Logic:
-               1. A central triangle/pyramid shape.
-               2. Lines representing light entering and refracting.
-               3. Neon aesthetic strokes.
+               Geometric Prism Logic - Minimalist Version
+               不再使用霓虹色，而是依靠线条粗细和透明度来表达结构
             */}
 
-            {/* Main Pyramid Outline - Neon Blue */}
+            {/* Main Pyramid Outline */}
             <path
                 d="M50 15L85 80H15L50 15Z"
                 stroke="currentColor"
@@ -44,13 +42,13 @@ const LogoIcon: React.FC = () => {
                 opacity="0.9"
             />
 
-            {/* Internal Refraction Lines - Cyan */}
+            {/* Internal Refraction Lines */}
             <path
                 d="M50 15L50 80"
                 stroke="currentColor"
                 strokeWidth="4"
                 strokeLinecap="round"
-                opacity="0.6"
+                opacity="0.4"
             />
 
             <path
@@ -58,7 +56,7 @@ const LogoIcon: React.FC = () => {
                 stroke="currentColor"
                 strokeWidth="4"
                 strokeLinecap="round"
-                opacity="0.6"
+                opacity="0.4"
             />
 
             <path
@@ -66,43 +64,39 @@ const LogoIcon: React.FC = () => {
                 stroke="currentColor"
                 strokeWidth="4"
                 strokeLinecap="round"
-                opacity="0.6"
+                opacity="0.4"
             />
 
             {/* Horizontal Light Beam (Entering) */}
             <path
                 d="M-10 55L42 55"
-                stroke="white"
+                stroke="currentColor"
                 strokeWidth="4"
                 strokeLinecap="round"
-                opacity="0.8"
-                className="logo-beam-enter"
+                opacity="0.6"
             />
 
-            {/* Refracted Spectrum (Exiting) */}
+            {/* Refracted Spectrum (Exiting) - Simplified to single hue/monochrome */}
             <path
                 d="M58 55L110 40"
-                stroke="#30D158"
+                stroke="currentColor"
                 strokeWidth="3"
                 strokeLinecap="round"
-                opacity="0.8"
-                className="logo-beam-exit-1"
+                opacity="0.5"
             />
             <path
                 d="M58 55L110 55"
-                stroke="#007AFF"
+                stroke="currentColor"
                 strokeWidth="3"
                 strokeLinecap="round"
-                opacity="0.8"
-                className="logo-beam-exit-2"
+                opacity="0.5"
             />
             <path
                 d="M58 55L110 70"
-                stroke="#BF5AF2"
+                stroke="currentColor"
                 strokeWidth="3"
                 strokeLinecap="round"
-                opacity="0.8"
-                className="logo-beam-exit-3"
+                opacity="0.5"
             />
         </svg>
     );

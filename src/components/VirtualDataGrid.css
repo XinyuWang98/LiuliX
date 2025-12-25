@@ -25,6 +25,8 @@
     position: sticky;
     top: 0;
     z-index: var(--grid-header-z);
+    align-items: stretch;
+    /* 确保所有列等高 */
 }
 
 .enhancedHeaderCell {
@@ -35,8 +37,7 @@
     gap: var(--gap-xs);
     border-right: 1px solid var(--border);
     box-sizing: border-box;
-    min-height: 180px;
-    /* 增加高度以容纳80px的直方图 */
+    /* 移除 min-height，让所有列自然等高 */
 }
 
 .headerCellTop {
@@ -187,9 +188,48 @@
     transform-origin: bottom;
 }
 
+/* ========== 单一值指示器（唯一值=1的兜底展示） ========== */
+.single-value-indicator {
+    /* 继承微型直方图的容器样式，确保高度统一 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 移除边框和阴影，保持简洁 */
+}
+
+.single-value-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-xs) var(--gap-s);
+    /* 移除背景、边框和阴影 */
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    cursor: help;
+    transition: opacity var(--transition-fast);
+}
+
+.single-value-badge:hover {
+    opacity: 0.8;
+}
+
+.single-value-label {
+    font-weight: var(--fw-medium);
+    color: var(--text-tertiary);
+    font-size: var(--fs-xxs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.single-value-text {
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
 /* ========== 详细统计面板 ========== */
 .headerDetailedStats {
-    /* 移除绝对定位，改为流式布局以撑开表头，避免遮挡 */
+    /* 改为使用 flex: 1 撑满剩余高度，确保高度统一 */
     position: relative;
     width: 100%;
     flex: 1;

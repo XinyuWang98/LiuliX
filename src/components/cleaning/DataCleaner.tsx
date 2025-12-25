@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Sparkles, Play, CheckCircle2, RefreshCw, History, X } from 'lucide-react';
 
 import { SuggestionCard } from './components/SuggestionCard';
@@ -15,6 +15,7 @@ import { groupByCategory } from './utils/suggestionUtils';
 import { useCleaningHistory } from './hooks/useCleaningHistory';
 import { useSuggestionGeneration } from './hooks/useSuggestionGeneration';
 import { useCleaningExecution } from './hooks/useCleaningExecution';
+import { logger } from '../../utils/logger';
 import './DataCleaner.css';
 
 export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigger, onProjectUpdate, aiSuggestions }) => {
@@ -27,6 +28,19 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
     const [bottomPanelTab, setBottomPanelTab] = useState<'suggestions' | 'history'>('suggestions');
 
     const activeFile = project.files.find(f => f.id === activeFileId);
+
+    // 🔍 调试：追踪DataCleaner渲染和activeFile状态
+    useEffect(() => {
+        logger.log('数据清洗', 'DataCleaner渲染', {
+            data: {
+                activeFileId,
+                hasActiveFile: !!activeFile,
+                tableName: activeFile?.data?.tableName,
+                rowCount: activeFile?.data?.rowCount,
+                filesCount: project.files.length
+            }
+        });
+    }, [activeFileId, activeFile, project.files.length]);
 
     // 使用建议生成Hook
     const {
@@ -229,7 +243,6 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
 
                                 <div className="tabContent">
                                     {(() => {
-                                        console.log('DataCleaner Render:', { suggestionLoading, executionLoading, count: suggestions.length });
                                         // 优先级 1: 加载状态 (AI生成) - 覆盖在列表之上
                                         if (suggestionLoading) return (
                                             <AILoading visible={true} message={aiProgressMsg} />

@@ -1,33 +1,31 @@
+const path = require('path');
+// 尝试从根目录加载 .env.local (假设 CWD 是根目录)
+const envPath = path.resolve(process.cwd(), '.env.local');
+console.log('正在加载环境变量:', envPath);
+require('dotenv').config({ path: envPath });
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-require('dotenv').config({ path: '.env.local' });
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 // 读取环境变量（支持通道拆分）
 const DEEPSEEK_CLEANING_KEY = process.env.DEEPSEEK_API_KEY_CLEANING || process.env.DEEPSEEK_API_KEY;
-const DEEPSEEK_INSIGHT_KEY = process.env.DEEPSEEK_API_KEY_INSIGHT || 'sk-33b37922d18d4783a4664b86022c5e5e';
+const DEEPSEEK_INSIGHT_KEY = process.env.DEEPSEEK_API_KEY_INSIGHT || process.env.DEEPSEEK_API_KEY;
 
 // 调试：检查环境变量是否加载（脱敏输出）
 if (DEEPSEEK_CLEANING_KEY) {
     console.log('✅ 清洗建议 API Key:', DEEPSEEK_CLEANING_KEY.substring(0, 10) + '...');
 } else {
-    console.log('❌ 警告: DEEPSEEK_API_KEY_CLEANING 环境变量未设置');
-}
-if (DEEPSEEK_INSIGHT_KEY) {
-    console.log('✅ 洞察建议 API Key:', DEEPSEEK_INSIGHT_KEY.substring(0, 10) + '...');
+    console.error('❌ 严重警告: DEEPSEEK_API_KEY_CLEANING 环境变量未设置！');
 }
 
-// 启用 CORS，允许前端请求
+// ... CORS and Middleware ...
 app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// 🔧 增加body size限制以支持大数据集洞察生成（从1mb增加到10mb）
-app.use(express.json({ limit: '10mb' }));  // 增加JSON body限制
-app.use(express.urlencoded({ limit: '10mb', extended: true }));  // 增加URL-encoded限制
-
-// 健康检查接口
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -35,12 +33,21 @@ app.get('/health', (req, res) => {
 // 🆕 清洗建议专用通道（快速响应）
 app.post('/api/proxy/deepseek-cleaning', async (req, res) => {
     const { data } = req.body;
-    // 优先使用客户端Key
     const clientKey = req.headers['x-api-key'];
+    // 逻辑：如果客户端传了真实Key则用客户端的，否则用服务端的。排除 'default'。
     const finalKey = (clientKey && clientKey !== 'default') ? clientKey : DEEPSEEK_CLEANING_KEY;
+
+    if (!finalKey) {
+        console.error('[代理-清洗] ❌ 失败: 未配置 API Key');
+        return res.status(500).json({
+            error: 'Server Misconfiguration: No DeepSeek API Key found. Please check .env.local on server.',
+            channel: 'cleaning'
+        });
+    }
 
     try {
         console.log('[代理-清洗] 转发请求至 DeepSeek');
+
 
         const config = {
             method: 'POST',
@@ -50,7 +57,7 @@ app.post('/api/proxy/deepseek-cleaning', async (req, res) => {
                 'Authorization': `Bearer ${finalKey}`
             },
             data,
-            timeout: 30000 // 清洗：30秒超时
+            timeout: 60000 // 清洗：60秒超时（增加以适应DeepSeek响应时间）
         };
 
         const response = await axios(config);
@@ -71,6 +78,14 @@ app.post('/api/proxy/deepseek-insight', async (req, res) => {
     // 优先使用客户端Key
     const clientKey = req.headers['x-api-key'];
     const finalKey = (clientKey && clientKey !== 'default') ? clientKey : DEEPSEEK_INSIGHT_KEY;
+
+    if (!finalKey) {
+        console.error('[代理-洞察] ❌ 失败: 未配置 API Key');
+        return res.status(500).json({
+            error: 'Server Misconfiguration: No DeepSeek API Key found.',
+            channel: 'insight'
+        });
+    }
 
     try {
         console.log('[代理-洞察] 转发请求至 DeepSeek');
@@ -104,6 +119,14 @@ app.post('/api/proxy/deepseek-skills', async (req, res) => {
     // 优先使用客户端Key
     const clientKey = req.headers['x-api-key'];
     const finalKey = (clientKey && clientKey !== 'default') ? clientKey : DEEPSEEK_INSIGHT_KEY;
+
+    if (!finalKey) {
+        console.error('[代理-Skills] ❌ 失败: 未配置 API Key');
+        return res.status(500).json({
+            error: 'Server Misconfiguration: No DeepSeek API Key found.',
+            channel: 'skills'
+        });
+    }
 
     try {
         console.log('[代理-Skills] 转发请求至 DeepSeek (Function Calling)');

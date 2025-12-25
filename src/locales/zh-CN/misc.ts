@@ -7,27 +7,6 @@ export const themes = {
     minimal: '极简亮白版',
 };
 
-export const welcome = {
-    title: '欢迎使用 DataPrism',
-    p0Completed: 'P0 优先级功能已完成:',
-    features: {
-        typeSystem: 'TypeScript 类型系统(PromptSchema, ColumnMetadata, HypothesisSchema 等)',
-        cssVariables: '全局 CSS 变量系统(支持主题切换)',
-        themes: '三套预设主题(Neufuture 暗夜版、高对比度专业版、极简亮白版)',
-        promptLibrary: 'Prompt 库配置(10 条预设分析策略)',
-        projectConfig: '项目配置(Vite + React + TypeScript)',
-        themeSwitch: '主题切换功能 - 点击右上角调色板图标试试!',
-        fileUpload: '文件上传功能 - 点击左侧文件夹图标上传数据!',
-    },
-    functionsTitle: '功能说明',
-    functions: {
-        supportFormats: '支持 CSV、XLSX、JSON 格式文件上传',
-        dragUpload: '支持拖拽上传和点击选择',
-        largeFileDetection: '大文件自动检测(>50,000行或>50MB)并提示抽样',
-        sampleRatio: '可调节抽样比例(5%-20%)',
-    },
-};
-
 export const workshop = {
     title: '智能工坊',
     cleaning: '数据清洗建议',

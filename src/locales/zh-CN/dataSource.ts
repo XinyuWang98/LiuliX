@@ -3,6 +3,7 @@ export const dataSource = {
     title: '数据源',
     noProjects: '暂无项目',
     uploadHint: '点击上方按钮上传数据文件',
+    connectDatabase: '连接数据库 (即将推出)',
     uploadFile: '上传文件',
     project: {
         untitled: '未命名项目',

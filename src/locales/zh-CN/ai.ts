@@ -40,6 +40,9 @@ export const localModel = {
         processing: '正在处理模型权重...',
         ready: '本地模型已就绪',
         unknown: '正在处理...',
+        loadingFromCache: '正在从本地缓存读取模型...',
+        downloading: '正在下载模型文件...',
+        finish: '加载完成',
     }
 };
 

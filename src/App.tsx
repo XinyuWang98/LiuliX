@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { EvidenceProvider } from './contexts/EvidenceContext';
@@ -10,35 +10,38 @@ import { AIWorkshopTools } from './components/workshop/AIWorkshopTools';
 import { Project } from './utils/projectUtils';
 import { PanelRight, PanelLeft } from 'lucide-react';
 import { ExplorationFlow } from './components/exploration/ExplorationFlow';
+import { EmptyStateWelcome } from './components/exploration/EmptyStateWelcome';
 import { pyodideManager } from './services/PyodideManager';
-import { AIConfigModal } from './components/AIConfigModal';
+import { SettingsPage } from './components/settings/SettingsPage';
 import { useResizable } from '@/hooks/useResizable';
 import { logger } from './utils/logger';
 import { Logo } from './components/common/Logo/Logo';
 import './App.css';
+import { ingestFilesAndCreateProject } from './utils/projectImporter';
+import { saveProjects, loadProjects } from './utils/indexedDB';
 
-function LoadingScreen() {
+
+
+interface LoadingScreenProps {
+    progress: number;
+    message: string;
+}
+
+function LoadingScreen({ progress, message }: LoadingScreenProps) {
     const { t } = useI18n();
     return (
         <div className="loading-screen">
-            <div className="loading-spinner" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <Logo layout="vertical" size="m" variant="neon" />
-                    <span style={{ fontSize: '10px', opacity: 0.5 }}>Neon Pulse</span>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                    <Logo layout="vertical" size="m" variant="flow" />
-                    <span style={{ fontSize: '10px', opacity: 0.5 }}>Beam Flow</span>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                    <Logo layout="vertical" size="m" variant="glass" />
-                    <span style={{ fontSize: '10px', opacity: 0.5 }}>Glass Shimmer</span>
-                </div>
+            <Logo layout="vertical" size="l" variant="flow" />
+            <div className="loading-status">
+                <p className="loading-text">
+                    {message || t('common.initializing')}
+                </p>
+                {progress > 0 && (
+                    <div className="loading-progress-container">
+                        <span className="loading-progress-percent">{Math.round(progress)}%</span>
+                    </div>
+                )}
             </div>
-            <p className="loading-text">
-                {t('common.initializing')}
-            </p>
         </div>
     );
 }
@@ -52,6 +55,8 @@ function AppContent() {
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
     const [showRight, setShowRight] = useState(() => localStorage.getItem('layout.showRight') !== 'false');
     const [showAPISettings, setShowAPISettings] = useState(false);
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [loadingMessage, setLoadingMessage] = useState('');
     const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
     const [backendStatus, setBackendStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
 
@@ -76,16 +81,93 @@ function AppContent() {
     useEffect(() => localStorage.setItem('layout.showLeft', showLeft.toString()), [showLeft]);
     useEffect(() => localStorage.setItem('layout.showRight', showRight.toString()), [showRight]);
 
+    const isPyodideReadyRef = useRef(false);
+
     useEffect(() => {
+        // 防止Strict Mode重复执行
+        if (isPyodideReadyRef.current) return;
+        isPyodideReadyRef.current = true;
+
         const init = async () => {
             logger.group('系统', '🚀 应用初始化');
             try {
-                logger.log('Python', '引擎加载中...');
-                await pyodideManager.initialize();
-                await pyodideManager.waitForReady();
-                logger.log('Python', '引擎加载完成');
+                // 🔍 WebLLM缓存诊断（自动运行）
+                const { diagnoseWebLLMCache } = await import('./utils/webllmDiagnostics');
+                diagnoseWebLLMCache().catch(err => console.error('诊断失败:', err));
 
+                // 自动启用本地模型
+                if (!localStorage.getItem('use_local_model')) {
+                    localStorage.setItem('use_local_model', 'true');
+                    console.log('✅ 已自动启用本地模型');
+                }
+
+                // ⚡ 并行加载：Python引擎 + 本地模型
+                const shouldPreload = localStorage.getItem('use_local_model') === 'true';
+
+                // 启动Python引擎加载（Promise 1）
+                logger.log('Python', '引擎加载中...');
+                const pyodidePromise = (async () => {
+                    await pyodideManager.initialize();
+                    await pyodideManager.waitForReady();
+                    logger.log('Python', '引擎加载完成');
+                })();
+
+                // 并行启动模型加载（Promise 2）
+                const modelPromise = shouldPreload
+                    ? (async () => {
+                        logger.log('本地模型', '后台加载启动（并行）...');
+                        try {
+                            const { localLLMService, SUPPORTED_MODELS } = await import('@/services/localLLMService');
+
+                            // 定义进度里程碑：加载至 50% 即可进入
+                            return new Promise<void>((resolve) => {
+                                let resolved = false;
+                                localLLMService.reload(SUPPORTED_MODELS.QWEN, (progress, message) => {
+                                    setLoadingProgress(progress);
+
+                                    // 简单的消息翻译映射
+                                    let translatedMsg = message;
+                                    const lowerMsg = message.toLowerCase();
+                                    if (lowerMsg.includes('loading model from cache') || lowerMsg.includes('webllm cache')) {
+                                        translatedMsg = t('localModel.status.loadingFromCache');
+                                    } else if (lowerMsg.includes('downloading')) {
+                                        translatedMsg = t('localModel.status.downloading');
+                                    } else if (lowerMsg.includes('finish loading')) {
+                                        translatedMsg = t('localModel.status.finish');
+                                    } else if (lowerMsg.includes('fetching param cache')) {
+                                        translatedMsg = t('localModel.status.fetching', { progress: '' });
+                                    }
+
+                                    setLoadingMessage(translatedMsg);
+
+                                    // 达到 50% 或加载完成时，允许进入
+                                    if (!resolved && (progress >= 50 || progress === 100)) {
+                                        resolved = true;
+                                        resolve();
+                                    }
+                                }).catch(err => {
+                                    // 如果加载失败，也不要阻塞进入
+                                    logger.warn('本地模型', '加载过程出错', err);
+                                    if (!resolved) resolve();
+                                });
+                            });
+                        } catch (err) {
+                            logger.warn('本地模型', '模块导入失败', err);
+                        }
+                    })()
+                    : Promise.resolve();
+
+                // 等待Python引擎（UI必需）
+                await pyodidePromise;
+
+                // 等待模型加载至 50%（根据用户需求）
+                if (shouldPreload) {
+                    await modelPromise;
+                }
+
+                // UI就绪，用户可以开始使用（模型后续在后台继续完成剩余 50%）
                 setTimeout(() => setIsPyodideReady(true), 500);
+
             } catch (err) {
                 logger.error('Python', '引擎加载失败', err);
                 setIsPyodideReady(true);
@@ -135,8 +217,50 @@ function AppContent() {
     //     }
     // }, [isPyodideReady]);
 
+    // 处理欢迎界面的文件上传
+    const handleWelcomeUpload = async (files: any[], sampledFlags: boolean[]) => {
+        try {
+            logger.group('UI', '欢迎界面上传文件处理');
+
+            const themeMap = {
+                game: t('dataSource.project.themes.game'),
+                sales: t('dataSource.project.themes.sales'),
+                finance: t('dataSource.project.themes.finance'),
+                analytics: t('dataSource.project.themes.analytics'),
+                user: t('dataSource.project.themes.user'),
+            };
+
+            // 1. 创建新项目对象
+            const newProject = await ingestFilesAndCreateProject(
+                files,
+                sampledFlags,
+                'zh-CN', // 强制中文活 MVP 默认
+                themeMap
+            );
+
+            // 2. 读取现有项目并追加 (防止覆盖)
+            const existingProjects = await loadProjects();
+            const updatedProjects = [newProject, ...existingProjects];
+
+            // 3. 保存到 IndexedDB
+            await saveProjects(updatedProjects);
+            logger.log('UI', '项目已保存到数据库', { data: { id: newProject.id } });
+
+            // 4. 更新当前选中项目 (这将触发界面切换到 ExplorationFlow)
+            setSelectedProject(newProject);
+
+            // 5. 自动展开左侧栏 (可选，增加沉浸感可不展开，但为了让用户看到文件列表，展开较好)
+            setShowLeft(true);
+
+            logger.groupEnd();
+        } catch (err) {
+            logger.error('UI', '项目创建失败', err);
+            logger.groupEnd();
+        }
+    };
+
     if (!isPyodideReady) {
-        return <LoadingScreen />;
+        return <LoadingScreen progress={loadingProgress} message={loadingMessage} />;
     }
 
     return (
@@ -179,7 +303,9 @@ function AppContent() {
 
                 <div className="glass-panel main-panel-wrapper">
                     <div className="main-panel-content">
-                        {activeView === 'dashboard' ? (
+                        {selectedProject === null ? (
+                            <EmptyStateWelcome onFilesUploaded={handleWelcomeUpload} />
+                        ) : activeView === 'dashboard' ? (
                             <ExplorationFlow
                                 project={selectedProject}
                                 onNavigate={(view) => setActiveView(view as 'dashboard' | 'library')}
@@ -252,7 +378,7 @@ function AppContent() {
                 )}
             </div>
 
-            {showAPISettings && <AIConfigModal isOpen={showAPISettings} onClose={() => setShowAPISettings(false)} />}
+            {showAPISettings && <SettingsPage onClose={() => setShowAPISettings(false)} />}
         </div>
     );
 }

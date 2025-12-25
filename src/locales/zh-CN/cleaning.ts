@@ -20,6 +20,7 @@ export const cleaning = {
     noSuggestions: '数据质量良好，暂无建议',
     promptLib: 'Prompt库',
     recommend: '{percent}% 推荐',
+    defaultReason: '根据数据完整性规则自动生成',
     promptStandardizeDate: '标准化日期格式',
     reasonDate: '检测到日期字段，建议统一格式 (YYYY-MM-DD)。',
     removeDuplicates: '删除重复行',
