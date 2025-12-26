@@ -65,19 +65,58 @@
 
 > **目标**: 产出有价值的图表和洞察。
 
-- [ ] **假设生成 (JSON Schema 强约束)** <!-- id: 301 -->
+- [x] **假设生成 (JSON Schema 强约束)** <!-- id: 301 -->
     - **优先级**: **P0 (生死线)**
-    - **理由**: 分析的起点。必须结构化输出以保证稳定性。
+    - **理由**: 已通过 `batchInsightGenerator` 和 QualityGate 实现。
 
-- [ ] **分析看板与图表渲染** <!-- id: 302 -->
+- [x] **分析看板与图表渲染** <!-- id: 302 -->
     - **优先级**: **P0 (生死线)**
-    - **理由**: 用户最终要看的就是图表。支持 Plotly 交互式图表。
+    - **理由**: 已通过 `ActionChip` + `InsightFlow` + `Pyodide` 实现交互式图表。
+
+- [x] **Settings UI Optimization** 
+    - [x] Sticky footer
+    - [x] Table/Grid layout toggle (Grid Selected)
+    - [x] Single select for fonts
+
+- [ ] **Pyodide Dynamic Loading**
+    - [ ] `pyodideService` reads localStorage
+    - [ ] Worker accepts `packages` list
+    - [ ] Worker installs requested packages
+
+- [ ] **因果分析方法设计 (RDD/DID/PSM)** 🆕
+    - **优先级**: **P1 (差异化特性)**
+    - **理由**: 高级分析能力护城河。
+    - **状态**: 设计中
+
+- [ ] **聚类分析设计 (K-Means/DBSCAN)** 🆕
+    - **优先级**: **P1 (差异化特性)**
+    - **理由**: 探索性分析的核心，发现隐形群体。
+    - **状态**: 设计中
+
+- [ ] **时序预测设计 (Holt-Winters)** 🆕
+    - **优先级**: **P1 (差异化特性)**
+    - **理由**: 预测未来趋势，从 Insight 走向 Action。
+    - **状态**: 设计中
+
+- [ ] **预测模型设计 (Decision Tree/Random Forest)** 🆕
+    - **优先级**: **P1 (差异化特性)**
+    - **理由**: 发现关键规则与因子，解释"为什么"。
+    - **状态**: 设计中
+
+- [ ] **回归分析设计 (OLS)** 🆕
+    - **优先级**: **P1 (差异化特性)**
+    - **理由**: 经典的解释性建模，量化影响。
+    - **状态**: 设计中
 
 ---
 
 ## Phase 4: 报告与输出 (12月26日 - 12月31日)
 
 > **目标**: 让用户能把结果拿走。
+
+- [ ] **Prompt 库模板化引擎 (3B兼容)** 🆕
+    - **优先级**: **P1 (已推迟至 2025Q1)**
+    - **任务**: 实现 `Template-Based Execution` 以支持 3B 模型。见 `docs/04-技术专题/02-Prompt库/02-专题-Prompt模板化执行引擎设计.md`。
 
 - [ ] **报告导出 支持一键导出 HTML 单文件（带图）**
     - **优先级**: **P0 (生死线)**
@@ -101,3 +140,10 @@
 
 - [ ] **Prompt 库外部配置化** (**P1**)
 - [ ] **单元测试 (Parser/Engine)** (**P2**)
+- [ ] **Prompt 模板编辑器前端** (**P2**)
+
+## 维护任务
+- [x] **代码库清理与审计**
+    - 检查未使用文件 (Tests, Debug components)
+    - 识别残留备份文件 (*.bak)
+    - 确认 Hook 版本使用情况 (useInsightLoaderV2)

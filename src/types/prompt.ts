@@ -55,6 +55,28 @@ export interface UserPrompt {
     // 告诉调用者需要传入哪些变量 (e.g., "column_name", "df_summary")
     inputVariables: string[];
 
+    // ========== Router 模式扩展 (L1 推荐式) ==========
+
+    /**
+     * 执行模式
+     * - CODE_GEN: 传统模式，AI 直接输出完整代码 (适合 7B+)
+     * - TEMPLATE_FILL: 模板模式，AI 输出参数，系统渲染模板 (适合 3B)
+     */
+    executionMode?: 'CODE_GEN' | 'TEMPLATE_FILL';
+
+    /**
+     * [仅 TEMPLATE_FILL 模式有效]
+     * Python 代码模板，使用 {{variable}} 占位符
+     * 系统会用 AI 返回的参数填充占位符后执行
+     */
+    codeTemplate?: string;
+
+    /**
+     * [仅 TEMPLATE_FILL 模式有效]
+     * SQL 聚合模板 (用于 aggregated_mode)
+     */
+    sqlTemplate?: string;
+
     // 元数据
     author: string;
     version: string;

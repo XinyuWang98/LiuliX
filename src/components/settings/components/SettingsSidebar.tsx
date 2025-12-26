@@ -1,5 +1,5 @@
 
-import { Search, Settings, Cpu, Zap, Gauge } from 'lucide-react';
+import { Search, Settings, Cpu, Zap, Gauge, Blocks } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
 import '../SettingsPage.css';
 
@@ -16,6 +16,7 @@ export const SettingsSidebar = ({ activeCategory, onCategoryChange, searchQuery,
     const categories = [
         { id: 'commonly-used', label: t('settings.commonlyUsed'), icon: Settings },
         { id: 'ai-config', label: t('settings.aiConfig'), icon: Cpu },
+        { id: 'analysis-packages', label: t('settings.analysisPackages') || '分析能力', icon: Blocks },
         { id: 'performance', label: t('config.performanceQuality'), icon: Gauge },
         { id: 'advanced', label: t('settings.advanced'), icon: Zap },
     ];
@@ -27,6 +28,7 @@ export const SettingsSidebar = ({ activeCategory, onCategoryChange, searchQuery,
         const categoryLabels: Record<string, string[]> = {
             'commonly-used': ['常用', 'common', '本地', 'local', '模型', 'model'],
             'ai-config': ['ai', '配置', 'config', 'api', 'key', '硬件', 'hardware', '推荐', 'recommendation'],
+            'analysis-packages': ['分析', 'analysis', '能力', 'package', 'sklearn', 'statsmodels', '机器学习'],
             'performance': ['性能', 'performance', '质量', 'quality', '列', 'column', '超时', 'timeout'],
             'advanced': ['高级', 'advanced']
         };

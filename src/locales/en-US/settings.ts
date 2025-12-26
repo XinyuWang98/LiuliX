@@ -85,4 +85,43 @@ export const settings = {
     performanceSlowWarning: '⚠️ May Be Slow',
     performanceColumnsUnit: 'columns',
     performanceTimeoutUnit: 'seconds',
+
+    // Settings Page Categories
+    commonlyUsed: 'Common Settings',
+    commonlyUsedDesc: 'Quick access to frequently used settings',
+    appearanceAndLanguage: 'Appearance & Language',
+    interfaceLanguage: 'Interface Language',
+    interfaceLanguageDesc: 'Select display language',
+    localModelEnableTitle: 'Enable Local AI Acceleration (WebGPU)',
+    aiConfig: 'AI Configuration',
+    aiConfigDesc: 'Manage model sources and API keys',
+    hardwareEnvironment: 'Hardware Environment',
+    apiPriorityAndKeys: 'API Priority & Keys',
+    performanceDesc: 'Adjust analysis performance and sampling',
+    dataProcessing: 'Data Processing',
+    advanced: 'Advanced Settings',
+    advancedDesc: 'For developers only',
+    devMode: 'Developer Mode',
+    devModeDesc: 'Enable experimental features (none currently)',
+    searchPlaceholder: 'Search settings (e.g., model/API)...',
+
+    // Analysis Packages Settings
+    analysisPackages: 'Analysis Packages',
+    analysisPackagesDesc: 'Select analysis packages to download during startup',
+    chartDisplayConfig: 'Chart Display Configuration',
+    chartFonts: 'Chart Fonts',
+    dataAnalysisStrategy: 'Data Analysis Strategy',
+    dataPrivacyTitle: 'Data Privacy',
+    dataPrivacyDesc: 'Choose data format sent to Cloud AI (Not required for Local Model)',
+    chartFontsHint: 'Pre-selected based on your current language',
+    saveAndApply: 'Save & Apply',
+    restartEngineWarning: 'Changes require restarting the analysis engine',
+    builtIn: 'Built-in',
+
+    // Common Table Headers
+    table: {
+        method: 'Analysis Method',
+        description: 'Description',
+        charts: 'Output Charts',
+    }
 };

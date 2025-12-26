@@ -8,7 +8,7 @@ import { fileUpload } from './fileUpload';
 import { cleaning } from './cleaning';
 import { themes, workshop, grid, pagination, workflow } from './misc';
 import welcome from './welcome';
-import { insightChain, exploration, evidence, quality, report } from './analysis';
+import { insightChain, insight, exploration, evidence, quality, report } from './analysis';
 import { aiCost, aiRetry, cache, localModel, config } from './ai';
 import { errors } from './errors';
 
@@ -34,6 +34,7 @@ export const zhCN: LanguageConfig = {
         pagination,
         workflow,
         insightChain,
+        insight,
         exploration,
         evidence,
         quality,

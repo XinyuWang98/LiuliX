@@ -104,5 +104,25 @@ export const settings = {
     devMode: '开发模式',
     devModeDesc: '启用实验性功能（当前无）',
     searchPlaceholder: '搜索设置 (如:模型/API)...',
+
+    // 分析能力包设置
+    analysisPackages: '分析能力',
+    analysisPackagesDesc: '勾选需要的分析能力，系统将在启动时下载对应的 Python 库',
+    chartDisplayConfig: '图表显示配置',
+    chartFonts: '图表字体',
+    dataAnalysisStrategy: '数据分析策略',
+    dataPrivacyTitle: '数据隐私',
+    dataPrivacyDesc: '选择发送给云端AI的数据形式（本地模型无需配置）',
+    chartFontsHint: '已基于您当前语言设置为您预选',
+    saveAndApply: '保存并应用',
+    restartEngineWarning: '更改后需重新启动分析引擎才能生效',
+    builtIn: '内置',
+
+    // 通用表格
+    table: {
+        method: '分析方法',
+        description: '功能描述',
+        charts: '输出图表',
+    }
 };
 

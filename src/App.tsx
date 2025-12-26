@@ -91,7 +91,7 @@ function AppContent() {
         const init = async () => {
             logger.group('系统', '🚀 应用初始化');
             try {
-                // 🔍 WebLLM缓存诊断（自动运行）
+                // 🔍 WebLLM缓存诊断
                 const { diagnoseWebLLMCache } = await import('./utils/webllmDiagnostics');
                 diagnoseWebLLMCache().catch(err => console.error('诊断失败:', err));
 
@@ -101,72 +101,69 @@ function AppContent() {
                     console.log('✅ 已自动启用本地模型');
                 }
 
-                // ⚡ 并行加载：Python引擎 + 本地模型
-                const shouldPreload = localStorage.getItem('use_local_model') === 'true';
-
-                // 启动Python引擎加载（Promise 1）
-                logger.log('Python', '引擎加载中...');
-                const pyodidePromise = (async () => {
-                    await pyodideManager.initialize();
-                    await pyodideManager.waitForReady();
-                    logger.log('Python', '引擎加载完成');
-                })();
-
-                // 并行启动模型加载（Promise 2）
-                const modelPromise = shouldPreload
-                    ? (async () => {
-                        logger.log('本地模型', '后台加载启动（并行）...');
-                        try {
-                            const { localLLMService, SUPPORTED_MODELS } = await import('@/services/localLLMService');
-
-                            // 定义进度里程碑：加载至 50% 即可进入
-                            return new Promise<void>((resolve) => {
-                                let resolved = false;
-                                localLLMService.reload(SUPPORTED_MODELS.QWEN, (progress, message) => {
-                                    setLoadingProgress(progress);
-
-                                    // 简单的消息翻译映射
-                                    let translatedMsg = message;
-                                    const lowerMsg = message.toLowerCase();
-                                    if (lowerMsg.includes('loading model from cache') || lowerMsg.includes('webllm cache')) {
-                                        translatedMsg = t('localModel.status.loadingFromCache');
-                                    } else if (lowerMsg.includes('downloading')) {
-                                        translatedMsg = t('localModel.status.downloading');
-                                    } else if (lowerMsg.includes('finish loading')) {
-                                        translatedMsg = t('localModel.status.finish');
-                                    } else if (lowerMsg.includes('fetching param cache')) {
-                                        translatedMsg = t('localModel.status.fetching', { progress: '' });
-                                    }
-
-                                    setLoadingMessage(translatedMsg);
-
-                                    // 达到 50% 或加载完成时，允许进入
-                                    if (!resolved && (progress >= 50 || progress === 100)) {
-                                        resolved = true;
-                                        resolve();
-                                    }
-                                }).catch(err => {
-                                    // 如果加载失败，也不要阻塞进入
-                                    logger.warn('本地模型', '加载过程出错', err);
-                                    if (!resolved) resolve();
-                                });
-                            });
-                        } catch (err) {
-                            logger.warn('本地模型', '模块导入失败', err);
-                        }
-                    })()
-                    : Promise.resolve();
-
-                // 等待Python引擎（UI必需）
-                await pyodidePromise;
-
-                // 等待模型加载至 50%（根据用户需求）
-                if (shouldPreload) {
-                    await modelPromise;
+                // 💡 检查是否首次运行 (用于显示友好提示)
+                const isFirstRun = !localStorage.getItem('app_has_run_before');
+                if (isFirstRun) {
+                    // 显示首次运行提示
+                    setLoadingMessage(t('common.firstTimeTip'));
                 }
 
-                // UI就绪，用户可以开始使用（模型后续在后台继续完成剩余 50%）
-                setTimeout(() => setIsPyodideReady(true), 500);
+                // --- Phase 1: 核心环境加载 (Blocking) ---
+                logger.log('Python', '阶段1: 加载核心环境...');
+                setLoadingProgress(10); // 起始进度
+
+                await pyodideManager.initialize((msg, _progress) => {
+                    // 更新进度文案 (支持多语言替换)
+                    if (msg.includes('Loading Pyodide')) {
+                        setLoadingMessage(t('common.initCore', { current: 1, total: 3 }));
+                        setLoadingProgress(30);
+                    } else if (msg.includes('Loading Pandas')) {
+                        setLoadingMessage(t('common.loadPandas'));
+                        setLoadingProgress(60);
+                    } else {
+                        // 其他消息透传
+                        setLoadingMessage(msg);
+                    }
+                });
+
+                // 显式等待核心包就绪
+                await pyodideManager.loadEssentials((msg) => {
+                    logger.log('Python', msg);
+                    setLoadingProgress(90);
+                });
+
+                logger.log('Python', '核心环境加载完成');
+                setIsPyodideReady(true);
+
+                // 标记非首次运行
+                if (isFirstRun) {
+                    localStorage.setItem('app_has_run_before', 'true');
+                }
+
+                // --- Phase 2: 用户扩展加载 (Silent/Background) ---
+                // 不阻塞 UI，延迟执行避免争抢资源
+                setTimeout(async () => {
+                    logger.log('Python', '阶段2: 静默加载扩展包...');
+                    try {
+                        await pyodideManager.loadUserConfigExtensions((msg) => {
+                            logger.log('Python', `[扩展] ${msg}`);
+                        });
+                    } catch (extErr) {
+                        logger.warn('Python', '扩展包加载部分失败 (不影响主功能)', extErr);
+                    }
+
+                    // 并行启动本地模型预加载 (Silent)
+                    const shouldPreload = localStorage.getItem('use_local_model') === 'true';
+                    if (shouldPreload) {
+                        logger.log('本地模型', '后台预加载启动...');
+                        import('@/services/localLLMService').then(({ localLLMService, SUPPORTED_MODELS }) => {
+                            localLLMService.reload(SUPPORTED_MODELS.QWEN, (p, m) => {
+                                // 仅记录日志，不更新 UI Loading
+                                // logger.debug('本地模型', `后台进度 ${p}%: ${m}`);
+                            }).catch(err => logger.warn('本地模型', '后台加载失败', err));
+                        });
+                    }
+                }, 1000);
 
             } catch (err) {
                 logger.error('Python', '引擎加载失败', err);
@@ -176,7 +173,7 @@ function AppContent() {
             }
         };
         init();
-    }, []);
+    }, [t]);
 
     // 后端健康检查
     useEffect(() => {

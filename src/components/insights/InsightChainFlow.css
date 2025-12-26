@@ -76,3 +76,30 @@
     color: var(--text-primary);
     margin-bottom: var(--gap-m);
 }
+
+/* \ud83c\udd95 InsightTreeNode \u68ee\u6797\u5e03\u5c40 */
+.insight-tree-forest {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--gap-m);
+    margin-top: var(--gap-m);
+}
+
+/* \u6839\u8282\u70b9\u79fb\u9664\u7f29\u8fdb */
+.insight-tree-forest > .insight-tree-node {
+    margin-left: 0 !important;
+}
+
+/* \u786e\u4fdd\u8282\u70b9\u5728Grid\u4e2d\u6b63\u5e38\u5c55\u793a */
+.insight-tree-node {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    padding: var(--padding-card);
+    transition: all 0.2s ease;
+}
+
+.insight-tree-node:hover {
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

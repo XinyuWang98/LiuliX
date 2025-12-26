@@ -3,17 +3,22 @@
  */
 
 import React from 'react';
+import { useI18n } from '@/contexts/I18nContext';
 
 export type AnalysisStrategy = 'balanced' | 'fast' | 'precise';
 
 export function DataAnalysisSection() {
+    const { t } = useI18n();
     const [strategy, setStrategy] = React.useState<AnalysisStrategy>('balanced');
 
     return (
         <div className="settings-section">
-            <h3 className="settings-section-title">📊 数据分析策略</h3>
+            {/* Removed Emoji, used i18n key */}
+            <h3 className="settings-section-title">
+                {t('settings.dataAnalysisStrategy') || '数据分析策略'}
+            </h3>
             <p className="settings-section-desc">
-                选择AI采样行数（影响分析速度和准确性）
+                选择 AI 采样行数（影响分析速度和准确性）
             </p>
 
             <div className="settings-options">

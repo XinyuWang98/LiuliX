@@ -4,13 +4,14 @@
     "type": "module",
     "description": "Future Tech 风格的 AI 主导 EDA 工具",
     "scripts": {
-        "dev": "vite",
+        "dev": "npm run monitor:cleanup && vite",
         "dev:backend": "node server/index.js",
         "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev\" --names \"backend,frontend\" --prefix-colors \"cyan,magenta\"",
         "server": "cd server && node index.js",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "type-check": "tsc --noEmit"
+        "type-check": "tsc --noEmit",
+        "monitor:cleanup": "npx -y tsx scripts/retention_policy.ts"
     },
     "dependencies": {
         "@duckdb/duckdb-wasm": "^1.30.0",

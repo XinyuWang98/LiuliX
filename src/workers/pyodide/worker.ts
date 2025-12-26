@@ -64,8 +64,71 @@ ctx.onmessage = async (event) => {
         if (type === 'RUN_CODE') {
             // Execute Python code
             await pyodide.loadPackagesFromImports(content);
-            const result = await pyodide.runPythonAsync(content);
-            ctx.postMessage({ id, type: 'SUCCESS', result });
+
+            // 🔧 修复：捕获 stdout 输出（支持 print(json.dumps(...)) 模式）
+            const captureStdout = `
+import sys
+import io
+_stdout_capture = io.StringIO()
+_old_stdout = sys.stdout
+sys.stdout = _stdout_capture
+`;
+
+            try {
+                // 1. 开始捕获 stdout
+                await pyodide.runPythonAsync(captureStdout);
+
+                // 2. 执行用户代码
+                const rawResult = await pyodide.runPythonAsync(content);
+
+                // 3. 恢复 stdout 并获取捕获的输出
+                const capturedOutputRaw = await pyodide.runPythonAsync(`
+sys.stdout = _old_stdout
+_stdout_capture.getvalue()
+`);
+
+                // 4. 显式转换 PyProxy 为字符串
+                const capturedOutput = capturedOutputRaw?.toString() || '';
+
+                // 🔍 调试日志
+                console.log('[Worker] Captured Output Length:', capturedOutput.length);
+                console.log('[Worker] Captured Output Preview:', capturedOutput.substring(0, 200));
+
+                // 5. 优先使用 stdout 捕获的内容（print 输出）
+                let result = rawResult;
+                if (capturedOutput && capturedOutput.trim()) {
+                    try {
+                        result = JSON.parse(capturedOutput.trim());
+                        console.log('[Worker] ✅ 使用 stdout JSON');
+                    } catch (e) {
+                        console.warn('[Worker] stdout 不是 JSON，使用返回值');
+                        result = { textOutput: capturedOutput };
+                    }
+                }
+                // 6. 如果 stdout 为空，尝试解析返回值
+                else if (typeof rawResult === 'string') {
+                    try {
+                        const trimmed = rawResult.trim();
+                        if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+                            (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                            result = JSON.parse(trimmed);
+                            console.log('[Worker] ✅ 使用返回值 JSON');
+                        }
+                    } catch {
+                        // 不是有效 JSON，保持原字符串
+                    }
+                }
+
+                ctx.postMessage({ id, type: 'SUCCESS', result });
+            } catch (error) {
+                // 确保恢复 stdout
+                try {
+                    await pyodide.runPythonAsync('sys.stdout = _old_stdout');
+                } catch (e) {
+                    // 忽略
+                }
+                throw error;
+            }
         } else if (type === 'LOAD_DATA') {
             // Load data into a global dataframe 'df'
             const { filename, csv } = content;
@@ -250,9 +313,27 @@ json.dumps(replace_nan(preview))
 
                 // 1. Fetch字体文件
                 const response = await fetch(url);
-                if (!response.ok) throw new Error(`Failed to fetch font: ${response.statusText}`);
+                if (!response.ok) {
+                    console.warn(`Font fetch failed: ${url} (${response.status})`);
+                    ctx.postMessage({ id, type: 'SUCCESS', result: 'Font fetch failed (skipped)' });
+                    return;
+                }
                 const buffer = await response.arrayBuffer();
                 const data = new Uint8Array(buffer);
+
+                // 简单的 Magic Number 检查 (TTF/OTF start with 0x00010000 or OTTO)
+                // 避免将 HTML (如 404 页面) 传给 Matplotlib 导致崩溃
+                const isFont = (data.length > 4) && (
+                    (data[0] === 0x00 && data[1] === 0x01 && data[2] === 0x00 && data[3] === 0x00) || // TTF
+                    (data[0] === 0x4F && data[1] === 0x54 && data[2] === 0x54 && data[3] === 0x4F)    // OTF (OTTO)
+                );
+
+                if (!isFont) {
+                    console.warn(`Invalid font file signature at ${url}. Likely a 404 HTML page.`);
+                    // 不抛出错误，而是作为警告处理，避免打断整体加载流程
+                    ctx.postMessage({ id, type: 'SUCCESS', result: 'Invalid font file (skipped)' });
+                    return;
+                }
 
                 // 2. 写入虚拟文件系统
                 const fontPath = `/home/pyodide/${name}`;
@@ -287,6 +368,59 @@ else:
             } catch (err) {
                 console.error("Font loading error:", err);
                 ctx.postMessage({ id, type: 'ERROR', error: String(err) });
+            }
+        } else if (type === 'LOAD_PACKAGES') {
+            const { packages } = content;
+            try {
+                if (packages && packages.length > 0) {
+                    ctx.postMessage({ type: 'STATUS', message: `Loading packages: ${packages.join(', ')}...` });
+
+                    // 1. 加载 micropip
+                    await pyodide.loadPackage('micropip');
+                    const micropip = pyodide.pyimport("micropip");
+
+                    // 2. 尝试安装所有包
+                    // 注意：标准 pyodide 包和 PyPI 包都可以尝试用 micropip 安装
+                    // 或者先用 loadPackage 尝试，失败再用 micropip，但混合用可能更复杂
+                    // 简单起见，对于已知不支持的包（如 jieba），micropip 是必须的
+
+                    // 策略：先尝试加载 standard packages，如果失败或者是 PyPI 包，则使用 micropip
+                    // 但 pyodide.loadPackage 对未知包会报错。
+                    // 更好的策略是：先加载 micropip，然后用 micropip.install(packages)
+                    // micropip 会自动处理 Pyodide 内置包和 PyPI 包
+
+                    // 2. 尝试安装所有包
+                    const packagesToInstall: string[] = [];
+
+                    for (const pkg of packages) {
+                        if (pkg === 'jieba') {
+                            // 使用第三方提供的 jieba wheel
+                            packagesToInstall.push('https://files.pythonhosted.org/packages/1f/20/451327170139b83a213ba111a0300d89758f2762ba41c305a415951e604f/jieba-0.42.1-py3-none-any.whl');
+                        } else {
+                            packagesToInstall.push(pkg);
+                        }
+                    }
+
+                    await micropip.install(packagesToInstall);
+                    micropip.destroy(); // 释放 Python 对象
+
+                    console.log(`[Worker] Packages loaded: ${packages.join(', ')}`);
+                }
+                ctx.postMessage({ id, type: 'SUCCESS', result: 'Packages loaded' });
+            } catch (err) {
+                console.error("Package loading error:", err);
+
+                // 如果 micropip 失败，可能是网络问题或包名错误
+                // 尝试回退到 pyodide.loadPackage (仅针对内置包) 作为最后的尝试
+                try {
+                    if (packages && packages.length > 0) {
+                        console.warn("Micropip failed, trying pyodide.loadPackage as fallback...");
+                        await pyodide.loadPackage(packages);
+                    }
+                    ctx.postMessage({ id, type: 'SUCCESS', result: 'Packages loaded (Fallback)' });
+                } catch (fallbackErr) {
+                    ctx.postMessage({ id, type: 'ERROR', error: String(err) });
+                }
             }
         }
     } catch (error) {

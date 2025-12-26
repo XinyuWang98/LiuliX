@@ -1,6 +1,6 @@
 /**
  * Skills执行模式选择器
- * 根据内存评估结果和洞察建议，选择执行full_mode或aggregated_mode
+ * 根据内存评估结果和洞察建议,选择执行full_mode或aggregated_mode
  */
 
 import { logger } from '@/utils/logger';
@@ -9,6 +9,8 @@ import { DuckDBEngine } from '@/db/duckdbEngine';
 import { pyodideManager } from '@/services/PyodideManager';
 import { ExecutionMode } from '@/utils/memoryAssessment';
 import { InsightSuggestion } from '@/services/prompts/batchInsightGenerator';
+// import { validatePythonCode, formatValidationResult } from '@/utils/pythonCodeValidator';
+// import { smartFixPythonCode } from '@/utils/pythonCodeSanitizer';
 
 export interface ModeExecutionResult {
     success: boolean;
@@ -115,6 +117,11 @@ import json
 try:
     data_json = '''${safeJsonData}'''
     df = pd.DataFrame(json.loads(data_json))
+    
+    # ✅ 自动类型转换：将可转换的列转为数值类型（兜底防御）
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    
 except Exception as e:
     print(f"Error loading JSON data: {str(e)}")
     raise e
@@ -122,7 +129,22 @@ except Exception as e:
         await pyodideManager.runPython(dataScript);
         logger.log('Skills', `数据已加载到Pyodide`, { data: { rows: data.length, limited: isLimited, maxRows } });
 
-        const result = await pyodideManager.runPython(code);
+
+
+
+
+
+
+        // ✅ P1: 验证和自动修复 Python 代码
+        // 注意：不需要解码转义字符！AI 返回的 \\n, \\t 等就是正确的 Python 转义序列
+        // 如果将 \\n 转换为物理换行符（\n），Python 会报 SyntaxError: unterminated string literal
+
+        // ⚠️ 临时禁用验证器（有误判bug）
+        let finalCode = code;
+        logger.log('Python', '⚠️ 验证器已临时禁用（修复中）');
+
+
+        const result = await pyodideManager.runPython(finalCode);
 
         return {
             success: true,

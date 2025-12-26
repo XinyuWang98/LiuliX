@@ -102,6 +102,17 @@ LiuliX 目前是一个 **"AI 辅助 Copilot"** 雏形。已成功实现 "Local-F
 - [x] **9个 L2 Prompt**: distribution, correlation, outlier, groupby, trend, topn, missing, stats, crosstab
 - [ ] **Model Skills**: 增加 "线性回归", "K-Means" 等高级分析 Skill
 
+### Phase 4: 本地模型(3B)兼容与Prompt引擎升级 - 📅 **计划中 (2025Q1)**
+
+> 鉴于 3B 模型在代码生成任务上的不稳定性，我们决定推迟简单的降级，而是采用架构升级方案。
+
+- [ ] **双模执行引擎**: 实现 `ExecutionMode: 'CODE_GEN' | 'TEMPLATE_FILL'`，让 3B 模型仅负责参数提取。
+- [ ] **模板化编辑器**: 支持参数与模板分离的编辑器 UI。
+- [ ] **技术方案参考**:
+    - [45-技术专题-Skills与代码执行双模式架构](../04-技术专题/45-技术专题-Skills与代码执行双模式架构.md)
+    - [46-技术专题-本地模型降级3B可行性分析](../04-技术专题/46-技术专题-本地模型降级3B可行性分析.md)
+    - [47-技术专题-Prompt模板化执行引擎设计](../04-技术专题/47-技术专题-Prompt模板化执行引擎设计.md)
+
 ---
 
 *结论: 我们不把用户当成 Prompt Engineer，而是通过预置的高质量 Prompt (专家脑)，让用户只需做"选择题"。*

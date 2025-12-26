@@ -9,7 +9,7 @@ export function generateBatchInsightsPrompt(
     rowCount: number,
     totalRows: number,
     sampleData: any[],
-    t: (key: string) => string  // i18n函数
+    t?: (key: string) => string  // i18n函数（可选，不传则使用中文硬编码）
 ): string {
     const columnList = columns.join(', ');
 
@@ -23,6 +23,54 @@ export function generateBatchInsightsPrompt(
     });
 
     const sampleJson = JSON.stringify(sampleDataCleaned);
+
+    // 如果没有提供 t 函数，使用硬编码的中文 prompt
+    if (!t) {
+        return `你是一位资深数据分析师，请分析以下数据集并生成洞察建议。
+
+## 数据集信息
+- 列名: ${columnList}
+- 采样行数: ${rowCount} 行
+- 总行数: ${totalRows} 行
+- 样本数据:
+${sampleJson}
+
+## 要求
+请生成3-5个数据洞察建议，每个建议包含：
+1. title: 洞察标题
+2. description: 洞察描述
+3. columns_used: 使用的列名数组
+4. full_mode.code: 完整的Python分析代码
+5. aggregated_mode.sql: DuckDB预聚合SQL
+6. aggregated_mode.viz_code: 可视化代码
+
+## 代码规范
+- 使用 df 作为数据变量名
+- 使用 matplotlib 生成图表
+- 输出格式为 JSON，包含 image(base64) 和 summary
+- **重要：在执行数值聚合操作前，必须确保列是数值类型（使用 pd.to_numeric(df['column'], errors='coerce')）**
+- **字符串中的换行必须使用 \\n 转义，禁止在单引号或双引号内直接换行**
+- **示例：ax.text(0.5, 0.5, '第一行\\n第二行') 而不是 ax.text(0.5, 0.5, '第一行 换行 第二行')**
+
+
+## 输出格式
+[
+    {
+        "title": "洞察标题",
+        "description": "洞察描述",
+        "columns_used": ["列名1", "列名2"],
+        "full_mode": {
+            "code": "完整Python代码"
+        },
+        "aggregated_mode": {
+            "sql": "DuckDB SQL",
+            "viz_code": "可视化代码"
+        }
+    }
+]
+
+请直接返回JSON数组，不要包含其他内容。`;
+    }
 
     return `${t('prompt.batchInsight.systemRole')}
 
@@ -151,6 +199,11 @@ export interface InsightSuggestion {
  */
 export function parseBatchInsightsResponse(aiResponse: string): InsightSuggestion[] {
     try {
+        // 📊 调试：输出原始响应（前500字符）
+        logger.log('AI服务', 'AI原始响应预览', {
+            data: aiResponse.substring(0, 500) + (aiResponse.length > 500 ? '...' : '')
+        });
+
         let cleaned = aiResponse.trim();
         if (cleaned.startsWith('```json')) {
             cleaned = cleaned.replace(/```json\n?/g, '').replace(/```\n?$/g, '');
@@ -164,18 +217,42 @@ export function parseBatchInsightsResponse(aiResponse: string): InsightSuggestio
         const parsed = JSON.parse(cleaned);
 
         if (!Array.isArray(parsed)) {
-            logger.log('AI服务', 'AI返回格式错误：期望数组');
+            logger.log('AI服务', 'AI返回格式错误：期望数组', { data: typeof parsed });
             return [];
         }
 
-        return parsed.filter((item: any) =>
-            item.title &&
-            item.description &&
-            item.columns_used &&
-            item.full_mode?.code &&
-            item.aggregated_mode?.sql &&
-            item.aggregated_mode?.viz_code
-        );
+        // 📊 调试：输出解析前的数量
+        logger.log('AI服务', 'JSON解析成功', { count: parsed.length });
+
+        // 📊 详细过滤日志
+        const filtered = parsed.filter((item: any, index: number) => {
+            const checks = {
+                hasTitle: !!item.title,
+                hasDescription: !!item.description,
+                hasColumnsUsed: !!item.columns_used,
+                hasFullModeCode: !!item.full_mode?.code,
+                hasAggregatedModeSQL: !!item.aggregated_mode?.sql,
+                hasAggregatedModeVizCode: !!item.aggregated_mode?.viz_code
+            };
+
+            // ⚠️ 临时放宽：只要求 title 和 description（用于快速验证）
+            const passed = checks.hasTitle && checks.hasDescription;
+
+            if (!passed) {
+                logger.warn('AI服务', `洞察 #${index + 1} 被过滤`, {
+                    data: { title: item.title || '无标题', ...checks }
+                });
+            }
+
+            return passed;
+        });
+
+        logger.log('AI服务', '过滤完成', {
+            count: filtered.length,
+            data: { original: parsed.length, filtered: filtered.length }
+        });
+
+        return filtered;
     } catch (error) {
         logger.error('AI服务', 'AI响应解析失败', error);
         // ✅ 增强日志：显示截断位置

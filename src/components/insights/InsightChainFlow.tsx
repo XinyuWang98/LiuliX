@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
-import { InsightNode } from './InsightNode';
-import { useInsightChain } from '@/contexts/InsightChainContext';
+import { InsightNode as InsightNodeType } from '@/types/insightTree';
+import { DrillDownAction } from '@/types/insightTree';
+import { InsightTreeNode } from './InsightTreeNode';
 import { logger } from '../../utils/logger';
 import { Loader } from 'lucide-react';
 import { useInsightLoaderV2 } from '@/hooks/useInsightLoaderV2';
 import { useInsightRefresh } from '@/hooks/useInsightRefresh';
-import { InsightCardGrid } from './InsightCardGrid';
 import { LocalModelProgress } from './LocalModelProgress';
+import { getRenderedCode } from '@/services/insights/inflater';
+import { executeInsightWithMode } from '@/services/skills/modeExecutor';
 import './InsightChainFlow.css';
 
 interface InsightChainFlowProps {
@@ -25,14 +27,9 @@ interface InsightChainFlowProps {
 
 export function InsightChainFlow({ columns, rowCount, tableName, fileName, insightCache, hideTitle = false }: InsightChainFlowProps) {
     const { t } = useI18n();
-    const {
-        hypotheses,
-        insights,
-        activeHypothesisId,
-        setHypotheses,
-        toggleHypothesis,
-        adoptChain,
-    } = useInsightChain();
+
+    // 使用 InsightNode 状态
+    const [insightNodes, setInsightNodes] = useState<InsightNodeType[]>([]);
 
     // 使用 V2 Hook（包含完整质量门控）
     const {
@@ -48,12 +45,12 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
     const handleLoadInsights = async () => {
         logger.log('AI洞察', '使用V2增强模式（含双重质量门控）');
         const result = await loadInsights(columns, rowCount, tableName, fileName);
-        setHypotheses(result);
+        setInsightNodes(result); // 直接设置 InsightNode[]
     };
 
     // 使用智能刷新 Hook
     useInsightRefresh({
-        hypothesesLength: hypotheses.length,
+        hypothesesLength: insightNodes.length,
         tableName,
         insightCache,
         onRefresh: handleLoadInsights,
@@ -75,8 +72,115 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
         return () => clearTimeout(timer);
     }, []);
 
-    const showInitializing = isInitializing && hypotheses.length === 0;
-    const showEmpty = !isLoading && !isInitializing && hypotheses.length === 0;
+    const showInitializing = isInitializing && insightNodes.length === 0;
+    const showEmpty = !isLoading && !isInitializing && insightNodes.length === 0;
+
+    // 🆕 下钻处理逻辑
+    const handleDrillDown = async (
+        parentNode: InsightNodeType,
+        action: DrillDownAction
+    ) => {
+        logger.log('UI', '执行下钻分析', { data: { parent: parentNode.title, action: action.label } });
+
+        // 创建子节点
+        const childNode: InsightNodeType = {
+            id: `drill-${Date.now()}-${Math.random()}`,
+            depth: parentNode.depth + 1,
+            title: action.label || '下钻分析',
+            columnsUsed: Object.values(action.params).filter(v => typeof v === 'string') as string[],
+            promptId: action.promptId,
+            params: action.params,
+            isLoading: true,
+            drillDownActions: [],
+            children: [],
+            isExpanded: true
+        };
+
+        // 添加到父节点
+        parentNode.children.push(childNode);
+        parentNode.isExpanded = true;
+        setInsightNodes([...insightNodes]);
+
+        try {
+            // 渲染代码
+            const renderedCode = getRenderedCode(action.promptId, action.params);
+
+            if (!renderedCode) {
+                throw new Error(`无法渲染模板: ${action.promptId}`);
+            }
+
+            // 执行代码
+            const execResult = await executeInsightWithMode(
+                {
+                    title: childNode.title,
+                    description: '',
+                    columns_used: childNode.columnsUsed,
+                    full_mode: { code: renderedCode },
+                    aggregated_mode: { sql: '', viz_code: '' }
+                },
+                'full',
+                tableName || ''
+            );
+
+            childNode.isLoading = false;
+
+            // 🔍 验证日志：检查执行结果
+            logger.log('UI', '下钻执行结果', {
+                data: {
+                    success: execResult.success,
+                    hasImage: !!execResult.data?.image,
+                    imageLength: execResult.data?.image?.length || 0,
+                    hasSummary: !!execResult.data?.summary,
+                    summaryLength: execResult.data?.summary?.length || 0,
+                    error: execResult.error
+                }
+            });
+
+            if (execResult.success) {
+                childNode.result = {
+                    code: renderedCode,
+                    image: execResult.data?.image,
+                    summary: execResult.data?.summary || '',
+                    columnsUsed: childNode.columnsUsed
+                };
+                logger.log('UI', '下钻成功', { data: { title: childNode.title } });
+            } else {
+                childNode.error = execResult.error || '执行失败';
+                logger.error('UI', '下钻失败', execResult.error);
+            }
+        } catch (error) {
+            childNode.isLoading = false;
+            childNode.error = String(error);
+            logger.error('UI', '下钻异常', error);
+        }
+
+        setInsightNodes([...insightNodes]);
+    };
+
+    // 展开/折叠处理
+    const handleToggleExpand = (nodeId: string) => {
+        const toggleNode = (nodes: InsightNodeType[]): boolean => {
+            for (const node of nodes) {
+                if (node.id === nodeId) {
+                    node.isExpanded = !node.isExpanded;
+                    return true;
+                }
+                if (node.children.length > 0 && toggleNode(node.children)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        toggleNode(insightNodes);
+        setInsightNodes([...insightNodes]);
+    };
+
+    // 自定义分析（可选）
+    const handleCustomAnalysis = (promptId: string, params: Record<string, unknown>) => {
+        logger.log('UI', '自定义分析待实现', { data: { promptId, params } });
+        // TODO: 实现自定义分析逻辑
+    };
 
     return (
         <div className="insight-chain-flow">
@@ -136,36 +240,19 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
                 </div>
             )}
 
-            {/* 假设卡片网格 */}
-            {!isLoading && hypotheses.length > 0 && (
-                <InsightCardGrid
-                    hypotheses={hypotheses}
-                    activeHypothesisId={activeHypothesisId}
-                    onToggleHypothesis={toggleHypothesis}
-                    onAdoptChain={adoptChain}
-                />
-            )}
-
-            {/* 激活假设的洞察节点列表 */}
-            {activeHypothesisId && (
-                <div className="insight-results-container">
-                    <h4 className="insight-results-title">
-                        {t('insightChain.results')}
-                    </h4>
-
-                    {/* 洞察节点 */}
-                    {insights
-                        .filter(i => i.hypothesisId === activeHypothesisId)
-                        .map(node => (
-                            <InsightNode
-                                key={node.id}
-                                node={node}
-                                onAdopt={() => adoptChain(activeHypothesisId)}
-                                onIgnore={() => {
-                                    // TODO: 实现忽略逻辑
-                                }}
-                            />
-                        ))}
+            {/* 🆕 InsightTreeNode 森林布局 */}
+            {!isLoading && insightNodes.length > 0 && (
+                <div className="insight-tree-forest">
+                    {insightNodes.map(node => (
+                        <InsightTreeNode
+                            key={node.id}
+                            node={node}
+                            availableColumns={columns}
+                            onDrillDown={handleDrillDown}
+                            onCustomAnalysis={handleCustomAnalysis}
+                            onToggleExpand={handleToggleExpand}
+                        />
+                    ))}
                 </div>
             )}
         </div>

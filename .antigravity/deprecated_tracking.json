@@ -1,0 +1,27 @@
+[
+    {
+        "originalPath": "src/components/AIConfigModal.tsx",
+        "deprecatedPath": "src/deprecated/components/AIConfigModal.tsx",
+        "movedAt": "2025-12-26T18:16:00.000Z"
+    },
+    {
+        "originalPath": "src/components/debug/GridDebug.tsx",
+        "deprecatedPath": "src/deprecated/components/debug/GridDebug.tsx",
+        "movedAt": "2025-12-26T18:16:00.000Z"
+    },
+    {
+        "originalPath": "src/hooks/useInsightLoader.ts",
+        "deprecatedPath": "src/deprecated/hooks/useInsightLoader.ts",
+        "movedAt": "2025-12-26T18:16:00.000Z"
+    },
+    {
+        "originalPath": "src/hooks/useInsightLoaderWithSkills.ts",
+        "deprecatedPath": "src/deprecated/hooks/useInsightLoaderWithSkills.ts",
+        "movedAt": "2025-12-26T18:16:00.000Z"
+    },
+    {
+        "originalPath": "src/tests/skillsPhase2Test.ts",
+        "deprecatedPath": "src/deprecated/tests/skillsPhase2Test.ts",
+        "movedAt": "2025-12-26T18:16:00.000Z"
+    }
+]

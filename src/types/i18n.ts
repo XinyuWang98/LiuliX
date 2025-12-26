@@ -60,6 +60,14 @@ export interface LanguageConfig {
             priority: string;
         };
 
+        // 表格通用
+        table: {
+            method: string;
+            description: string;
+            charts: string;
+        };
+
+
         // 设置
         settings: {
             apiConfig: string;
@@ -186,6 +194,15 @@ export interface LanguageConfig {
             advancedDesc: string;
             devMode: string;
             devModeDesc: string;
+
+            // 分析能力包设置
+            analysisPackages: string;
+            analysisPackagesDesc: string;
+            chartFonts: string;
+            chartFontsHint: string;
+            saveAndApply: string;
+            restartEngineWarning: string;
+            builtIn: string;
         };
 
         // Prompt 库
@@ -544,6 +561,24 @@ export interface LanguageConfig {
             dataSource: string;
             selectHypothesis: string;
             or: string;
+            analyzing: string;  // 正在执行洞察分析
+            results: string;    // 洞察结果标题
+        };
+
+        // 森林式下钻交互
+        insight: {
+            recommendedAction: string;   // AI推荐
+            recommendedActions: string;  // 推荐分析
+            customAnalysis: string;      // 自选分析
+            selectMethod: string;        // 选择分析方法
+            selectColumn: string;        // 选择列
+            selectColumn2: string;       // 选择第二列
+            pleaseSelect: string;        // 请选择
+            execute: string;             // 执行
+            analyzing: string;           // 正在分析
+            viewCode: string;            // 查看代码
+            drillDown: string;           // 下钻分析
+            maxDepthReached: string;     // 已达到最大下钻深度
         };
 
         // 数据表格

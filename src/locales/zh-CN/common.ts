@@ -15,6 +15,10 @@ export const common = {
     all: '全部',
     featureInDev: '功能开发中...',
     collapse: '收起',
+    // 智能加载提示
+    initCore: '正在初始化 Python 核心环境 ({current}/{total})...',
+    loadPandas: '正在加载 Pandas 数据分析库...',
+    firstTimeTip: '💡 首次运行提示：正在配置本地分析引擎（约 20MB），这可能需要一点时间。下次启动将瞬间完成。',
 };
 
 export const data = {

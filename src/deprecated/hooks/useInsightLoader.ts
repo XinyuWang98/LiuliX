@@ -26,6 +26,10 @@ export function useInsightLoader() {
         rowCount: number,
         tableName?: string
     ): Promise<HypothesisCardType[]> => {
+        // 📊 性能计时：开始
+        const perfStart = performance.now();
+        logger.log('AI洞察', '⏱️ 性能计时开始');
+
         setIsLoading(true);
         setExecutionProgress(null);
 
@@ -37,6 +41,7 @@ export function useInsightLoader() {
             logger.log('AI洞察', '流程启动', { count: columns?.length || 0 });
 
             // 步骤1：获取有效列名（从 DuckDB 动态获取）
+            const step1Start = performance.now();
             let 有效列名: string[] = columns || [];
             if (有效列名.length === 0 && tableName) {
                 logger.log('DuckDB', '从DESCRIBE获取列信息', { data: tableName });

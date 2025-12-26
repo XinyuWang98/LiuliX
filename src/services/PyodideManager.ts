@@ -1,4 +1,10 @@
 import { logger } from '../utils/logger';
+import {
+    getEnabledPackages,
+    getEnabledFonts,
+    getPyodidePackagesToLoad,
+    chartFonts
+} from '../config/analysisPackages';
 
 export interface PyodideResponse {
     id: string;
@@ -21,7 +27,7 @@ class PyodideManager {
         });
     }
 
-    public initialize() {
+    public async initialize(onProgress?: (msg: string, progress: number) => void) {
         if (this.worker) return;
 
         // Create worker using Vite's worker import syntax
@@ -33,10 +39,14 @@ class PyodideManager {
             const data = event.data as PyodideResponse;
 
             if (data.type === 'READY') {
+                // 原有的单一加载逻辑已移除，改由 App.tsx 显式调用 loadEssentials
                 this.isReady = true;
-                logger.log('Python', '引擎就绪');
                 if (this.readyResolver) this.readyResolver();
             } else if (data.type === 'STATUS') {
+                // 透传 Worker 的进度消息
+                if (onProgress) {
+                    onProgress(data.message || 'Loading...', 0);
+                }
                 logger.log('Python', `状态: ${data.message}`);
             } else {
                 // Handle request responses
@@ -46,6 +56,55 @@ class PyodideManager {
                 }
             }
         };
+    }
+
+    /**
+     * Phase 1: 加载核心环境 (Blocking)
+     * 仅加载 pandas, numpy, matplotlib 等基础包
+     */
+    public async loadEssentials(onProgress?: (msg: string) => void) {
+        await this.waitForReady();
+        // 核心包其实在 worker 启动时已经由 Pyodide 自动加载了 (loadPyodideAndPackages)
+        // 这里主要做一些基础配置或检查，或者在此处显式加载核心包以获得进度
+        // 目前 worker.ts 中是自动加载的，所以这里暂且保留为空，
+        // 但为了统一接口，可以在 worker 中把自动加载改为等待指令。
+        // 为最小化改动，假设 worker 启动完毕即代表核心包就绪。
+        if (onProgress) onProgress('Core packages ready');
+    }
+
+    /**
+     * Phase 2: 加载用户扩展包 (Silent/Background)
+     * 根据设置加载 scikit-learn, statsmodels 等
+     */
+    public async loadUserConfigExtensions(onProgress?: (msg: string) => void) {
+        await this.waitForReady();
+
+        // 1. 获取用户启用的包
+        const enabledIds = getEnabledPackages();
+        // 核心包ID，不需要重复加载
+        const coreIds = ['basic'];
+
+        // 过滤出需要加载的扩展包 ID
+        const extensionIds = enabledIds.filter(id => !coreIds.includes(id));
+
+        // 计算对应的 Pyodide 包名
+        const packagesToLoad = getPyodidePackagesToLoad(extensionIds);
+
+        if (packagesToLoad.length > 0) {
+            logger.log('Python', `[后台] 正在静默加载扩展包: ${packagesToLoad.join(', ')}`);
+            if (onProgress) onProgress(`Loading extensions: ${packagesToLoad.join(', ')}`);
+            await this.sendMessage('LOAD_PACKAGES', { packages: packagesToLoad });
+        }
+
+        // 2. 加载字体 (通常很快，也可以放在这里)
+        const { fonts } = getEnabledFonts(undefined);
+        if (fonts.length > 0) {
+            const fontId = fonts[0];
+            const fontConfig = chartFonts.find(f => f.id === fontId);
+            if (fontConfig) {
+                await this.loadFont(fontConfig.fontUrl, fontConfig.fontFile);
+            }
+        }
     }
 
     public async waitForReady() {
@@ -142,6 +201,11 @@ class PyodideManager {
             this.worker.postMessage({ id, type, content });
         });
     }
+
+    /**
+     * 加载用户配置的包和字体
+     */
+
 }
 
 export const pyodideManager = new PyodideManager();

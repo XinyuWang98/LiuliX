@@ -1,9 +1,13 @@
 /**
  * 预置模板（QualityGate全拒绝时的兜底方案）
  * 提供基础数据概览洞察
+ * 
+ * ⚠️ 注意：所有 Python 代码模板已通过 pythonCodeValidator 验证
+ * 修改此文件时，请确保运行验证器检查
  */
 
 import { InsightSuggestion } from '@/services/prompts/batchInsightGenerator';
+import { validatePythonCode, formatValidationResult } from './pythonCodeValidator';
 
 /**
  * 获取预置模板洞察（兜底方案）
@@ -206,4 +210,21 @@ json.dumps(result)`
             }
         }
     ];
+}
+
+/**
+ * 验证所有预置模板的 Python 代码
+ * 开发时可调用此函数确保代码质量
+ */
+export function validateAllFallbackTemplates(): void {
+    const templates = getFallbackInsights();
+
+    templates.forEach((template, index) => {
+        if (template.full_mode?.code) {
+            const result = validatePythonCode(template.full_mode.code);
+            if (!result.valid) {
+                console.error(`❌ 模板 ${index + 1} "${template.title}" 验证失败:`, formatValidationResult(result));
+            }
+        }
+    });
 }

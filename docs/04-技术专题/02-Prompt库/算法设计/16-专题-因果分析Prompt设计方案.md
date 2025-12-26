@@ -54,7 +54,12 @@ graph TD
    - 适用: 面板数据 (Panel Data)，有"干预组/对照组" 和 "干预前/干预后"。
    - 信号: 用户提到 "政策实施前后", "实验组对比", 且数据包含时间列和组别列。
 
-3. **DoWhy (通用观测推断)**
+3. **PSM (倾向性得分匹配)**
+   - 适用: 观察性数据存在选择偏差 (Selection Bias)。
+   - 信号: "匹配", "控制混淆变量", "比较相似样本"。
+   - 逻辑: 当用户想比较两组差异，且这两组在其他属性上分布不均时推荐。
+
+4. **DoWhy (通用观测推断)**
    - 适用: 普通横截面数据，需要排除混淆变量。
    - 信号: "影响因素分析", "归因", "相关性 vs 因果性"。这是默认兜底选项。
 
@@ -62,7 +67,7 @@ graph TD
 请返回以下 JSON 格式，不要包含任何解释：
 
 {
-  "recommended_method": "RDD" | "DID" | "DOWHY",
+  "recommended_method": "RDD" | "DID" | "PSM" | "DOWHY",
   "reason": "简短的一句话理由，例如：检测到 'gpa' 列在 3.5 处有明确政策断点。",
   "missing_info_question": "如果无法决策，请生成一句追问用户的话 (可选，若有此字段则前端会先追问用户)"
 }
@@ -117,7 +122,35 @@ graph TD
 - 必须标注出 Intervention Date。
 ```
 
-### 4.3 Worker: DoWhy 专员 (Prompt)
+### 4.3 Worker: PSM 专员 (Prompt)
+
+**ID**: `builtin-causal-worker-psm`
+
+```markdown
+# Role
+你是一个专注于 **倾向性得分匹配 (Propensity Score Matching)** 的专家。
+
+# Goal
+利用 Logistic Regression 计算倾向性得分，进行最近邻匹配，评估 ATE (Average Treatment Effect)。
+
+# Input Confirmation
+- Treatment (干预变量, 0/1): {{TREATMENT_COL}}
+- Outcome (结果变量): {{OUTCOME_COL}}
+- Confounders (混淆变量列表): {{CONFOUNDERS_LIST}}
+
+# Code Protocol
+1. **预处理**: 删除 Confounders 中的缺失值。
+2. **计算 Propensity Score**: 使用 `sklearn.linear_model.LogisticRegression` 拟合 `T ~ C1 + C2 + ...`。
+3. **匹配 (Matching)**: 使用 `sklearn.neighbors.NearestNeighbors` 为每个 Treatment=1 找到最近的 Treatment=0。
+4. **平衡性检验 (Balance Check)**: 计算匹配前后 Confounders 的标准化差异 (SMD)，并绘图 (`sns.stripplot` 或 `Love Plot`)。
+5. **效应估计**: 对匹配后的样本进行 T 检验。
+
+# Visualization
+- 必须绘制 **SMD Plot** (Standardized Mean Difference) 展示匹配前后的平衡性改善。
+- 必须绘制 **Propensity Score Distribution** (重叠性检验)。
+```
+
+### 4.4 Worker: DoWhy 专员 (Prompt)
 
 **ID**: `builtin-causal-worker-dowhy`
 
@@ -158,6 +191,7 @@ async function runCausalAnalysis(userQuery, dataContext) {
   switch (decision.recommended_method) {
     case 'RDD': workerPromptId = 'builtin-causal-worker-rdd'; break;
     case 'DID': workerPromptId = 'builtin-causal-worker-did'; break;
+    case 'PSM': workerPromptId = 'builtin-causal-worker-psm'; break;
     case 'DOWHY': workerPromptId = 'builtin-causal-worker-dowhy'; break;
   }
   

@@ -8,6 +8,7 @@ import { Play, CheckCircle, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react
 import '../SettingsPage.css';
 import { SUPPORTED_MODELS } from '@/services/localLLMService';
 import { LogDownloadButton } from './LogDownloadButton';
+import { AnalysisPackagesSettings } from './AnalysisPackagesSettings';
 
 // Import Types
 import { type AIModel } from '@/services/aiService';
@@ -266,6 +267,11 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         />
                     </SettingsGroup>
                 </>
+            )}
+
+            {/* Analysis Packages */}
+            {activeCategory === 'analysis-packages' && (
+                <AnalysisPackagesSettings />
             )}
         </main>
     );

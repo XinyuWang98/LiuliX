@@ -50,7 +50,7 @@
 .settings-modal-container {
     width: var(--settings-modal-width);
     height: var(--settings-modal-height);
-    background: var(--bg-panel);
+    background: #09090b;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -545,4 +545,558 @@
 
 .drag-handle:active {
     cursor: grabbing;
+}
+
+/* ========== 分析能力包设置样式 ========== */
+
+.analysis-packages-list {
+    padding: 8px;
+}
+
+.analysis-package-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+}
+
+.analysis-package-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.analysis-package-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+}
+
+.analysis-package-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.analysis-package-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--bg-accent);
+}
+
+.analysis-package-checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.analysis-package-icon {
+    font-size: 20px;
+    display: flex;
+    /* 确保图标居中 */
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    /* 使用次要文本颜色，避免 emoji 过于突兀，如果是 lucide icon 会继承 */
+}
+
+.analysis-package-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.analysis-package-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 锁定图标样式 */
+.analysis-package-lock {
+    color: var(--text-secondary);
+    opacity: 0.7;
+    margin-right: 2px;
+    /* 调整与 checkbox 占位的对齐 */
+}
+
+/* 移除旧的 badge 样式，如果不再使用 */
+.analysis-package-builtin-badge {
+    font-size: 10px;
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 400;
+    display: none;
+    /* 暂时隐藏，替换为 Lock Icon */
+}
+
+.analysis-package-size {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.analysis-package-expand-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.analysis-package-expand-btn:hover {
+    color: var(--text-primary);
+}
+
+/* 优化后的方法列表 (Grid Style) */
+.analysis-package-methods {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.1);
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    /* 响应式网格 */
+    gap: 12px;
+}
+
+.analysis-method-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.analysis-method-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.analysis-method-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.analysis-method-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-bottom: 10px;
+    flex: 1;
+    /* 让描述撑开中间部分，标签沉底 */
+}
+
+.analysis-method-charts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    /* 标签底部对齐 */
+}
+
+.analysis-chart-tag {
+    font-size: 11px;
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    color: #22d3ee;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* 底部 Sticky Footer */
+.analysis-packages-actions {
+    position: sticky;
+    bottom: calc(var(--setting-content-padding) * -1);
+    /* 抵消父容器 padding-bottom */
+    margin: 16px calc(var(--setting-content-padding) * -1) calc(var(--setting-content-padding) * -1);
+    /* 抵消左右和下边距 */
+    padding: 16px 24px;
+
+    background: rgba(20, 20, 23, 0.85);
+    /* 接近背景色但带透明 */
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+
+    /* 动画 */
+    animation: slideUp 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.analysis-packages-warning {
+    font-size: 12px;
+    color: #f59e0b;
+    /* Amber 500 warning color */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.analysis-packages-save-btn {
+    background: var(--bg-accent);
+    color: white;
+    border: none;
+    /* No border for primary button */
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+}
+
+.analysis-packages-save-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.analysis-packages-save-btn:active {
+    transform: translateY(0);
+}
+
+/* 设置 Badge 提示 */
+.setting-badge-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 4px;
+    color: #10b981;
+    font-size: 11px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+/* Analysis Packages Table View */
+.settings-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: var(--setting-card-border);
+    border-radius: var(--setting-card-radius);
+    background: var(--setting-card-bg);
+    margin-bottom: 24px;
+}
+
+.settings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.settings-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
+}
+
+.settings-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.settings-table tr:last-child td {
+    border-bottom: none;
+}
+
+.settings-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Feature tags in table */
+.feature-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.feature-tag {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.settings-table .pkg-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.settings-table .pkg-icon {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+}
+
+.settings-table .pkg-size {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-family: monospace;
+}
+
+/* =============================================
+   Grid System Refactor Styles
+   ============================================= */
+
+/* Package Card */
+.analysis-pkg-card {
+    background: var(--setting-card-bg);
+    border: var(--setting-card-border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.analysis-pkg-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.analysis-pkg-card.active {
+    border-left: 2px solid var(--primary-color, #22d3ee);
+}
+
+/* Package Header */
+.analysis-pkg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.analysis-pkg-header:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.pkg-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.analysis-pkg-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+/* Grid Content Area */
+.analysis-pkg-content {
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+/* The Grid Itself */
+.analysis-methods-grid {
+    display: grid;
+    /* 自动填充列，最小宽度220px，实现响应式豆腐块 */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+/* Method "Tofu" Card */
+.method-grid-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.method-grid-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.method-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.method-card-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    flex: 1;
+    /* Push tags to bottom */
+}
+
+.method-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.chart-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(34, 211, 238, 0.1);
+    color: var(--primary-color, #22d3ee);
+    white-space: nowrap;
+}
+
+/* Font Settings */
+.font-setting-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.font-setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.font-setting-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.font-setting-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.font-setting-info {
+    display: flex;
+    flex-direction: column;
+}
+
+/* iOS Style Switch */
+.settings-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.settings-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.settings-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--ios-switch-bg-inactive, rgba(120, 120, 128, 0.32));
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.settings-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.settings-switch input:checked+.settings-slider {
+    background-color: var(--primary-color, #22d3ee);
+}
+
+.settings-switch input:checked+.settings-slider:before {
+    transform: translateX(20px);
+}
+
+/* Font Setting Card Refined */
+.font-setting-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background: var(--setting-card-bg);
+    border: var(--setting-card-border);
+    border-radius: 12px;
+    margin-top: 8px;
 }

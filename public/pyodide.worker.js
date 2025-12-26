@@ -72,17 +72,71 @@ self.addEventListener('message', async (event) => {
                         }
                     }
 
-                    // 执行 Python 代码
-                    const result = await pyodide.runPythonAsync(code);
+                    // 🔧 修复：捕获 stdout 输出
+                    // 使用 Python 的 io.StringIO 重定向 sys.stdout
+                    const captureStdout = `
+import sys
+import io
+import json
 
-                    // 将结果转换为 JavaScript 对象
-                    const jsResult = result?.toJs ? result.toJs({ dict_converter: Object.fromEntries }) : result;
+_stdout_capture = io.StringIO()
+_old_stdout = sys.stdout
+sys.stdout = _stdout_capture
+`;
 
-                    self.postMessage({
-                        id,
-                        type: 'RUN_PYTHON_SUCCESS',
-                        payload: { result: jsResult },
-                    });
+                    const restoreStdout = `
+sys.stdout = _old_stdout
+_captured_output = _stdout_capture.getvalue()
+`;
+
+                    try {
+                        // 1. 开始捕获 stdout
+                        await pyodide.runPythonAsync(captureStdout);
+
+                        // 2. 执行用户代码
+                        await pyodide.runPythonAsync(code);
+
+                        // 3. 恢复 stdout 并返回捕获的输出（作为 Python 表达式）
+                        const capturedOutputRaw = await pyodide.runPythonAsync(`
+sys.stdout = _old_stdout
+_stdout_capture.getvalue()
+`);
+
+                        // 🔧 修复：显式转换 PyProxy 为字符串
+                        const capturedOutput = capturedOutputRaw?.toString() || '';
+
+                        // 🔍 调试：输出捕获的字符串
+                        console.log('[Pyodide Worker] Captured Output Length:', capturedOutput.length);
+                        console.log('[Pyodide Worker] Captured Output Preview:', capturedOutput.substring(0, 200));
+
+                        // 4. 尝试解析为 JSON（支持 print(json.dumps(...)) 模式）
+                        let parsedResult = null;
+                        if (capturedOutput && capturedOutput.trim()) {
+                            try {
+                                parsedResult = JSON.parse(capturedOutput.trim());
+                                console.log('[Pyodide Worker] ✅ JSON Parse Success');
+                            } catch (e) {
+                                console.error('[Pyodide Worker] ❌ JSON Parse Failed:', e);
+                                console.log('[Pyodide Worker] Raw Output:', capturedOutput);
+                                // 不是 JSON，返回原始文本
+                                parsedResult = { textOutput: capturedOutput };
+                            }
+                        }
+
+                        self.postMessage({
+                            id,
+                            type: 'RUN_PYTHON_SUCCESS',
+                            payload: { result: parsedResult },
+                        });
+                    } catch (error) {
+                        // 确保恢复 stdout
+                        try {
+                            await pyodide.runPythonAsync(restoreStdout);
+                        } catch (e) {
+                            // 忽略恢复错误
+                        }
+                        throw error;
+                    }
                 }
                 break;
 

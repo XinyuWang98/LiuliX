@@ -7,6 +7,8 @@ import { useI18n } from '@/contexts/I18nContext';
 import { InsightNode as InsightNodeType, DrillDownAction, MAX_DRILL_DEPTH } from '@/types/insightTree';
 import { DrillDownArea } from './DrillDownArea';
 import { ChevronRight, ChevronDown, Loader, AlertCircle, BarChart2, GitBranch } from 'lucide-react';
+import { useEffect } from 'react';
+import { logger } from '@/utils/logger';
 import './InsightTreeNode.css';
 
 export interface InsightTreeNodeProps {
@@ -33,6 +35,23 @@ export function InsightTreeNode({
     isExecuting = false
 }: InsightTreeNodeProps) {
     const { t } = useI18n();
+
+    // 🔍 验证日志：组件渲染时检查 drillDownActions
+    useEffect(() => {
+        if (node.depth === 0) { // 只记录根节点
+            logger.log('UI', `[InsightTreeNode] 节点渲染`, {
+                data: {
+                    title: node.title,
+                    drillDownActionsCount: node.drillDownActions.length,
+                    hasDrill: node.drillDownActions.length > 0,
+                    drillActions: node.drillDownActions.map(a => ({
+                        promptId: a.promptId,
+                        label: a.label
+                    }))
+                }
+            });
+        }
+    }, [node.depth, node.title, node.drillDownActions]);
 
     const hasChildren = node.children.length > 0;
     const canExpand = hasChildren || node.drillDownActions.length > 0;

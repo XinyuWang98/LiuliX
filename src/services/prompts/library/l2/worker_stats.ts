@@ -19,6 +19,65 @@ export const workerStatsPrompt: UserPrompt = {
         { category: 'output', value: 'table', label: '表格' }
     ],
 
+    // ✅ Router 模式
+    executionMode: 'TEMPLATE_FILL',
+
+    // 预置 Python 代码模板
+    codeTemplate: `import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import base64
+from io import BytesIO
+import json
+
+plt.switch_backend('Agg')
+
+column_name = '{{column_name}}'
+col_data = pd.to_numeric(df[column_name], errors='coerce').dropna()
+
+# 计算统计指标
+stats_dict = {
+    '计数': len(col_data),
+    '均值': col_data.mean(),
+    '标准差': col_data.std(),
+    '最小值': col_data.min(),
+    'Q1': col_data.quantile(0.25),
+    '中位数': col_data.median(),
+    'Q3': col_data.quantile(0.75),
+    '最大值': col_data.max(),
+    '偏度': col_data.skew(),
+    '峰度': col_data.kurtosis()
+}
+
+# 可视化统计指标
+fig, ax = plt.subplots(figsize=(10, 6), dpi=72)
+keys = ['均值', '中位数', '标准差', 'Q1', 'Q3']
+values = [stats_dict[k] for k in keys]
+ax.bar(keys, values, color='#3498db')
+ax.set_title(f'{column_name} 统计摘要', fontsize=14)
+ax.set_ylabel('数值')
+
+# 添加数值标签
+for i, v in enumerate(values):
+    ax.text(i, v + 0.05 * max(values), f'{v:.2f}', ha='center', fontsize=10)
+
+plt.tight_layout()
+
+# 转 Base64
+buffer = BytesIO()
+fig.savefig(buffer, format='png', bbox_inches='tight')
+buffer.seek(0)
+image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+plt.close(fig)
+
+# 生成摘要
+skew_desc = '右偏' if stats_dict['偏度'] > 0.5 else ('左偏' if stats_dict['偏度'] < -0.5 else '对称')
+summary = f"{column_name}: 均值={stats_dict['均值']:.2f}, 中位数={stats_dict['中位数']:.2f}, 标准差={stats_dict['标准差']:.2f}, 分布{skew_desc}"
+
+result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
+json.dumps(result)`,
+
+    // 旧版 AI Prompt (保留兼容)
     template: `
 你是一个专业的 Python 数据分析师。
 请针对 DataFrame \`df\` 中的列 \`{{column_name}}\` 进行描述性统计分析。
@@ -53,7 +112,7 @@ export const workerStatsPrompt: UserPrompt = {
 }
 `,
 
-    inputVariables: ['df_summary', 'column_name'],
+    inputVariables: ['column_name'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

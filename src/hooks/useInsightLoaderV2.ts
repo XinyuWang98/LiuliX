@@ -3,11 +3,14 @@
  * 负责：数据脱敏、内存评估、AI双模式、Skills执行、质量门控
  */
 import { useState, useRef } from 'react';
-import { HypothesisCard as HypothesisCardType } from '@/types/insightChain';
+import { InsightNode } from '@/types/insightTree';
 import { askAIInsight } from '@/services/aiService';
 import { sampleDataForAI } from '@/utils/sampleData';
 import { DuckDBEngine } from '@/db/duckdbEngine';
 import { generateBatchInsightsPrompt, parseBatchInsightsResponse, InsightSuggestion } from '@/services/prompts/batchInsightGenerator';
+// 🆕 Router 模式导入
+import { buildRouterPrompt, parseRouterResponse, buildFallbackRecommendations } from '@/services/prompts/routerPrompt';
+import { inflateRecommendations } from '@/services/insights/inflater';
 import { logger } from '../utils/logger';
 import { localLLMService, SUPPORTED_MODELS } from '@/services/localLLMService';
 import { prepareAIInput } from '@/utils/dataPrivacy';
@@ -39,7 +42,7 @@ export function useInsightLoaderV2() {
         tableName?: string,
         fileName?: string,  // 🆕 文件名参数
         currentFile?: any  // 🆕 当前文件对象（用于缓存管理）
-    ): Promise<HypothesisCardType[]> => {
+    ): Promise<InsightNode[]> => {
         setIsLoading(true);
         setLoadingStage('progress.generatingPrompt');
         setExecutionProgress(null);
@@ -100,14 +103,42 @@ export function useInsightLoaderV2() {
             const useLocalModel = localStorage.getItem('use_local_model') === 'true';
             let aiResponse: string = ''; // 初始化为空字符串，避免未赋值错误
 
-            // 构造Prompt（传入totalRows，使用限制后的列名）
-            const prompt = generateBatchInsightsPrompt(
-                选中列名,  // ✅ 使用限制后的列名
-                采样数据.length,
-                totalRows,
-                privacyMode === 'auto_sanitize' ? [] : 采样数据,  // 脱敏模式下传空
-                t  // i18n翻译函数
-            );
+            // ✅ 获取列类型信息（Router 模式需要）
+            let columnTypes: Record<string, string> | undefined;
+            if (tableName) {
+                try {
+                    const engine = DuckDBEngine.getInstance();
+                    const describeResult = await engine.runQuery(`DESCRIBE ${tableName}`);
+                    columnTypes = Object.fromEntries(
+                        describeResult.map((row: any) => [row.column_name, row.column_type])
+                    );
+                } catch (e) {
+                    logger.warn('AI洞察', 'Failed to get column types');
+                }
+            }
+
+            // ✅ 构造 Router Prompt（使用新架构）
+            const USE_ROUTER_MODE = true; // 🎯 切换开关
+
+            let prompt: string;
+            if (USE_ROUTER_MODE) {
+                prompt = buildRouterPrompt(
+                    选中列名,
+                    privacyMode === 'auto_sanitize' ? [] : 采样数据,
+                    columnTypes
+                );
+                logger.log('AI服务', '[Router] 使用 Router Prompt 模式');
+            } else {
+                // 旧版 Coder Prompt（保留兼容）
+                prompt = generateBatchInsightsPrompt(
+                    选中列名,
+                    采样数据.length,
+                    totalRows,
+                    privacyMode === 'auto_sanitize' ? [] : 采样数据,
+                    t
+                );
+                logger.log('AI服务', '[Coder] 使用传统 Coder Prompt 模式');
+            }
 
             if (useLocalModel) {
                 // ✅ 检查GPU是否可用（及是否为软件模拟）
@@ -199,56 +230,67 @@ export function useInsightLoaderV2() {
                 aiResponse = aiResult.content;
             }
 
-            // ========== 步骤4：解析AI响应（双模式） ==========
+            // ========== 步骤4：解析AI响应并膨胀为 InsightNode[] ==========
             setLoadingStage('progress.analyzingResponse');
-            let insightSuggestions = parseBatchInsightsResponse(aiResponse);
+            let insightNodes: InsightNode[] = [];
 
-            if (insightSuggestions.length === 0) {
-                logger.warn('AI洞察', 'AI未返回有效建议，使用预置模板');
-                insightSuggestions = getFallbackInsights() as InsightSuggestion[];
-            }
+            if (USE_ROUTER_MODE) {
+                // ✅ Router 模式：解析轻量 JSON → 膨胀为完整节点
+                const recommendations = parseRouterResponse(aiResponse);
 
-            logger.log('AI洞察', '解析成功', { data: { count: insightSuggestions.length } });
-
-            // ========== 步骤5：质量门控（过滤低质量） ==========
-            setLoadingStage('progress.validating');
-            const { passed: validated, rejected } = batchValidateInsights(insightSuggestions);
-
-            // 📊 产品分析：记录被拒绝数量（未来可展示"AI探索日志"）
-            if (rejected.length > 0) {
-                logger.log('AI服务', `质量门控拒绝了${rejected.length}个低质量洞察`, {
-                    data: {
-                        rejectedTitles: rejected.map(r => r.insight.title),
-                        rejectedReasons: rejected.map(r => r.score.reasons?.join(', ') || '未知')
-                    }
-                });
-            }
-
-            if (validated.length === 0) {
-                logger.warn('AI服务', '质量门控全部被拒绝，使用预置模板');
-                insightSuggestions = getFallbackInsights();
+                if (recommendations.length === 0) {
+                    logger.warn('AI服务', '[Router] AI未返回推荐，使用规则层兜底');
+                    const fallbackRecs = buildFallbackRecommendations(选中列名, columnTypes);
+                    insightNodes = inflateRecommendations(fallbackRecs as any);
+                } else {
+                    logger.log('AI服务', '[Router] 解析成功', { data: { count: recommendations.length } });
+                    insightNodes = inflateRecommendations(recommendations as any);
+                }
             } else {
-                insightSuggestions = validated.map(v => v.insight);
+                // 旧版 Coder 模式（需要转换为 InsightNode）
+                const insightSuggestions = parseBatchInsightsResponse(aiResponse);
+
+                if (insightSuggestions.length === 0) {
+                    logger.warn('AI洞察', 'AI未返回有效建议，使用预置模板');
+                    const fallback = getFallbackInsights();
+                    // 转换为 InsightNode 格式
+                    insightNodes = fallback.map((sugg, idx) => ({
+                        id: `node-${Date.now()}-${idx}`,
+                        depth: 0,
+                        title: sugg.title,
+                        columnsUsed: sugg.columns_used || [],
+                        promptId: '',
+                        params: {},
+                        isLoading: false,
+                        drillDownActions: [],
+                        children: [],
+                        isExpanded: false,
+                        result: {
+                            code: sugg.full_mode.code,
+                            summary: '',
+                            columnsUsed: sugg.columns_used || []
+                        }
+                    }));
+                    logger.log('AI洞察', '解析成功', { data: { count: insightNodes.length } });
+                }
             }
 
-            // ========== 步骤6：批量内存评估与Skills执行 ==========
-            const 洞察卡片: HypothesisCardType[] = [];
-            let validCount = 0;
+            // ========== 步骤5：执行代码并填充结果 ==========
+            setLoadingStage('progress.validating');
 
-            // ⚠️ 安全限制：最多执行5个洞察
             const maxInsights = Math.min(
-                insightSuggestions.length,
+                insightNodes.length,
                 RESOURCE_LIMITS.SAFETY_LIMITS.MAX_INSIGHTS_PER_RUN
             );
 
             for (let i = 0; i < maxInsights; i++) {
-                const suggestion = insightSuggestions[i];
+                const node = insightNodes[i];
 
                 // 更新进度
                 setExecutionProgress({ current: i + 1, total: maxInsights });
                 setLoadingStage('progress.generatingInsight');
 
-                // ⚠️ 执行中内存监控：每2个洞察检查一次
+                // 执行中内存监控
                 if (i % 2 === 0 && i > 0) {
                     const freeMemory = checkAvailableMemory();
                     if (freeMemory < RESOURCE_LIMITS.SAFETY_LIMITS.MIN_FREE_MEMORY) {
@@ -257,104 +299,95 @@ export function useInsightLoaderV2() {
                     }
                 }
 
-                // 6.1 内存评估
-                const assessment = await assessMemoryBeforeExecution(
-                    totalRows,
-                    suggestion.columns_used || []
-                );
+                // 如果节点已有代码，执行它
+                if (node.result?.code) {
+                    try {
+                        node.isLoading = true;
 
-                logger.log('AI服务', `洞察${i + 1}: ${assessment.mode}模式`, {
-                    data: { memory: `${assessment.estimatedMemory.toFixed(0)}MB` }
-                });
+                        // 内存评估
+                        const assessment = await assessMemoryBeforeExecution(
+                            totalRows,
+                            node.columnsUsed
+                        );
 
-                // 6.2 执行对应模式
-                const result = await executeInsightWithMode(
-                    suggestion,
-                    assessment.mode,
-                    tableName || ''
-                );
-
-                if (result.success) {
-                    // ========== 执行后质量评估 ==========
-                    const postScore = validateExecutionResult(
-                        suggestion,
-                        {
-                            image: result.data?.image || '',
-                            summary: result.data?.summary || ''
-                        }
-                    );
-
-                    if (postScore.passed) {
-                        // ✅ 高价值洞察 - 展示给用户
-                        validCount++;
-                        洞察卡片.push({
-                            id: `insight-${Date.now()}-${i}`,
-                            title: suggestion.title,
-                            description: suggestion.description,
-                            verificationMethod: `执行模式：${assessment.mode}`,
-                            fileName: fileName,  // 🆕 添加文件名
-                            columnsUsed: suggestion.columns_used || [],  // 🆕 添加列名
-                            isExpanded: false,
-                            executionResult: {
-                                image: result.data?.image || '',
-                                summary: result.data?.summary || '',
-                                code: suggestion.full_mode.code
-                            },
-                            executionStatus: 'success'
+                        logger.log('AI服务', `洞察${i + 1}: ${assessment.mode}模式`, {
+                            data: { title: node.title, memory: `${assessment.estimatedMemory.toFixed(0)}MB` }
                         });
-                    } else {
-                        // ⚠️ 低价值洞察 - 记录到日志，不展示
-                        logger.log('AI服务', `洞察${i + 1}质量不足，不展示`, {
-                            data: {
-                                title: suggestion.title,
-                                score: postScore.total,
-                                reasons: postScore.reasons
+
+                        // 执行代码
+                        const execResult = await executeInsightWithMode(
+                            {
+                                title: node.title,
+                                description: '',
+                                columns_used: node.columnsUsed,
+                                full_mode: { code: node.result.code },
+                                aggregated_mode: { sql: '', viz_code: '' }
+                            },
+                            assessment.mode,
+                            tableName || ''
+                        );
+
+                        node.isLoading = false;
+
+                        if (execResult.success) {
+                            // 质量门控
+                            const postScore = validateExecutionResult(
+                                {
+                                    title: node.title,
+                                    description: '',
+                                    columns_used: node.columnsUsed,
+                                    full_mode: { code: node.result.code },
+                                    aggregated_mode: { sql: '', viz_code: '' }
+                                },
+                                {
+                                    image: execResult.data?.image || '',
+                                    summary: execResult.data?.summary || ''
+                                }
+                            );
+
+                            if (postScore.passed) {
+                                // 填充结果
+                                node.result = {
+                                    code: node.result.code,
+                                    image: execResult.data?.image,
+                                    summary: execResult.data?.summary || '',
+                                    columnsUsed: node.columnsUsed
+                                };
+                            } else {
+                                logger.log('AI服务', `洞察${i + 1}质量不足，标记为低质量`, {
+                                    data: {
+                                        title: node.title,
+                                        score: postScore.total,
+                                        reasons: postScore.reasons
+                                    }
+                                });
+                                node.error = `质量评分不足：${postScore.total}/100`;
                             }
-                        });
-                    }
-                } else {
-                    logger.warn('Skills', `洞察${i + 1}执行失败`, { data: result.error });
-                }
-            }
-
-            // ========== 步骤7：检查是否全部失败 ==========
-            if (validCount === 0) {
-                logger.warn('Skills', '所有洞察执行失败，使用预置模板');
-                const fallback = getFallbackInsights() as InsightSuggestion[];
-
-                // 执行fallback（使用full模式）
-                for (let i = 0; i < Math.min(fallback.length, 3); i++) {
-                    const fb = fallback[i];
-                    const result = await executeInsightWithMode(fb, 'full', tableName || '');
-
-                    if (result.success) {
-                        洞察卡片.push({
-                            id: `fallback-${i}`,
-                            title: fb.title,
-                            description: fb.description,
-                            verificationMethod: '预置模板',
-                            isExpanded: false,
-                            executionResult: {
-                                image: result.data?.image || '',
-                                summary: result.data?.summary || '',
-                                code: fb.full_mode.code
-                            },
-                            executionStatus: 'success'
-                        });
+                        } else {
+                            node.error = execResult.error || '执行失败';
+                            logger.warn('Skills', `洞察${i + 1}执行失败`, { data: execResult.error });
+                        }
+                    } catch (error) {
+                        node.isLoading = false;
+                        node.error = String(error);
+                        logger.error('Skills', `洞察${i + 1}执行异常`, error);
                     }
                 }
             }
 
-            logger.log('AI洞察', `完成：生成${validCount}条有效洞察`);
+            // 过滤掉失败的节点（可选，保留失败节点可以显示错误信息）
+            const validNodes = insightNodes.filter(node => node.result && !node.error);
 
-            // 🆕 队列优化：更新缓存时间戳
+            logger.log('AI洞察', `完成：生成${validNodes.length}/${insightNodes.length}条有效洞察`);
+
+            // 更新缓存时间戳
             if (currentFileRef.current) {
                 CacheManager.updateInsightTimestamp(currentFileRef.current);
             }
 
             logger.groupEnd();
 
-            return 洞察卡片;
+            return insightNodes; // 返回所有节点（包括失败的）
 
         } catch (error) {
             logger.groupEnd();
@@ -366,15 +399,20 @@ export function useInsightLoaderV2() {
                 CacheManager.invalidateInsightCache(currentFileRef.current);
             }
 
-            // Mock降级
+            // 返回错误节点
             return [
                 {
-                    id: 'mock-error',
+                    id: 'error-node',
+                    depth: 0,
                     title: '洞察生成失败',
-                    description: `错误: ${String(error)}`,
-                    verificationMethod: '请检查数据或重试',
-                    isExpanded: false,
-                    executionStatus: 'error'
+                    columnsUsed: [],
+                    promptId: '',
+                    params: {},
+                    isLoading: false,
+                    error: `错误: ${String(error)}`,
+                    drillDownActions: [],
+                    children: [],
+                    isExpanded: false
                 }
             ];
         } finally {

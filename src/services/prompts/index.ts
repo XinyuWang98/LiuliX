@@ -21,8 +21,12 @@ import { workerCleanDropnaPrompt } from './library/l2/worker_clean_dropna';
 import { workerCleanOutlierPrompt } from './library/l2/worker_clean_outlier';
 import { workerCleanNormalizePrompt } from './library/l2/worker_clean_normalize';
 import { workerCleanTypecastPrompt } from './library/l2/worker_clean_typecast';
+// L2 高级分析类 (P0/P1)
+import { workerRegressionPrompt } from './library/l2/worker_regression';
+import { workerDecisionTreePrompt } from './library/l2/worker_decision_tree';
+import { workerClusterPrompt } from './library/l2/worker_cluster';
 
-// 导出种子全集 (1个L1 + 15个L2 = 16个)
+// 导出种子全集 (1个L1 + 18个L2 = 19个)
 export const seedPrompts = [
     // L1 决策层
     explorerGeneralPrompt,
@@ -42,7 +46,11 @@ export const seedPrompts = [
     workerCleanDropnaPrompt,
     workerCleanOutlierPrompt,
     workerCleanNormalizePrompt,
-    workerCleanTypecastPrompt
+    workerCleanTypecastPrompt,
+    // L2 执行层 - 高级分析类 (3个) 🆕
+    workerRegressionPrompt,
+    workerDecisionTreePrompt,
+    workerClusterPrompt
 ];
 
 /**

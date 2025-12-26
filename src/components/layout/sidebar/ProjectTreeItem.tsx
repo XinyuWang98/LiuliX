@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChevronDown, ChevronRight, FileText } from 'lucide-react';
 import { Project } from '@/utils/projectUtils';
-import { useI18n } from '@/contexts/I18nContext';
 
 interface ProjectTreeItemProps {
     project: Project;

@@ -13,6 +13,10 @@ export const common = {
     no: 'No',
     search: 'Search',
     all: 'All',
+    // Smart Loading Messages
+    initCore: 'Initializing Python Core ({current}/{total})...',
+    loadPandas: 'Loading Pandas Library...',
+    firstTimeTip: '💡 First Run Tip: Configuring local analysis engine (~20MB). This may take a moment. Next launch will be instant.',
 };
 
 export const data = {

@@ -4,8 +4,10 @@
 
 import React from 'react';
 import { getPrivacyConfig, savePrivacyConfig, PrivacyMode } from '@/utils/dataPrivacy';
+import { useI18n } from '@/contexts/I18nContext';
 
 export function DataPrivacySection() {
+    const { t } = useI18n();
     const [privacyMode, setPrivacyMode] = React.useState<PrivacyMode>('auto_sanitize');
 
     // 初始化：读取用户设置
@@ -22,9 +24,11 @@ export function DataPrivacySection() {
 
     return (
         <div className="settings-section">
-            <h3 className="settings-section-title">🔒 数据隐私</h3>
+            <h3 className="settings-section-title">
+                {t('settings.dataPrivacyTitle') || '数据隐私'}
+            </h3>
             <p className="settings-section-desc">
-                选择发送给云端AI的数据形式（本地模型无需配置）
+                {t('settings.dataPrivacyDesc') || '选择发送给云端AI的数据形式（本地模型无需配置）'}
             </p>
 
             <div className="settings-options">
