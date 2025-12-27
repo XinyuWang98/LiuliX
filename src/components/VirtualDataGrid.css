@@ -42,8 +42,13 @@
 
 .headerCellTop {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    /* 改为center以便对齐 badge */
+    justify-content: space-between;
+    /* 让名称和 Badge 分开 */
     gap: var(--gap-xs);
+    width: 100%;
+    /* 撑满 */
 }
 
 .headerCellName {
@@ -53,14 +58,99 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    flex: 1;
+    /* 占据剩余空间 */
 }
 
-.headerCellType {
+/* 类型徽章按钮 - 下拉触发器 */
+.headerCellTypeBadge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: var(--radius-s);
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+
     font-size: var(--fs-xxs);
     color: var(--text-tertiary);
     text-transform: uppercase;
-    font-weight: normal;
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
 }
+
+.headerCellTypeBadge:hover,
+.headerCellTypeBadge.active {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+.headerCellTypeBadge:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    color: var(--primary);
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 下拉菜单 */
+.type-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-l);
+    z-index: 1000;
+    /* 高层级 */
+    min-width: 140px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.type-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 6px 10px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-s);
+
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.type-dropdown-item:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.type-dropdown-item.selected {
+    background: var(--primary-bg);
+    /* light version of primary */
+    color: var(--primary);
+    font-weight: var(--fw-bold);
+}
+
 
 .headerCellStats {
     display: flex;
@@ -492,4 +582,56 @@
 .paginationInfo strong {
     color: var(--text-primary);
     font-weight: var(--fw-bold);
+}
+
+/* ========== Portal Dropdown Menu ========== */
+.type-dropdown-menu {
+    /* 强制固定定位和层级 */
+    position: fixed;
+    z-index: 9999;
+
+    /* 尺寸限制 - 修复宽度过宽问题 */
+    width: max-content;
+    min-width: 140px;
+    max-width: 220px;
+
+    /* 外观 - 修复透明度问题，使用实色背景 */
+    background-color: rgb(28, 28, 30);
+    /* 强制不透明 (对应 Apple Dark Surface) */
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-xl);
+
+    /* 布局 */
+    padding: var(--gap-xs);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.type-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    text-align: left;
+    cursor: pointer;
+    border-radius: var(--radius-s);
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.type-dropdown-item:hover {
+    background-color: var(--bg-state-hover);
+    color: var(--text-primary);
+}
+
+.type-dropdown-item.selected {
+    background-color: var(--bg-primary-subtle);
+    color: var(--primary);
+    font-weight: var(--fw-medium);
 }

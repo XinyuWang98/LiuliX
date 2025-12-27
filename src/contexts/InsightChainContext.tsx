@@ -1,6 +1,7 @@
 ﻿import { createContext, useContext, useState, ReactNode } from 'react';
 import { HypothesisCard, InsightNode, InsightChain } from '@/types/insightChain';
 import { useEvidence } from './EvidenceContext';
+import { logger } from '@/utils/logger';
 
 interface InsightChainContextType {
     hypotheses: HypothesisCard[];
@@ -65,7 +66,7 @@ export function InsightChainProvider({ children }: { children: ReactNode }) {
             )
         );
 
-        console.log('[UI] 洞察链已采纳', insightChain);
+        logger.log('UI', '洞察链已采纳', { data: insightChain });
     };
 
     const resetChain = () => {

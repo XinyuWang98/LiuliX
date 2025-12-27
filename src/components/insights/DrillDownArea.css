@@ -7,33 +7,57 @@
     flex-direction: column;
     gap: var(--spacing-sm);
     margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
+    padding-top: var(--gap-m);
     border-top: 1px dashed var(--border-color);
+}
+
+.drill-down-area--vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    margin-top: var(--gap-s);
+}
+
+.drill-down-area--vertical .drill-down-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+    width: 100%;
+}
+
+.drill-down-area--vertical .action-chip {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 8px 12px;
 }
 
 /* 推荐区 */
 .drill-down-area__recommendations {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: var(--gap-s);
 }
 
 .drill-down-area__label {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--gap-s);
     color: var(--text-muted);
-    font-size: var(--font-size-sm);
+    font-size: var(--fs-sm);
 }
 
 .drill-down-area__label svg {
-    color: var(--warning-color);
+    color: var(--warning);
 }
 
 .drill-down-area__chips {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-xs);
+    gap: var(--gap-s);
 }
 
 /* 自选区触发器 */
@@ -44,20 +68,20 @@
 .drill-down-area__custom-btn {
     display: inline-flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    gap: var(--gap-s);
+    padding: var(--gap-s) var(--gap-m);
     background: transparent;
     border: 1px dashed var(--border-color);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-m);
     color: var(--text-muted);
-    font-size: var(--font-size-sm);
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
 }
 
 .drill-down-area__custom-btn:hover:not(:disabled) {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .drill-down-area__chevron {
@@ -72,10 +96,10 @@
 .drill-down-area__custom-panel {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md);
+    gap: var(--gap-m);
+    padding: var(--gap-m);
     background: var(--bg-tertiary);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-m);
     animation: slideDown 0.2s ease-out;
 }
 
@@ -94,45 +118,63 @@
 .drill-down-area__row {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: var(--gap-s);
 }
 
 .drill-down-area__row label {
-    font-size: var(--font-size-sm);
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
 }
 
 .drill-down-area__row select {
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: var(--gap-s) var(--gap-m);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-s);
     background: var(--bg-primary);
     color: var(--text-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--fs-sm);
 }
 
 .drill-down-area__row select:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--primary);
+}
+
+/* 修复选项看不清的问题：强制设置选项背景色和文字色 */
+.drill-down-area__row select option {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
 .drill-down-area__execute-btn {
     align-self: flex-start;
-    padding: var(--spacing-xs) var(--spacing-md);
-    background: var(--primary-color);
+    padding: var(--gap-s) var(--gap-m);
+    background: var(--primary);
     color: var(--text-on-primary);
     border: none;
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-sm);
+    border-radius: var(--radius-s);
+    font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
 }
 
 .drill-down-area__execute-btn:hover:not(:disabled) {
-    background: var(--primary-color-dark);
+    background: var(--primary-hover);
 }
 
 .drill-down-area__execute-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* 覆盖 ActionChip 样式以适应垂直布局 */
+.drill-down-area--vertical .action-chip {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    justify-content: flex-start;
+}
+
+.drill-down-area--vertical .action-chip:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
 }

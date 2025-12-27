@@ -8,6 +8,7 @@ export interface FeatureFlags {
     REAL_AI_INSIGHT: boolean;           // 真实AI洞察（当前Mock）
     REAL_AI_CLEANING: boolean;          // 真实AI清洗建议（当前Mock）
     AI_CHAT_PANEL: boolean;             // AI聊天面板
+    LOCAL_AI_MODEL: boolean;            // 本地AI模型（MVP阶段禁用）
 
     // 报告功能
     PDF_EXPORT: boolean;                // PDF导出（当前仅HTML）
@@ -38,6 +39,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
     REAL_AI_INSIGHT: false,
     REAL_AI_CLEANING: false,
     AI_CHAT_PANEL: false,
+    LOCAL_AI_MODEL: false,  // MVP阶段禁用（质量未达标）
 
     // 报告功能（HTML完成，PDF未完成）
     PDF_EXPORT: false,

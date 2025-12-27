@@ -80,6 +80,8 @@ export interface InsightNode {
     title: string;
     /** 使用的列名 (继承自父节点或由 AI 生成) */
     columnsUsed: string[];
+    /** 来源文件名称 */
+    fileName?: string;
     /** 父节点的结论摘要 (用于上下文注入) */
     parentContext?: string;
     /** 触发此节点的 Prompt ID */
@@ -88,12 +90,36 @@ export interface InsightNode {
     params: Record<string, unknown>;
 
     // 执行状态
+    /**节点执行状态 */
+    status?: 'loading' | 'completed' | 'error';
     /** 是否正在加载 */
     isLoading: boolean;
     /** 执行结果 */
     result?: ExecutionResult;
     /** 错误信息 */
     error?: string;
+
+    // 扩展字段（用于聚焦模式展示）
+    /** AI生成的洞察分析文本 */
+    insight?: string;
+    /** 图表Base64图片 */
+    chartImage?: string;
+    /** 生成的Python代码 */
+    code?: string;
+    /** 元数据（表名、列名等） */
+    metadata?: {
+        tableName?: string;
+        columns?: string[];
+        [key: string]: unknown;
+    };
+    /** 推荐的下钻操作（用于ActionGrid） */
+    recommendedActions?: Array<{
+        id: string;
+        label: string;
+        icon?: string;
+        description?: string;
+        isCustom?: boolean;
+    }>;
 
     // 下钻入口
     /** 可用的下钻动作列表 */

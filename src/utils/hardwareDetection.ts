@@ -251,39 +251,42 @@ export async function detectHardware(): Promise<HardwareDetectionResult> {
 /**
  * 获取硬件描述（用于UI展示）
  */
-export function getHardwareDescription(detection: HardwareDetectionResult): {
+export function getHardwareDescription(
+    detection: HardwareDetectionResult,
+    t: (key: string, params?: any) => string
+): {
     platform: string;
     gpu: string;
     memory: string;
 } {
     // 平台描述
-    let platformDesc = '未知设备';
+    let platformDesc = t('hardware.unknown');
     if (detection.platform.isMac) {
         if (detection.platform.isM1Plus) {
-            platformDesc = 'MacBook (M系列)';
+            platformDesc = t('hardware.macM1Plus');
         } else {
-            platformDesc = 'MacBook (Intel)';
+            platformDesc = t('hardware.macIntel');
         }
     } else if (detection.platform.os === 'windows') {
-        platformDesc = 'Windows PC';
+        platformDesc = t('hardware.windows');
     } else if (detection.platform.os === 'linux') {
-        platformDesc = 'Linux';
+        platformDesc = t('hardware.linux');
     }
 
     // GPU描述
-    let gpuDesc = '未检测到GPU';
+    let gpuDesc = t('hardware.gpuNotDetected');
     if (!detection.gpu.isAvailable) {
-        gpuDesc = '未检测到GPU';
+        gpuDesc = t('hardware.gpuNotDetected');
     } else if (detection.gpu.isFallbackAdapter) {
-        gpuDesc = '软件模拟（无硬件加速）';
+        gpuDesc = t('hardware.gpuSoftware');
     } else {
         const bufferMB = Math.round(detection.gpu.maxBufferSize / (1024 * 1024));
         if (bufferMB >= 2048) {
-            gpuDesc = '独立显卡（高性能）';
+            gpuDesc = t('hardware.gpuHigh');
         } else if (bufferMB >= 1024) {
-            gpuDesc = '独立显卡（中等性能）';
+            gpuDesc = t('hardware.gpuMedium');
         } else {
-            gpuDesc = '集成显卡';
+            gpuDesc = t('hardware.gpuIntegrated');
         }
 
         if (detection.gpu.vendor) {
@@ -292,12 +295,12 @@ export function getHardwareDescription(detection: HardwareDetectionResult): {
     }
 
     // 内存描述
-    let memoryDesc = '未知';
+    let memoryDesc = t('hardware.unknown');
     if (detection.memory.deviceMemoryGB !== undefined) {
         memoryDesc = `${detection.memory.deviceMemoryGB} GB`;
     } else {
         // 降级：显示存储配额作为参考
-        memoryDesc = `约 ${Math.round(detection.memory.storageQuotaGB)} GB 配额`;
+        memoryDesc = `~${Math.round(detection.memory.storageQuotaGB)} GB (Quota)`;
     }
 
     return {

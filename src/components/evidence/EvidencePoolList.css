@@ -1,0 +1,96 @@
+/* 证据池列表样式 */
+
+.evidence-pool-list {
+    background: var(--glass-panel-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border-color);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+}
+
+.evidence-pool-list--empty {
+    padding: var(--gap-xl);
+    text-align: center;
+}
+
+.evidence-pool-list__empty-text {
+    margin: 0;
+    color: var(--text-tertiary);
+    font-size: var(--fs-sm);
+}
+
+/* 头部 */
+.evidence-pool-list__header {
+    padding: var(--gap-m) var(--gap-l);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.evidence-pool-list__title {
+    margin: 0;
+    font-size: var(--fs-m);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 列表 */
+.evidence-pool-list__items {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* 列表项 */
+.evidence-pool-list__item {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: var(--gap-s) var(--gap-l);
+
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition-fast);
+    cursor: default;
+}
+
+.evidence-pool-list__item:last-child {
+    border-bottom: none;
+}
+
+.evidence-pool-list__item:hover {
+    background: var(--bg-hover);
+}
+
+.evidence-pool-list__item-icon {
+    font-size: var(--fs-m);
+    flex-shrink: 0;
+}
+
+.evidence-pool-list__item-title {
+    flex: 1;
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 滚动条 */
+.evidence-pool-list__items::-webkit-scrollbar {
+    width: 6px;
+}
+
+.evidence-pool-list__items::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.evidence-pool-list__items::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: var(--radius-s);
+}
+
+.evidence-pool-list__items::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}

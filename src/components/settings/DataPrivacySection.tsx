@@ -25,10 +25,10 @@ export function DataPrivacySection() {
     return (
         <div className="settings-section">
             <h3 className="settings-section-title">
-                {t('settings.dataPrivacyTitle') || '数据隐私'}
+                {t('settings.dataPrivacyTitle')}
             </h3>
             <p className="settings-section-desc">
-                {t('settings.dataPrivacyDesc') || '选择发送给云端AI的数据形式（本地模型无需配置）'}
+                {t('settings.dataPrivacyDesc')}
             </p>
 
             <div className="settings-options">
@@ -42,11 +42,11 @@ export function DataPrivacySection() {
                     />
                     <div className="option-content">
                         <div className="option-label">
-                            自动脱敏（推荐）
-                            <span className="badge">推荐</span>
+                            {t('settings.dataPrivacy.autoSanitize')}
+                            <span className="badge">{t('settings.dataPrivacy.autoSanitizeBadge')}</span>
                         </div>
                         <div className="option-desc">
-                            仅发送列名和统计信息，不含具体数据值
+                            {t('settings.dataPrivacy.autoSanitizeDesc')}
                         </div>
                     </div>
                 </label>
@@ -61,17 +61,17 @@ export function DataPrivacySection() {
                     />
                     <div className="option-content">
                         <div className="option-label">
-                            发送原始数据
+                            {t('settings.dataPrivacy.sendRaw')}
                         </div>
                         <div className="option-desc">
-                            发送采样数据到云端API以获得更准确的建议
+                            {t('settings.dataPrivacy.sendRawDesc')}
                         </div>
                     </div>
                 </label>
             </div>
 
             <div className="settings-note">
-                💡 提示：使用本地模型时，数据完全不会离开浏览器
+                {t('settings.dataPrivacy.localModelHint')}
             </div>
         </div>
     );

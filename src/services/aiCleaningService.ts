@@ -2,7 +2,6 @@
  * AI清洗建议服务（集成版）
  * 包含数据脱敏、AI调用、三层校验、降级机制、大文件采样
  */
-import { askAICleaning } from './aiService';
 import type { CleaningSuggestion } from './aiService';
 import { buildDesensitizedMetadata, generateQualityIssues } from '@/utils/dataSanitizer';
 import { compressMetadataForPrompt } from '@/utils/promptCompressor';
@@ -10,7 +9,6 @@ import { buildCleaningPrompt } from './prompts/cleaningSuggestions';
 import { validateAIResponse, validateSQLSafety, validateWithDryRun } from '@/utils/sqlValidator';
 import { sampleDataForAI } from '@/utils/sampleData';
 import { logger } from '@/utils/logger';
-import { localLLMService, SUPPORTED_MODELS } from '@/services/localLLMService';
 export { type CleaningSuggestion } from './aiService';
 /**
  * 验证SQL中的列名是否存在于列名映射表中
@@ -50,7 +48,7 @@ export async function generateAICleaningSuggestions(
     language?: string
 ): Promise<CleaningSuggestion[]> {
     const totalStartTime = performance.now(); // 总计时开始
-    logger.group('AI服务', '开始生成清洗建议 (Function Call)');
+    logger.log('AI服务', '开始生成清洗建议 (Function Call)');
     logger.log('AI服务', `Language: ${language}`);
 
     if (signal?.aborted) {
@@ -90,58 +88,21 @@ export async function generateAICleaningSuggestions(
         // 2. 构建 AI Prompt（使用压缩后的数据）
         const prompt = buildCleaningPrompt(tableName, compressedData, qualityIssues, t, language);
         const estimatedTokens = Math.ceil(prompt.length / 1.5);
-        logger.log('AI清洗', '构建Prompt完成', {
+        logger.log('AI清洗', `构建Prompt完成 ${prompt.length}字符 (约${estimatedTokens} tokens)`, {
             data: `${prompt.length}字符 (约${estimatedTokens} tokens)`
         });
-        logger.groupCollapsed('AI清洗', '完整Prompt内容（点击展开）');
-        console.log(prompt);
-        logger.groupEnd();
+        // 完整Prompt内容较长，已省略输出（如需查看可在代码中临时启用）
         onProgress?.(t('cleaning.generatingSuggestions'));
 
-        // 3. 调用本地模型（🚫 API已禁用）
+        // 3. 调用 AI（使用统一的 invokeAI，自动处理本地/API降级）
         const aiStartTime = performance.now();
 
-        // 🔄 切换到本地模型
-        const useLocalModel = localStorage.getItem('use_local_model') === 'true';
-        let content: string;
-
-        if (useLocalModel) {
-            const status = localLLMService.getStatus();
-
-            // 如果模型未加载，先等待预加载完成（最多30秒）
-            if (!status.isReady && !status.isInitializing) {
-                logger.log('AI清洗', '模型未加载，启动加载流程...');
-                await localLLMService.reload(SUPPORTED_MODELS.QWEN);
-            } else if (status.isInitializing) {
-                // 模型正在加载中，等待完成
-                logger.log('AI清洗', '等待模型预加载完成...');
-                const maxWaitTime = 30000; // 30秒
-                const checkInterval = 1000; // 1秒
-                const startTime = Date.now();
-
-                while (Date.now() - startTime < maxWaitTime) {
-                    const currentStatus = localLLMService.getStatus();
-                    if (currentStatus.isReady) {
-                        logger.log('AI清洗', '预加载完成，继续生成');
-                        break;
-                    }
-                    await new Promise(resolve => setTimeout(resolve, checkInterval));
-                }
-            }
-
-
-            const finalStatus = localLLMService.getStatus();
-            if (!finalStatus.isReady) {
-                throw new Error('本地模型加载失败，请刷新页面重试');
-            }
-
-            // ⚡ 使用高优先级，可插队优先执行（用户主动触发的清洗建议）
-            content = await localLLMService.generateInsight(prompt, 'high');
-        } else {
-            // 降级到云端API
-            const { content: apiContent } = await askAICleaning(prompt);
-            content = apiContent;
-        }
+        // 🔄 使用统一 AI 调用服务（自动降级）
+        const { invokeAI } = await import('./aiInvoker');
+        const content = await invokeAI(prompt, {
+            type: 'cleaning',
+            priority: 'high'  // 用户主动触发，高优先级
+        });
 
         const aiDuration = (performance.now() - aiStartTime) / 1000;
         logger.log('AI清洗', 'AI响应收到', {

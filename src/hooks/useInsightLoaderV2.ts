@@ -4,19 +4,16 @@
  */
 import { useState, useRef } from 'react';
 import { InsightNode } from '@/types/insightTree';
-import { askAIInsight } from '@/services/aiService';
 import { sampleDataForAI } from '@/utils/sampleData';
 import { DuckDBEngine } from '@/db/duckdbEngine';
-import { generateBatchInsightsPrompt, parseBatchInsightsResponse, InsightSuggestion } from '@/services/prompts/batchInsightGenerator';
+import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/batchInsightGenerator';
 // 🆕 Router 模式导入
 import { buildRouterPrompt, parseRouterResponse, buildFallbackRecommendations } from '@/services/prompts/routerPrompt';
 import { inflateRecommendations } from '@/services/insights/inflater';
 import { logger } from '../utils/logger';
-import { localLLMService, SUPPORTED_MODELS } from '@/services/localLLMService';
 import { prepareAIInput } from '@/utils/dataPrivacy';
 import { assessMemoryBeforeExecution } from '@/utils/memoryAssessment';
 import { executeInsightWithMode } from '@/services/skills/modeExecutor';
-import { batchValidateInsights } from '@/utils/qualityGate';
 import { getFallbackInsights } from '@/utils/fallbackTemplates';
 import { RESOURCE_LIMITS, checkAvailableMemory } from '@/utils/resourceLimits';
 import { validateExecutionResult } from '@/utils/postExecutionGate';
@@ -28,7 +25,6 @@ export function useInsightLoaderV2() {
     const { t } = useI18n();  // 获取i18n翻译函数
     const [loadingStage, setLoadingStage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingLocalModel, setIsLoadingLocalModel] = useState(false);
     const [executionProgress, setExecutionProgress] = useState<{ current: number; total: number } | null>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
     const currentFileRef = useRef<any>(null);  // 🆕 追踪当前处理的文件
@@ -40,7 +36,6 @@ export function useInsightLoaderV2() {
         columns: string[],
         rowCount: number,
         tableName?: string,
-        fileName?: string,  // 🆕 文件名参数
         currentFile?: any  // 🆕 当前文件对象（用于缓存管理）
     ): Promise<InsightNode[]> => {
         setIsLoading(true);
@@ -100,8 +95,6 @@ export function useInsightLoaderV2() {
             );
 
             // ========== 步骤3：AI生成洞察（双模式） ==========
-            const useLocalModel = localStorage.getItem('use_local_model') === 'true';
-            let aiResponse: string = ''; // 初始化为空字符串，避免未赋值错误
 
             // ✅ 获取列类型信息（Router 模式需要）
             let columnTypes: Record<string, string> | undefined;
@@ -140,95 +133,19 @@ export function useInsightLoaderV2() {
                 logger.log('AI服务', '[Coder] 使用传统 Coder Prompt 模式');
             }
 
-            if (useLocalModel) {
-                // ✅ 检查GPU是否可用（及是否为软件模拟）
-                setLoadingStage('progress.sendingRequest');
-                let hasEnoughMemory = true;
 
-                try {
-                    if ('gpu' in navigator) {
-                        const adapter = await (navigator as any).gpu.requestAdapter();
-                        if (adapter && adapter.limits) {
-                            // 修正：maxBufferSize是单个Buffer限制（通常2GB），不代表总显存
-                            // 只要不是软件模拟适配器(isFallbackAdapter)，且maxBufferSize >= 1GB，就尝试运行
-                            const isSoftware = (adapter as any).isFallbackAdapter;
-                            const maxBufferSize = adapter.limits.maxBufferSize || 0;
-                            const bufferLimitMB = maxBufferSize / (1024 * 1024);
+            // ========== 步骤3.5：使用统一AI调用（自动降级） ==========
+            setLoadingStage('progress.sendingRequest');
+            const aiStartTime = performance.now();
 
-                            logger.log('本地模型', `GPU能力检测`, {
-                                data: {
-                                    isSoftware,
-                                    bufferLimit: `${bufferLimitMB.toFixed(0)}MB`,
-                                    description: (adapter as any).info?.description || 'Unknown' // 如果支持
-                                }
-                            });
+            const { invokeAI } = await import('@/services/aiInvoker');
+            const aiResponse = await invokeAI(prompt, {
+                type: 'insight',
+                priority: 'normal'
+            });
 
-                            // 宽松策略：只要不是软件模拟且Buffer限制>1GB，就认为可以尝试
-                            // 真正的OOM由WebLLM内部捕获
-                            if (isSoftware || bufferLimitMB < 1000) {
-                                hasEnoughMemory = false;
-                                logger.warn('本地模型', `GPU能力不足（软件模拟或显存过小），降级到API模式`);
-                            } else {
-                                hasEnoughMemory = true;
-                                logger.log('本地模型', `GPU检测通过，准备加载模型`);
-                            }
-                        }
-                    }
-                } catch (err) {
-                    logger.warn('本地模型', 'GPU检测失败，降级到API模式', err);
-                    hasEnoughMemory = false;
-                }
-
-                const status = localLLMService.getStatus();
-                if (hasEnoughMemory && !status.isReady && !status.isInitializing) {
-                    setIsLoadingLocalModel(true);
-                    await localLLMService.reload(SUPPORTED_MODELS.QWEN);
-                }
-
-                // 🔄 使用本地模型生成
-                if (localStorage.getItem('use_local_model') === 'true') {
-                    const localStatus = localLLMService.getStatus();
-                    if (hasEnoughMemory && localStatus.isReady) {
-                        aiResponse = await localLLMService.generateInsight(prompt);
-                    } else if (hasEnoughMemory) {
-                        // 🔄 模型正在预加载中，等待最多30秒
-                        logger.log('本地模型', '等待预加载完成...');
-                        const maxWaitTime = 30000; // 30秒
-                        const checkInterval = 1000; //  1秒
-                        const startTime = Date.now();
-
-                        let modelReady = false;
-                        while (Date.now() - startTime < maxWaitTime) {
-                            const currentStatus = localLLMService.getStatus();
-                            if (currentStatus.isReady) {
-                                logger.log('本地模型', '预加载完成，继续生成');
-                                aiResponse = await localLLMService.generateInsight(prompt);
-                                modelReady = true;
-                                break;
-                            }
-                            // 等待1秒后重试
-                            await new Promise(resolve => setTimeout(resolve, checkInterval));
-                        }
-
-
-                        // 如果超时仍未就绪
-                        if (!modelReady) {
-                            throw new Error('本地模型加载超时（30秒），请刷新页面重试');
-                        }
-                    } else {
-                        // 降级到云端API
-                        logger.warn('本地模型', '本地模型未就绪，降级到云端API');
-                        const aiResult = await askAIInsight(prompt);
-                        aiResponse = aiResult.content;
-                    }
-                }
-                setIsLoadingLocalModel(false); // 无论成功失败，都关闭加载状态
-            } else {
-                // 使用云端API
-                setLoadingStage('progress.sendingRequest');
-                const aiResult = await askAIInsight(prompt);
-                aiResponse = aiResult.content;
-            }
+            const aiDuration = (performance.now() - aiStartTime) / 1000;
+            logger.log('AI洞察', `AI响应收到 (${aiResponse.length}字符，耗时${aiDuration.toFixed(1)}秒)`);
 
             // ========== 步骤4：解析AI响应并膨胀为 InsightNode[] ==========
             setLoadingStage('progress.analyzingResponse');
@@ -430,7 +347,6 @@ export function useInsightLoaderV2() {
 
     return {
         isLoading,
-        isLoadingLocalModel,
         executionProgress,
         loadingStage,
         loadInsights,

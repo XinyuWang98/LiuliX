@@ -3,6 +3,8 @@
  * 用于测试时自动收集所有日志，方便问题诊断
  */
 
+import { logger } from './logger';
+
 interface LogEntry {
     timestamp: number;
     level: 'log' | 'warn' | 'error' | 'group' | 'groupEnd';
@@ -27,7 +29,7 @@ class LogCapture {
         this.sessionStartTime = Date.now();
         this.logs = [];
 
-        console.log('[LogCapture] 📝 开始捕捉日志');
+        logger.log('日志捕获', '开始捕捉日志');
     }
 
     /**
@@ -37,7 +39,7 @@ class LogCapture {
         if (!this.isCapturing) return;
 
         this.isCapturing = false;
-        console.log('[LogCapture] ⏹️ 停止捕捉日志', { totalLogs: this.logs.length });
+        logger.log('日志捕获', '停止捕捉日志', { data: { totalLogs: this.logs.length } });
     }
 
     /**
@@ -139,7 +141,7 @@ class LogCapture {
         a.click();
 
         URL.revokeObjectURL(url);
-        console.log('[LogCapture] 💾 日志已下载', { filename });
+        logger.log('日志捕获', '日志已下载', { data: { filename } });
     }
 
     /**
@@ -179,7 +181,7 @@ class LogCapture {
      */
     clear() {
         this.logs = [];
-        console.log('[LogCapture] 🗑️ 日志已清空');
+        logger.log('日志捕获', '日志已清空');
     }
 }
 
@@ -189,9 +191,5 @@ export const logCapture = new LogCapture();
 // 开发环境自动暴露到window
 if (import.meta.env.DEV) {
     (window as any).logCapture = logCapture;
-    console.log('[LogCapture] 💡 使用方法：');
-    console.log('  logCapture.start()     - 开始捕捉');
-    console.log('  logCapture.stop()      - 停止捕捉');
-    console.log('  logCapture.download()  - 下载日志');
-    console.log('  logCapture.getStats()  - 查看统计');
+    logger.log('日志捕获', '使用方法：\n  logCapture.start()     - 开始捕捉\n  logCapture.stop()      - 停止捕捉\n  logCapture.download()  - 下载日志\n  logCapture.getStats()  - 查看统计');
 }

@@ -65,68 +65,52 @@ ctx.onmessage = async (event) => {
             // Execute Python code
             await pyodide.loadPackagesFromImports(content);
 
-            // 🔧 修复：捕获 stdout 输出（支持 print(json.dumps(...)) 模式）
-            const captureStdout = `
+            // 🔧 关键修复：将 stdout 捕获和用户代码合并为单个脚本
+            // 这样所有代码在同一个 Python 执行上下文中运行，变量可以共享
+            const fullScript = `
 import sys
 import io
+
+# 开始捕获 stdout
 _stdout_capture = io.StringIO()
 _old_stdout = sys.stdout
 sys.stdout = _stdout_capture
+
+# === 用户代码开始 ===
+${content}
+# === 用户代码结束 ===
+
+# 恢复 stdout 并返回捕获的内容
+sys.stdout = _old_stdout
+_stdout_capture.getvalue()
 `;
 
             try {
-                // 1. 开始捕获 stdout
-                await pyodide.runPythonAsync(captureStdout);
+                // 一次性执行完整脚本，返回值是捕获的 stdout
+                const capturedOutputRaw = await pyodide.runPythonAsync(fullScript);
 
-                // 2. 执行用户代码
-                const rawResult = await pyodide.runPythonAsync(content);
-
-                // 3. 恢复 stdout 并获取捕获的输出
-                const capturedOutputRaw = await pyodide.runPythonAsync(`
-sys.stdout = _old_stdout
-_stdout_capture.getvalue()
-`);
-
-                // 4. 显式转换 PyProxy 为字符串
+                // 显式转换 PyProxy 为字符串
                 const capturedOutput = capturedOutputRaw?.toString() || '';
 
-                // 🔍 调试日志
-                console.log('[Worker] Captured Output Length:', capturedOutput.length);
-                console.log('[Worker] Captured Output Preview:', capturedOutput.substring(0, 200));
+                // 🔍 调试日志（已移除，使用标准logger）
 
-                // 5. 优先使用 stdout 捕获的内容（print 输出）
-                let result = rawResult;
+                // 优先使用 stdout 捕获的内容（print 输出）
+                let result = null;
                 if (capturedOutput && capturedOutput.trim()) {
                     try {
                         result = JSON.parse(capturedOutput.trim());
-                        console.log('[Worker] ✅ 使用 stdout JSON');
+                        // stdout解析为JSON成功
                     } catch (e) {
-                        console.warn('[Worker] stdout 不是 JSON，使用返回值');
+                        console.warn('[Worker] stdout 不是 JSON，作为文本返回');
                         result = { textOutput: capturedOutput };
                     }
-                }
-                // 6. 如果 stdout 为空，尝试解析返回值
-                else if (typeof rawResult === 'string') {
-                    try {
-                        const trimmed = rawResult.trim();
-                        if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
-                            (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
-                            result = JSON.parse(trimmed);
-                            console.log('[Worker] ✅ 使用返回值 JSON');
-                        }
-                    } catch {
-                        // 不是有效 JSON，保持原字符串
-                    }
+                } else {
+                    console.warn('[Worker] stdout 为空，无可用输出');
+                    result = { error: 'No output captured from Python code' };
                 }
 
                 ctx.postMessage({ id, type: 'SUCCESS', result });
             } catch (error) {
-                // 确保恢复 stdout
-                try {
-                    await pyodide.runPythonAsync('sys.stdout = _old_stdout');
-                } catch (e) {
-                    // 忽略
-                }
                 throw error;
             }
         } else if (type === 'LOAD_DATA') {
@@ -404,7 +388,7 @@ else:
                     await micropip.install(packagesToInstall);
                     micropip.destroy(); // 释放 Python 对象
 
-                    console.log(`[Worker] Packages loaded: ${packages.join(', ')}`);
+                    // Packages加载成功（由micropip处理）
                 }
                 ctx.postMessage({ id, type: 'SUCCESS', result: 'Packages loaded' });
             } catch (err) {

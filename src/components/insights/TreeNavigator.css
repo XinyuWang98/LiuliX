@@ -1,0 +1,121 @@
+/* 树形导航组件样式 */
+
+.tree-navigator {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 导航头部 */
+.tree-navigator__header {
+    padding: var(--gap-m);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.tree-navigator__title {
+    margin: 0;
+    font-size: var(--fs-m);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 树形列表容器 */
+.tree-navigator__tree {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--gap-s) 0;
+}
+
+/* 树节点项 */
+.tree-node-item {
+    user-select: none;
+}
+
+.tree-node-item__content {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    height: 36px;
+    padding-right: var(--gap-s);
+
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+
+    transition: background var(--transition-fast);
+    border-left: 2px solid transparent;
+}
+
+.tree-node-item__content:hover {
+    background: var(--bg-hover);
+}
+
+.tree-node-item__content--active {
+    background: var(--bg-selected);
+    border-left-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* 展开/折叠按钮 */
+.tree-node-item__toggle {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+.tree-node-item__toggle:hover {
+    color: var(--text-primary);
+}
+
+.tree-node-item__spacer {
+    width: 16px;
+    flex-shrink: 0;
+}
+
+/* 节点图标 */
+.tree-node-item__icon {
+    font-size: var(--fs-m);
+    flex-shrink: 0;
+}
+
+/* 节点标题 */
+.tree-node-item__title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Depth标记 */
+.tree-node-item__depth {
+    padding: 2px 6px;
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    color: var(--text-tertiary);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-s);
+    flex-shrink: 0;
+}
+
+/* 子节点容器 */
+.tree-node-item__children {
+    /* 左侧引导线 */
+    border-left: 1px solid var(--border-color);
+    margin-left: 20px;
+}

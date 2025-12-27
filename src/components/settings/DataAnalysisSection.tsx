@@ -15,10 +15,10 @@ export function DataAnalysisSection() {
         <div className="settings-section">
             {/* Removed Emoji, used i18n key */}
             <h3 className="settings-section-title">
-                {t('settings.dataAnalysisStrategy') || '数据分析策略'}
+                {t('settings.dataAnalysisStrategy')}
             </h3>
             <p className="settings-section-desc">
-                选择 AI 采样行数（影响分析速度和准确性）
+                {t('settings.dataAnalysis.samplingHint')}
             </p>
 
             <div className="settings-options">
@@ -31,11 +31,11 @@ export function DataAnalysisSection() {
                     />
                     <div className="option-content">
                         <div className="option-label">
-                            快速模式
-                            <span className="badge coming-soon">敬请期待</span>
+                            {t('settings.dataAnalysis.fastMode')}
+                            <span className="badge coming-soon">{t('settings.dataAnalysis.fastModeBadge')}</span>
                         </div>
                         <div className="option-desc">
-                            AI采样：500行 | 推理时间：~2秒
+                            {t('settings.dataAnalysis.fastModeDesc')}
                         </div>
                     </div>
                 </label>
@@ -50,11 +50,11 @@ export function DataAnalysisSection() {
                     />
                     <div className="option-content">
                         <div className="option-label">
-                            平衡模式（当前MVP）
-                            <span className="badge default">默认</span>
+                            {t('settings.dataAnalysis.balancedMode')}
+                            <span className="badge default">{t('settings.dataAnalysis.balancedModeBadge')}</span>
                         </div>
                         <div className="option-desc">
-                            AI采样：1000行 | 推理时间：~5秒
+                            {t('settings.dataAnalysis.balancedModeDesc')}
                         </div>
                     </div>
                 </label>
@@ -68,11 +68,11 @@ export function DataAnalysisSection() {
                     />
                     <div className="option-content">
                         <div className="option-label">
-                            精确模式
-                            <span className="badge coming-soon">敬请期待</span>
+                            {t('settings.dataAnalysis.preciseMode')}
+                            <span className="badge coming-soon">{t('settings.dataAnalysis.preciseModeBadge')}</span>
                         </div>
                         <div className="option-desc">
-                            AI采样：5000行（动态计算） | 推理时间：~10秒
+                            {t('settings.dataAnalysis.preciseModeDesc')}
                         </div>
                     </div>
                 </label>

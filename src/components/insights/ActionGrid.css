@@ -1,0 +1,82 @@
+/* 下钻操作网格样式 */
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--gap-m);
+}
+
+/* 操作卡片 */
+.action-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-m);
+    padding: var(--gap-l);
+
+    text-align: left;
+    background: var(--glass-panel-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border-color);
+    border-radius: var(--radius-m);
+    cursor: pointer;
+
+    transition: all var(--transition-normal);
+}
+
+.action-card:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 20px var(--color-primary-alpha);
+    transform: translateY(-2px);
+}
+
+.action-card--custom {
+    border-style: dashed;
+    border-width: 2px;
+}
+
+.action-card--custom:hover {
+    border-style: solid;
+}
+
+/* 图标 */
+.action-card__icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: var(--fs-xxl);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-m);
+}
+
+/* 内容 */
+.action-card__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.action-card__title {
+    margin: 0 0 var(--gap-xs) 0;
+    font-size: var(--fs-m);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.action-card__description {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+}

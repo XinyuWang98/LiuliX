@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insight Card Component</title>
+    <style>
+        :root {
+            /* Colors */
+            --bg-body: #09090b;
+            --bg-card: #15191e;
+            --bg-card-hover: #1a1e24;
+            --bg-header-badge: #1e3a8a;
+            --text-header-badge: #60a5fa;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --border-color: #2e353f;
+            --chart-bar-bg: #1e293b;
+            --chart-bar-fill: #1d4ed8;
+            --chart-bar-active: #3b82f6;
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            /* Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 20px;
+        }
+
+        /* Timeline/Connector Line Simulation */
+        .timeline-wrapper {
+            display: flex;
+            gap: 20px;
+            position: relative;
+        }
+
+        .timeline-line {
+            width: 2px;
+            background-color: #334155;
+            position: relative;
+            margin-left: 20px;
+        }
+
+        .timeline-node {
+            position: absolute;
+            top: 24px;
+            left: -19px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--accent-glow);
+            z-index: 2;
+        }
+
+        .timeline-node svg {
+            width: 20px;
+            height: 20px;
+            color: white;
+        }
+
+        /* Main Card */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 380px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Header */
+        .card-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tags {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag {
+            padding: 2px 8px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tag-depth {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--text-header-badge);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .tag-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .tag-dot {
+            width: 6px;
+            height: 6px;
+            background-color: currentColor;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .data-source {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            width: fit-content;
+        }
+
+        .data-source span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .divider {
+            color: var(--text-tertiary);
+        }
+
+        /* Chart Area */
+        .chart-area {
+            padding: var(--spacing-xl) var(--spacing-lg);
+            height: 160px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            position: relative;
+        }
+
+        /* Bar Chart */
+        .bar-container {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .bar {
+            width: 100%;
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.6) 0%, rgba(29, 78, 216, 0.2) 100%);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            height: 0%;
+            /* Animate to value */
+        }
+
+        .bar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--accent-blue);
+            box-shadow: 0 0 8px var(--accent-blue);
+        }
+
+        .bar:hover {
+            background: linear-gradient(180deg, rgba(96, 165, 250, 0.8) 0%, rgba(37, 99, 235, 0.4) 100%);
+        }
+
+        /* Smart Summary */
+        .summary-section {
+            background-color: rgba(59, 130, 246, 0.05);
+            padding: var(--spacing-lg);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .magic-icon {
+            color: var(--accent-blue);
+        }
+
+        .summary-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            padding-left: 24px;
+            /* Align with text start */
+        }
+
+        /* Code Analysis (Collapsible) */
+        .code-analysis {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .code-analysis:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .code-header {
+            padding: var(--spacing-md) var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .code-content {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease;
+            background-color: #0d1117;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #d1d5db;
+        }
+
+        .code-inner {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .wrapper-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .action-wrapper.open .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Accordion / Action Wrapper */
+        .action-wrapper {
+            margin-top: 8px;
+        }
+
+        .action-wrapper .footer-action {
+            margin-top: 0;
+            /* Reset for wrapper context */
+        }
+
+        .expanded-content {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding-left: 20px;
+            /* Indent sub-cards */
+            border-left: 2px dashed #334155;
+            margin-left: 20px;
+            /* Align with node line roughly? No, visually indenting */
+        }
+
+        .sub-card {
+            margin-top: 12px;
+            width: 360px;
+            /* Slightly smaller */
+            transform-origin: top;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="timeline-wrapper">
+        <div class="timeline-line"></div>
+        <div class="timeline-node">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M2 12h20"></path>
+            </svg>
+        </div>
+        <!-- Component Start -->
+        <div>
+            <div class="card">
+                <!-- Header -->
+                <div class="card-header">
+                    <div class="tags">
+                        <div class="tag tag-depth">DEPTH 0</div>
+                        <div class="tag tag-active">
+                            <div class="tag-dot"></div>ACTIVE
+                        </div>
+                    </div>
+                    <div class="title" id="card-title"></div>
+                    <div class="data-source">
+                        <span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3b82f6"
+                                stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            sales_data.csv
+                        </span>
+                        <span class="divider">/</span>
+                        <span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3b82f6"
+                                stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                            revenue
+                        </span>
+                    </div>
+                </div>
+                <!-- Chart -->
+                <div class="chart-area" id="chart-area">
+                    <!-- Bars inserted by JS -->
+                </div>
+                <!-- Summary -->
+                <div class="summary-section">
+                    <div class="summary-header">
+                        <svg class="magic-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                        </svg>
+                        Smart Summary: Revenue
+                    </div>
+                    <div class="summary-text" id="summary-text"></div>
+                </div>
+                <!-- Code Analysis -->
+                <div class="code-analysis" id="code-toggle">
+                    <div class="code-header">
+                        CODE ANALYSIS
+                        <svg class="wrapper-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="code-content" id="code-content">
+                        <div class="code-inner">
+                            import pandas as pd<br>
+                            df = pd.read_csv('sales_data.csv')<br>
+                            revenue = df.groupby('Q')['revenue'].sum()
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer Action Dropdown -->
+            <div class="footer-action">
+                <div class="action-left">
+                    <svg class="action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <line x1="4" y1="21" x2="4" y2="14"></line>
+                        <line x1="4" y1="10" x2="4" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12" y2="3"></line>
+                        <line x1="20" y1="21" x2="20" y2="16"></line>
+                        <line x1="20" y1="12" x2="20" y2="3"></line>
+                        <line x1="1" y1="14" x2="7" y2="14"></line>
+                        <line x1="9" y1="8" x2="15" y2="8"></line>
+                        <line x1="17" y1="16" x2="23" y2="16"></line>
+                    </svg>
+                    <span id="custom-analysis-text"></span>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+            <!-- Recommended Action 1 Wrapper -->
+            <div class="action-wrapper">
+                <div class="footer-action" onclick="toggleAction(this, 'action-1-content')">
+                    <div class="action-left">
+                        <svg class="action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <span>推荐动作 1: 客户分析 <span class="tag tag-depth"
+                                style="display: inline-flex; margin-left: 8px; vertical-align: middle;">DEPTH
+                                1</span></span>
+                    </div>
+                    <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b"
+                        stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div id="action-1-content" class="expanded-content">
+                    <div class="card sub-card">
+                        <!-- Header -->
+                        <div class="card-header">
+                            <div class="tags">
+                                <div class="tag tag-depth">DEPTH 1</div>
+                                <div class="tag tag-active">
+                                    <div class="tag-dot"></div>POTENTIAL
+                                </div>
+                            </div>
+                            <div class="title">客户分析: 高价值客户流失风险</div>
+                            <div class="data-source">
+                                <span>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3b82f6"
+                                        stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                    </svg>
+                                    customer_churn.csv
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Chart -->
+                        <div class="chart-area" id="chart-area-1">
+                            <!-- Bars inserted by JS -->
+                        </div>
+                        <!-- Summary -->
+                        <div class="summary-section">
+                            <div class="summary-header">
+                                <svg class="magic-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                                </svg>
+                                Smart Summary: High Risk
+                            </div>
+                            <div class="summary-text">
+                                Detected a 20% increase in churn risk among top-tier enterprise clients in the last
+                                quarter.
+                            </div>
+                        </div>
+                        <!-- Code Analysis -->
+                        <div class="code-analysis" onclick="toggleCode(this)">
+                            <div class="code-header">
+                                CODE ANALYSIS
+                                <svg class="wrapper-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="code-content">
+                                <div class="code-inner">
+                                    import pandas as pd<br>
+                                    df = pd.read_csv('churn.csv')<br>
+                                    risk = df[df['value'] > 1000].churn_rate()
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Recommended Action 2 Wrapper -->
+            <div class="action-wrapper">
+                <div class="footer-action" onclick="toggleAction(this, 'action-2-content')">
+                    <div class="action-left">
+                        <svg class="action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                        </svg>
+                        <span>推荐动作 2: 地区分布 <span class="tag tag-depth"
+                                style="display: inline-flex; margin-left: 8px; vertical-align: middle;">DEPTH
+                                1</span></span>
+                    </div>
+                    <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b"
+                        stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div id="action-2-content" class="expanded-content">
+                    <div class="card sub-card">
+                        <!-- Header -->
+                        <div class="card-header">
+                            <div class="tags">
+                                <div class="tag tag-depth">DEPTH 1</div>
+                                <div class="tag tag-active">
+                                    <div class="tag-dot"></div>OPPORTUNITY
+                                </div>
+                            </div>
+                            <div class="title">地区分布: 亚太区增长潜力</div>
+                            <div class="data-source">
+                                <span>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3b82f6"
+                                        stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                    </svg>
+                                    regional_sales.csv
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Chart -->
+                        <div class="chart-area" id="chart-area-2">
+                            <!-- Bars inserted by JS -->
+                        </div>
+                        <!-- Summary -->
+                        <div class="summary-section">
+                            <div class="summary-header">
+                                <svg class="magic-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                                </svg>
+                                Smart Summary: Growth Spike
+                            </div>
+                            <div class="summary-text">
+                                APAC region shows a 35% MoM growth, significantly outperforming other regions.
+                            </div>
+                        </div>
+                        <!-- Code Analysis -->
+                        <div class="code-analysis" onclick="toggleCode(this)">
+                            <div class="code-header">
+                                CODE ANALYSIS
+                                <svg class="wrapper-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="code-content">
+                                <div class="code-inner">
+                                    import pandas as pd<br>
+                                    df = pd.read_csv('sales.csv')<br>
+                                    apac = df.groupby('Region').get_group('APAC')
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // i18n
+        const dictionary = {
+            'card.title': '洞察建议1: 销售增长趋势',
+            'summary.content': 'Revenue increased by 15% in Q3 driven by high-value customer acquisitions.',
+            'footer.custom': '自定义分析: 客户分析'
+        };
+        function t(key) {
+            return dictionary[key] || key;
+        }
+        // Helper to render chart
+        function renderChart(containerId, data) {
+            const chartArea = document.getElementById(containerId);
+            if (!chartArea || chartArea.children.length > 0) return; // Prevent double render
+            data.forEach((val, index) => {
+                const barContainer = document.createElement('div');
+                barContainer.className = 'bar-container';
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                // Initially 0 for animation
+                setTimeout(() => {
+                    bar.style.height = val + '%';
+                }, 100 + (index * 100)); // Stagger animation
+                barContainer.appendChild(bar);
+                chartArea.appendChild(barContainer);
+            });
+        }
+        // Render Main Content
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('card-title').textContent = t('card.title');
+            document.getElementById('summary-text').textContent = t('summary.content');
+            document.getElementById('custom-analysis-text').textContent = t('footer.custom');
+            // Render Main Chart
+            renderChart('chart-area', [30, 50, 40, 70, 95]);
+        });
+        // Toggle Actions
+        function toggleAction(headerElement, contentId) {
+            const wrapper = headerElement.parentElement;
+            const content = document.getElementById(contentId);
+            const isOpen = wrapper.classList.contains('open');
+            // Close all others (Optionally) - staying simple for now
+            // document.querySelectorAll('.action-wrapper').forEach(el => {
+            //     el.classList.remove('open');
+            //     el.querySelector('.expanded-content').style.height = 0;
+            // });
+            if (isOpen) {
+                wrapper.classList.remove('open');
+                content.style.height = '0';
+            } else {
+                wrapper.classList.add('open');
+                content.style.height = content.scrollHeight + 'px';
+                // Render sub-charts based on ID
+                if (contentId === 'action-1-content') {
+                    renderChart('chart-area-1', [80, 20, 30, 60, 40]);
+                } else if (contentId === 'action-2-content') {
+                    renderChart('chart-area-2', [45, 55, 65, 85, 90]);
+                }
+            }
+        }
+        // Toggle Code (Updated generic)
+        function toggleCode(element) {
+            const content = element.querySelector('.code-content');
+            const arrowIcon = element.querySelector('.wrapper-icon');
+            const isOpen = element.classList.contains('open');
+            // Need to adjust parent height because it's inside an overflow container
+            const parentExpandedContent = element.closest('.expanded-content');
+            if (isOpen) {
+                element.classList.remove('open');
+                content.style.height = '0';
+                arrowIcon.classList.remove('rotate-180');
+            } else {
+                element.classList.add('open');
+                content.style.height = content.scrollHeight + 'px';
+                arrowIcon.classList.add('rotate-180');
+            }
+            // Adjust Parent Wrapper Height Dynamic Update
+            if (parentExpandedContent) {
+                setTimeout(() => {
+                    parentExpandedContent.style.height = parentExpandedContent.scrollHeight + 'px';
+                }, 300); // Wait for inner transition
+            }
+        }
+        // Initial Code Toggle Binding (for the main card)
+        const mainCodeToggle = document.getElementById('code-toggle');
+        mainCodeToggle.addEventListener('click', function () {
+            toggleCode(this);
+        });
+    </script>
+</body>
+
+</html>

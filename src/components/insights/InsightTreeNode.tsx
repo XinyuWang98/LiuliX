@@ -1,12 +1,7 @@
-/**
- * InsightTreeNode 组件
- * 递归渲染洞察树节点 (支持森林式下钻)
- */
-
 import { useI18n } from '@/contexts/I18nContext';
 import { InsightNode as InsightNodeType, DrillDownAction, MAX_DRILL_DEPTH } from '@/types/insightTree';
 import { DrillDownArea } from './DrillDownArea';
-import { ChevronRight, ChevronDown, Loader, AlertCircle, BarChart2, GitBranch } from 'lucide-react';
+import { ChevronRight, ChevronDown, Loader, AlertCircle, BarChart2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { logger } from '@/utils/logger';
 import './InsightTreeNode.css';
@@ -43,49 +38,39 @@ export function InsightTreeNode({
                 data: {
                     title: node.title,
                     drillDownActionsCount: node.drillDownActions.length,
-                    hasDrill: node.drillDownActions.length > 0,
-                    drillActions: node.drillDownActions.map(a => ({
-                        promptId: a.promptId,
-                        label: a.label
-                    }))
+                    hasDrill: node.drillDownActions.length > 0
                 }
             });
         }
     }, [node.depth, node.title, node.drillDownActions]);
 
     const hasChildren = node.children.length > 0;
-    const canExpand = hasChildren || node.drillDownActions.length > 0;
-    const depthIndent = node.depth * 24; // 每层缩进 24px
+    const canExpand = hasChildren || node.drillDownActions.length > 0 || (!!node.result);
+
+    // 递归对齐：每一层子节点固定 marginLeft: 24px
+    // Root 节点由外部容器控制，这里只控制子节点的缩进
+    const depthIndent = node.depth > 0 ? 24 : 0;
 
     return (
         <div
             className={`insight-tree-node insight-tree-node--depth-${node.depth}`}
-            style={{ marginLeft: depthIndent }}
+            style={node.depth > 0 ? { marginLeft: depthIndent } : undefined}
         >
-            {/* 节点头部 */}
-            <div className="insight-tree-node__header">
-                {/* 展开/折叠按钮 */}
-                {canExpand && (
-                    <button
-                        className="insight-tree-node__toggle"
-                        onClick={() => onToggleExpand(node.id)}
-                    >
-                        {node.isExpanded ? (
-                            <ChevronDown size={16} />
-                        ) : (
-                            <ChevronRight size={16} />
-                        )}
-                    </button>
-                )}
+            {/* Row 1: Header (核心索引) */}
+            <div
+                className="insight-tree-node__header"
+                onClick={() => canExpand && onToggleExpand(node.id)}
+            >
+                {/* 1.1 折叠/展开按钮 */}
+                <div className="insight-tree-node__toggle">
+                    {canExpand ? (
+                        node.isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+                    ) : (
+                        <span className="insight-tree-node__toggle-placeholder" />
+                    )}
+                </div>
 
-                {/* 深度指示器 */}
-                {node.depth > 0 && (
-                    <div className="insight-tree-node__depth-indicator">
-                        <GitBranch size={14} />
-                    </div>
-                )}
-
-                {/* 节点图标 */}
+                {/* 1.2 节点图标 (状态指示) */}
                 <div className="insight-tree-node__icon">
                     {node.isLoading ? (
                         <Loader size={16} className="spinning" />
@@ -96,30 +81,35 @@ export function InsightTreeNode({
                     )}
                 </div>
 
-                {/* 节点标题 */}
-                <div className="insight-tree-node__title">
+                {/* 1.3 标题 */}
+                <div className="insight-tree-node__title" title={node.title}>
                     {node.title}
                 </div>
 
-                {/* 使用的列 */}
+                {/* 1.4 Metadata Tags (Columns) */}
                 {node.columnsUsed.length > 0 && (
-                    <div className="insight-tree-node__columns">
-                        {node.columnsUsed.slice(0, 3).map(col => (
-                            <span key={col} className="insight-tree-node__column-tag">{col}</span>
+                    <div className="insight-tree-node__tags">
+                        {node.columnsUsed.slice(0, 2).map(col => (
+                            <span key={col} className="insight-tag">{col}</span>
                         ))}
-                        {node.columnsUsed.length > 3 && (
-                            <span className="insight-tree-node__column-more">+{node.columnsUsed.length - 3}</span>
+                        {node.columnsUsed.length > 2 && (
+                            <span className="insight-tag insight-tag--more">+{node.columnsUsed.length - 2}</span>
                         )}
                     </div>
                 )}
+
+                {/* 1.5 深度 Badge */}
+                {node.depth > 0 && (
+                    <div className="insight-tree-node__depth-badge">D{node.depth}</div>
+                )}
             </div>
 
-            {/* 节点内容 (展开时显示) */}
+            {/* Content Body (Expanded) */}
             {node.isExpanded && (
-                <div className="insight-tree-node__content">
-                    {/* 加载中 */}
-                    {node.isLoading && (
-                        <div className="insight-tree-node__loading">
+                <div className="insight-node-content-body">
+                    {/* 加载中状态 (局部) */}
+                    {node.isLoading && !node.result && (
+                        <div className="insight-node-loading">
                             <Loader size={20} className="spinning" />
                             <span>{t('insight.analyzing')}</span>
                         </div>
@@ -127,56 +117,64 @@ export function InsightTreeNode({
 
                     {/* 错误信息 */}
                     {node.error && (
-                        <div className="insight-tree-node__error">
+                        <div className="insight-node-error">
                             <AlertCircle size={16} />
                             <span>{node.error}</span>
                         </div>
                     )}
 
-                    {/* 执行结果 */}
+                    {/* 空状态处理：非加载、无错误且无结果 */}
+                    {!node.isLoading && !node.error && !node.result && (
+                        <div className="insight-node-empty">
+                            <span>{t('common.noData')}</span>
+                        </div>
+                    )}
+
+                    {/* 分析结果内容 */}
                     {node.result && (
-                        <div className="insight-tree-node__result">
-                            {/* 图表 */}
+                        <>
+                            {/* Row 3: Visualization */}
                             {node.result.image && (
-                                <div className="insight-tree-node__chart">
+                                <div className="insight-node-row-viz">
                                     <img
                                         src={`data:image/png;base64,${node.result.image}`}
                                         alt={node.title}
+                                        className="insight-chart-thumbnail"
                                     />
                                 </div>
                             )}
 
-                            {/* 摘要 */}
-                            <div className="insight-tree-node__summary">
+                            {/* Row 4: Summary */}
+                            <div className="insight-node-row-summary">
                                 {node.result.summary}
                             </div>
 
-                            {/* 代码 (可折叠) */}
+                            {/* Row 5: Code */}
                             {node.result.code && (
-                                <details className="insight-tree-node__code-details">
+                                <details className="insight-node-row-code">
                                     <summary>{t('insight.viewCode')}</summary>
-                                    <pre className="insight-tree-node__code">
-                                        <code>{node.result.code}</code>
-                                    </pre>
+                                    <pre><code>{node.result.code}</code></pre>
                                 </details>
                             )}
+                        </>
+                    )}
+
+                    {/* Row 6: DrillDownArea */}
+                    {node.result && (
+                        <div className="insight-node-row-drill">
+                            <DrillDownArea
+                                recommendations={node.drillDownActions}
+                                availableColumns={availableColumns}
+                                depth={node.depth}
+                                maxDepth={MAX_DRILL_DEPTH}
+                                onExecuteAction={(action) => onDrillDown(node, action)}
+                                onExecuteCustom={onCustomAnalysis}
+                                isExecuting={isExecuting}
+                            />
                         </div>
                     )}
 
-                    {/* 下钻区域 */}
-                    {node.result && (
-                        <DrillDownArea
-                            recommendations={node.drillDownActions}
-                            availableColumns={availableColumns}
-                            depth={node.depth}
-                            maxDepth={MAX_DRILL_DEPTH}
-                            onExecuteAction={(action) => onDrillDown(node, action)}
-                            onExecuteCustom={onCustomAnalysis}
-                            isExecuting={isExecuting}
-                        />
-                    )}
-
-                    {/* 子节点 (递归渲染) */}
+                    {/* 子节点容器 */}
                     {node.children.length > 0 && (
                         <div className="insight-tree-node__children">
                             {node.children.map(child => (

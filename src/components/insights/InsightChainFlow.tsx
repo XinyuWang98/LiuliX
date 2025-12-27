@@ -12,6 +12,8 @@ import { getRenderedCode } from '@/services/insights/inflater';
 import { executeInsightWithMode } from '@/services/skills/modeExecutor';
 import './InsightChainFlow.css';
 
+const INIT_DELAY_MS = 800;
+
 interface InsightChainFlowProps {
     columns: string[];
     rowCount: number;
@@ -68,7 +70,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsInitializing(false);
-        }, 800);
+        }, INIT_DELAY_MS);
         return () => clearTimeout(timer);
     }, []);
 
@@ -82,11 +84,28 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
     ) => {
         logger.log('UI', '执行下钻分析', { data: { parent: parentNode.title, action: action.label } });
 
+        // 🔍 防重复检查：如果在同一父节点下已有相同 promptId 和 params 的子节点，则不再创建
+        // 防止用户疯狂点击或误触导致生成多个相同的图表
+        const existingChild = parentNode.children.find(child =>
+            child.promptId === action.promptId &&
+            JSON.stringify(child.params) === JSON.stringify(action.params)
+        );
+
+        if (existingChild) {
+            logger.log('UI', '拦截重复下钻操作', { data: { actionLabel: action.label } });
+            // 如果已存在节点被折叠，则展开它
+            if (!existingChild.isExpanded) {
+                existingChild.isExpanded = true;
+                setInsightNodes([...insightNodes]);
+            }
+            return;
+        }
+
         // 创建子节点
         const childNode: InsightNodeType = {
             id: `drill-${Date.now()}-${Math.random()}`,
             depth: parentNode.depth + 1,
-            title: action.label || '下钻分析',
+            title: action.label || t('insight.drillDown'),
             columnsUsed: Object.values(action.params).filter(v => typeof v === 'string') as string[],
             promptId: action.promptId,
             params: action.params,
@@ -145,7 +164,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
                 };
                 logger.log('UI', '下钻成功', { data: { title: childNode.title } });
             } else {
-                childNode.error = execResult.error || '执行失败';
+                childNode.error = execResult.error || t('common.error');
                 logger.error('UI', '下钻失败', execResult.error);
             }
         } catch (error) {
@@ -243,16 +262,20 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
             {/* 🆕 InsightTreeNode 森林布局 */}
             {!isLoading && insightNodes.length > 0 && (
                 <div className="insight-tree-forest">
-                    {insightNodes.map(node => (
-                        <InsightTreeNode
-                            key={node.id}
-                            node={node}
-                            availableColumns={columns}
-                            onDrillDown={handleDrillDown}
-                            onCustomAnalysis={handleCustomAnalysis}
-                            onToggleExpand={handleToggleExpand}
-                        />
-                    ))}
+                    {insightNodes
+                        // 🔍 过滤逻辑: 隐藏有错误的节点 (如质量评分不足: 0/100)
+                        // 只展示高质量、渲染成功的洞察
+                        .filter(node => !node.error)
+                        .map(node => (
+                            <InsightTreeNode
+                                key={node.id}
+                                node={node}
+                                availableColumns={columns}
+                                onDrillDown={handleDrillDown}
+                                onCustomAnalysis={handleCustomAnalysis}
+                                onToggleExpand={handleToggleExpand}
+                            />
+                        ))}
                 </div>
             )}
         </div>

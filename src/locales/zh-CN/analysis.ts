@@ -128,4 +128,91 @@ export const report = {
     suggestion1: '对数据进行分层清洗，重点关注高影响字段',
     suggestion2: '补充缺失值填充策略，避免偏差',
     suggestion3: '定期复查重复数据，确保数据质量',
+    // Markdown 报告生成相关
+    generatedAt: '生成时间',
+    dataSource: '数据源',
+    sampleData: '示例数据',
+    recordsUnit: '条',
+    cleaningSection: '数据清洗记录',
+    analysisSection: '数据分析记录',
+    insightsSection: '关键洞见',
+    visualizationSection: '可视化建议',
+    timestamp: '时间',
+    operationType: '类型',
+    description: '操作说明',
+    tags: '标签',
+    analysisResult: '分析结果',
+    analysisSql: '分析 SQL',
+    detailInfo: '详细信息',
+    nextSteps: '后续计划',
+    upgradeRoadmap: '后续升级计划',
+    roadmapHtml: '升级为交互式 HTML 报告（支持点击证据展开 SQL）',
+    roadmapCharts: '嵌入数据表格和图表',
+    roadmapThemes: '支持主题样式切换',
+    roadmapExport: '单文件 HTML 导出',
+    generatedBy: '本报告由',
+
+    // V0双角色报告新增
+    notebook: {
+        title: 'Notebook 模式',
+        copyCell: '复制Cell',
+        copyAllToColab: '复制全部到Colab',
+        runDisabled: 'V0版本暂不支持执行',
+        runDisabledTip: '请复制代码到Google Colab执行',
+        copyCode: '复制代码',
+        codeCopied: '代码已复制',
+        defaultTitle: 'LiuliX 智能分析报告',
+        defaultSigner: 'AI 数据分析师'
+    },
+
+    audit: {
+        pending: '待审核',
+        approved: '已通过',
+        rejected: '有问题',
+        markApproved: '标记为已审计',
+        markRejected: '标记问题',
+        addNote: '添加备注',
+        progress: '审计进度',
+        signReport: '签字并锁定报告',
+        reportSigned: '报告已锁定',
+        signedBy: '审计人',
+        signedAt: '审计时间',
+        reportLocked: '报告已锁定',
+        unlockAndReaudit: '解锁并重新审计',
+        confirmSign: '确认签字',
+        signConfirmMessage: '我已审计所有Cell，确认无误',
+        allCellsReviewed: '所有Cell已审核',
+        issueType: '问题类型',
+        issueSqlLogic: 'SQL逻辑错误',
+        issueDataAnomaly: '数据异常',
+        issueChartInaccurate: '图表不准确',
+        issueConclusion: '结论不合理',
+        note: '备注',
+        submit: '提交'
+    },
+
+    export: {
+        downloadIpynb: '已下载.ipynb文件',
+        uploadToColab: '请前往 colab.research.google.com 上传',
+        exportDisabled: '需要签字后才能导出',
+        exportPDF: '导出PDF',
+        exportMarkdown: '导出 Markdown',
+        downloadHTML: '下载 HTML 报告',
+        successMarkdown: 'Markdown 已复制到剪贴板',
+        successHTML: 'HTML 报告已下载',
+        needSignFirst: '请先完成审计签字',
+        colabInstructions: '请在Google Colab中上传并运行'
+    },
+
+    mode: {
+        notebook: 'Notebook',
+        report: 'Report',
+        switchTo: '切换到'
+    },
+
+    status: {
+        notSignedYet: '报告尚未签字审计',
+        canPreviewNoExport: '可查看Report预览，但无法导出'
+    }
 };
+

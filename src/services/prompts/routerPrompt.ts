@@ -77,7 +77,50 @@ ${promptList}
 }
 \`\`\`
 
-**只返回 JSON，不要其他内容。**`;
+## 重要约束（3B模型优化）
+⚠️ **promptId约束**:
+- 必须严格从上述模板列表中选择（包括版本号，如 -v1）
+- 禁止自创promptId或省略版本号
+- 示例正确: "worker-distribution-v1"
+- 示例错误: "distribution", "worker-distribution" (缺少-v1)
+
+⚠️ **params约束**:
+- column_name 必须是实际存在的列名
+- 数值参数必须是数字类型（不要加引号）
+- 示例正确: {"column_name": "age", "threshold": 100}
+- 示例错误: {"column_name": "不存在的列", "threshold": "100"}
+
+⚠️ **JSON约束**:
+- 只返回JSON，不要其他markdown说明
+- 确保JSON格式正确（双引号、逗号）
+
+## Few-shot示例
+假设数据列: customer_id (INTEGER), age (INTEGER), salary (DOUBLE), purchase_date (DATE)
+
+正确输出:
+\`\`\`json
+{
+  "recommendations": [
+    {
+      "promptId": "worker-distribution-v1",
+      "params": {"column_name": "age"},
+      "reason": "查看客户年龄分布"
+    },
+    {
+      "promptId": "worker-correlation-v1",
+      "params": {"col_x": "age", "col_y": "salary"},
+      "reason": "分析年龄与收入的关系",
+      "drillHint": {
+        "promptId": "worker-groupby-v1",
+        "params": {"group_col": "age", "agg_col": "salary"},
+        "label": "按年龄段分组"
+      }
+    }
+  ]
+}
+\`\`\`
+
+**现在请分析实际数据并生成推荐。**`;
 }
 
 /**

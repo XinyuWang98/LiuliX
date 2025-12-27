@@ -1,14 +1,17 @@
 
-
 import { useI18n } from '@/contexts/I18nContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { SettingsGroup, SettingsRow } from './SettingsSection';
 import { Switch } from './Switch';
-import { Play, CheckCircle, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
+import { Play, CheckCircle, AlertCircle, ArrowUp, ArrowDown, Loader } from 'lucide-react';
 import '../SettingsPage.css';
 import { SUPPORTED_MODELS } from '@/services/localLLMService';
 import { LogDownloadButton } from './LogDownloadButton';
 import { AnalysisPackagesSettings } from './AnalysisPackagesSettings';
+import { UserRoleSettings } from './UserRoleSettings';
+import { DataPrivacySection } from '../DataPrivacySection';
+import { DataAnalysisSection } from '../DataAnalysisSection';
+import { LocalModelSelector } from './LocalModelSelector';
 
 // Import Types
 import { type AIModel } from '@/services/aiService';
@@ -48,6 +51,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
     const { currentTheme, setTheme } = useTheme();
 
     const { activeCategory } = props;
+    const hardwareScore = props.hardwareDetection?.overallScore;
 
     return (
         <main className="settings-content">
@@ -80,25 +84,69 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         />
                         <div className="theme-grid-wrapper">
                             <div className="theme-grid">
-                                {['apple-dark', 'apple-light', 'neufuture'].map(themeId => (
-                                    <div
-                                        key={themeId}
-                                        className={`theme-card ${currentTheme.id === themeId ? 'active' : ''}`}
-                                        onClick={() => setTheme(themeId as any)}
-                                    >
+                                {['apple-dark', 'apple-light', 'neufuture'].map(themeId => {
+                                    const isDisabled = themeId !== 'apple-dark';
+                                    return (
                                         <div
-                                            className={`theme-preview-box theme-preview-${themeId.replace('apple-', '')} ${themeId.includes('light') ? 'light' : ''}`}
-                                            style={themeId.includes('light') ? undefined : { background: 'var(--theme-preview-dark)' }}
-                                        />
-                                        <span>
-                                            {t(`themes.${themeId}`)}
-                                        </span>
-                                    </div>
-                                ))}
+                                            key={themeId}
+                                            className={`theme-card ${currentTheme.id === themeId ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
+                                            onClick={() => !isDisabled && setTheme(themeId as any)}
+                                        >
+                                            <span>
+                                                {t(`themes.${themeId}`)}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </SettingsGroup>
 
+
+                </>
+            )}
+
+            {/* User Role Settings */}
+            {activeCategory === 'user-role' && (
+                <UserRoleSettings />
+            )}
+
+            {/* AI Config */}
+            {activeCategory === 'ai-config' && (
+                <>
+                    <h2 className="settings-section-title">{t('settings.aiConfig')}</h2>
+                    <p className="settings-section-desc">{t('settings.aiConfigDesc')}</p>
+
+
+                    <SettingsGroup title={t('settings.hardwareEnvironment')}>
+                        {props.isDetecting ? (
+                            <div className="hardware-detection-row">
+                                <Loader size={20} className="spinning" />
+                                <span>{t('hardware.detecting')}</span>
+                            </div>
+                        ) : hardwareScore !== undefined ? (
+                            <div className="hardware-detection-row">
+                                <div className="score-badge" style={{
+                                    backgroundColor: hardwareScore >= 80 ? 'var(--recommend-color)' :
+                                        hardwareScore >= 60 ? '#f59e0b' : 'var(--bg-accent)'
+                                }}>
+                                    {hardwareScore >= 80 ? t('settings.hardwareStrong') :
+                                        hardwareScore >= 60 ? t('settings.hardwareMedium') : t('settings.hardwareWeak')}
+                                </div>
+                                <span className="score-desc">
+                                    {t('settings.hardwareScore', { score: hardwareScore })} - {
+                                        hardwareScore >= 80 ? t('settings.hardwareRecLocal') : t('settings.hardwareRecCloud')
+                                    }
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="hardware-detection-row">
+                                <span>{t('settings.hardwareUnknown')}</span>
+                            </div>
+                        )}
+                    </SettingsGroup>
+
+                    {/* Local Model Settings (Moved here) */}
                     <SettingsGroup title={t('settings.localModelTitle')}>
                         <SettingsRow
                             label={t('settings.localModelEnableTitle')}
@@ -111,40 +159,23 @@ export const SettingsContent = (props: SettingsContentProps) => {
                             }
                         />
                         {props.useLocalModel && (
-                            <div className="settings-info-text">
-                                ℹ️ {t('settings.localModelInfo', { model: SUPPORTED_MODELS.QWEN })}
-                            </div>
-                        )}
-                    </SettingsGroup>
-                </>
-            )}
-
-            {/* AI Config */}
-            {activeCategory === 'ai-config' && (
-                <>
-                    <h2 className="settings-section-title">{t('settings.aiConfig')}</h2>
-                    <p className="settings-section-desc">{t('settings.aiConfigDesc')}</p>
-
-                    {/* Hardware Detection */}
-                    <SettingsGroup title={t('settings.hardwareEnvironment')}>
-                        {props.isDetecting ? (
-                            <div className="hardware-detection-row">
-                                <div className="settings-spinner-tiny" />
-                                <span className="hardware-detection-text">{t('hardware.detecting')}</span>
-                            </div>
-                        ) : props.recommendation ? (
-                            <SettingsRow
-                                label={props.recommendation.mode === 'local' ? t('hardware.localMode') : t('hardware.apiMode')}
-                                description={`${t('hardware.score')}: ${props.hardwareDetection?.overallScore} - ${props.recommendation.reason}`}
-                                action={
-                                    props.recommendation.confidence === 'high' ? (
-                                        <span className="confidence-badge">
-                                            {t('hardware.confidenceHigh')}
-                                        </span>
-                                    ) : null
-                                }
+                            <LocalModelSelector
+                                currentModel={localStorage.getItem('ollama_model') || SUPPORTED_MODELS.QWEN_7B}
+                                onModelChange={(modelId) => {
+                                    localStorage.setItem('ollama_model', modelId);
+                                    // 触发模型重新加载
+                                    window.dispatchEvent(new CustomEvent('ollama-model-change', { detail: modelId }));
+                                }}
                             />
-                        ) : null}
+                        )}
+                        {/* 调用逻辑说明 */}
+                        <div className="model-logic-info">
+                            <div className="model-logic-title">💡 {t('settings.modelLogicTitle')}</div>
+                            <ul className="model-logic-list">
+                                <li>{props.useLocalModel ? t('settings.modelLogicLocal') : t('settings.modelLogicAPI')}</li>
+                                {props.useLocalModel && <li>{t('settings.modelLogicFallback')}</li>}
+                            </ul>
+                        </div>
                     </SettingsGroup>
 
                     {/* API Keys */}
@@ -212,6 +243,8 @@ export const SettingsContent = (props: SettingsContentProps) => {
                     <h2 className="settings-section-title">{t('config.performanceQuality')}</h2>
                     <p className="settings-section-desc">{t('settings.performanceDesc')}</p>
 
+                    <DataAnalysisSection />
+
                     <SettingsGroup title={t('settings.dataProcessing')}>
                         <SettingsRow
                             label={t('config.maxColumns')}
@@ -254,6 +287,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                 <>
                     <h2 className="settings-section-title">{t('settings.advanced')}</h2>
                     <p className="settings-section-desc">{t('settings.advancedDesc')}</p>
+                    <DataPrivacySection />
                     <SettingsGroup>
                         <SettingsRow
                             label={t('settings.devMode')}
@@ -261,8 +295,8 @@ export const SettingsContent = (props: SettingsContentProps) => {
                             action={<Switch checked={false} onChange={() => { }} />}
                         />
                         <SettingsRow
-                            label="测试日志下载"
-                            description="导出完整的测试日志（所有操作记录、错误信息、性能数据）"
+                            label={t('settings.testLogDownload')}
+                            description={t('settings.testLogDownloadDesc')}
                             action={<LogDownloadButton />}
                         />
                     </SettingsGroup>

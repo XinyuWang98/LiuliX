@@ -25,11 +25,14 @@ export type ServiceName =
     | '资源管理'  // 🆕 资源与限制管理
     | '文件管理'
     | 'Python'
+    | 'Python Worker'  // 🆕 Pyodide Worker专用
     | 'Skills'
     | 'UI'
     | '用户操作'  // 🆕 用户操作（采纳洞察等）
     | '系统'
-    | '报告';  // 🆕 报告生成服务
+    | '报告'  // 🆕 报告生成服务
+    | '诊断工具'  // 🆕 WebLLM诊断等工具
+    | '日志捕获';  // 🆕 日志捕获工具
 
 export interface LogOptions {
     data?: any; // 附加数据

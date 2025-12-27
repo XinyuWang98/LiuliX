@@ -63,6 +63,18 @@ export const grid = {
     count: '数量',
     selectAll: '全选',
     deselectAll: '取消全选',
+    dataType: {
+        setAs: '转换为 {type}',
+        integer: '整数 (Integer)',
+        double: '小数 (Double)',
+        string: '文本 (String)',
+        boolean: '布尔值 (Boolean)',
+        date: '日期 (Date)',
+        timestamp: '时间戳 (Timestamp)',
+        modifying: '正在转换...',
+        success: '转换成功',
+        failed: '转换失败'
+    }
 };
 
 export const pagination = {

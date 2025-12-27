@@ -61,9 +61,9 @@ export const SettingsPage = ({ onClose }: SettingsPageProps) => {
                 try {
                     const result = await detectHardware();
                     setHardwareDetection(result);
-                    setRecommendation(getAIModeRecommendation(result));
+                    setRecommendation(getAIModeRecommendation(result, t));
                 } catch (err) {
-                    logger.error('UI', 'Hardware detection failed', err);
+                    logger.error('UI', '硬件检测失败', err);
                 } finally {
                     setIsDetecting(false);
                 }
@@ -84,19 +84,19 @@ export const SettingsPage = ({ onClose }: SettingsPageProps) => {
         setTimeout(async () => {
             try {
                 if (enabled) {
-                    const modelSize = localStorage.getItem('selected_model_size') || '3B';
-                    // @ts-ignore
-                    const modelID = SUPPORTED_MODELS[`QWEN_${modelSize}`] || SUPPORTED_MODELS.QWEN_3B;
+                    // 🔧 快速修复：直接使用唯一可用的模型ID
+                    // TODO: 后续升级到 Qwen-3B 时需要更新 SUPPORTED_MODELS
+                    const modelID = SUPPORTED_MODELS.QWEN_7B;
                     await localLLMService.reload(modelID);
-                    logger.log('AI服务', 'Switched to Local Model');
+                    logger.log('AI服务', '已切换至本地模型');
                 } else {
                     await localLLMService.unload();
-                    logger.log('AI服务', 'Unloaded Local Model');
+                    logger.log('AI服务', '已卸载本地模型');
                 }
                 setUseLocalModel(enabled);
                 localStorage.setItem('use_local_model', enabled.toString());
             } catch (error) {
-                logger.error('UI', 'AI Mode Switch Failed', error);
+                logger.error('UI', 'AI模式切换失败', error);
                 // Revert on failure
                 setUseLocalModel(!enabled);
             } finally {
@@ -192,7 +192,7 @@ export const SettingsPage = ({ onClose }: SettingsPageProps) => {
                 <div className="settings-loading-overlay">
                     <div className="settings-spinner" />
                     <div style={{ fontSize: 16, fontWeight: 500 }}>
-                        {useLocalModel ? '正在释放资源...' : '正在初始化 Neural Engine...'}
+                        {useLocalModel ? t('settings.loadingState.releasing') : t('settings.loadingState.initializing')}
                     </div>
                 </div>
             )}

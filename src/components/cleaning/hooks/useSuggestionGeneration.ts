@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../../contexts/I18nContext';
 import { SimpleSuggestion } from '../types/cleaning.types';
 import { isMissing } from '../utils/dataValidator';
-import { generateAICleaningSuggestions } from '../../../services/aiCleaningService';
+import { generateCleaningSuggestionsV2, getCleaningServiceConfig } from '../../../services/cleaningSuggestionService';
 import { DuckDBEngine } from '../../../db/duckdbEngine';
 import { logger } from '../../../utils/logger';
 
@@ -313,8 +313,8 @@ export function useSuggestionGeneration(
                                     ? activeFile.data.columns
                                     : stats.map(s => ({ name: s.name, type: s.type }));
 
-                                // ✅ P0修复：data.columns已包含{name,type}，直接传递
-                                const aiResults = await generateAICleaningSuggestions(
+                                // ✅ 三层兼容架构调用
+                                const aiResults = await generateCleaningSuggestionsV2(
                                     activeFile.data.tableName,
                                     columns,
                                     stats, // 传递真实stats
@@ -323,7 +323,8 @@ export function useSuggestionGeneration(
                                     (msg) => setAiProgressMsg(msg), // ✅ 实时更新进度文案
                                     undefined, // onSuggestionUpdate
                                     abortControllerRef.current.signal, // signal ✅
-                                    language.name // language
+                                    language.name, // language
+                                    getCleaningServiceConfig() // ✅ 三层配置
                                 );
 
                                 if (aiResults && aiResults.length > 0) {
@@ -463,7 +464,7 @@ export function useSuggestionGeneration(
                 console.log('📊 [调试-刷新] 第一个stat:', stats[0]);
             }
 
-            const aiResults = await generateAICleaningSuggestions(
+            const aiResults = await generateCleaningSuggestionsV2(
                 activeFile.data.tableName,
                 activeFile.data.columns, // ✅ 直接使用，不需要map
                 stats, // ✅ 传递真实stats
@@ -472,7 +473,8 @@ export function useSuggestionGeneration(
                 (msg) => setAiProgressMsg(msg), // ✅ 实时更新进度文案
                 undefined, // onSuggestionUpdate
                 undefined, // signal (Manual refresh doesn't support abort yet, or add AbortController if needed but undefined fixes type error)
-                language.name // 🌍 Pass current language
+                language.name, // 🌍 Pass current language
+                getCleaningServiceConfig() // ✅ 三层配置
             );
 
             if (aiResults) {

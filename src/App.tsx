@@ -46,6 +46,8 @@ function LoadingScreen({ progress, message }: LoadingScreenProps) {
     );
 }
 
+// ... imports
+
 function AppContent() {
     const { t } = useI18n();
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -89,16 +91,16 @@ function AppContent() {
         isPyodideReadyRef.current = true;
 
         const init = async () => {
-            logger.group('系统', '🚀 应用初始化');
+            logger.log('系统', '应用初始化开始');
             try {
                 // 🔍 WebLLM缓存诊断
                 const { diagnoseWebLLMCache } = await import('./utils/webllmDiagnostics');
-                diagnoseWebLLMCache().catch(err => console.error('诊断失败:', err));
+                diagnoseWebLLMCache().catch(err => logger.error('诊断工具', '诊断失败', err));
 
                 // 自动启用本地模型
                 if (!localStorage.getItem('use_local_model')) {
                     localStorage.setItem('use_local_model', 'true');
-                    console.log('✅ 已自动启用本地模型');
+                    logger.log('系统', '已自动启用本地模型');
                 }
 
                 // 💡 检查是否首次运行 (用于显示友好提示)
@@ -157,7 +159,7 @@ function AppContent() {
                     if (shouldPreload) {
                         logger.log('本地模型', '后台预加载启动...');
                         import('@/services/localLLMService').then(({ localLLMService, SUPPORTED_MODELS }) => {
-                            localLLMService.reload(SUPPORTED_MODELS.QWEN, (p, m) => {
+                            localLLMService.reload(SUPPORTED_MODELS.QWEN_7B, (_p, _m) => {
                                 // 仅记录日志，不更新 UI Loading
                                 // logger.debug('本地模型', `后台进度 ${p}%: ${m}`);
                             }).catch(err => logger.warn('本地模型', '后台加载失败', err));
@@ -165,11 +167,10 @@ function AppContent() {
                     }
                 }, 1000);
 
+                logger.log('系统', '应用初始化完成');
             } catch (err) {
                 logger.error('Python', '引擎加载失败', err);
                 setIsPyodideReady(true);
-            } finally {
-                logger.groupEnd();
             }
         };
         init();
@@ -217,7 +218,7 @@ function AppContent() {
     // 处理欢迎界面的文件上传
     const handleWelcomeUpload = async (files: any[], sampledFlags: boolean[]) => {
         try {
-            logger.group('UI', '欢迎界面上传文件处理');
+            logger.log('UI', '欢迎界面上传文件处理开始');
 
             const themeMap = {
                 game: t('dataSource.project.themes.game'),
@@ -249,10 +250,9 @@ function AppContent() {
             // 5. 自动展开左侧栏 (可选，增加沉浸感可不展开，但为了让用户看到文件列表，展开较好)
             setShowLeft(true);
 
-            logger.groupEnd();
+            logger.log('UI', '欢迎界面上传文件处理完成');
         } catch (err) {
             logger.error('UI', '项目创建失败', err);
-            logger.groupEnd();
         }
     };
 

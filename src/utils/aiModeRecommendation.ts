@@ -45,41 +45,46 @@ const REDETECTION_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7天
 /**
  * 获取AI模式推荐
  */
-export function getAIModeRecommendation(detection: HardwareDetectionResult): AIModeRecommendation {
+export function getAIModeRecommendation(
+    detection: HardwareDetectionResult,
+    t: (key: string, params?: any) => string
+): AIModeRecommendation {
     const score = detection.overallScore;
 
-    // 推荐逻辑
-    if (score >= 75) {
-        // 高性能硬件：强烈推荐本地模型
+    // 推荐逻辑 (Ollama 版本 - 性能更好，阈值更宽松)
+    // 🔧 2024-12: 阈值从 75 降到 60，因为 Ollama 原生 GPU 加速性能远超 WebGPU
+    if (score >= 60) {
+        // 中高性能硬件：推荐本地模型
         return {
             mode: 'local',
-            confidence: 'high',
+            confidence: score >= 80 ? 'high' : 'medium',
             reason: detection.platform.isM1Plus
-                ? 'MacBook Pro M系列，硬件性能优秀，本地AI体验流畅'
-                : '您的设备配置优秀，本地AI模型性能出色',
-            technicalReason: `综合评分: ${score}/100 (平台: ${detection.platform.isM1Plus ? 'M系列Mac' : detection.platform.os}, GPU: ${detection.gpu.score}, 内存: ${detection.memory.score})`,
-            expectedLoadTime: '15-25秒',
-            expectedInferenceTime: '20-50秒'
+                ? t('hardware.reasonMacPlus')
+                : t('hardware.reasonGood'),
+            technicalReason: `${t('hardware.score')}: ${score}/100 (${t('hardware.platform')}: ${detection.platform.isM1Plus ? t('hardware.macM1Plus') : (detection.platform.os === 'windows' ? t('hardware.windows') : detection.platform.os)}, GPU: ${detection.gpu.score}, ${t('hardware.memory')}: ${detection.memory.score})`,
+            // Ollama 性能更好，更新预期时间
+            expectedLoadTime: '3-5s',
+            expectedInferenceTime: '10-30s'
         };
-    } else if (score >= 50) {
-        // 中等硬件：轻度推荐API
+    } else if (score >= 40) {
+        // 中等硬件：可以尝试本地，但提示可能较慢
         return {
-            mode: 'api',
-            confidence: 'medium',
-            reason: '您的设备配置一般，建议使用云端AI获得更快速度和更好体验',
-            technicalReason: `综合评分: ${score}/100 (GPU性能一般或内存偏低)`,
-            expectedLoadTime: detection.gpu.score >= 50 ? '30-45秒' : '40-60秒',
-            expectedInferenceTime: detection.gpu.score >= 50 ? '50-90秒' : '60-120秒'
+            mode: 'local',
+            confidence: 'low',
+            reason: t('hardware.reasonMedium'),
+            technicalReason: `${t('hardware.score')}: ${score}/100`,
+            expectedLoadTime: '5-10s',
+            expectedInferenceTime: '30-60s'
         };
     } else {
-        // 低性能硬件：强烈推荐API
+        // 低性能硬件：推荐API
         return {
             mode: 'api',
             confidence: 'high',
-            reason: '您的设备配置较低，强烈建议使用云端AI获得流畅体验',
-            technicalReason: `综合评分: ${score}/100 (硬件性能不足，本地模型会非常慢)`,
-            expectedLoadTime: '60秒以上',
-            expectedInferenceTime: '120秒以上'
+            reason: t('hardware.reasonLow'),
+            technicalReason: `${t('hardware.score')}: ${score}/100`,
+            expectedLoadTime: '> 60s',
+            expectedInferenceTime: '> 120s'
         };
     }
 }

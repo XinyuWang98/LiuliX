@@ -2,8 +2,8 @@
     /* ========== Settings Page Specific Variables ========== */
 
     /* Modal Dimensions */
-    --settings-modal-width: 900px;
-    --settings-modal-height: 600px;
+    --settings-modal-width: 1100px;
+    --settings-modal-height: 800px;
     --settings-sidebar-width: 240px;
 
     /* Card Colors */
@@ -50,6 +50,8 @@
 .settings-modal-container {
     width: var(--settings-modal-width);
     height: var(--settings-modal-height);
+    max-width: 95vw;
+    max-height: 95vh;
     background: #09090b;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -185,7 +187,8 @@
     border: var(--setting-card-border);
     border-radius: var(--setting-card-radius);
     margin-bottom: 24px;
-    overflow: hidden;
+    /* 🔧 改为 visible 以允许下拉菜单溢出 */
+    overflow: visible;
 }
 
 .settings-group-title {
@@ -271,33 +274,121 @@
 .theme-card {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    padding: 12px;
-    text-align: center;
+    padding: 16px;
+    /* Increased padding */
     cursor: pointer;
     background: rgba(255, 255, 255, 0.02);
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+    /* Fixed height */
+    font-weight: 500;
 }
 
-.theme-card:hover {
+.theme-card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    background: transparent;
+    border-style: dashed;
+}
+
+.theme-card:hover:not(.disabled) {
     background: rgba(255, 255, 255, 0.05);
 }
 
 .theme-card.active {
-    border-color: var(--bg-accent);
-    background: rgba(6, 182, 212, 0.1);
-    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+    border-color: var(--setting-active-item-text);
+    /* Brighter border */
+    background: var(--setting-active-item-bg);
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.3);
+    /* Subtle glow */
+}
+
+.theme-card.active span {
+    color: var(--setting-active-item-text);
+    font-weight: 600;
 }
 
 .theme-preview-box {
-    height: 60px;
+    height: 70px;
+    /* Slightly taller */
     border-radius: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     background: var(--theme-preview-dark);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.theme-preview-box.light {
-    background: var(--theme-preview-light);
+/* Apple Dark Preview */
+.theme-preview-dark {
+    background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.theme-preview-dark::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 24px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+/* Apple Light Preview */
+.theme-preview-light {
+    background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.theme-preview-light::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 24px;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+}
+
+/* Neufuture Preview */
+.theme-preview-neufuture {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    position: relative;
+}
+
+.theme-preview-neufuture::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.2) 0%, transparent 50%);
+}
+
+.theme-preview-neufuture::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 24px;
+    height: 4px;
+    background: rgba(6, 182, 212, 0.4);
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+}
+
+.theme-card:hover .theme-preview-box {
+    transform: scale(1.02);
+}
+
+.theme-card.active .theme-preview-box {
+    border-color: var(--bg-accent);
 }
 
 /* Loading Overlay */
@@ -1089,7 +1180,6 @@
     transform: translateX(20px);
 }
 
-/* Font Setting Card Refined */
 .font-setting-card {
     display: flex;
     align-items: center;
@@ -1099,4 +1189,375 @@
     border: var(--setting-card-border);
     border-radius: 12px;
     margin-top: 8px;
+}
+
+/* ========== 本地模型选择器样式 ========== */
+
+.local-model-selector {
+    padding: 0 16px 16px 16px;
+}
+
+.ollama-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.ollama-status.checking {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+}
+
+.ollama-status.online {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.ollama-status.offline {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.ollama-download-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    color: var(--bg-accent);
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.ollama-download-link:hover {
+    text-decoration: underline;
+}
+
+.ollama-refresh-btn {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 4px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.ollama-refresh-btn:hover {
+    opacity: 1;
+}
+
+.model-select-wrapper {
+    margin-bottom: 12px;
+}
+
+.model-select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.model-select:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.model-select:focus {
+    outline: none;
+    border-color: var(--bg-accent);
+}
+
+.model-select option {
+    background: #1a1a1a;
+    color: white;
+}
+
+.custom-model-input {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.custom-model-input input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 13px;
+}
+
+.custom-model-input input:focus {
+    outline: none;
+    border-color: var(--bg-accent);
+}
+
+.custom-model-input button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.custom-model-input button:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.model-tip {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    background: rgba(251, 191, 36, 0.1);
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.model-tip code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.model-error {
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 8px;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* ========== 模型调用逻辑说明 ========== */
+
+.model-logic-info {
+    padding: 12px 16px;
+    background: rgba(6, 182, 212, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.model-logic-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--bg-accent);
+    margin-bottom: 8px;
+}
+
+.model-logic-list {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.model-logic-list li {
+    margin-bottom: 4px;
+}
+
+.model-logic-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* ========== 自定义模型下拉菜单样式 ========== */
+
+.model-dropdown-wrapper {
+    position: relative;
+    margin-bottom: 12px;
+    z-index: 50;
+    /* 确保下拉菜单在其他元素之上 */
+}
+
+.model-dropdown-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.model-dropdown-trigger:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.model-dropdown-trigger.open {
+    border-color: var(--bg-accent);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.model-dropdown-trigger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.model-dropdown-value {
+    flex: 1;
+    text-align: left;
+}
+
+.model-dropdown-arrow {
+    transition: transform 0.2s ease;
+    opacity: 0.7;
+}
+
+.model-dropdown-arrow.rotated {
+    transform: rotate(180deg);
+}
+
+.model-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 320px;
+    overflow-y: auto;
+    background: rgba(20, 20, 22, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    animation: dropdownFadeIn 0.15s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.model-dropdown-group {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.model-dropdown-group:last-child {
+    border-bottom: none;
+}
+
+.model-dropdown-group-label {
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.model-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-align: left;
+}
+
+.model-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.model-dropdown-item.selected {
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.model-check {
+    opacity: 0;
+    color: #10b981;
+    flex-shrink: 0;
+}
+
+.model-check.visible {
+    opacity: 1;
+}
+
+.model-download-icon {
+    color: var(--bg-accent);
+    flex-shrink: 0;
+}
+
+.model-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.model-size {
+    font-size: 12px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.model-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}/* 下载进度提示样式 */
+.model-download-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--accent-color);
+}
+
+.model-download-progress .spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* 下载中的模型�?*/
+.model-dropdown-item.downloading {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    pointer-events: none;
+}
+
+.model-dropdown-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

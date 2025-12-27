@@ -134,6 +134,26 @@ export const enUS: LanguageConfig = {
             connectionSuccessShort: 'Connected',
             settingComplete: 'Done',
 
+            // Analysis Packages
+            analysisPackages: 'Analysis Packages',
+            analysisPackagesDesc: 'Select analysis capabilities to load corresponding Python libraries at startup',
+            chartDisplayConfig: 'Chart Display Configuration',
+            chartFonts: 'Chart Fonts',
+            dataAnalysisStrategy: 'Data Analysis Strategy',
+            dataPrivacyTitle: 'Data Privacy',
+            dataPrivacyDesc: 'Select data format sent to cloud AI (No config needed for local model)',
+            chartFontsHint: 'Pre-selected based on your current language',
+            saveAndApply: 'Save and Apply',
+            restartEngineWarning: 'Engine restart required for changes to take effect',
+            builtIn: 'Built-in',
+
+            // Generic Table
+            table: {
+                method: 'Method',
+                description: 'Description',
+                charts: 'Charts',
+            },
+
             // Skills Architecture
             skillsTitle: 'Enable Skills Architecture (Experimental)',
             skillsDesc: 'Function Calling mode, improves AI reasoning accuracy',
@@ -155,6 +175,70 @@ export const enUS: LanguageConfig = {
             performanceSlowWarning: '⚠️ May Be Slow',
             performanceColumnsUnit: 'columns',
             performanceTimeoutUnit: 'seconds',
+
+            // User Roles
+            userRole: 'User Role',
+            userRoleDesc: 'Select your role for a tailored experience',
+            roleAnalyst: 'Data Analyst',
+            roleAnalystDesc: 'Familiar with SQL/Python\nFull control required',
+            roleAnalystFeatures: '• SQL Editable\n• Detailed Config\n• Deep Analysis Priority',
+            roleExpert: 'Business Expert',
+            roleExpertDesc: 'Focus on Insights\nEfficiency & Automation',
+            roleExpertFeatures: '• Standardization\n• One-click Actions\n• Auto-generated Results',
+            roleSwitchHint: 'ℹ️ Switching roles applies configuration immediately. AI settings and language are managed separately.',
+            currentConfigDetail: 'Current Config Details',
+            cleaningEngine: 'Cleaning Engine',
+            cleaningRouter: 'Router Quick Templates',
+            cleaningAI: 'AI Deep Analysis',
+            minSuggestions: 'Min Suggestions',
+            showSQL: 'Show SQL',
+            defaultExpanded: 'Default Expanded',
+            defaultCollapsed: 'Default Collapsed',
+            reportTemplate: 'Report Template',
+            templateBusiness: 'Business Concise',
+            templateTechnical: 'Technical Detailed',
+
+            // Data Privacy Options
+            dataPrivacy: {
+                autoSanitize: 'Auto Sanitize (Recommended)',
+                autoSanitizeBadge: 'Recommended',
+                autoSanitizeDesc: 'Send only column names and stats, no raw data values',
+                sendRaw: 'Send Raw Data',
+                sendRawDesc: 'Send sampled data to Cloud API for more accurate suggestions',
+                localModelHint: '💡 Note: When using local model, data never leaves your browser',
+            },
+
+            // Data Analysis Strategy Options
+            dataAnalysis: {
+                samplingHint: 'Select AI sampling rows (affects speed and accuracy)',
+                fastMode: 'Fast Mode',
+                fastModeBadge: 'Coming Soon',
+                fastModeDesc: 'AI Sample: 500 rows | Inference: ~2s',
+                balancedMode: 'Balanced Mode (MVP)',
+                balancedModeBadge: 'Default',
+                balancedModeDesc: 'AI Sample: 1000 rows | Inference: ~5s',
+                preciseMode: 'Precise Mode',
+                preciseModeBadge: 'Coming Soon',
+                preciseModeDesc: 'AI Sample: 5000 rows (Dynamic) | Inference: ~10s',
+            },
+
+            // Loading State
+            loadingState: {
+                releasing: 'Releasing resources...',
+                initializing: 'Initializing Neural Engine...',
+            },
+            testLog: 'Test Logs',
+            testLogDownload: 'Download Test Logs',
+            testLogDownloadDesc: 'Export full test logs (all operations, errors, performance data)',
+            testLogDownloadSuccess: '✅ Logs downloaded!\n\nFormat: Markdown\nUsage: Submit Issue, Diagnostics',
+
+            hardwareStrong: 'Powerful',
+            hardwareMedium: 'Moderate',
+            hardwareWeak: 'Weak',
+            hardwareScore: 'Score: {score}',
+            hardwareRecLocal: 'Local Model Recommended',
+            hardwareRecCloud: 'Cloud Model Recommended',
+            hardwareUnknown: 'Hardware unknown'
         },
         prompt,
         dataSource: {
@@ -300,6 +384,85 @@ export const enUS: LanguageConfig = {
             suggestion1: 'Apply layered cleaning, focus on high-impact fields',
             suggestion2: 'Add missing value strategies to avoid bias',
             suggestion3: 'Regularly check duplicates for data quality',
+            // Markdown report generation
+            generatedAt: 'Generated At',
+            dataSource: 'Data Source',
+            sampleData: 'Sample Data',
+            recordsUnit: 'records',
+            cleaningSection: 'Data Cleaning Records',
+            analysisSection: 'Data Analysis Records',
+            insightsSection: 'Key Insights',
+            visualizationSection: 'Visualization Suggestions',
+            timestamp: 'Time',
+            operationType: 'Type',
+            description: 'Description',
+            tags: 'Tags',
+            analysisResult: 'Analysis Result',
+            analysisSql: 'Analysis SQL',
+            detailInfo: 'Details',
+            nextSteps: 'Next Steps',
+            upgradeRoadmap: 'Upgrade Roadmap',
+            roadmapHtml: 'Upgrade to interactive HTML report (expandable SQL evidence)',
+            roadmapCharts: 'Embed data tables and charts',
+            roadmapThemes: 'Support theme switching',
+            roadmapExport: 'Single-file HTML export',
+            generatedBy: 'Report generated by',
+
+            // V0 Dual-Role Report
+            notebook: {
+                title: 'Notebook Mode',
+                copyCell: 'Copy Cell',
+                copyAllToColab: 'Copy All to Colab',
+                runDisabled: 'Execution disabled in V0',
+                runDisabledTip: 'Please copy code to Google Colab to execute',
+                copyCode: 'Copy Code',
+                codeCopied: 'Code Copied',
+                defaultTitle: 'LiuliX Analysis Report',
+                defaultSigner: 'AI Data Analyst'
+            },
+            audit: {
+                pending: 'Pending',
+                approved: 'Approved',
+                rejected: 'Rejected',
+                markApproved: 'Mark as Audited',
+                markRejected: 'Mark Issue',
+                addNote: 'Add Note',
+                progress: 'Audit Progress',
+                signReport: 'Sign and Lock Report',
+                reportSigned: 'Report Locked',
+                signedBy: 'Audited By',
+                signedAt: 'Audited At',
+                reportLocked: 'Report Locked',
+                unlockAndReaudit: 'Unlock and Re-audit',
+                confirmSign: 'Confirm Signature',
+                signConfirmMessage: 'I have audited all Cells and confirm no issues',
+                allCellsReviewed: 'All Cells Reviewed',
+                issueType: 'Issue Type',
+                issueSqlLogic: 'SQL Logic Error',
+                issueDataAnomaly: 'Data Anomaly',
+                issueChartInaccurate: 'Inaccurate Chart',
+                issueConclusion: 'Unreasonable Conclusion',
+                note: 'Note',
+                submit: 'Submit'
+            },
+            export: {
+                downloadIpynb: '.ipynb file downloaded',
+                uploadToColab: 'Please visit colab.research.google.com to upload',
+                exportDisabled: 'Export requires signature',
+                exportPDF: 'Export PDF',
+                exportMarkdown: 'Export Markdown',
+                needSignFirst: 'Please complete audit signature first',
+                colabInstructions: 'Upload and run in Google Colab'
+            },
+            mode: {
+                notebook: 'Notebook',
+                report: 'Report',
+                switchTo: 'Switch to'
+            },
+            status: {
+                notSignedYet: 'Report not yet signed',
+                canPreviewNoExport: 'Preview available, export disabled'
+            }
         },
         aiCost: {
             title: 'AI Cost Warning', fileCount: 'Uploading {count} files', estimatedCalls: 'Estimated {calls} AI calls',
@@ -309,6 +472,7 @@ export const enUS: LanguageConfig = {
         aiRetry: {
             title: 'AI Failed', retryButton: 'Retry', retrying: 'Retrying...', failed: 'AI failed, click to retry',
             staleHint: 'Data cleaned, re-analyzing...',
+            noSuggestionsHint: 'No AI suggestions available. Data quality might be good or AI service temporarily unavailable', // 🚀 Added
         },
         localModel: {
             init: 'Initializing local model...',
@@ -335,7 +499,9 @@ export const enUS: LanguageConfig = {
             maxColumns: 'Max Columns to Analyze',
             maxColumnsDesc: 'Maximum number of columns to include in AI analysis',
             timeout: 'Analysis Timeout (seconds)',
-            timeoutDesc: 'Maximum time to wait for AI response'
+            timeoutDesc: 'Maximum time to wait for AI response',
+            samplingRows: 'Sampling Rows',
+            samplingRowsDesc: 'Max rows for AI analysis (Sampled if exceeded)'
         },
         errors: {
             tableNotFound: 'Table not found',
@@ -347,45 +513,51 @@ export const enUS: LanguageConfig = {
         },
         hardware: {
             detection: 'Hardware Detection',
-            detecting: 'Detecting hardware configuration...',
-            detectionFailed: 'Detection failed',
+            detecting: 'Detecting hardware...',
+            detectionFailed: 'Detection Failed',
             platform: 'Platform',
             gpu: 'GPU',
             memory: 'Memory',
-            score: 'Score',
-            recommendation: 'Recommendation',
-            // Platform
-            macM1Plus: 'MacBook (Apple Silicon)',
+            score: 'Overall Score',
+            recommendation: 'AI Mode Recommendation',
+
+            macM1Plus: 'MacBook (M-Series)',
             macIntel: 'MacBook (Intel)',
             windows: 'Windows PC',
             linux: 'Linux',
             unknown: 'Unknown Device',
-            // GPU
+
             gpuNotDetected: 'No GPU Detected',
-            gpuSoftware: 'Software Renderer (No Acceleration)',
+            gpuSoftware: 'Software Renderer',
             gpuHigh: 'Discrete GPU (High Performance)',
             gpuMedium: 'Discrete GPU (Medium Performance)',
             gpuIntegrated: 'Integrated GPU',
-            // Modes
+
             recommendedMode: 'Recommended Mode',
-            localMode: 'Local AI Model',
-            apiMode: 'Cloud AI',
+            localMode: 'Local Model (Offline)',
+            apiMode: 'Cloud Model (API)',
             confidence: 'Confidence',
-            confidenceHigh: 'Highly Recommended',
-            confidenceMedium: 'Suggested',
-            confidenceLow: 'Optional',
-            // Reason
+            confidenceHigh: 'High',
+            confidenceMedium: 'Medium',
+            confidenceLow: 'Low',
+
             reason: 'Reason',
-            technicalDetails: 'Technical Details',
-            expectedLoadTime: 'Expected Load Time',
-            expectedInferenceTime: 'Expected Inference Time',
-            // Pros/Cons
+            technicalDetails: 'Technical Score',
+            expectedLoadTime: 'Est. Load Time',
+            expectedInferenceTime: 'Est. Inference Time',
+
             pros: 'Pros',
-            cons: 'Notes',
-            // Buttons
+            cons: 'Cons',
+
             useRecommended: 'Use Recommended Config',
             keepCurrent: 'Keep Current Config',
             redetect: 'Redetect',
+
+            // Recommendation Reasons
+            reasonMacPlus: 'MacBook Pro M-Series: Excellent hardware, smooth local AI experience',
+            reasonGood: 'Excellent hardware configuration, great local AI performance',
+            reasonMedium: 'Average hardware, Cloud AI recommended for speed and experience',
+            reasonLow: 'Low hardware spec, strongly recommend Cloud AI for usability'
         },
     },
 };

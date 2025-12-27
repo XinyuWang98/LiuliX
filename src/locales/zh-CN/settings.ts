@@ -1,3 +1,4 @@
+
 // 设置模块翻译
 export const settings = {
     apiConfig: 'API 配置',
@@ -123,6 +124,77 @@ export const settings = {
         method: '分析方法',
         description: '功能描述',
         charts: '输出图表',
-    }
-};
+    },
 
+    // 用户角色配置
+    userRole: '用户角色',
+    userRoleDesc: '选择您的角色以获得针对性的使用体验',
+    roleAnalyst: '数据分析师',
+    roleAnalystDesc: '熟悉SQL/Python\n需要完全控制',
+    roleAnalystFeatures: '• SQL可编辑\n• 详细参数配置\n• 深度分析优先',
+    roleExpert: '业务专家',
+    roleExpertDesc: '关注业务洞察\n追求效率自动化',
+    roleExpertFeatures: '• 快速标准化\n• 一键式操作\n• 自动生成结果',
+    roleSwitchHint: 'ℹ️ 切换角色会立即应用对应的配置。AI设置、界面语言等在其他设置页面独立管理。',
+    currentConfigDetail: '当前配置详情',
+    cleaningEngine: '清洗引擎',
+    cleaningRouter: 'Router快速模板',
+    cleaningAI: 'AI深度分析',
+    minSuggestions: '最少建议数量',
+    showSQL: 'SQL代码显示',
+    defaultExpanded: '默认展开',
+    defaultCollapsed: '默认折叠',
+    reportTemplate: '报告模板',
+    templateBusiness: '商务精简版',
+    templateTechnical: '技术详细版',
+
+    // 数据隐私选项
+    dataPrivacy: {
+        autoSanitize: '自动脱敏（推荐）',
+        autoSanitizeBadge: '推荐',
+        autoSanitizeDesc: '仅发送列名和统计信息，不含具体数据值',
+        sendRaw: '发送原始数据',
+        sendRawDesc: '发送采样数据到云端API以获得更准确的建议',
+        localModelHint: '💡 提示：使用本地模型时，数据完全不会离开浏览器',
+    },
+
+    // 数据分析策略选项
+    dataAnalysis: {
+        samplingHint: '选择 AI 采样行数（影响分析速度和准确性）',
+        fastMode: '快速模式',
+        fastModeBadge: '敬请期待',
+        fastModeDesc: 'AI采样：500行 | 推理时间：~2秒',
+        balancedMode: '平衡模式（当前MVP）',
+        balancedModeBadge: '默认',
+        balancedModeDesc: 'AI采样：1000行 | 推理时间：~5秒',
+        preciseMode: '精确模式',
+        preciseModeBadge: '敬请期待',
+        preciseModeDesc: 'AI采样：5000行（动态计算） | 推理时间：~10秒',
+    },
+
+    // 加载状态
+    loadingState: {
+        releasing: '正在释放资源...',
+        initializing: '正在初始化 Neural Engine...'
+    },
+
+    testLog: '测试日志',
+    testLogDownload: '测试日志下载',
+    testLogDownloadDesc: '导出完整的测试日志（所有操作记录、错误信息、性能数据）',
+    testLogDownloadSuccess: '✅ 日志已下载！\n\n文件格式: Markdown\n建议用途: 提交Issue、问题诊断',
+
+    // 硬件状态
+    hardwareStrong: '性能强劲',
+    hardwareMedium: '性能尚可',
+    hardwareWeak: '性能不足',
+    hardwareScore: '综合评分: {score}',
+    hardwareRecLocal: '推荐本地模型',
+    hardwareRecCloud: '推荐云端模型',
+    hardwareUnknown: '未检测到硬件信息',
+
+    // 模型调用逻辑说明
+    modelLogicTitle: '调用逻辑',
+    modelLogicLocal: '优先使用本地模型（Ollama），数据完全离线不上传',
+    modelLogicAPI: '使用云端API，需配置有效的API Key',
+    modelLogicFallback: '如果本地模型不可用，自动降级到云端API'
+};

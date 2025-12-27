@@ -78,15 +78,10 @@
 }
 
 /* \ud83c\udd95 InsightTreeNode \u68ee\u6797\u5e03\u5c40 */
-.insight-tree-forest {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: var(--gap-m);
-    margin-top: var(--gap-m);
-}
+
 
 /* \u6839\u8282\u70b9\u79fb\u9664\u7f29\u8fdb */
-.insight-tree-forest > .insight-tree-node {
+.insight-tree-forest>.insight-tree-node {
     margin-left: 0 !important;
 }
 

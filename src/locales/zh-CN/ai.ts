@@ -52,5 +52,63 @@ export const config = {
     maxColumns: '最大分析列数',
     maxColumnsDesc: '更多列 = 更全面分析，但速度更慢',
     timeout: '分析超时时间',
-    timeoutDesc: '愿意等待的最长时间（秒）'
+    timeoutDesc: '愿意等待的最长时间（秒）',
+    samplingRows: '采样行数',
+    samplingRowsDesc: '用于AI分析的最大数据行数（超出将采样）'
+};
+
+/** 硬件检测与推荐翻译（新增） */
+export const hardware = {
+    detection: '硬件检测',
+    detecting: '正在检测硬件配置...',
+    detectionFailed: '硬件检测失败',
+    platform: '平台',
+    gpu: '显卡',
+    memory: '内存',
+    score: '综合评分',
+    recommendation: 'AI 模式推荐',
+
+    // 平台描述
+    macM1Plus: 'MacBook (M系列)',
+    macIntel: 'MacBook (Intel)',
+    windows: 'Windows PC',
+    linux: 'Linux',
+    unknown: '未知设备',
+
+    // GPU描述
+    gpuNotDetected: '未检测到GPU',
+    gpuSoftware: '软件模拟（无硬件加速）',
+    gpuHigh: '独立显卡（高性能）',
+    gpuMedium: '独立显卡（中等性能）',
+    gpuIntegrated: '集成显卡',
+
+    // 推荐模式
+    recommendedMode: '推荐模式',
+    localMode: '本地模型 (离线)',
+    apiMode: '云端模型 (API)',
+    confidence: '推荐置信度',
+    confidenceHigh: '高',
+    confidenceMedium: '中',
+    confidenceLow: '低',
+
+    // 推荐理由
+    reason: '推荐理由',
+    technicalDetails: '技术评分',
+    expectedLoadTime: '首次加载耗时',
+    expectedInferenceTime: '预计推理耗时',
+
+    // 优缺点
+    pros: '优点',
+    cons: '不足',
+
+    // 按钮
+    useRecommended: '使用推荐配置',
+    keepCurrent: '保持当前配置',
+    redetect: '重新检测',
+
+    // 推荐理由
+    reasonMacPlus: 'MacBook Pro M系列，硬件性能优秀，本地AI体验流畅',
+    reasonGood: '您的设备配置优秀，本地AI模型性能出色',
+    reasonMedium: '您的设备配置一般，建议使用云端AI获得更快速度和更好体验',
+    reasonLow: '您的设备配置较低，强烈建议使用云端AI获得流畅体验'
 };

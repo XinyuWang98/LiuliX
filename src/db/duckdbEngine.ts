@@ -530,4 +530,48 @@ export class DuckDBEngine {
     public async terminate() {
         await this.db?.terminate();
     }
+
+    /**
+     * 修改列的数据类型
+     * 使用 ALTER TABLE ... ALTER ... TYPE ... 语法
+     * @param tableName 表名
+     * @param columnName 列名
+     * @param newType 新数据类型 (e.g. 'INTEGER', 'DOUBLE', 'VARCHAR')
+     * @returns 是否成功
+     */
+    public async alterColumnType(tableName: string, columnName: string, newType: string): Promise<boolean> {
+        if (!this.conn) throw new Error(globalT('settings.dbNotReady'));
+
+        const start = performance.now();
+        logger.log('DuckDB', '修改列类型', { data: `${tableName}.${columnName} -> ${newType}` });
+
+        try {
+            // DuckDB 的 ALTER COLUMN TYPE 语法：
+            // ALTER TABLE table_name ALTER columnName TYPE newType
+            // 如果转换失败会报错，DuckDB 0.8+ 支持 TRY_CAST 吗？
+            // 标准语法通常是直接转，失败则报错。
+            // 为了安全，我们可以使用 USING TRY_CAST(columnName AS newType) 如果 DuckDB 支持
+            // 或者先简单的 ALTER，如果为了兼容性，构建 SQL 字符串
+
+            // 针对包含特殊字符的列名，确保引用
+            const safeCol = `"${columnName}"`;
+
+            // 尝试直接转换 (DuckDB 会尝试自动转换)
+            // 如果是 String -> Number 且包含非数字字符，可能会失败
+            // 我们可以使用 USING 表达式来处理错误 (变 NULL)
+            // 语法: ALTER TABLE t ALTER c TYPE INT USING TRY_CAST(c AS INT)
+
+            const sql = `ALTER TABLE ${tableName} ALTER ${safeCol} TYPE ${newType} USING TRY_CAST(${safeCol} AS ${newType})`;
+
+            await this.conn.query(sql);
+
+            const duration = (performance.now() - start).toFixed(2);
+            logger.log('DuckDB', '修改列类型成功', { duration: Number(duration) });
+            return true;
+        } catch (error) {
+            logger.error('DuckDB', '修改列类型失败', error);
+            // 这里可以考虑 fallback 策略，但 MVP 阶段先透传失败
+            return false;
+        }
+    }
 }

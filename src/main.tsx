@@ -7,10 +7,15 @@ import './styles/variables.css';
 import './styles/reset.css';
 import './styles/global.css';
 
-// 初始化 Prompt 库
+// Prompt库初始化
 import { promptRegistry } from './services/promptRegistry';
 import { seedPrompts } from './services/prompts';
+import { SEED_CLEANING_PROMPTS } from './services/prompts/seedCleaningPrompts';
+
+// 注册洞察Prompt
 promptRegistry.registerBatch(seedPrompts);
+// 注册清洗Prompt
+promptRegistry.registerBatch(SEED_CLEANING_PROMPTS);
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

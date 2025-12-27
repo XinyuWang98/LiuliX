@@ -60,12 +60,7 @@ export interface LanguageConfig {
             priority: string;
         };
 
-        // 表格通用
-        table: {
-            method: string;
-            description: string;
-            charts: string;
-        };
+
 
 
         // 设置
@@ -198,11 +193,86 @@ export interface LanguageConfig {
             // 分析能力包设置
             analysisPackages: string;
             analysisPackagesDesc: string;
+            chartDisplayConfig: string;
             chartFonts: string;
+            dataAnalysisStrategy: string;
+            dataPrivacyTitle: string;
+            dataPrivacyDesc: string;
             chartFontsHint: string;
             saveAndApply: string;
             restartEngineWarning: string;
             builtIn: string;
+
+            // 通用表格
+            table: {
+                method: string;
+                description: string;
+                charts: string;
+            };
+
+            // User Roles
+            userRole: string;
+            userRoleDesc: string;
+            roleAnalyst: string;
+            roleAnalystDesc: string;
+            roleAnalystFeatures: string;
+            roleExpert: string;
+            roleExpertDesc: string;
+            roleExpertFeatures: string;
+            roleSwitchHint: string;
+            currentConfigDetail: string;
+            cleaningEngine: string;
+            cleaningRouter: string;
+            cleaningAI: string;
+            minSuggestions: string;
+            showSQL: string;
+            defaultExpanded: string;
+            defaultCollapsed: string;
+            reportTemplate: string;
+            templateBusiness: string;
+            templateTechnical: string;
+
+            // 数据隐私选项
+            dataPrivacy: {
+                autoSanitize: string;
+                autoSanitizeBadge: string;
+                autoSanitizeDesc: string;
+                sendRaw: string;
+                sendRawDesc: string;
+                localModelHint: string;
+            };
+
+            // 数据分析策略选项
+            dataAnalysis: {
+                samplingHint: string;
+                fastMode: string;
+                fastModeBadge: string;
+                fastModeDesc: string;
+                balancedMode: string;
+                balancedModeBadge: string;
+                balancedModeDesc: string;
+                preciseMode: string;
+                preciseModeBadge: string;
+                preciseModeDesc: string;
+            };
+
+            // 加载状态
+            loadingState: {
+                releasing: string;
+                initializing: string;
+            };
+            testLog: string;
+            testLogDownload: string;
+            testLogDownloadDesc: string;
+            testLogDownloadSuccess: string;
+
+            hardwareStrong: string;
+            hardwareMedium: string;
+            hardwareWeak: string;
+            hardwareScore: string;
+            hardwareRecLocal: string;
+            hardwareRecCloud: string;
+            hardwareUnknown: string;
         };
 
         // Prompt 库
@@ -685,6 +755,89 @@ export interface LanguageConfig {
             suggestion1: string;
             suggestion2: string;
             suggestion3: string;
+            // Markdown 报告生成相关
+            generatedAt: string;
+            dataSource: string;
+            sampleData: string;
+            recordsUnit: string;
+            cleaningSection: string;
+            analysisSection: string;
+            insightsSection: string;
+            visualizationSection: string;
+            timestamp: string;
+            operationType: string;
+            description: string;
+            tags: string;
+            analysisResult: string;
+            analysisSql: string;
+            detailInfo: string;
+            nextSteps: string;
+            upgradeRoadmap: string;
+            roadmapHtml: string;
+            roadmapCharts: string;
+            roadmapThemes: string;
+            roadmapExport: string;
+            generatedBy: string;
+
+            // V0 双角色报告新增
+            notebook: {
+                title: string;
+                copyCell: string;
+                copyAllToColab: string;
+                runDisabled: string;
+                runDisabledTip: string;
+                copyCode: string;
+                codeCopied: string;
+                defaultTitle: string;
+                defaultSigner: string;
+            };
+
+            audit: {
+                pending: string;
+                approved: string;
+                rejected: string;
+                markApproved: string;
+                markRejected: string;
+                addNote: string;
+                progress: string;
+                signReport: string;
+                reportSigned: string;
+                signedBy: string;
+                signedAt: string;
+                reportLocked: string;
+                unlockAndReaudit: string;
+                confirmSign: string;
+                signConfirmMessage: string;
+                allCellsReviewed: string;
+                issueType: string;
+                issueSqlLogic: string;
+                issueDataAnomaly: string;
+                issueChartInaccurate: string;
+                issueConclusion: string;
+                note: string;
+                submit: string;
+            };
+
+            export: {
+                downloadIpynb: string;
+                uploadToColab: string;
+                exportDisabled: string;
+                exportPDF: string;
+                exportMarkdown: string;
+                needSignFirst: string;
+                colabInstructions: string;
+            };
+
+            mode: {
+                notebook: string;
+                report: string;
+                switchTo: string;
+            };
+
+            status: {
+                notSignedYet: string;
+                canPreviewNoExport: string;
+            };
         };
 
         // AI成本提示
@@ -706,6 +859,7 @@ export interface LanguageConfig {
             retrying: string;
             failed: string;
             staleHint: string;
+            noSuggestionsHint: string;
         };
 
         // 本地模型进度
@@ -741,6 +895,8 @@ export interface LanguageConfig {
             maxColumnsDesc: string;
             timeout: string;
             timeoutDesc: string;
+            samplingRows: string;
+            samplingRowsDesc: string;
         };
 
         // 错误提示文案
@@ -789,6 +945,10 @@ export interface LanguageConfig {
 
             // 推荐理由
             reason: string;
+            reasonMacPlus: string;
+            reasonGood: string;
+            reasonMedium: string;
+            reasonLow: string;
             technicalDetails: string;
             expectedLoadTime: string;
             expectedInferenceTime: string;

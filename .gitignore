@@ -16,7 +16,7 @@ build/
 *.sln
 *.sw?
 
-# Environment variables (ä¿æŠ¤æ•æ„Ÿä¿¡æ¯)
+# Environment variables (æ·‡æ¿‡å§¢éå¿”åŠ…æ·‡â„ƒä¼…)
 .env*
 !.env.examplelog
 npm-debug.log*
@@ -38,8 +38,14 @@ backup*/
 # Temporary files
 *.tmp
 *.temp
-# Pyodide ÀëÏß°ü£¨´óÎÄ¼ş£¬²»Ìá½»µ½Git£©
-# ÆäËû¿ª·¢ÕßÊ¹ÓÃ public/pyodide/download.ps1 ×ÔĞĞÏÂÔØ
+# Pyodide ç¦»çº¿åŒ…ï¼ˆå¤§æ–‡ä»¶ï¼Œä¸æäº¤åˆ°Gitï¼‰
+# å…¶ä»–å¼€å‘è€…ä½¿ç”¨ public/pyodide/download.ps1 è‡ªè¡Œä¸‹è½½
 public/pyodide/*
 !public/pyodide/README.md
 !public/pyodide/download.ps1
+
+# Local AI Models Cache (Large files)
+models_cache/
+
+# Ollama Setup Executable
+OllamaSetup.exe

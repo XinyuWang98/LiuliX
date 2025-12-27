@@ -1,0 +1,171 @@
+/**
+ * ReportNotebook 主容器样式
+ */
+
+.report-notebook {
+    --status-locked-bg: rgba(34, 197, 94, 0.1);
+    --status-warning-bg: rgba(245, 158, 11, 0.1);
+    --status-warning-color: var(--color-quality-warning);
+
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--gap-l);
+}
+
+/* ... existing code ... */
+
+/* Signed Status */
+.signed-status {
+    margin-bottom: var(--gap-m);
+    padding: var(--gap-m);
+    background: var(--status-locked-bg);
+    border: 1px solid var(--success);
+    border-radius: var(--radius-m);
+    color: var(--success);
+    font-size: var(--font-size-m);
+    text-align: center;
+}
+
+/* ... existing code ... */
+
+/* Report Mode Notice */
+.report-mode-notice {
+    padding: var(--gap-m);
+    background: var(--status-warning-bg);
+    border: 1px solid var(--status-warning-color);
+    border-radius: var(--radius-m);
+    color: var(--status-warning-color);
+    text-align: center;
+    font-size: var(--font-size-m);
+    line-height: 1.6;
+}
+
+.report-notebook-empty {
+    text-align: center;
+    padding: var(--gap-xl);
+    color: var(--text-secondary);
+}
+
+/* Header */
+.report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--gap-l);
+    padding-bottom: var(--gap-m);
+    border-bottom: 2px solid var(--border);
+}
+
+.report-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-xl);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-m);
+}
+
+.btn-export-colab,
+.btn-sign-report {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-s) var(--gap-m);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    background: var(--bg-panel);
+    color: var(--text-primary);
+    font-size: var(--font-size-m);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-export-colab:hover {
+    background: var(--bg-accent);
+    border-color: var(--bg-accent);
+}
+
+.btn-sign-report {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+}
+
+.btn-sign-report:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.btn-sign-report:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Audit Progress */
+.audit-progress-bar {
+    margin-bottom: var(--gap-m);
+    padding: var(--gap-m);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+}
+
+.audit-progress-bar span {
+    display: block;
+    margin-bottom: var(--gap-s);
+    font-size: var(--font-size-s);
+    color: var(--text-secondary);
+}
+
+.progress-track {
+    height: 8px;
+    background: var(--bg-hover);
+    border-radius: var(--radius-s);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--success);
+    transition: width 0.3s ease;
+}
+
+/* Signed Status */
+.signed-status {
+    margin-bottom: var(--gap-m);
+    padding: var(--gap-m);
+    background: var(--status-locked-bg);
+    border: 1px solid var(--success);
+    border-radius: var(--radius-m);
+    color: var(--success);
+    font-size: var(--font-size-m);
+    text-align: center;
+}
+
+/* Cells Container */
+.cells-container {
+    margin-bottom: var(--gap-l);
+}
+
+/* Report Mode - 隐藏代码 */
+.cells-container.mode-report .cell-code-area {
+    display: none;
+}
+
+.cells-container.mode-report .cell-audit-controls {
+    display: none;
+}
+
+/* Report Mode Notice */
+.report-mode-notice {
+    padding: var(--gap-m);
+    background: var(--status-warning-bg);
+    border: 1px solid var(--status-warning-color);
+    border-radius: var(--radius-m);
+    color: var(--status-warning-color);
+    text-align: center;
+    font-size: var(--font-size-m);
+    line-height: 1.6;
+}

@@ -112,7 +112,23 @@ export function useDataLoader(
             }
 
             // 回退到 Pyodide
-            const fileContent = JSON.stringify(file.data);
+            let fileContent = '';
+
+            if (file.data.rawContent) {
+                fileContent = file.data.rawContent;
+            } else if (Array.isArray(file.data.data) && file.data.data.length > 0) {
+                // Reconstruct CSV from data if rawContent is missing
+                // This handles the case where rawContent was dropped or not saved, but we have parsed rows
+                const Papa = (await import('papaparse')).default;
+                fileContent = Papa.unparse({
+                    fields: file.data.columns,
+                    data: file.data.data
+                });
+            } else {
+                // Fallback for valid JSON or last resort
+                fileContent = JSON.stringify(file.data);
+            }
+
             const loadResult = await pyodideManager.loadDataFromFile(
                 fileContent,
                 fileName.endsWith('.json') ? 'json' : 'csv',

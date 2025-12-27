@@ -122,7 +122,6 @@ result = {
     "summary": summary,
     "columnsUsed": [group_col, value_col]
 }
-print("DEBUG: About to print JSON result", flush=True)
 print(json.dumps(result), flush=True)
 
 `,

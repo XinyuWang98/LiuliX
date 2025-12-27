@@ -23,3 +23,31 @@ export interface IngestionResult {
     isSampled: boolean;
     columns: ColumnMetadata[];
 }
+
+export interface ColumnStats {
+    name: string;
+    type: string;
+    total: number;
+    nullCount: number;
+    uniqueCount: number;
+    numericStats?: {
+        min: number;
+        q1: number;
+        median: number;
+        q3: number;
+        max: number;
+        stddev: number;
+        skewness: number;
+    };
+    categoricalStats?: {
+        topValues: Array<{ value: string; count: number }>;
+    };
+    distribution?: {
+        bins: number;
+        counts: number[];
+        min: number;
+        max: number;
+        labels?: (string | number)[];
+    };
+    error?: boolean;
+}

@@ -80,7 +80,7 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
             detectHardware()
                 .then(result => {
                     setHardwareDetection(result);
-                    const rec = getAIModeRecommendation(result);
+                    const rec = getAIModeRecommendation(result, t);
                     setRecommendation(rec);
                 })
                 .catch(err => {
@@ -282,7 +282,7 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                                             {t('hardware.platform')}
                                         </div>
                                         <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
-                                            {getHardwareDescription(hardwareDetection).platform}
+                                            {getHardwareDescription(hardwareDetection, t).platform}
                                         </div>
                                     </div>
                                     <div>
@@ -290,7 +290,7 @@ export const AIConfigModal = ({ isOpen, onClose }: AIConfigModalProps) => {
                                             {t('hardware.gpu')}
                                         </div>
                                         <div style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
-                                            {getHardwareDescription(hardwareDetection).gpu}
+                                            {getHardwareDescription(hardwareDetection, t).gpu}
                                         </div>
                                     </div>
                                     <div>

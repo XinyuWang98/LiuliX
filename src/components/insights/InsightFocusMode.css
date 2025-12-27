@@ -1,0 +1,179 @@
+/* 洞察聚焦模式样式 */
+
+.insight-focus-mode {
+    /* 全屏覆盖 */
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    /* 布局 */
+    display: flex;
+    flex-direction: column;
+
+    /* Glassmorphism背景 */
+    background: var(--glass-panel-bg);
+    backdrop-filter: blur(20px);
+
+    /* 动画入场 */
+    animation: focus-mode-fade-in 0.3s ease-out;
+}
+
+@keyframes focus-mode-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* 顶部工具栏 */
+.insight-focus-mode__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 var(--gap-l);
+
+    background: var(--glass-panel-bg);
+    border-bottom: 1px solid var(--glass-border-color);
+    backdrop-filter: blur(var(--glass-blur));
+
+    flex-shrink: 0;
+}
+
+.insight-focus-mode__back-btn,
+.insight-focus-mode__close-btn {
+    padding: var(--gap-xs) var(--gap-m);
+    font-size: var(--fs-m);
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.insight-focus-mode__back-btn:hover,
+.insight-focus-mode__close-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+}
+
+.insight-focus-mode__close-btn {
+    font-size: var(--fs-xl);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.insight-focus-mode__title {
+    font-size: var(--fs-l);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 主体区域 */
+.insight-focus-mode__body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 左侧导航栏 */
+.insight-focus-mode__sidebar {
+    width: 280px;
+    flex-shrink: 0;
+
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--glass-border-color);
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* 右侧详情面板 */
+.insight-focus-mode__main {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: var(--gap-xl);
+}
+
+/* 右侧证据池 */
+.insight-focus-mode__evidence {
+    width: 320px;
+    flex-shrink: 0;
+
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--glass-border-color);
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--gap-l);
+}
+
+/* 滚动条样式 */
+.insight-focus-mode__sidebar::-webkit-scrollbar,
+.insight-focus-mode__main::-webkit-scrollbar,
+.insight-focus-mode__evidence::-webkit-scrollbar {
+    width: 8px;
+}
+
+.insight-focus-mode__sidebar::-webkit-scrollbar-track,
+.insight-focus-mode__main::-webkit-scrollbar-track,
+.insight-focus-mode__evidence::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.insight-focus-mode__sidebar::-webkit-scrollbar-thumb,
+.insight-focus-mode__main::-webkit-scrollbar-thumb,
+.insight-focus-mode__evidence::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: var(--radius-s);
+}
+
+.insight-focus-mode__sidebar::-webkit-scrollbar-thumb:hover,
+.insight-focus-mode__main::-webkit-scrollbar-thumb:hover,
+.insight-focus-mode__evidence::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
+
+/* 响应式：平板及以下 */
+@media (max-width: 1024px) {
+    .insight-focus-mode__sidebar {
+        width: 240px;
+    }
+
+    .insight-focus-mode__main {
+        padding: var(--gap-l);
+    }
+}
+
+/* 响应式：手机 */
+@media (max-width: 768px) {
+    .insight-focus-mode__sidebar {
+        position: absolute;
+        left: 0;
+        top: 56px;
+        bottom: 0;
+        z-index: 10;
+
+        transform: translateX(-100%);
+        transition: transform var(--transition-normal);
+    }
+
+    .insight-focus-mode__sidebar--open {
+        transform: translateX(0);
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .insight-focus-mode__main {
+        padding: var(--gap-m);
+    }
+}

@@ -1,227 +1,429 @@
 /**
- * InsightTreeNode 组件样式
+ * InsightTreeNode.css
+ * BEM命名规范 + L型连接线实现
  */
 
+/* 1. 基础容器 (Base Node) */
 .insight-tree-node {
     display: flex;
     flex-direction: column;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-sm);
-    overflow: hidden;
-    transition: all var(--transition-fast);
+    position: relative;
+    /* 递归缩进由 inline-style margin-left 控制 */
+    border-radius: var(--radius-m);
+    transition: all 0.3s ease;
 }
 
-.insight-tree-node:hover {
-    border-color: var(--primary-color-light);
-}
-
-/* 深度样式 */
+/* 根节点特殊样式 */
 .insight-tree-node--depth-0 {
-    border-left: 3px solid var(--primary-color);
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-light);
+    margin-bottom: var(--gap-m);
+    box-shadow: var(--shadow-lv1);
 }
 
-.insight-tree-node--depth-1 {
-    border-left: 3px solid var(--secondary-color);
+.insight-tree-node--depth-0:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lv2);
 }
 
-.insight-tree-node--depth-2 {
-    border-left: 3px solid var(--warning-color);
-}
-
-.insight-tree-node--depth-3 {
-    border-left: 3px solid var(--text-muted);
-}
-
-/* 节点头部 */
+/* 2. Header (核心索引行) */
 .insight-tree-node__header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--bg-tertiary);
+    gap: var(--gap-s);
+    padding: var(--gap-s) var(--gap-m);
     cursor: pointer;
+    border-radius: var(--radius-m);
+    transition: background-color 0.2s;
+    user-select: none;
 }
 
-.insight-tree-node__header:hover {
-    background: var(--bg-hover);
+/* 根节点 Header 底部直角 (当展开时) */
+.insight-tree-node--depth-0 .insight-tree-node__header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
+/* 子节点 Header 悬停反馈 */
+.insight-tree-node:not(.insight-tree-node--depth-0) .insight-tree-node__header:hover {
+    background-color: var(--bg-hover);
+}
+
+/* 2.1 Toggle Button */
 .insight-tree-node__toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: color var(--transition-fast);
+    width: 20px;
+    height: 20px;
+    color: var(--text-tertiary);
 }
 
 .insight-tree-node__toggle:hover {
-    color: var(--primary-color);
+    color: var(--primary);
 }
 
-.insight-tree-node__depth-indicator {
-    display: flex;
-    align-items: center;
-    color: var(--text-muted);
-    opacity: 0.5;
+.insight-tree-node__toggle-placeholder {
+    width: 16px;
+    height: 16px;
 }
 
+/* 2.2 Icon */
 .insight-tree-node__icon {
     display: flex;
-    align-items: center;
-    color: var(--primary-color);
+    color: var(--primary);
 }
 
 .insight-tree-node__icon--error {
-    color: var(--error-color);
+    color: var(--error);
 }
 
+/* 2.3 Title */
 .insight-tree-node__title {
-    flex: 1;
-    font-weight: 500;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-sm);
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    /* 限制最大宽度，给 Tags 留空间 */
+    max-width: 240px;
 }
 
-.insight-tree-node__columns {
+/* 2.4 Tags */
+.insight-tree-node__tags {
     display: flex;
     gap: 4px;
+    margin-left: auto;
+    /* 推到右侧 */
 }
 
-.insight-tree-node__column-tag {
-    display: inline-block;
+.insight-tag {
+    font-size: var(--fs-xs);
     padding: 2px 6px;
-    background: var(--bg-primary);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-xs);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
     color: var(--text-secondary);
 }
 
-.insight-tree-node__column-more {
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
+.insight-tag--more {
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
 }
 
-/* 节点内容 */
-.insight-tree-node__content {
-    padding: var(--spacing-md);
-    animation: fadeIn 0.2s ease-out;
+/* 2.5 Depth Badge */
+.insight-tree-node__depth-badge {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    background: var(--bg-secondary);
+    padding: 0 4px;
+    border-radius: 2px;
+    margin-left: 4px;
+    font-family: var(--font-mono);
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
 
-    to {
-        opacity: 1;
-    }
-}
-
-.insight-tree-node__loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-lg);
-    color: var(--text-muted);
-}
-
-.insight-tree-node__error {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    background: var(--error-color-light);
-    border-radius: var(--radius-sm);
-    color: var(--error-color);
-    font-size: var(--font-size-sm);
-}
-
-/* 执行结果 */
-.insight-tree-node__result {
+/* 3. Content Body (展开内容区) */
+.insight-node-content-body {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    padding: var(--gap-m);
+    gap: var(--gap-m);
+
+    /* 继承背景，或者透明 */
+    background: transparent;
 }
 
-.insight-tree-node__chart {
+.insight-tree-node--depth-0 .insight-node-content-body {
+    /* 根节点 Body 有背景色区分吗？暂时跟随 Parent */
+    padding-top: 0;
+    /* Header 已经有 padding */
+}
+
+/* 3.1 Loading State */
+.insight-node-loading {
     display: flex;
-    justify-content: center;
-    padding: var(--spacing-sm);
-    background: var(--bg-primary);
-    border-radius: var(--radius-sm);
-}
-
-.insight-tree-node__chart img {
-    max-width: 100%;
-    height: auto;
-    border-radius: var(--radius-sm);
-}
-
-.insight-tree-node__summary {
-    padding: var(--spacing-sm);
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-sm);
+    align-items: center;
+    gap: var(--gap-s);
     color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    padding: var(--gap-s);
+}
+
+/* 3.2 Error State */
+.insight-node-error {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    color: var(--error);
+    font-size: var(--fs-sm);
+    padding: var(--gap-s);
+    background: rgba(255, 69, 58, 0.1);
+    border-radius: var(--radius-s);
+}
+
+/* 3.3 Empty State */
+.insight-node-empty {
+    padding: var(--gap-m);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: var(--fs-sm);
+    border: 1px dashed var(--border-light);
+    border-radius: var(--radius-s);
+}
+
+
+/* 4. Visualization (Row 3) */
+.insight-node-row-viz {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.insight-chart-thumbnail {
+    max-width: 100%;
+    max-height: 280px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: zoom-in;
+    background-color: #fff;
+    /* 图表通常是白底 */
+}
+
+.insight-chart-thumbnail:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-lv2);
+    border-color: var(--primary);
+}
+
+
+/* 5. Summary (Row 4) */
+.insight-node-row-summary {
+    font-size: var(--fs-sm);
     line-height: 1.6;
+    color: var(--text-secondary);
+    padding-left: var(--gap-s);
+    border-left: 2px solid var(--primary);
 }
 
-/* 代码区域 */
-.insight-tree-node__code-details {
-    margin-top: var(--spacing-sm);
+
+/* 6. Code (Row 5) */
+.insight-node-row-code {
+    font-size: var(--fs-xs);
 }
 
-.insight-tree-node__code-details summary {
+.insight-node-row-code summary {
     cursor: pointer;
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-    padding: var(--spacing-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--gap-xs);
+    user-select: none;
 }
 
-.insight-tree-node__code-details summary:hover {
-    color: var(--primary-color);
+.insight-node-row-code summary:hover {
+    color: var(--text-primary);
 }
 
-.insight-tree-node__code {
-    margin-top: var(--spacing-xs);
-    padding: var(--spacing-sm);
-    background: var(--bg-code);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-mono);
-    font-size: var(--font-size-xs);
+.insight-node-row-code pre {
+    background: var(--bg-secondary);
+    padding: var(--gap-s);
+    border-radius: var(--radius-s);
     overflow-x: auto;
-    max-height: 300px;
+    font-family: var(--font-mono);
+    border: 1px solid var(--border-light);
 }
 
-/* 子节点容器 */
+
+/* 7. DrillDownArea (Row 6) */
+.insight-node-row-drill {
+    margin-top: var(--gap-s);
+}
+
+
+/* 8. Children Container (连接线系统) */
 .insight-tree-node__children {
-    margin-top: var(--spacing-md);
-    padding-left: var(--spacing-sm);
-    border-left: 2px dashed var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    /* 垂直线基准 */
+    margin-top: var(--gap-s);
 }
 
-/* 旋转动画 */
-.spinning {
-    animation: spin 1s linear infinite;
+/* 垂直引导线 (竖线) */
+/* 
+   注意：这个线是在 __children 容器的左边缘。
+   因为子节点有 margin-left: 24px，所以线应该在 12px 处（toggle button 中心）。
+   Toggle button width 20px, left padding gap-s (8px)?
+   Header padding: 8px 16px.
+   Toggle button is first element.
+   Center of toggle button is around 8 + 10 = 18px from parent's left edge.
+   Wait, parent has padding-left: 0 for children container?
+   Standard L-tree:
+   Parent
+     |
+     +-- Child 1
+     |
+     +-- Child 2
+   Line is drawn on container.
+*/
+
+.insight-tree-node__children::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    /* 对齐父节点的 toggle 图标中心 (大约位置) */
+    top: 0;
+    bottom: 24px;
+    /* 留出底部空间给最后一个节点的 L 型 */
+    width: 1px;
+    background-color: var(--border-light);
 }
 
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
+/* 子节点水平引导线 (横线) */
+/*
+  每个子节点本身是 .insight-tree-node
+  我们需要在它左侧画一条横线连到父节点的竖线上。
+  子节点已经 margin-left: 24px。
+  横线应该在子节点左侧的空白区域内。
+  left: -14px? (24 - 10)
+*/
+.insight-tree-node__children>.insight-tree-node::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    /* 从竖线位置开始 */
+    top: 18px;
+    /* Header 中心高度 (approx) */
+    width: 14px;
+    height: 1px;
+    background-color: var(--border-light);
+}
 
-    to {
-        transform: rotate(360deg);
-    }
+/* 最后一个子节点的 L 型闭合处理 */
+/* 
+   如果是最后一个子节点，父容器的竖线到底部就停了 (由 bottom: 24px 控制)。
+   但是这种 pure css implementation 比较依赖高度计算。
+   
+   更健壮的方法是：让每个子节点画这一段竖线。
+*/
+
+/* 方案 B：每个子节点画 L 型 */
+/* reset previous */
+.insight-tree-node__children::before {
+    display: none;
+}
+
+.insight-tree-node__children>.insight-tree-node::before {
+    display: none;
+}
+
+/* New Logic: 每个子节点负责画连接它的 L 线 */
+.insight-tree-node__children>.insight-tree-node {
+    position: relative;
+}
+
+.insight-tree-node__children>.insight-tree-node::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: -10px;
+    /* 连上一个节点的底部? No. Connect to parent line. */
+    bottom: 0;
+    width: 1px;
+    background-color: var(--border-light);
+    display: block;
+}
+
+/* NO, let's stick to the "long vertical line on container" approach, easier for infinite scroll/list contexts, 
+   but for fixed tree, individual lines are better for :last-child handling.
+*/
+
+/* 最终方案：容器画长竖线 + 子节点画横线 + 最后一个子节点遮盖竖线 */
+
+.insight-tree-node__children::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    /* Toggle center approx */
+    top: 0;
+    bottom: 15px;
+    /* Stop before the very end */
+    width: 1px;
+    background-color: var(--border-light);
+    display: block;
+}
+
+.insight-tree-node__children>.insight-tree-node::after {
+    content: '';
+    position: absolute;
+    left: -15px;
+    /* From line */
+    top: 20px;
+    /* Middle of header */
+    width: 15px;
+    height: 1px;
+    background-color: var(--border-light);
+}
+
+/* 最后一个子节点需要 mask 掉它下方的竖线 (如果容器竖线画多了) */
+/* 或者，让容器竖线只画到最后一个子节点的 top: 20px */
+/* CSS 无法直接动态计算 "直到最后一个子节点的 Header 中心"。
+   除非使用 flex/grid lines。
+   或者：
+   让每个子节点画 "├─"
+   最后一个子节点画 "└─"
+*/
+
+/* Reset again for "Individual Lines" approach - cleanest for L-shapes */
+
+.insight-tree-node__children::before {
+    display: none;
+}
+
+.insight-tree-node__children>.insight-tree-node::after {
+    display: none;
+}
+
+/* 竖线 (Vertical Segment for each node) - 实际上是连接上一个节点的线 */
+/* 
+   我们在这个节点左侧画线。
+   如果是第一个节点，需要连到父节点。
+   如果是中间节点，连上连下。
+*/
+.insight-tree-node__children>.insight-tree-node::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    /* Indent gap center */
+    top: 0;
+    bottom: 0;
+    /* Full height */
+    width: 1px;
+    background-color: var(--border-light);
+}
+
+/* 横线 (Horizontal Segment) */
+.insight-tree-node__children>.insight-tree-node::after {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 20px;
+    /* Header center height (approx 40px/2) */
+    width: 15px;
+    height: 1px;
+    background-color: var(--border-light);
+}
+
+/* 修正第一个子节点：顶端不需要无限向上，只连到父节点 ? 
+   其实父节点的竖线应该连下来。
+   但在 __children 容器里，我们假设竖线是贯通的。
+*/
+
+/* 修正最后一个子节点：形成 L 型 (Hidden bottom half) */
+.insight-tree-node__children>.insight-tree-node:last-child::before {
+    height: 20px;
+    /* Only top half to meet horizontal line */
+    bottom: auto;
 }

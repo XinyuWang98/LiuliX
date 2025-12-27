@@ -101,7 +101,6 @@ export const ProjectTreeItem: React.FC<ProjectTreeItemProps> = ({
                         cursor: 'pointer'
                     }}
                     onClick={(e) => {
-                        console.log('Toggle expand clicked', project.id);
                         e.stopPropagation();
                         onToggleExpand(project.id);
                     }}

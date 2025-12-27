@@ -1,0 +1,296 @@
+/* 详情面板样式 */
+
+.detail-panel {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 头部区域 */
+.detail-panel__header {
+    margin-bottom: var(--gap-xl);
+}
+
+.detail-panel__header-main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--gap-l);
+    margin-bottom: var(--gap-m);
+}
+
+.detail-panel__title {
+    flex: 1;
+    margin: 0;
+    font-size: var(--fs-xxl);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+/* 操作按钮组 */
+.detail-panel__actions {
+    display: flex;
+    gap: var(--gap-s);
+    flex-shrink: 0;
+}
+
+.detail-panel__action-btn {
+    padding: var(--gap-s) var(--gap-l);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.detail-panel__action-btn--adopt {
+    color: var(--color-success);
+    background: transparent;
+    border-color: var(--color-success);
+}
+
+.detail-panel__action-btn--adopt:hover:not(:disabled) {
+    background: var(--color-success);
+    color: white;
+}
+
+.detail-panel__action-btn--ignore {
+    color: var(--text-tertiary);
+    background: transparent;
+}
+
+.detail-panel__action-btn--ignore:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--text-secondary);
+}
+
+.detail-panel__action-btn--active {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.detail-panel__action-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.detail-panel__metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-s);
+}
+
+.detail-panel__tag {
+    padding: var(--gap-xs) var(--gap-s);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-s);
+}
+
+/* 章节标题 */
+.detail-panel__section-title {
+    margin: 0 0 var(--gap-m) 0;
+    font-size: var(--fs-l);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 主内容区：左列（图表+分析） + 右列（代码） */
+.detail-panel__viz-code-section {
+    display: flex;
+    gap: var(--gap-l);
+    margin-bottom: var(--gap-xl);
+    align-items: flex-start;
+}
+
+/* 左列：图表 + AI分析 */
+.detail-panel__left-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+}
+
+/* 图表容器 */
+.detail-panel__chart-container {
+    position: relative;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-m);
+    padding: var(--gap-l);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Glassmorphism */
+    backdrop-filter: blur(var(--glass-blur));
+}
+
+.detail-panel__chart-image {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: var(--radius-s);
+}
+
+.detail-panel__chart-controls {
+    position: absolute;
+    top: var(--gap-m);
+    right: var(--gap-m);
+    display: flex;
+    gap: var(--gap-xs);
+}
+
+.detail-panel__chart-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+
+    font-size: var(--fs-m);
+    background: var(--glass-panel-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border-color);
+    border-radius: var(--radius-s);
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: all var(--transition-fast);
+}
+
+.detail-panel__chart-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+/* AI分析内容（在左列） */
+.detail-panel__insight-content {
+    padding: var(--gap-l);
+    background: var(--glass-panel-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border-color);
+    border-radius: var(--radius-m);
+}
+
+.detail-panel__insight-title {
+    margin: 0 0 var(--gap-m) 0;
+    font-size: var(--fs-l);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.detail-panel__insight-content p {
+    margin: 0;
+    font-size: var(--fs-m);
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+
+/* 右列：代码容器 */
+.detail-panel__code-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    max-height: 600px;
+    /* 限制最大高度，使代码可滚动 */
+}
+
+.detail-panel__code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--gap-m) var(--gap-l);
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--fs-m);
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.detail-panel__copy-btn {
+    padding: var(--gap-xs) var(--gap-s);
+    font-size: var(--fs-xs);
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.detail-panel__copy-btn:hover {
+    background: var(--color-primary);
+    color: var(--color-primary-text);
+    border-color: var(--color-primary);
+}
+
+.detail-panel__code-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--gap-l);
+    background: #1e1e1e;
+}
+
+.detail-panel__code-content pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    overflow-x: auto;
+}
+
+.detail-panel__code-content code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: #d4d4d4;
+}
+
+/* 代码区域滚动条 */
+.detail-panel__code-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.detail-panel__code-content::-webkit-scrollbar-track {
+    background: #252526;
+}
+
+.detail-panel__code-content::-webkit-scrollbar-thumb {
+    background: #424242;
+    border-radius: var(--radius-s);
+}
+
+.detail-panel__code-content::-webkit-scrollbar-thumb:hover {
+    background: #4e4e4e;
+}
+
+/* 响应式：平板及以下 */
+@media (max-width: 1024px) {
+    .detail-panel__viz-code-section {
+        flex-direction: column;
+    }
+
+    .detail-panel__code-container {
+        max-height: 400px;
+    }
+}
+
+
+/* 下钻操作区域 */
+.detail-panel__actions-section {
+    margin-bottom: var(--gap-xl);
+}

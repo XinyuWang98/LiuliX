@@ -213,8 +213,68 @@ app.post('/api/proxy', async (req, res) => {
     }
 });
 
+// 🆕 本地模型服务 API
+const modelService = require('./modelService');
+
+// 模型加载
+app.post('/api/model/load', async (req, res) => {
+    try {
+        const { modelId } = req.body;
+        const result = await modelService.loadModel(modelId);
+        res.json(result);
+    } catch (error) {
+        console.error('[API-Model] 加载失败:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 文本生成
+app.post('/api/model/generate', async (req, res) => {
+    try {
+        const { prompt, maxTokens, temperature } = req.body;
+        const result = await modelService.generate(prompt, { maxTokens, temperature });
+        res.json(result);
+    } catch (error) {
+        console.error('[API-Model] 生成失败:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 模型状态查询
+app.get('/api/model/status', (req, res) => {
+    const status = modelService.getStatus();
+    res.json(status);
+});
+
+// 🆕 获取已安装的 Ollama 模型列表
+app.get('/api/model/list', async (req, res) => {
+    try {
+        const response = await axios.get('http://localhost:11434/api/tags');
+        const models = response.data.models || [];
+        // 返回简化的模型信息
+        const simplifiedModels = models.map(m => ({
+            name: m.name,
+            size: m.size,
+            modifiedAt: m.modified_at
+        }));
+        res.json({
+            available: true,
+            models: simplifiedModels,
+            currentModel: modelService.getStatus().currentModel
+        });
+    } catch (error) {
+        // Ollama 未运行或未安装
+        res.json({
+            available: false,
+            models: [],
+            error: 'Ollama 服务未运行。请安装并启动 Ollama。'
+        });
+    }
+});
+
 app.listen(port, () => {
     console.log(`\n🚀 后端代理服务器运行于 http://localhost:${port}`);
     console.log(`   - 健康检查: http://localhost:${port}/health`);
-    console.log(`   - 代理端点: http://localhost:${port}/api/proxy\n`);
+    console.log(`   - 代理端点: http://localhost:${port}/api/proxy`);
+    console.log(`   - 模型服务: http://localhost:${port}/api/model/*\n`);
 });

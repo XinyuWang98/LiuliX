@@ -123,5 +123,11 @@ export const settings = {
         method: 'Analysis Method',
         description: 'Description',
         charts: 'Output Charts',
-    }
+    },
+
+    // Model Call Logic
+    modelLogicTitle: 'How It Works',
+    modelLogicLocal: 'Local model (Ollama) is prioritized - data stays offline',
+    modelLogicAPI: 'Uses Cloud API - requires a valid API Key',
+    modelLogicFallback: 'Falls back to Cloud API if local model is unavailable'
 };
