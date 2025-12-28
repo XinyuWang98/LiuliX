@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { InsightTreeNode } from '../components/insights/InsightTreeNode';
+import { ForestExplorer } from '../components/insights/forest/ForestExplorer';
 import { InsightNode } from '../types/insightTree';
 import { logger } from '@/utils/logger';
-import '../components/insights/InsightTreeNode.css';
 
 export function MockInsightPage() {
     const [mockNode, setMockNode] = useState<InsightNode>({
@@ -97,9 +96,9 @@ export function MockInsightPage() {
         <div style={{ padding: '40px', background: '#101622', minHeight: '100vh', color: 'white' }}>
             <h2>Insight Mock Page (Action-Container Layout)</h2>
             <div style={{ maxWidth: '480px', margin: '0 auto' }}>
-                <InsightTreeNode
-                    node={mockNode}
-                    availableColumns={['date', 'revenue', 'cost', 'profit']}
+                <ForestExplorer
+                    nodes={[mockNode]}
+                    columns={['date', 'revenue', 'cost', 'profit']}
                     onDrillDown={handleDrillDown}
                     onCustomAnalysis={(pid, params) => logger.log('UI', 'Custom:', { data: { pid, params } })}
                     onToggleExpand={(id) => {
@@ -108,7 +107,6 @@ export function MockInsightPage() {
                             setMockNode(p => ({ ...p, isExpanded: !p.isExpanded }));
                         }
                     }}
-                    isExecuting={false}
                 />
             </div>
 

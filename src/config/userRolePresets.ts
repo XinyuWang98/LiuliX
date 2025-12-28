@@ -18,8 +18,8 @@ export const USER_ROLE_PRESETS: Record<UserRole, UserRoleConfig> = {
 
         // 数据清洗配置
         cleaning: {
-            enableRouter: false,      // 不用Router，直接AI深度分析
-            enableAI: true,            // 使用AI深度分析
+            enableRouter: true,        // ✅ 开启Router，与AI并行执行
+            enableAI: true,            // ✅ 开启AI，并行深度分析
             minSuggestions: 5,         // 需要更多选择
             showSQL: true,             // P1: 显示SQL代码
             enableSQLEdit: true,       // P1: 允许编辑SQL

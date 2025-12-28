@@ -20,6 +20,7 @@ import { validateExecutionResult } from '@/utils/postExecutionGate';
 import { useI18n } from '@/contexts/I18nContext';
 
 import { CacheManager } from '../utils/cacheManager';
+import { getAnalysisConfig } from '@/config/analysisConfig';
 
 export function useInsightLoaderV2() {
     const { t } = useI18n();  // 获取i18n翻译函数
@@ -70,8 +71,9 @@ export function useInsightLoaderV2() {
 
             logger.log('AI洞察', '数据规模', { data: { columns: 有效列名.length, totalRows } });
 
-            // ========== 🆕 步骤1.5：列数限制（避免Prompt过大）==========
-            const MAX_COLUMNS = 50;
+            // ========== 🆕 步骤1.5：列数限制（应用角色配置）==========
+            const analysisConfig = getAnalysisConfig();
+            const MAX_COLUMNS = analysisConfig.maxColumns; // 数据分析师50列，业务专家20列
             let 选中列名 = 有效列名;
             if (有效列名.length > MAX_COLUMNS) {
                 选中列名 = 有效列名.slice(0, MAX_COLUMNS);
@@ -80,10 +82,11 @@ export function useInsightLoaderV2() {
                 });
             }
 
-            // ========== 步骤2：数据采样 ==========
+            // ========== 步骤2：数据采样（应用角色配置）==========
             let 采样数据: any[] = [];
             if (tableName) {
-                const { sampledData } = await sampleDataForAI(tableName, 1000);
+                const SAMPLE_ROWS = analysisConfig.samplingRows; // 数据分析师100行，业务专家30行
+                const { sampledData } = await sampleDataForAI(tableName, SAMPLE_ROWS);
                 采样数据 = sampledData;
             }
 

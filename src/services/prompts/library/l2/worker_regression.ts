@@ -83,7 +83,7 @@ else:
     summary = f"模型解释度为 {r_squared:.1%}，未发现统计显著的关键因素。"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
-json.dumps(result)`,
+print(json.dumps(result))`,
 
     template: `
 你是一个专业的 Python 数据分析师。

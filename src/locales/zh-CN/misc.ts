@@ -23,6 +23,7 @@ export const workshop = {
     voiceReportDesc: '生成分析结果的语音解读',
     pptReport: 'PPT报告',
     pptReportDesc: '自动生成演示文稿',
+    assessment: '质量评估',  // ✅ 新增
     tools: {
         cleaning: {
             title: '数据清洗建议',

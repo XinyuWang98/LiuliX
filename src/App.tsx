@@ -62,6 +62,24 @@ function AppContent() {
     const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
     const [backendStatus, setBackendStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
 
+    // Simple Hash Router
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash;
+            if (hash === '#/prompts') {
+                setActiveView('library');
+            } else if (hash === '#/' || hash === '') {
+                setActiveView('dashboard');
+            }
+        };
+
+        // Check on mount
+        handleHashChange();
+
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
     // 左侧边栏拖拽处理
     const { width: leftWidth, startResizing: startLeftResizing, isResizing: isLeftResizing } = useResizable({
         initialWidth: 280,
@@ -265,120 +283,126 @@ function AppContent() {
             <NavigationBar
                 onOpenAPISettings={() => setShowAPISettings(true)}
                 backendStatus={backendStatus}
+                activeView={activeView}
             />
 
-            <div className="main-content-wrapper">
-                {showLeft ? (
-                    <div className="sidebar-container" style={{ width: leftWidth }}>
-                        <LeftSidebar
-                            onProjectSelect={(project) => {
-                                setSelectedProject(project);
-                                setActiveView('dashboard');
-                            }}
-                            onClose={() => setShowLeft(false)}
-                        />
-                        {/* Drag Handle */}
-                        <div
-                            onMouseDown={startLeftResizing}
-                            className="drag-handle drag-handle-left"
-                            title="Drag to resize"
-                        >
-                            <div className={`drag-indicator ${isLeftResizing ? 'active' : ''}`} />
-                        </div>
-                    </div>
-                ) : (
-                    <div className="collapsed-sidebar left">
-                        <button
-                            className="btn-ghost sidebar-toggle-btn"
-                            onClick={() => setShowLeft(true)}
-                            title="展开侧边栏"
-                        >
-                            <PanelLeft size={20} />
-                        </button>
-                    </div>
-                )}
-
-                <div className="glass-panel main-panel-wrapper">
-                    <div className="main-panel-content">
-                        {selectedProject === null ? (
-                            <EmptyStateWelcome onFilesUploaded={handleWelcomeUpload} />
-                        ) : activeView === 'dashboard' ? (
-                            <ExplorationFlow
-                                project={selectedProject}
-                                onNavigate={(view) => setActiveView(view as 'dashboard' | 'library')}
-                                cleaningTrigger={cleaningTrigger}
-                                onProjectUpdate={setSelectedProject}
-                                aiSuggestions={aiSuggestions}
-                            />
-                        ) : (
-                            <PromptLibrary
-                                activeView={activeView}
-                                onNavigate={setActiveView}
-                            />
-                        )}
-                    </div>
+            {activeView === 'library' ? (
+                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <PromptLibrary
+                        activeView={activeView}
+                        onNavigate={setActiveView}
+                    />
                 </div>
-
-                {showRight ? (
-                    <div className="sidebar-container" style={{ width: rightWidth }}>
-                        {/* 拖拽手柄 (左侧) */}
-                        <div
-                            onMouseDown={startRightResizing}
-                            className="drag-handle drag-handle-right"
-                            title="Drag to resize"
-                        >
-                            {/* 可视化指示条 */}
-                            <div className={`drag-indicator ${isRightResizing ? 'active' : ''}`} />
+            ) : (
+                <div className="main-content-wrapper">
+                    {showLeft ? (
+                        <div className="sidebar-container" style={{ width: leftWidth }}>
+                            <LeftSidebar
+                                onProjectSelect={(project) => {
+                                    setSelectedProject(project);
+                                    setActiveView('dashboard');
+                                }}
+                                onClose={() => setShowLeft(false)}
+                            />
+                            {/* Drag Handle */}
+                            <div
+                                onMouseDown={startLeftResizing}
+                                className="drag-handle drag-handle-left"
+                                title="Drag to resize"
+                            >
+                                <div className={`drag-indicator ${isLeftResizing ? 'active' : ''}`} />
+                            </div>
                         </div>
+                    ) : (
+                        <div className="collapsed-sidebar left">
+                            <button
+                                className="btn-ghost sidebar-toggle-btn"
+                                onClick={() => setShowLeft(true)}
+                                title="展开侧边栏"
+                            >
+                                <PanelLeft size={20} />
+                            </button>
+                        </div>
+                    )}
 
-                        <div className="glass-panel right-panel-container">
-                            <aside className="right-panel-aside">
-                                <div className="workshop-header">
-                                    <h2 className="workshop-title">
-                                        {t('workshop.title')}
-                                    </h2>
-                                    <button
-                                        className="btn-ghost workshop-close-btn"
-                                        onClick={() => setShowRight(false)}
-                                        title={t('sidebar.collapse')}
-                                    >
-                                        <PanelRight size={18} />
-                                    </button>
-                                </div>
-                                <div className="workshop-content">
-                                    <AIWorkshopTools
-                                        project={selectedProject}
-                                        onToolClick={(toolId) => {
-                                            if (toolId === 'cleaning') {
-                                                setCleaningTrigger(prev => prev + 1);
-                                            }
-                                        }}
-                                        onSuggestionsGenerated={(suggestions) => {
-                                            setAiSuggestions(suggestions);
-                                            logger.log('UI', `收到AI清洗建议: ${suggestions.length}条`);
-                                        }}
-                                    />
-                                </div>
-                            </aside>
+                    <div className="glass-panel main-panel-wrapper">
+                        <div className="main-panel-content">
+                            {selectedProject === null ? (
+                                <EmptyStateWelcome onFilesUploaded={handleWelcomeUpload} />
+                            ) : (
+                                <ExplorationFlow
+                                    project={selectedProject}
+                                    onNavigate={(view) => setActiveView(view as 'dashboard' | 'library')}
+                                    cleaningTrigger={cleaningTrigger}
+                                    onProjectUpdate={setSelectedProject}
+                                    aiSuggestions={aiSuggestions}
+                                />
+                            )}
                         </div>
                     </div>
-                ) : (
-                    <div className="collapsed-sidebar right">
-                        <button
-                            className="btn-ghost sidebar-toggle-btn"
-                            onClick={() => setShowRight(true)}
-                            title="展开侧边栏"
-                        >
-                            <PanelRight size={20} />
-                        </button>
-                    </div>
-                )}
-            </div>
+
+                    {showRight ? (
+                        <div className="sidebar-container" style={{ width: rightWidth }}>
+                            {/* 拖拽手柄 (左侧) */}
+                            <div
+                                onMouseDown={startRightResizing}
+                                className="drag-handle drag-handle-right"
+                                title="Drag to resize"
+                            >
+                                {/* 可视化指示条 */}
+                                <div className={`drag-indicator ${isRightResizing ? 'active' : ''}`} />
+                            </div>
+
+                            <div className="glass-panel right-panel-container">
+                                <aside className="right-panel-aside">
+                                    <div className="workshop-header">
+                                        <h2 className="workshop-title">
+                                            {t('workshop.title')}
+                                        </h2>
+                                        <button
+                                            className="btn-ghost workshop-close-btn"
+                                            onClick={() => setShowRight(false)}
+                                            title={t('sidebar.collapse')}
+                                        >
+                                            <PanelRight size={18} />
+                                        </button>
+                                    </div>
+                                    <div className="workshop-content">
+                                        <AIWorkshopTools
+                                            project={selectedProject}
+                                            onToolClick={(toolId) => {
+                                                if (toolId === 'cleaning') {
+                                                    setCleaningTrigger(prev => prev + 1);
+                                                }
+                                            }}
+                                            onSuggestionsGenerated={(suggestions) => {
+                                                setAiSuggestions(suggestions);
+                                                logger.log('UI', `收到AI清洗建议: ${suggestions.length}条`);
+                                            }}
+                                        />
+                                    </div>
+                                </aside>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="collapsed-sidebar right">
+                            <button
+                                className="btn-ghost sidebar-toggle-btn"
+                                onClick={() => setShowRight(true)}
+                                title="展开侧边栏"
+                            >
+                                <PanelRight size={20} />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {showAPISettings && <SettingsPage onClose={() => setShowAPISettings(false)} />}
         </div>
     );
 }
+
 
 export default function App() {
     return (
@@ -393,3 +417,4 @@ export default function App() {
         </I18nProvider>
     );
 }
+

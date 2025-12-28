@@ -351,4 +351,29 @@
   /* ========== 模态框背景 ========== */
   --modal-backdrop: rgba(0, 0, 0, 0.6);
   /* 半透明黑色遮罩 */
+
+  /* ========== Forest Explorer (Dark Forest Theme) - High Contrast Update ========== */
+  --forest-bg: #0f172a;
+  /* Slate 900 - Slightly lighter than black for depth */
+
+  /* 卡片更亮，玻璃感更强 */
+  --forest-card-bg: rgba(30, 41, 59, 0.6);
+  /* Slate 800 @ 60% */
+  --forest-card-border: rgba(96, 165, 250, 0.3);
+  /* Blue 400 @ 30% - Explicit border */
+
+  /* 脊柱和连线 - 高亮可见 */
+  --forest-spine-color: #3b82f6;
+  /* Blue 500 Solid */
+  --forest-line-color: #60a5fa;
+  /* Blue 400 Solid - Bright for connections */
+
+  --forest-accent: #3b82f6;
+  /* Blue 500 */
+  --forest-text-muted: #94a3b8;
+  /* Slate 400 */
+
+  --forest-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --forest-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+  /* Stronger glow */
 }

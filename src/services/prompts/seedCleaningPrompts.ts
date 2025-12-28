@@ -117,6 +117,208 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         version: 'v1',
         isBuiltIn: true,
         updatedAt: Date.now()
+    },
+
+    // ==================== P2: 新增10个核心模板 ====================
+
+    {
+        id: 'cleaner-filter-outliers-iqr-v1',
+        name: 'cleaner_filter_outliers_iqr',
+        title: '异常值过滤（IQR规则）',
+        description: '使用四分位距(IQR)规则过滤数值列的异常值，删除超出Q1-1.5*IQR和Q3+1.5*IQR范围的记录',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'CREATE OR REPLACE TABLE __TABLE_NAME__ AS SELECT * FROM __TABLE_NAME__ WHERE "{column_name}" >= {q1_minus_iqr} AND "{column_name}" <= {q3_plus_iqr}',
+        inputVariables: ['column_name', 'q1_minus_iqr', 'q3_plus_iqr'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'filter', label: '过滤' },
+            { category: 'method', value: 'iqr', label: 'IQR规则' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-format-money-v1',
+        name: 'cleaner_format_money',
+        title: '金额格式化（2位小数）',
+        description: '将金额/价格列统一保留2位小数',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = ROUND(CAST("{column_name}" AS DOUBLE), 2)',
+        inputVariables: ['column_name'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'standardize', label: '格式标准化' },
+            { category: 'output', value: 'numeric', label: '数值' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-drop-null-column-v1',
+        name: 'cleaner_drop_null_column',
+        title: '删除全空列',
+        description: '删除数据全部为NULL的无效列',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'ALTER TABLE __TABLE_NAME__ DROP COLUMN "{column_name}"',
+        inputVariables: ['column_name'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'filter', label: '过滤' },
+            { category: 'method', value: 'drop', label: '删除' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-cast-to-numeric-v1',
+        name: 'cleaner_cast_to_numeric',
+        title: '类型转换（转数值）',
+        description: '将文本列转换为数值类型，无效值转为NULL',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = TRY_CAST("{column_name}" AS DOUBLE)',
+        inputVariables: ['column_name'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'convert', label: '类型转换' },
+            { category: 'output', value: 'numeric', label: '数值' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-fill-null-mean-v1',
+        name: 'cleaner_fill_null_mean',
+        title: '缺失值填充（均值）',
+        description: '使用平均值填充数值列的缺失值',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = {mean_value} WHERE "{column_name}" IS NULL',
+        inputVariables: ['column_name', 'mean_value'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'fill_missing', label: '填充缺失值' },
+            { category: 'method', value: 'mean', label: '均值' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-fill-null-mode-v1',
+        name: 'cleaner_fill_null_mode',
+        title: '缺失值填充（众数）',
+        description: '使用最常见值（众数）填充分类列的缺失值',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = \'{mode_value}\' WHERE "{column_name}" IS NULL',
+        inputVariables: ['column_name', 'mode_value'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'fill_missing', label: '填充缺失值' },
+            { category: 'method', value: 'mode', label: '众数' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-standardize-phone-v1',
+        name: 'cleaner_standardize_phone',
+        title: '电话号码标准化',
+        description: '去除电话号码中的非数字字符（空格、横线、括号等）',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = regexp_replace("{column_name}", \'[^0-9]\', \'\', \'g\')',
+        inputVariables: ['column_name'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'standardize', label: '格式标准化' },
+            { category: 'output', value: 'text', label: '文本' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-trim-whitespace-v1',
+        name: 'cleaner_trim_whitespace',
+        title: '文本清洗（去除空白）',
+        description: '去除文本列的前后空白字符和多余空格',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = regexp_replace(trim("{column_name}"), \'\\s+\', \' \', \'g\')',
+        inputVariables: ['column_name'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'standardize', label: '格式标准化' },
+            { category: 'output', value: 'text', label: '文本' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-delete-null-rows-v1',
+        name: 'cleaner_delete_null_rows',
+        title: '删除空白行',
+        description: '删除指定列为NULL的记录',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'CREATE OR REPLACE TABLE __TABLE_NAME__ AS SELECT * FROM __TABLE_NAME__ WHERE "{column_name}" IS NOT NULL',
+        inputVariables: ['column_name'],
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'filter', label: '过滤' },
+            { category: 'method', value: 'delete', label: '删除' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
+    },
+
+    {
+        id: 'cleaner-standardize-case-v1',
+        name: 'cleaner_standardize_case',
+        title: '大小写标准化',
+        description: '将文本列统一转为小写（或大写）',
+        layer: 'L2_EXECUTION',
+        template: '',
+        sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = {case_function}("{column_name}")',
+        inputVariables: ['column_name', 'case_function'], // case_function: lower 或 upper
+        executionMode: 'TEMPLATE_FILL',
+        dimensions: [
+            { category: 'intent', value: 'standardize', label: '格式标准化' },
+            { category: 'output', value: 'text', label: '文本' }
+        ],
+        author: 'system',
+        version: 'v1',
+        isBuiltIn: true,
+        updatedAt: Date.now()
     }
 ];
 

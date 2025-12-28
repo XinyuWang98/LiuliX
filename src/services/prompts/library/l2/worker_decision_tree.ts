@@ -75,7 +75,7 @@ root_feature = X.columns[model.tree_.feature[0]] if model.tree_.feature[0] >= 0 
 summary = f"模型构建完成。根节点分裂特征为 {root_feature}，它是区分 {target_col} 最重要的单一指标。"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
-json.dumps(result)`,
+print(json.dumps(result))`,
 
     template: `
 你是一个专业的 Python 数据分析师。

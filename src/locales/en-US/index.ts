@@ -25,6 +25,20 @@ export const enUS: LanguageConfig = {
             all: 'All',
             featureInDev: 'Feature in development...',
             collapse: 'Collapse',
+            verifying: 'Verifying...',
+        },
+        header: {
+            freeTrial: 'Free Trial',
+            inviteCodeTrial: 'Invite Quota',
+        },
+        inviteCode: {
+            title: 'Enter Invite Code',
+            placeholder: 'Enter your invite code',
+            activate: 'Activate',
+            emptyError: 'Please enter invite code',
+            invalidError: 'Invalid or expired invite code',
+            networkError: 'Network error, please try again',
+            hint: 'Enter invite code to get 20 AI uses',
         },
         data: {
             unique: 'Unique',

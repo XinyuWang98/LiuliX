@@ -10,8 +10,39 @@ class PromptRegistry implements IPromptRegistry {
     private prompts: Map<string, UserPrompt> = new Map();
 
     private constructor() {
-        // 初始化时可以加载种子 Prompt (后续会改为动态加载)
-        // this.log('PromptRegistry', '初始化完成');
+        // Load persist usage counts
+        this.loadUsageCounts();
+    }
+
+    private loadUsageCounts() {
+        try {
+            const usageData = localStorage.getItem('prompt_usage_counts');
+            if (usageData) {
+                const counts = JSON.parse(usageData);
+                for (const [id, count] of Object.entries(counts)) {
+                    if (this.prompts.has(id)) {
+                        const p = this.prompts.get(id);
+                        if (p) p.usageCount = count as number;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load usage counts', e);
+        }
+    }
+
+    private saveUsageCounts() {
+        try {
+            const counts: Record<string, number> = {};
+            this.prompts.forEach(p => {
+                if (p.usageCount && p.usageCount > 0) {
+                    counts[p.id] = p.usageCount;
+                }
+            });
+            localStorage.setItem('prompt_usage_counts', JSON.stringify(counts));
+        } catch (e) {
+            console.error('Failed to save usage counts', e);
+        }
     }
 
     public static getInstance(): PromptRegistry {
@@ -19,6 +50,18 @@ class PromptRegistry implements IPromptRegistry {
             PromptRegistry.instance = new PromptRegistry();
         }
         return PromptRegistry.instance;
+    }
+
+    /**
+     * Increment usage count for a prompt
+     */
+    public recordUsage(id: string): void {
+        const prompt = this.prompts.get(id);
+        if (prompt) {
+            prompt.usageCount = (prompt.usageCount || 0) + 1;
+            this.saveUsageCounts();
+            logger.log('AI服务', `Prompt 使用: ${prompt.title} (Total: ${prompt.usageCount})`);
+        }
     }
 
     /**
@@ -49,6 +92,10 @@ class PromptRegistry implements IPromptRegistry {
                 results = results.filter(p =>
                     p.dimensions.some(d => d.category === filter.tagCategory && d.value === filter.tagValue)
                 );
+            } else if (filter.tagValue) {
+                results = results.filter(p =>
+                    p.dimensions.some(d => d.value === filter.tagValue)
+                );
             }
             if (filter.search) {
                 const lowerSearch = filter.search.toLowerCase();
@@ -59,15 +106,36 @@ class PromptRegistry implements IPromptRegistry {
             }
         }
 
-        return results;
+        // Default sort by usage count desc, then title
+        return results.sort((a, b) => {
+            const usageA = a.usageCount || 0;
+            const usageB = b.usageCount || 0;
+            if (usageA !== usageB) return usageB - usageA;
+            return a.title.localeCompare(b.title);
+        });
     }
 
     /**
      * 注册/更新 Prompt
      */
     public register(prompt: UserPrompt): void {
+        if (prompt.isBuiltIn && prompt.isOfficial === undefined) {
+            prompt.isOfficial = true; // 内置默认为官方
+        }
+
+        // Preserve existing usage count if already loaded
+        const existing = this.prompts.get(prompt.id);
+        if (existing && existing.usageCount) {
+            prompt.usageCount = existing.usageCount;
+        } else if (prompt.usageCount === undefined) {
+            prompt.usageCount = 0; // 默认为0
+        }
+
         this.prompts.set(prompt.id, prompt);
         // logger.log('AI服务', `[PromptRegistry] 注册: ${prompt.title}`);
+
+        // Re-apply persisted counts in case register happens after load
+        this.loadUsageCounts();
     }
 
     /**
@@ -104,6 +172,47 @@ class PromptRegistry implements IPromptRegistry {
             method: Array.from(tags.method),
             output: Array.from(tags.output)
         };
+    }
+
+
+
+    /**
+     * 获取维度计数 (用于侧边栏 Faceted Filter)
+     */
+    public getPromptCounts(): Record<DimensionKey | 'cleaning' | 'analysis', Record<string, number>> {
+        const counts: any = {
+            industry: {},
+            intent: {},
+            method: {},
+            output: {},
+            cleaning: { total: 0 }, // 特殊分类
+            analysis: { total: 0 }  // 特殊分类
+        };
+
+        this.prompts.forEach(p => {
+            // 维度计数
+            p.dimensions.forEach(d => {
+                if (!counts[d.category][d.value]) {
+                    counts[d.category][d.value] = 0;
+                }
+                counts[d.category][d.value]++;
+            });
+
+            // 业务分类计数 (根据是否有 cleaning 标签或 ID 判断)
+            // 简单规则：L2_EXECUTION 且 method != 'cleaning' 归为 analysis
+            // method == 'cleaning' 或 L1 归为 cleaning (这里根据现有Prompt特征暂定)
+            const isCleaning = p.dimensions.some(d => d.value === 'cleaning' || d.category === 'method' && d.value === 'cleaning');
+
+            if (isCleaning) {
+                if (!counts.cleaning['all']) counts.cleaning['all'] = 0;
+                counts.cleaning['all']++;
+            } else {
+                if (!counts.analysis['all']) counts.analysis['all'] = 0;
+                counts.analysis['all']++;
+            }
+        });
+
+        return counts as Record<DimensionKey | 'cleaning' | 'analysis', Record<string, number>>;
     }
 
     /**

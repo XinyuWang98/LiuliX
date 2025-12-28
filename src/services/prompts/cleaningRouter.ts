@@ -211,6 +211,9 @@ ${templateList}
                 continue;
             }
 
+            // 记录清洗模板使用
+            promptRegistry.recordUsage(rec.promptId);
+
             // 填充SQL模板
             let sql = template.sqlTemplate;
 

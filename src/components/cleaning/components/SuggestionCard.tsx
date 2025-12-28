@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { SimpleSuggestion } from '../types/cleaning.types';
 import { useI18n } from '../../../contexts/I18nContext';
-import { ChevronDown, ChevronRight, Copy, Check, Sparkles, Trash2, Eraser, FileX, Calculator } from 'lucide-react';
+import { ChevronDown, ChevronRight, Copy, Check, Sparkles, Trash2, Eraser, FileX, Calculator, Wand2 } from 'lucide-react';
 import { formatSQL } from '../../../utils/sqlFormatter';
 import './SuggestionCard.css';
 
@@ -16,7 +16,7 @@ interface SuggestionCardProps {
 
 /**
  * 单个建议卡片（简洁文本型）
- * 格式：【AI/规则建议】操作描述 推荐度XX%
+ * 格式：【PROMPT/AI】操作描述 推荐度XX%
  * 点击高亮选中，支持多选，选中后直接在卡片内展开详情
  */
 export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, isIgnored, onToggle }) => {
@@ -24,23 +24,28 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
     const [isSqlExpanded, setIsSqlExpanded] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // 判断来源
-    const isAI = suggestion.id.startsWith('ai_');
+    // ✅ 判断来源：优先使用source字段，回退到id前缀判断（向后兼容）
+    const isFromRouter = suggestion.source === 'router' || (!suggestion.source && suggestion.id.startsWith('router-'));
+    const isFromAI = suggestion.source === 'ai' || (!suggestion.source && suggestion.id.startsWith('ai_'));
 
     // 置信度百分比
     const confidencePercent = Math.round(suggestion.confidence * 100);
 
-    // 根据标签或内容判断图标
+    // 根据来源和内容判断图标
     const getIcon = () => {
-        if (isAI) return <Sparkles size={16} className="icon-ai" />;
+        // AI生成用sparkles图标
+        if (isFromAI) return <Sparkles size={16} className="icon-ai" />;
+        // Router/Prompt模板用wand图标
+        if (isFromRouter) return <Wand2 size={16} className="icon-prompt" />;
 
+        // 根据标签内容判断
         const labelLower = suggestion.label.toLowerCase();
         if (labelLower.includes('删除') || labelLower.includes('drop')) return <Trash2 size={16} className="icon-delete" />;
         if (labelLower.includes('去重') || labelLower.includes('duplicate')) return <FileX size={16} className="icon-dedup" />;
         if (labelLower.includes('填充') || labelLower.includes('fill')) return <Eraser size={16} className="icon-fill" />;
         if (labelLower.includes('标准化') || labelLower.includes('normalize')) return <Calculator size={16} className="icon-calc" />;
 
-        return <Sparkles size={16} className="icon-default" />; // 默认图标
+        return <Sparkles size={16} className="icon-default" />;
     };
 
     const handleCopyObj = (e: React.MouseEvent, text: string) => {
@@ -69,20 +74,20 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
 
     return (
         <div
-            className={`suggestionCard ${isSelected ? 'selected' : ''} ${isIgnored ? 'ignored' : ''} ${isAI ? 'card-ai' : 'card-rule'}`}
+            className={`suggestionCard ${isSelected ? 'selected' : ''} ${isIgnored ? 'ignored' : ''} ${isFromAI ? 'card-ai' : 'card-prompt'}`}
             onClick={() => onToggle(suggestion.id)}
         >
             {/* 1. 头部：来源标签 + 标题 + 置信度 */}
             <div className="cardHeader">
                 <div className="headerLeft">
                     {/* 图标容器 */}
-                    <div className={`iconContainer ${isAI ? 'bg-ai' : 'bg-rule'}`}>
+                    <div className={`iconContainer ${isFromAI ? 'bg-ai' : 'bg-prompt'}`}>
                         {getIcon()}
                     </div>
 
                     <div className="titleGroup">
-                        <span className={`sourceLabel ${isAI ? 'ai' : 'rule'}`}>
-                            {isAI ? 'AI' : 'RULE'}
+                        <span className={`sourceLabel ${isFromAI ? 'ai' : 'prompt'}`}>
+                            {isFromAI ? 'AI' : 'PROMPT'}
                         </span>
                         <span className="suggestionTitle" title={suggestion.label}>
                             {suggestion.label}

@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { InsightNode as InsightNodeType } from '@/types/insightTree';
 import { DrillDownAction } from '@/types/insightTree';
-import { InsightTreeNode } from './InsightTreeNode';
+import { ForestExplorer } from './forest/ForestExplorer';
 import { logger } from '../../utils/logger';
 import { Loader } from 'lucide-react';
 import { useInsightLoaderV2 } from '@/hooks/useInsightLoaderV2';
 import { useInsightRefresh } from '@/hooks/useInsightRefresh';
-import { LocalModelProgress } from './LocalModelProgress';
 import { getRenderedCode } from '@/services/insights/inflater';
 import { executeInsightWithMode } from '@/services/skills/modeExecutor';
 import './InsightChainFlow.css';
@@ -36,7 +35,6 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
     // 使用 V2 Hook（包含完整质量门控）
     const {
         isLoading,
-        isLoadingLocalModel,
         executionProgress,
         loadingStage, // 🆕 获取详细进度状态
         loadInsights,
@@ -209,11 +207,8 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
                 </h3>
             )}
 
-            {/* 本地模型加载进度 */}
-            {isLoadingLocalModel && <LocalModelProgress isLoading={isLoadingLocalModel} />}
-
             {/* 加载状态 + 执行进度 (覆盖 Initializing 阶段) */}
-            {(isLoading || showInitializing) && !isLoadingLocalModel && (
+            {(isLoading || showInitializing) && (
                 <div className="insight-loading-container">
                     <Loader size={32} className="spinning" />
                     <p>
@@ -259,24 +254,15 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
                 </div>
             )}
 
-            {/* 🆕 InsightTreeNode 森林布局 */}
+            {/* 🆕 Forest Explorer (Dark Forest Theme) */}
             {!isLoading && insightNodes.length > 0 && (
-                <div className="insight-tree-forest">
-                    {insightNodes
-                        // 🔍 过滤逻辑: 隐藏有错误的节点 (如质量评分不足: 0/100)
-                        // 只展示高质量、渲染成功的洞察
-                        .filter(node => !node.error)
-                        .map(node => (
-                            <InsightTreeNode
-                                key={node.id}
-                                node={node}
-                                availableColumns={columns}
-                                onDrillDown={handleDrillDown}
-                                onCustomAnalysis={handleCustomAnalysis}
-                                onToggleExpand={handleToggleExpand}
-                            />
-                        ))}
-                </div>
+                <ForestExplorer
+                    nodes={insightNodes.filter(node => !node.error)}
+                    columns={columns}
+                    onDrillDown={handleDrillDown}
+                    onToggleExpand={handleToggleExpand}
+                    onCustomAnalysis={handleCustomAnalysis}
+                />
             )}
         </div>
     );

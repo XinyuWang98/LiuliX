@@ -1,8 +1,34 @@
 // Prompt库模块翻译
 export const prompt = {
+    tryIt: '试运行',
+    sourceJson: 'JSON 源码',
+    noPython: '# 暂无 Python 模板',
+    noSql: '-- 暂无 SQL 模板',
+    info: '信息',
+    copied: '已复制',
+},
     library: {
         title: 'Prompt 库',
         description: '高质量分析策略与 Prompt 集合',
+        searchPlaceholder: '搜索 Prompt...',
+        trending: '🔥 热门推荐 Top 4',
+        allPrompts: '全部 Prompt',
+        noResults: '未找到匹配的 Prompt',
+        totalPrompts: '{{count}} 个 Prompt',
+        filter: {
+            all: '全部',
+            industry: '行业',
+            intent: '意图',
+            method: '方法',
+            output: '输出',
+        },
+        card: {
+            official: '官方',
+            usage: '{{count}} 次使用',
+            usageTooltip: '使用次数',
+            version: 'v{{version}}',
+            updated: '更新于 {{date}}',
+        },
     },
     category: {
         analysis: '数据分析',

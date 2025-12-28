@@ -3,6 +3,38 @@ export const prompt = {
     library: {
         title: 'Prompt Library',
         description: 'Collection of high-quality analysis strategies and prompts',
+        searchPlaceholder: 'Search prompts...',
+        filter: {
+            all: 'All',
+            industry: 'Industry',
+            intent: 'Intent',
+            method: 'Method',
+            output: 'Output',
+        },
+        card: {
+            official: 'Official',
+            usage: '{{count}} uses',
+            version: 'v{{version}}',
+            updated: 'Updated {{date}}',
+        },
+    },
+    sidebar: {
+        all: 'All',
+        cleaning: 'Data Cleaning',
+        analysis: 'Insight Analysis',
+    },
+    detail: {
+        infoTab: 'Template Info',
+        codeTab: 'Core Logic',
+        description: 'Description',
+        tags: 'Tags',
+        inputVariables: 'Input Variables',
+        author: 'Author',
+        version: 'Version',
+        updated: 'Last Updated',
+        copyCode: 'Copy Code',
+        tryIt: 'Try It',
+        sourceJson: 'JSON Source',
     },
     category: {
         analysis: 'Data Analysis',

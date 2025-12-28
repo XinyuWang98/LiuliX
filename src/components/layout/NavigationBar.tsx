@@ -1,13 +1,21 @@
 import { useI18n } from '@contexts/I18nContext';
-import { Settings, User } from 'lucide-react';
+import { Settings, User, BookOpen, LayoutGrid } from 'lucide-react';
 import { Logo } from '@/components/common/Logo/Logo';
+import { FreeTrialBadge } from '@/components/Header/FreeTrialBadge';
+import '@/components/Header/FreeTrialBadge.css';
+import './NavigationBar.css';
 
 interface NavigationBarProps {
     onOpenAPISettings?: () => void;
     backendStatus?: 'connected' | 'disconnected' | 'checking';
+    activeView?: 'dashboard' | 'library';
 }
 
-export function NavigationBar({ onOpenAPISettings, backendStatus = 'checking' }: NavigationBarProps = {}) {
+export function NavigationBar({
+    onOpenAPISettings,
+    backendStatus = 'checking',
+    activeView = 'dashboard'
+}: NavigationBarProps = {}) {
     const { t } = useI18n();
 
     return (
@@ -22,12 +30,38 @@ export function NavigationBar({ onOpenAPISettings, backendStatus = 'checking' }:
                 zIndex: 100,
                 position: 'relative',
                 background: 'transparent',
+                borderBottom: '1px solid var(--border)',
             }}
         >
-            {/* 左侧: LiuliX Logo */}
-            <Logo layout="horizontal" size="m" />
+            {/* Left: Logo + Navigation Tabs */}
+            <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                <Logo
+                    layout="horizontal"
+                    size="m"
+                />
 
-            {/* 右侧:工具栏 */}
+                <div className="nav-divider" />
+
+                <nav className="nav-tabs">
+                    <button
+                        className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
+                        onClick={() => window.location.hash = '#/'}
+                    >
+                        <LayoutGrid size={16} style={{ marginRight: 6 }} />
+                        {t('nav.dashboard')}
+                    </button>
+
+                    <button
+                        className={`nav-tab ${activeView === 'library' ? 'active' : ''}`}
+                        onClick={() => window.location.hash = '#/prompts'}
+                    >
+                        <BookOpen size={16} style={{ marginRight: 6 }} />
+                        {t('nav.promptLibrary')}
+                    </button>
+                </nav>
+            </div>
+
+            {/* Right: Tools */}
             <div
                 style={{
                     display: 'flex',
@@ -35,12 +69,12 @@ export function NavigationBar({ onOpenAPISettings, backendStatus = 'checking' }:
                     gap: 'var(--gap-s)',
                 }}
             >
-                {/* 后端状态指示灯 */}
+                {/* Backend Status */}
                 <div
                     title={backendStatus === 'connected' ? '后端服务已连接' : backendStatus === 'disconnected' ? '后端服务未启动，AI 功能已降级' : '正在检测后端服务...'}
                     style={{
-                        width: '10px',
-                        height: '10px',
+                        width: '8px',
+                        height: '8px',
                         borderRadius: '50%',
                         background: backendStatus === 'connected' ? 'var(--success)' : backendStatus === 'disconnected' ? 'var(--warning)' : 'var(--text-secondary)',
                         boxShadow: backendStatus === 'connected' ? '0 0 8px var(--success)' : backendStatus === 'disconnected' ? '0 0 8px var(--warning)' : 'none',
@@ -49,9 +83,11 @@ export function NavigationBar({ onOpenAPISettings, backendStatus = 'checking' }:
                     }}
                 />
 
-                <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 var(--gap-xs)' }} />
+                <FreeTrialBadge />
 
-                {/* Settings Button - 直接打开设置页 */}
+                <div style={{ width: '1px', height: '16px', background: 'var(--border)', margin: '0 var(--gap-xs)' }} />
+
+                {/* Settings Button */}
                 <button
                     className="btn-ghost"
                     title={t('nav.settings')}

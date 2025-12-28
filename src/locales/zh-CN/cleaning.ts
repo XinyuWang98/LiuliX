@@ -9,6 +9,7 @@ export const cleaning = {
     ignore: '忽略',
     sqlPlaceholder: '输入 SQL 清洗语句...',
     runSQL: '执行 SQL',
+    requirements: '清洗需求', // ✅ 新增
     intentDedup: '去除重复数据',
     intentFillNull: '填充空值',
     intentNormalize: '数据标准化',

@@ -1,0 +1,52 @@
+.nav-tabs {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin-left: 0;
+}
+
+.nav-divider {
+    width: 1px;
+    height: 18px;
+    background-color: var(--border);
+    margin: 0 16px;
+    opacity: 0.6;
+}
+
+.nav-tab {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0 16px;
+    height: 100%;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.nav-tab:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.nav-tab.active {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.nav-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 3px 3px 0 0;
+    box-shadow: 0 -2px 8px var(--primary-20);
+}

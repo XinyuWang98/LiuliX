@@ -82,6 +82,10 @@ export interface UserPrompt {
     version: string;
     isBuiltIn: boolean; // 是否内置
     updatedAt: number;
+
+    // UI 展示增强字段
+    isOfficial?: boolean; // 是否官方认证
+    usageCount?: number; // 使用次数
 }
 
 // ========== 3. 注册表接口 ==========

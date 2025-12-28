@@ -1,0 +1,103 @@
+.library-sidebar {
+    width: 250px;
+    height: 100%;
+    border-right: 1px solid var(--border);
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    padding: var(--gap-m);
+    gap: var(--gap-l);
+    overflow-y: auto;
+}
+
+.sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+}
+
+.sidebar-section-title {
+    font-size: var(--font-xs);
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    padding-left: var(--gap-xs);
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px var(--gap-s);
+    border-radius: var(--radius-m);
+    cursor: pointer;
+    font-size: var(--font-s);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.sidebar-menu-item:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.sidebar-menu-item.active {
+    background: var(--primary-10);
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.sidebar-menu-item .count {
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
+    background: var(--bg-floating);
+    padding: 2px 6px;
+    border-radius: 99px;
+}
+
+.sidebar-menu-item.active .count {
+    color: var(--primary);
+    background: var(--bg-card);
+}
+
+/* Faceted Filters */
+.faceted-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.faceted-group-title {
+    font-size: var(--font-s);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+.faceted-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: 4px var(--gap-xs);
+    cursor: pointer;
+    font-size: var(--font-s);
+    color: var(--text-secondary);
+}
+
+.faceted-checkbox:hover {
+    color: var(--text-primary);
+}
+
+.faceted-checkbox input {
+    accent-color: var(--primary);
+}

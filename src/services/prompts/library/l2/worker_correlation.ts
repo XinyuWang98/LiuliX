@@ -97,7 +97,7 @@ image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
 plt.close(fig)
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
-json.dumps(result)`,
+print(json.dumps(result))`,
 
     // 旧版 AI Prompt (保留兼容)
     template: `

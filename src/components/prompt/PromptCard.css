@@ -1,0 +1,118 @@
+.prompt-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    padding: 24px;
+    /* Increased padding from var(--gap-m) */
+    box-shadow: var(--shadow-s);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    /* Increased gap */
+    position: relative;
+    overflow: hidden;
+}
+
+.prompt-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-m);
+    border-color: var(--primary-30);
+}
+
+.prompt-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--gap-s);
+}
+
+.prompt-card-title {
+    font-size: 15px;
+    /* Slightly larger */
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.official-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
+}
+
+.prompt-card-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    /* Increased line height */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    /* Limit to 2 lines for cleaner look */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+.prompt-card-meta-group {
+    display: flex;
+    gap: var(--gap-s);
+    align-items: center;
+}
+
+.prompt-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: var(--gap-s);
+    border-top: 1px solid var(--border-light);
+}
+
+.prompt-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.prompt-tag {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 99px;
+    background: var(--bg-floating);
+    color: var(--text-tertiary);
+}
+
+.prompt-usage {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.prompt-meta-badge {
+    position: absolute;
+    top: -10px;
+    right: -25px;
+    background: var(--primary);
+    color: white;
+    font-size: 10px;
+    padding: 15px 30px 5px 30px;
+    transform: rotate(45deg);
+    display: none;
+    /* Optional style variant */
+}

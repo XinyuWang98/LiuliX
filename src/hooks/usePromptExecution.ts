@@ -117,6 +117,9 @@ export function usePromptExecution(options: UsePromptExecutionOptions): UsePromp
                 throw new Error('L1 Prompt not found');
             }
 
+            // 记录 L1 使用
+            promptRegistry.recordUsage('explorer-general-v1');
+
             // 填充模板
             const historyStr = history && history.length > 0
                 ? JSON.stringify(history, null, 2)
@@ -181,6 +184,9 @@ export function usePromptExecution(options: UsePromptExecutionOptions): UsePromp
             if (!l2Prompt) {
                 throw new Error(`L2 Prompt not found: ${promptId}`);
             }
+
+            // 记录使用 (实际执行)
+            promptRegistry.recordUsage(promptId);
 
             // 填充模板
             const filledPrompt = fillTemplate(l2Prompt.template, params);

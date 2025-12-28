@@ -1,0 +1,47 @@
+/* 免费试用徽章样式 */
+.free-trial-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-xs) var(--gap-s);
+    background: var(--glass-bg);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius-m);
+    font-size: var(--fs-sm);
+    font-family: var(--font-family);
+    /* ✅ 继承主题字体 */
+    color: var(--text-secondary);
+    /* ✅ 使用主题文本颜色 */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.free-trial-badge:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+/* 邀请码用户特殊样式 */
+.free-trial-badge.invite {
+    border-color: rgba(255, 193, 7, 0.5);
+    background: linear-gradient(135deg,
+            rgba(255, 215, 0, 0.1),
+            rgba(255, 193, 7, 0.05));
+}
+
+.free-trial-badge.invite:hover {
+    border-color: rgba(255, 193, 7, 0.8);
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.2);
+}
+
+.usage-count {
+    font-weight: var(--fw-semibold);
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.free-trial-badge.invite .usage-count {
+    color: #ffc107;
+}

@@ -14,11 +14,29 @@ const port = process.env.PORT || 3001;
 const DEEPSEEK_CLEANING_KEY = process.env.DEEPSEEK_API_KEY_CLEANING || process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_INSIGHT_KEY = process.env.DEEPSEEK_API_KEY_INSIGHT || process.env.DEEPSEEK_API_KEY;
 
+// 免费试用配置（测试阶段默认关闭）
+const ENABLE_FREE_TRIAL_LIMIT = process.env.ENABLE_FREE_TRIAL_LIMIT === 'true';
+const FREE_TRIAL_CLEANING_LIMIT = parseInt(process.env.FREE_TRIAL_CLEANING_LIMIT) || 5;
+const FREE_TRIAL_INSIGHT_LIMIT = parseInt(process.env.FREE_TRIAL_INSIGHT_LIMIT) || 5;
+const INVITE_CODE_TOTAL_LIMIT = parseInt(process.env.INVITE_CODE_TOTAL_LIMIT) || 20;
+
+// 邀请码白名单
+const validInviteCodes = new Set(
+    (process.env.VALID_INVITE_CODES || '').split(',').filter(c => c.trim())
+);
+
+// 用户使用计数器（内存存储，重启重置）
+const userUsageCounter = new Map();
+
 // 调试：检查环境变量是否加载（脱敏输出）
 if (DEEPSEEK_CLEANING_KEY) {
     console.log('✅ 清洗建议 API Key:', DEEPSEEK_CLEANING_KEY.substring(0, 10) + '...');
 } else {
     console.error('❌ 严重警告: DEEPSEEK_API_KEY_CLEANING 环境变量未设置！');
+}
+console.log('🎁 免费试用限制:', ENABLE_FREE_TRIAL_LIMIT ? '启用' : '关闭（测试模式）');
+if (validInviteCodes.size > 0) {
+    console.log('🔑 邀请码数量:', validInviteCodes.size);
 }
 
 // ... CORS and Middleware ...
@@ -26,12 +44,83 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+/**
+ * 免费试用计数器中间件
+ * @param {string} type -类型 'cleaning' | 'insight'
+ */
+function checkFreeTrialLimit(type) {
+    return (req, res, next) => {
+        // 测试阶段跳过限制
+        if (!ENABLE_FREE_TRIAL_LIMIT) return next();
+
+        const userId = req.headers['x-user-id'] || 'anonymous';
+        const clientKey = req.headers['x-api-key'];
+        const inviteCode = req.headers['x-invite-code'];
+
+        // 用户有自己的Key，不限制
+        if (clientKey && clientKey !== 'default') return next();
+
+        // 获取或初始化用户使用记录
+        let usage = userUsageCounter.get(userId);
+
+        // 首次访问：判断用户类型
+        if (!usage) {
+            if (inviteCode && validInviteCodes.has(inviteCode.toUpperCase().trim())) {
+                // 邀请码用户
+                usage = { type: 'invite', inviteCode, total: 0 };
+                console.log(`[计数] 新邀请码用户: ${userId}, 邀请码: ${inviteCode}`);
+            } else {
+                // 免费用户
+                usage = { type: 'free', cleaning: 0, insight: 0 };
+                console.log(`[计数] 新免费用户: ${userId}`);
+            }
+            userUsageCounter.set(userId, usage);
+        }
+
+        // 检查额度
+        if (usage.type === 'invite') {
+            // 邀请码用户：检查总次数
+            if (usage.total >= INVITE_CODE_TOTAL_LIMIT) {
+                return res.status(429).json({
+                    error: '邀请码额度已用完',
+                    message: '您的邀请码额度已用完，请配置 API Key 继续使用',
+                    usage: usage.total,
+                    limit: INVITE_CODE_TOTAL_LIMIT,
+                    userType: 'invite'
+                });
+            }
+            usage.total++;
+        } else {
+            // 免费用户：分别检查清洗和洞察次数
+            const limit = type === 'cleaning' ? FREE_TRIAL_CLEANING_LIMIT : FREE_TRIAL_INSIGHT_LIMIT;
+
+            if (usage[type] >= limit) {
+                return res.status(429).json({
+                    error: `免费${type === 'cleaning' ? '清洗' : '洞察'}次数已用完`,
+                    message: '请输入邀请码或配置 API Key 以继续使用',
+                    usage: usage[type],
+                    limit,
+                    userType: 'free',
+                    totalUsage: { cleaning: usage.cleaning, insight: usage.insight }
+                });
+            }
+            usage[type]++;
+        }
+
+        userUsageCounter.set(userId, usage);
+
+        // 在响应中返回使用情况
+        res.locals.usage = usage;
+        next();
+    };
+}
+
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // 🆕 清洗建议专用通道（快速响应）
-app.post('/api/proxy/deepseek-cleaning', async (req, res) => {
+app.post('/api/proxy/deepseek-cleaning', checkFreeTrialLimit('cleaning'), async (req, res) => {
     const { data } = req.body;
     const clientKey = req.headers['x-api-key'];
     // 逻辑：如果客户端传了真实Key则用客户端的，否则用服务端的。排除 'default'。
@@ -73,7 +162,7 @@ app.post('/api/proxy/deepseek-cleaning', async (req, res) => {
 });
 
 // 🆕 洞察建议专用通道（深度分析）
-app.post('/api/proxy/deepseek-insight', async (req, res) => {
+app.post('/api/proxy/deepseek-insight', checkFreeTrialLimit('insight'), async (req, res) => {
     const { data } = req.body;
     // 优先使用客户端Key
     const clientKey = req.headers['x-api-key'];
@@ -228,10 +317,20 @@ app.post('/api/model/load', async (req, res) => {
     }
 });
 
-// 文本生成
+// 文本生成（应用免费试用限制）
 app.post('/api/model/generate', async (req, res) => {
     try {
-        const { prompt, maxTokens, temperature } = req.body;
+        const { prompt, maxTokens, temperature, type = 'insight' } = req.body;
+
+        // 动态应用计数中间件
+        const middleware = checkFreeTrialLimit(type);
+        await new Promise((resolve, reject) => {
+            middleware(req, res, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+
         const result = await modelService.generate(prompt, { maxTokens, temperature });
         res.json(result);
     } catch (error) {
@@ -268,6 +367,30 @@ app.get('/api/model/list', async (req, res) => {
             available: false,
             models: [],
             error: 'Ollama 服务未运行。请安装并启动 Ollama。'
+        });
+    }
+});
+
+// 🆕 邀请码验证接口
+app.post('/api/validate-invite-code', (req, res) => {
+    const { code } = req.body;
+
+    if (!code) {
+        return res.status(400).json({ error: '请输入邀请码' });
+    }
+
+    const upperCode = code.toUpperCase().trim();
+
+    if (validInviteCodes.has(upperCode)) {
+        res.json({
+            valid: true,
+            message: '邀请码验证成功',
+            quota: INVITE_CODE_TOTAL_LIMIT
+        });
+    } else {
+        res.status(400).json({
+            error: '邀请码无效或已过期',
+            valid: false
         });
     }
 });

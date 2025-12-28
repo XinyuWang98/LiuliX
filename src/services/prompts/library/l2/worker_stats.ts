@@ -75,7 +75,7 @@ skew_desc = '右偏' if stats_dict['偏度'] > 0.5 else ('左偏' if stats_dict[
 summary = f"{column_name}: 均值={stats_dict['均值']:.2f}, 中位数={stats_dict['中位数']:.2f}, 标准差={stats_dict['标准差']:.2f}, 分布{skew_desc}"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
-json.dumps(result)`,
+print(json.dumps(result))`,
 
     // 旧版 AI Prompt (保留兼容)
     template: `

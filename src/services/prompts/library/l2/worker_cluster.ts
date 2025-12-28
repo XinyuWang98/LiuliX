@@ -78,7 +78,7 @@ largest_cluster = max(counts, key=counts.get)
 summary = f"已将数据分为 {n_clusters} 个群体。最大群体为 Cluster {largest_cluster} (共 {counts[largest_cluster]} 条记录)。"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
-json.dumps(result)`,
+print(json.dumps(result))`,
 
     template: `
 你是一个专业的 Python 数据分析师。

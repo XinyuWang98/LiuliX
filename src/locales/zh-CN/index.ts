@@ -11,6 +11,7 @@ import welcome from './welcome';
 import { insightChain, insight, exploration, evidence, quality, report } from './analysis';
 import { aiCost, aiRetry, cache, localModel, config } from './ai';
 import { errors } from './errors';
+import { header, inviteCode } from './header';
 
 export const zhCN: LanguageConfig = {
     code: 'zh-CN',
@@ -46,5 +47,17 @@ export const zhCN: LanguageConfig = {
         config,
         errors,
         hardware,
+        header,
+        inviteCode,
+        // ✅ 新增：analysis别名和progress翻译
+        analysis: {
+            initializing: '正在准备分析环境...',
+            readyHint: '点击"生成假设"开始分析',
+            waitingForData: '等待数据就绪...',
+        },
+        progress: {
+            generatingPrompt: '正在生成Prompt...',
+            sendingRequest: '正在发送请求...',
+        },
     },
 };

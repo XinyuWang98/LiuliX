@@ -5,75 +5,101 @@ import { UserPrompt } from '../../../../types/prompt';
  * 删除超出正常范围的异常值行
  */
 export const workerCleanOutlierPrompt: UserPrompt = {
-    id: 'worker-clean-outlier-v1',
-    name: 'worker_clean_outlier',
-    title: '剔除异常值',
-    description: '删除数值列中的异常值行，使用IQR或Z-score方法识别异常',
+  id: 'worker-clean-outlier-v1',
+  name: 'worker_clean_outlier',
+  title: '剔除异常值',
+  description: '删除数值列中的异常值行，使用IQR或Z-score方法识别异常',
 
-    layer: 'L2_EXECUTION',
+  layer: 'L2_EXECUTION',
 
-    dimensions: [
-        { category: 'industry', value: 'general', label: '通用' },
-        { category: 'intent', value: 'cleaning', label: '清洗' },
-        { category: 'method', value: 'outlier_removal', label: '异常剔除' },
-        { category: 'output', value: 'sql', label: 'SQL' }
-    ],
+  dimensions: [
+    { category: 'industry', value: 'general', label: '通用' },
+    { category: 'intent', value: 'cleaning', label: '清洗' },
+    { category: 'method', value: 'outlier_removal', label: '异常剔除' },
+    { category: 'output', value: 'sql', label: 'SQL' }
+  ],
 
-    template: `
-你是一个专业的数据清洗专家。
-请针对表 "__TABLE_NAME__" 中的 "{{column_name}}" 列剔除异常值。
+  // 提示词模板 (System Prompt) - 用于参考或 LLM 模式
+  template: `你是一个专业的数据清洗专家。请针对表 "__TABLE_NAME__" 中的 "{{column_name}}" 列剔除异常值。`,
 
-# 数据集摘要
-{{df_summary}}
+  executionMode: 'TEMPLATE_FILL',
 
-# 异常检测方法
-- 目标列: {{column_name}}
-- 检测方法: {{outlier_method}} (可选: iqr/zscore)
-- IQR 方法: 保留 Q1 - 1.5*IQR 到 Q3 + 1.5*IQR 之间的值
-- Z-score 方法: 保留 |z-score| < 3 的值
+  codeTemplate: `import pandas as pd
+import numpy as np
+import io
+import base64
+import json
+import matplotlib.pyplot as plt
 
-# 要求
-1. 生成 DuckDB SQL 语句执行异常值剔除。
-2. **必须使用 "__TABLE_NAME__"** 作为表名占位符。
-3. 使用子查询计算 Q1、Q3、IQR 或标准差。
-4. 使用 CREATE OR REPLACE TABLE 模式确保安全。
+def analyze(df):
+    try:
+        column_name = '{{column_name}}'
+        method = '{{outlier_method}}' # iqr or zscore (default iqr)
+        
+        # 1. 数据准备
+        df_clean = df.copy()
+        df_clean[column_name] = pd.to_numeric(df_clean[column_name], errors='coerce')
+        valid_data = df_clean.dropna(subset=[column_name])[column_name]
+        
+        if valid_data.empty:
+             return json.dumps({"error": f"列 {column_name} 无有效数值"})
 
-# SQL 模板参考 (IQR方法)
-CREATE OR REPLACE TABLE __TABLE_NAME__ AS
-WITH stats AS (
-  SELECT 
-    PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY "{{column_name}}") as q1,
-    PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY "{{column_name}}") as q3
-  FROM __TABLE_NAME__
-  WHERE "{{column_name}}" IS NOT NULL
-),
-bounds AS (
-  SELECT q1, q3, (q3 - q1) * 1.5 as iqr_range FROM stats
-)
-SELECT t.* FROM __TABLE_NAME__ t, bounds b
-WHERE t."{{column_name}}" BETWEEN (b.q1 - b.iqr_range) AND (b.q3 + b.iqr_range)
-   OR t."{{column_name}}" IS NULL
+        # 2. 计算异常值 (IQR)
+        q1 = valid_data.quantile(0.25)
+        q3 = valid_data.quantile(0.75)
+        iqr = q3 - q1
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        
+        outliers = valid_data[(valid_data < lower_bound) | (valid_data > upper_bound)]
+        outlier_count = len(outliers)
+        
+        # 3. 构造 SQL (DuckDB syntax)
+        table_placeholder = "__TABLE_NAME__"
+        sql = f"""
+CREATE OR REPLACE TABLE {table_placeholder} AS
+SELECT * FROM {table_placeholder}
+WHERE "{column_name}" BETWEEN {lower_bound} AND {upper_bound}
+OR "{column_name}" IS NULL
+        """
 
-# 输出格式 (JSON Only)
-{
-  "suggestions": [
-    {
-      "id": "clean-outlier-001",
-      "type": "filter",
-      "column": "{{column_name}}",
-      "label": "剔除 {{column_name}} 列的异常值",
-      "reason": "检测到 X 个异常值超出正常范围，可能影响分析结果",
-      "confidence": 0.8,
-      "sql": "CREATE OR REPLACE TABLE __TABLE_NAME__ AS ...",
-      "expectedImpact": "预计删除 X 行异常数据，保留 Y 行正常数据"
-    }
-  ]
-}
-`,
+        # 4. 可视化 (Boxplot)
+        plt.figure(figsize=(10, 4))
+        plt.boxplot(valid_data, vert=False, patch_artist=True)
+        plt.title(f'{column_name} Outlier Detection (IQR)')
+        plt.xlabel(column_name)
+        plt.tight_layout()
+        
+        img_buf = io.BytesIO()
+        plt.savefig(img_buf, format='png')
+        img_buf.seek(0)
+        img_base64 = base64.b64encode(img_buf.read()).decode('utf-8')
+        plt.close()
 
-    inputVariables: ['df_summary', 'column_name', 'outlier_method'],
-    author: 'System',
-    version: '1.0.0',
-    isBuiltIn: true,
-    updatedAt: Date.now()
+        # 5. 生成结果
+        summary = f"检测到 {outlier_count} 个异常值 (IQR方法)。\\n保留范围: [{lower_bound:.2f}, {upper_bound:.2f}]"
+        
+        result = {
+            "summary": summary,
+            "columnsUsed": [column_name],
+            "image": img_base64,
+            "suggestions": [{
+                "id": "clean-outlier-auto",
+                "label": f"剔除 {outlier_count} 个异常值",
+                "sql": sql,
+                "confidence": 0.9
+            }]
+        }
+        return json.dumps(result)
+
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+print(analyze(df))`,
+
+  inputVariables: ['df_summary', 'column_name', 'outlier_method'],
+  author: 'System',
+  version: '1.0.0',
+  isBuiltIn: true,
+  updatedAt: Date.now()
 };

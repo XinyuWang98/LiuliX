@@ -18,10 +18,11 @@ interface I18nContextType {
     availableLanguages: LanguageConfig[];
     setLanguage: (code: string) => void;
     t: (key: string, params?: Record<string, string | number>) => string;
+    formatDate: (date: number | string | Date) => string;
 }
 
 // 创建上下文
-const I18nContext = createContext<I18nContextType | undefined>(undefined);
+const I18nContext = createContext<I18nContextType | null>(null);
 
 /**
  * 获取嵌套对象的值
@@ -70,8 +71,55 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
     // 翻译函数
     const t = (key: string, params?: Record<string, string | number>): string => {
-        const translation = getNestedValue(currentLanguage.translations, key);
-        return interpolate(translation, params);
+        // First try to find the key in the current language
+        const keys = key.split('.');
+        let value: any = currentLanguage.translations;
+
+        for (const k of keys) {
+            value = value?.[k];
+        }
+
+        // If not found, try fallback language (zh-CN)
+        if (value === undefined && currentLanguage.code !== 'zh-CN') {
+            const fallbackLanguage = AVAILABLE_LANGUAGES.find(l => l.code === 'zh-CN');
+            if (fallbackLanguage) {
+                let fallbackValue: any = fallbackLanguage.translations;
+                for (const k of keys) {
+                    fallbackValue = fallbackValue?.[k];
+                }
+                value = fallbackValue;
+            }
+        }
+
+        if (value === undefined) {
+            console.warn(`Translation key not found: ${key}`);
+            return key;
+        }
+
+        if (typeof value !== 'string') {
+            return key;
+        }
+
+        if (params) {
+            // ✅ 修复：使用单花括号 {key} 格式，与翻译文件一致
+            return Object.entries(params).reduce((acc, [k, v]) => {
+                return acc.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+            }, value);
+        }
+
+        return value;
+    };
+
+    const formatDate = (date: number | string | Date): string => {
+        try {
+            return new Date(date).toLocaleDateString(currentLanguage.code, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return String(date);
+        }
     };
 
     // Update global T for non-react usage
@@ -82,6 +130,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         availableLanguages: AVAILABLE_LANGUAGES,
         setLanguage,
         t,
+        formatDate,
     };
 
     return (
@@ -101,7 +150,7 @@ export let globalT: (key: string, params?: Record<string, string | number>) => s
  */
 export function useI18n() {
     const context = useContext(I18nContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error('useI18n must be used within an I18nProvider');
     }
     return context;

@@ -24,7 +24,13 @@
     border-color: rgba(var(--primary-rgb), 0.2);
 }
 
-/* 规则卡片特殊样式 */
+/* Prompt模板卡片特殊样式 */
+.suggestionCard.card-prompt {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.05), rgba(var(--bg-element-rgb), 0.9));
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+/* 兼容旧版 */
 .suggestionCard.card-rule {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(var(--bg-element-rgb), 0.9));
 }
@@ -76,12 +82,21 @@
     flex-shrink: 0;
 }
 
+/* AI来源图标样式 */
 .bg-ai {
     background: linear-gradient(135deg, var(--primary), #8b5cf6);
     color: #fff;
     box-shadow: 0 2px 4px rgba(var(--primary-rgb), 0.3);
 }
 
+/* Prompt模板来源图标样式 */
+.bg-prompt {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+/* 兼容旧版 */
 .bg-rule {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
@@ -106,6 +121,16 @@
     padding: 0;
     background: none;
     border: none;
+}
+
+/* AI来源标签颜色 */
+.sourceLabel.ai {
+    color: var(--primary);
+}
+
+/* Prompt模板来源标签颜色 */
+.sourceLabel.prompt {
+    color: #10b981;
 }
 
 .suggestionTitle {

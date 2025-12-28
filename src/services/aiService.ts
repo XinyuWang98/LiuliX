@@ -2,6 +2,7 @@
 import ky from 'ky';
 import { MODEL_CONFIG } from '../config/modelConfig';
 import { logger } from '../utils/logger';
+import { getUserId, getInviteCode } from '@/utils/userIdManager';
 
 // ==================== 常量定义 ====================
 const PROXY_URL = '/api/proxy';
@@ -218,7 +219,9 @@ export const askAICleaning = async (prompt: string) => {
         const key = CONFIG.deepseek.key();
         const res = await ky.post('/api/proxy/deepseek-cleaning', {
             headers: {
-                'x-api-key': key
+                'x-api-key': key,
+                'x-user-id': getUserId(),                    // ✅ 免费试用计数
+                'x-invite-code': getInviteCode() || '',      // ✅ 邀请码验证
             },
             json: {
                 data: {
@@ -230,11 +233,26 @@ export const askAICleaning = async (prompt: string) => {
             timeout: 60000  // 与后端保持一致
         }).json<any>();
 
+        // ✅ 处理超限错误
+        if (res.error && res.userType) {
+            throw new Error(res.message || '免费试用次数已用完');
+        }
+
+        // ✅ 更新本地使用次数
+        if (res.usage) {
+            localStorage.setItem('free_trial_usage', JSON.stringify(res.usage));
+            window.dispatchEvent(new Event('free-trial-update'));
+        }
+
         const content = res.choices?.[0]?.message?.content || '';
         logger.log('AI清洗', '响应成功', { data: { length: content.length } });
 
         return { content, model: 'deepseek-cleaning' };
     } catch (err: any) {
+        // ✅ 特殊处理429错误
+        if (err.message.includes('免费试用') || err.message.includes('邀请码')) {
+            throw err; // 直接抛出，让上层显示友好提示
+        }
         console.warn('[AI服务-清洗] ⚠️ 调用失败:', err.message);
         throw new Error('清洗建议 AI 调用失败');
     }
@@ -250,7 +268,9 @@ export const askAIInsight = async (prompt: string) => {
         const key = CONFIG.deepseek.key();
         const res = await ky.post('/api/proxy/deepseek-insight', {
             headers: {
-                'x-api-key': key
+                'x-api-key': key,
+                'x-user-id': getUserId(),                    // ✅ 免费试用计数
+                'x-invite-code': getInviteCode() || '',      // ✅ 邀请码验证
             },
             json: {
                 data: {
@@ -262,11 +282,26 @@ export const askAIInsight = async (prompt: string) => {
             timeout: 180000  // ✅ 增加到3分钟，支持大数据集
         }).json<any>();
 
+        // ✅ 处理超限错误
+        if (res.error && res.userType) {
+            throw new Error(res.message || '免费试用次数已用完');
+        }
+
+        // ✅ 更新本地使用次数
+        if (res.usage) {
+            localStorage.setItem('free_trial_usage', JSON.stringify(res.usage));
+            window.dispatchEvent(new Event('free-trial-update'));
+        }
+
         const content = res.choices?.[0]?.message?.content || '';
         logger.log('AI洞察', '响应成功', { data: { length: content.length } });
 
         return { content, model: 'deepseek-insight' };
     } catch (err: any) {
+        // ✅ 特殊处理429错误
+        if (err.message.includes('免费试用') || err.message.includes('邀请码')) {
+            throw err; // 直接抛出，让上层显示友好提示
+        }
         console.warn('[AI服务-洞察] ⚠️ 调用失败:', err.message);
         throw new Error('洞察建议 AI 调用失败');
     }

@@ -1,36 +1,76 @@
 /**
- * 清洗建议服务（两层架构）
+ * 清洗建议服务（两层架构 - 并行优化版）
  * 
  * 架构层级：
- * - Layer 2 (优先): Router模式 → Prompt库模板（快速标准化）
- * - Layer 1 (兜底): AI直接生成SQL（深度分析）
+ * - Layer 2 (Router模式): Prompt库模板（快速标准化）
+ * - Layer 1 (AI直接生成): AI生成SQL（深度分析）
+ * 
+ * 优化策略：
+ * - 数据分析师角色：并行执行Layer 1 & Layer 2
+ * - 业务专家角色：串行执行，Layer 2优先，Layer 1兜底
  */
 
 import { CleaningRouter } from './prompts/cleaningRouter';
 import { generateAICleaningSuggestions } from './aiCleaningService';
 import type { CleaningSuggestion } from './aiService';
+import { getCurrentUserRole, getCurrentRoleConfig } from '@/config/userRolePresets';
 import { logger } from '@/utils/logger';
 
 /**
  * 清洗服务配置
  */
 export interface CleaningServiceConfig {
-    enableRouter: boolean;      // 是否启用Router模式（Layer 2）
-    enableAIGeneration: boolean; // 是否启用AI直接生成（Layer 1兜底）
-    minSuggestions: number;      // 最少建议数量（触发AI补充的阈值）
+    enableRouter: boolean;       // 是否启用Router模式（Layer 2）
+    enableAIGeneration: boolean; // 是否启用AI直接生成（Layer 1）
+    minSuggestions: number;      // 最少建议数量（串行模式下的兜底阈值）
+    parallelMode: boolean;       // ✅ 新增：是否并行执行两层
 }
 
 /**
- * 默认配置
+ * 默认配置（业务专家模式）
  */
 const DEFAULT_CONFIG: CleaningServiceConfig = {
     enableRouter: true,
     enableAIGeneration: true,
-    minSuggestions: 3
+    minSuggestions: 1,
+    parallelMode: false  // 默认串行
 };
 
 /**
- * 生成清洗建议（两层架构版本）
+ * 根据用户角色获取清洗服务配置
+ */
+export function getCleaningConfigByRole(): CleaningServiceConfig {
+    const role = getCurrentUserRole();
+    const roleConfig = getCurrentRoleConfig();
+
+    if (role === 'analyst') {
+        // 数据分析师：并行执行，获取更全面的建议
+        return {
+            enableRouter: roleConfig.cleaning.enableRouter,
+            enableAIGeneration: roleConfig.cleaning.enableAI,
+            minSuggestions: roleConfig.cleaning.minSuggestions,
+            parallelMode: true  // ✅ 分析师模式开启并行
+        };
+    }
+
+    // 业务专家：串行执行，Router优先 + AI兜底
+    return {
+        enableRouter: roleConfig.cleaning.enableRouter,
+        enableAIGeneration: roleConfig.cleaning.enableAI,
+        minSuggestions: roleConfig.cleaning.minSuggestions,
+        parallelMode: false
+    };
+}
+
+/**
+ * 扩展的清洗建议类型（包含来源标识）
+ */
+export interface CleaningSuggestionWithSource extends CleaningSuggestion {
+    source: 'router' | 'ai';  // ✅ 新增：来源标识
+}
+
+/**
+ * 生成清洗建议（两层架构版本 - 支持并行）
  * 
  * @param tableName 表名
  * @param columns 列信息
@@ -41,7 +81,7 @@ const DEFAULT_CONFIG: CleaningServiceConfig = {
  * @param onSuggestionUpdate 建议更新回调
  * @param signal 中止信号
  * @param language 语言
- * @param config 配置
+ * @param config 配置（可选，默认根据用户角色自动获取）
  */
 export async function generateCleaningSuggestionsV2(
     tableName: string,
@@ -50,43 +90,73 @@ export async function generateCleaningSuggestionsV2(
     t: (key: string, params?: Record<string, any>) => string,
     duckdbEngine?: any,
     onProgress?: (progressMsg: string) => void,
-    _onSuggestionUpdate?: (suggestions: CleaningSuggestion[]) => void,
+    _onSuggestionUpdate?: (suggestions: CleaningSuggestionWithSource[]) => void,
     signal?: AbortSignal,
     language?: string,
-    config: Partial<CleaningServiceConfig> = {}
-): Promise<CleaningSuggestion[]> {
+    config?: Partial<CleaningServiceConfig>
+): Promise<CleaningSuggestionWithSource[]> {
 
-    const finalConfig: CleaningServiceConfig = { ...DEFAULT_CONFIG, ...config };
-    const allSuggestions: CleaningSuggestion[] = [];
+    // 合并配置：传入配置 > 角色配置 > 默认配置
+    const roleConfig = getCleaningConfigByRole();
+    const finalConfig: CleaningServiceConfig = {
+        ...DEFAULT_CONFIG,
+        ...roleConfig,
+        ...config
+    };
 
-    logger.group('AI清洗', '两层架构流程');
+    const role = getCurrentUserRole();
+    logger.group('AI清洗', `两层架构流程 (${role === 'analyst' ? '分析师模式-并行' : '专家模式-串行'})`);
 
     try {
+        // ==================== 并行模式（数据分析师） ====================
+        if (finalConfig.parallelMode && finalConfig.enableRouter && finalConfig.enableAIGeneration) {
+            logger.log('AI清洗', '并行执行 Layer 1 & Layer 2');
+            onProgress?.('并行生成建议中...');
+
+            const [routerResult, aiResult] = await Promise.allSettled([
+                // Layer 2: Router模式
+                executeRouterLayer(tableName, columns, stats),
+                // Layer 1: AI直接生成
+                executeAILayer(tableName, columns, stats, t, duckdbEngine, onProgress, signal, language)
+            ]);
+
+            const allSuggestions: CleaningSuggestionWithSource[] = [];
+
+            // 处理Router结果
+            if (routerResult.status === 'fulfilled') {
+                allSuggestions.push(...routerResult.value);
+                logger.log('AI清洗', `Router返回 ${routerResult.value.length} 条`);
+            } else {
+                logger.warn('AI清洗', `Router失败: ${routerResult.reason}`);
+            }
+
+            // 处理AI结果
+            if (aiResult.status === 'fulfilled') {
+                const uniqueAI = deduplicateSuggestions(aiResult.value, allSuggestions);
+                allSuggestions.push(...uniqueAI);
+                logger.log('AI清洗', `AI生成 ${aiResult.value.length} 条 (去重后${uniqueAI.length}条)`);
+            } else {
+                logger.warn('AI清洗', `AI生成失败: ${aiResult.reason}`);
+            }
+
+            const sorted = sortSuggestions(allSuggestions);
+            logger.log('AI清洗', `并行模式完成: 总计 ${sorted.length} 条建议`);
+            logger.groupEnd();
+            return sorted;
+        }
+
+        // ==================== 串行模式（业务专家） ====================
+        const allSuggestions: CleaningSuggestionWithSource[] = [];
+
         // === Layer 2: Router模式（优先） ===
         if (finalConfig.enableRouter) {
-            logger.log('AI清洗', 'Layer 2: 尝试Router模式');
+            logger.log('AI清洗', 'Layer 2: Router模式');
             onProgress?.('Router模式生成中...');
 
             try {
-                const router = new CleaningRouter();
-
-                // AI服务函数（调用现有AI服务）
-                const aiService = async (prompt: string): Promise<string> => {
-                    const { askAICleaning } = await import('./aiService');
-                    const { content } = await askAICleaning(prompt);
-                    return content;
-                };
-
-                const routerSuggestions = await router.generate(
-                    tableName,
-                    columns,
-                    stats,
-                    aiService
-                );
-
+                const routerSuggestions = await executeRouterLayer(tableName, columns, stats);
                 allSuggestions.push(...routerSuggestions);
                 logger.log('AI清洗', `Router返回 ${routerSuggestions.length} 条`);
-
             } catch (error) {
                 logger.warn('AI清洗', `Router失败: ${error}`);
             }
@@ -98,36 +168,21 @@ export async function generateCleaningSuggestionsV2(
             onProgress?.('AI生成补充建议中...');
 
             try {
-                const aiSuggestions = await generateAICleaningSuggestions(
-                    tableName,
-                    columns,
-                    stats,
-                    t,
-                    duckdbEngine,
-                    onProgress,
-                    undefined, // 不需要实时更新
-                    signal,
-                    language
+                const aiSuggestions = await executeAILayer(
+                    tableName, columns, stats, t, duckdbEngine, onProgress, signal, language
                 );
 
-                // 去重（避免与Router重复）
                 const uniqueAI = deduplicateSuggestions(aiSuggestions, allSuggestions);
                 allSuggestions.push(...uniqueAI);
                 logger.log('AI清洗', `AI生成 ${aiSuggestions.length} 条 (去重后${uniqueAI.length}条新增)`);
-
             } catch (error) {
                 logger.warn('AI清洗', `AI生成失败: ${error}`);
             }
         }
 
-
-
-        // 排序: Router > AI, 然后按confidence
         const sorted = sortSuggestions(allSuggestions);
-
-        logger.log('AI清洗', `两层架构完成: 总计 ${sorted.length} 条建议`);
+        logger.log('AI清洗', `串行模式完成: 总计 ${sorted.length} 条建议`);
         logger.groupEnd();
-
         return sorted;
 
     } catch (error) {
@@ -138,12 +193,69 @@ export async function generateCleaningSuggestionsV2(
 }
 
 /**
+ * 执行Router层
+ */
+async function executeRouterLayer(
+    tableName: string,
+    columns: any[],
+    stats: any[]
+): Promise<CleaningSuggestionWithSource[]> {
+    const router = new CleaningRouter();
+
+    const aiService = async (prompt: string): Promise<string> => {
+        const { askAICleaning } = await import('./aiService');
+        const { content } = await askAICleaning(prompt);
+        return content;
+    };
+
+    const suggestions = await router.generate(tableName, columns, stats, aiService);
+
+    // ✅ 添加来源标识
+    return suggestions.map(s => ({
+        ...s,
+        source: 'router' as const
+    }));
+}
+
+/**
+ * 执行AI直接生成层
+ */
+async function executeAILayer(
+    tableName: string,
+    columns: any[],
+    stats: any[],
+    t: (key: string, params?: Record<string, any>) => string,
+    duckdbEngine?: any,
+    onProgress?: (progressMsg: string) => void,
+    signal?: AbortSignal,
+    language?: string
+): Promise<CleaningSuggestionWithSource[]> {
+    const suggestions = await generateAICleaningSuggestions(
+        tableName,
+        columns,
+        stats,
+        t,
+        duckdbEngine,
+        onProgress,
+        undefined,
+        signal,
+        language
+    );
+
+    // ✅ 添加来源标识
+    return suggestions.map(s => ({
+        ...s,
+        source: 'ai' as const
+    }));
+}
+
+/**
  * 去重逻辑
  */
 function deduplicateSuggestions(
-    newSuggestions: CleaningSuggestion[],
-    existing: CleaningSuggestion[]
-): CleaningSuggestion[] {
+    newSuggestions: CleaningSuggestionWithSource[],
+    existing: CleaningSuggestionWithSource[]
+): CleaningSuggestionWithSource[] {
     const existingIds = new Set(existing.map(s => s.id));
     const existingSQLs = new Set(existing.map(s => normalizeSQL(s.sql)));
 
@@ -158,8 +270,8 @@ function deduplicateSuggestions(
  */
 function normalizeSQL(sql: string): string {
     return sql
-        .replace(/\s+/g, ' ') // 合并空格
-        .replace(/"/g, '') // 移除引号
+        .replace(/\s+/g, ' ')
+        .replace(/"/g, '')
         .trim()
         .toLowerCase();
 }
@@ -170,32 +282,27 @@ function normalizeSQL(sql: string): string {
  * 优先级: Router > AI
  * 同优先级按confidence降序
  */
-function sortSuggestions(suggestions: CleaningSuggestion[]): CleaningSuggestion[] {
+function sortSuggestions(suggestions: CleaningSuggestionWithSource[]): CleaningSuggestionWithSource[] {
     const sourcePriority = {
         'router': 2,
         'ai': 1
     };
 
     return suggestions.sort((a, b) => {
-        // 优先按来源排序
-        const sourceA = (a as any).source || 'ai';
-        const sourceB = (b as any).source || 'ai';
-        const priorityDiff = (sourcePriority[sourceB as keyof typeof sourcePriority] || 0) - (sourcePriority[sourceA as keyof typeof sourcePriority] || 0);
-
+        const priorityDiff = sourcePriority[b.source] - sourcePriority[a.source];
         if (priorityDiff !== 0) return priorityDiff;
-
-        // 同来源按confidence排序
         return (b.confidence || 0) - (a.confidence || 0);
     });
 }
 
 /**
- * 获取清洗服务配置（从LocalStorage）
+ * 获取清洗服务配置（从LocalStorage，保持向后兼容）
  */
 export function getCleaningServiceConfig(): CleaningServiceConfig {
     return {
         enableRouter: localStorage.getItem('cleaning_router') !== 'false',
         enableAIGeneration: localStorage.getItem('cleaning_ai') !== 'false',
-        minSuggestions: parseInt(localStorage.getItem('min_suggestions') || '3')
+        minSuggestions: parseInt(localStorage.getItem('min_suggestions') || '1'),
+        parallelMode: getCurrentUserRole() === 'analyst'
     };
 }

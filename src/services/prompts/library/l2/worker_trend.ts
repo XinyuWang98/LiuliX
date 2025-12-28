@@ -77,7 +77,7 @@ plt.close(fig)
 summary = f"{value_col} 呈{trend_desc}趋势 (斜率={slope:.4f}), 最高值={y_values.max():.2f}, 最低值={y_values.min():.2f}"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
-json.dumps(result)`,
+print(json.dumps(result))`,
 
     // 旧版 AI Prompt (保留兼容)
     template: `

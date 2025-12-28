@@ -5,6 +5,7 @@ export const common = {
     error: '错误',
     success: '成功',
     cancel: '取消',
+    backToHome: '返回首页',
     confirm: '确认',
     delete: '删除',
     edit: '编辑',
@@ -15,6 +16,15 @@ export const common = {
     all: '全部',
     featureInDev: '功能开发中...',
     collapse: '收起',
+    verifying: '验证中...',
+    // ✅ 新增缺失的翻译key
+    column: '列',
+    type: '类型',
+    table: '表',
+    totalRows: '总行数',
+    totalColumns: '总列数',
+    none: '无',
+    rename: '重命名',
     // 智能加载提示
     initCore: '正在初始化 Python 核心环境 ({current}/{total})...',
     loadPandas: '正在加载 Pandas 数据分析库...',
