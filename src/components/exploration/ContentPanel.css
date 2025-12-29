@@ -17,7 +17,7 @@
     transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
         opacity 0.3s ease,
         margin-bottom 0.3s ease;
-    overflow: hidden;
+    /* 移除overflow:hidden，确保collapsed时ProjectSelector可见 */
     will-change: height;
 }
 
@@ -25,12 +25,18 @@
     height: 500px;
     opacity: 1;
     margin-bottom: 0;
+    overflow: auto;
+    /* 展开时可滚动 */
 }
 
 .project-section.collapsed {
-    height: 60px;
+    height: auto;
+    /* 改为auto，让内容撑开高度 */
+    min-height: 60px;
     opacity: 1;
     margin-bottom: var(--gap-l);
+    overflow: visible;
+    /* 确保可见 */
 }
 
 /* 折叠态紧凑头部 */

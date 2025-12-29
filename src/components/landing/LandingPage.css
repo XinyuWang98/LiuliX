@@ -1,0 +1,327 @@
+/* 
+  LiuliX Design System - Landing Page Styles
+  Theme: Ascension (Stairway to Light)
+  Core: Verticality, Data Rain, Central Beam
+*/
+
+:root {
+    /* 1. 环境 - 深邃苍穹 */
+    --liuli-bg: #010305;
+    /* 极致深蓝黑 */
+
+    /* 2. 光源 - 垂直光柱 */
+    --beam-core: rgba(200, 230, 255, 0.15);
+    /* 核心光柱，冷白 */
+    --beam-glow: rgba(50, 100, 255, 0.2);
+    /* 外围晕光，深蓝 */
+    --beam-highlight: rgba(255, 255, 255, 0.8);
+    /* 高光点 */
+
+    /* 3. 材质 - 结晶体 */
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    /* 垂直流动的渐变边框，呼应光雨 */
+    --glass-border-flow: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 100%);
+
+    --text-main: #ffffff;
+    --text-dim: rgba(180, 200, 255, 0.6);
+}
+
+.landing-page-container {
+    position: relative;
+    width: 100%;
+    /* Full viewport height to cover behind the navbar */
+    height: 100vh;
+    /* Pull up behind the 54px navbar */
+    margin-top: -54px;
+    /* Push content down so it's not hidden by navbar */
+    padding-top: 54px;
+
+    background-color: var(--liuli-bg);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* padding-left/right handles by inner content, but keep safe area */
+    box-sizing: border-box;
+
+    /* 核心背景：通天光柱 */
+    background-image:
+        /* 1. 中央核心光束 (极高，极窄) */
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 80%),
+        /* 2. 外围蓝色光蕴 */
+        radial-gradient(ellipse at 50% 0%, var(--beam-glow) 0%, transparent 70%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+/* --- Data Rain Effect (数据雨纹理) --- */
+.landing-page-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* 使用SVG模拟垂直下落的代码颗粒 */
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='200' viewBox='0 0 100 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E .rain %7B fill: rgba(100, 200, 255, 0.15); font-family: monospace; font-size: 10px; %7D %3C/style%3E%3Ctext x='10' y='20' class='rain'%3E1%3C/text%3E%3Ctext x='50' y='50' class='rain'%3E0%3C/text%3E%3Ctext x='80' y='90' class='rain'%3E1%3C/text%3E%3Ctext x='20' y='140' class='rain'%3E0%3C/text%3E%3Ctext x='60' y='180' class='rain'%3E1%3C/text%3E%3C/svg%3E");
+    opacity: 0.4;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 90%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 90%);
+    pointer-events: none;
+    z-index: 0;
+    /* 可选：简单的下落动画，如果性能允许 */
+    animation: rainFall 20s linear infinite;
+}
+
+@keyframes rainFall {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 0 400px;
+    }
+}
+
+/* 核心内容区 */
+.landing-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Hero Section */
+.hero-section {
+    position: relative;
+    margin-bottom: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* 整体上浮动画 */
+    animation: heroFloat 3s ease-in-out infinite alternate;
+}
+
+@keyframes heroFloat {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-10px);
+    }
+}
+
+/* Hero背后的神圣光环 */
+.hero-section::after {
+    content: '';
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 600px;
+    /* 垂直光束高光 */
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    filter: blur(40px);
+    z-index: -1;
+    border-radius: 50% 50% 0 0;
+}
+
+/* Slogan: 沐浴在光中的文字 */
+.hero-slogan {
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    /* Increase line-height to prevent clipping of descenders (g, y, p) */
+    line-height: 1.3;
+    /* Add padding to ensure shadow/glow isn't cut off */
+    padding-bottom: 0px;
+    margin-bottom: 24px;
+
+    /* 顶部亮，底部渐隐，模拟光从上方照下 */
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    /* 圣光溢出 */
+    text-shadow: 0 -10px 40px rgba(255, 255, 255, 0.4);
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    color: var(--text-dim);
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 56px;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+/* --- Artifact: 核心按钮 (悬浮法器) --- */
+.hero-action-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 260px;
+    height: 64px;
+    border-radius: 9999px;
+
+    /* 材质: 极其纯净的水晶 */
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    /* 顶部受光 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 40px -10px rgba(0, 100, 255, 0.3);
+
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    overflow: hidden;
+}
+
+.hero-action-btn:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 0 60px rgba(0, 200, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    border-top-color: #fff;
+}
+
+/* --- Features: 登神长阶 (Floating Steps) --- */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    width: 100%;
+    padding: 0 40px;
+    /* 3D 透视感 */
+    perspective: 1000px;
+}
+
+.landing-feature-card {
+    /* 像悬浮的玻璃台阶 - 更通透的琉璃感 */
+    /* 降低背景不透明度，让光雨能透过来 */
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+
+    /* 增强毛玻璃模糊度 */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    /* 顶部强高光 -> 模拟厚玻璃边缘受光 (Fresnel Effect) */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+
+    /* 内部微光辉光 */
+    box-shadow:
+        inset 0 0 20px rgba(255, 255, 255, 0.02),
+        0 20px 40px -10px rgba(0, 0, 0, 0.5);
+
+    border-radius: 20px;
+    padding: 32px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.landing-feature-card:hover {
+    /* 悬停上浮 + 内部被照亮 */
+    transform: translateY(-8px) scale(1.02);
+    /* 悬停时稍微变亮，模拟光线折射 */
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border-top-color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+
+    box-shadow:
+        inset 0 0 30px rgba(0, 242, 254, 0.05),
+        /* 极淡的青色内发光 */
+        0 30px 60px -12px rgba(0, 0, 0, 0.7);
+}
+
+.feature-icon-box {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    /* 圆形图标，像能量球 */
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.landing-feature-card:hover .feature-icon-box {
+    background: radial-gradient(circle, rgba(0, 200, 255, 0.2) 0%, transparent 70%);
+    box-shadow: 0 0 30px rgba(0, 200, 255, 0.3);
+    color: #00ffff;
+    transform: rotate(360deg);
+    /* 增加一点魔法感 */
+    transition: transform 0.6s ease-in-out, background 0.4s, color 0.4s;
+}
+
+.landing-feature-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+.landing-feature-card p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+    .hero-slogan {
+        font-size: 60px;
+    }
+
+    .features-grid {
+        gap: 20px;
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-feature-card {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .feature-icon-box {
+        width: 48px;
+        height: 48px;
+    }
+
+    .hero-slogan {
+        font-size: 42px;
+    }
+}

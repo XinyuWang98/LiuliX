@@ -1,16 +1,39 @@
+/* Navigation Bar Container */
+.navigation-bar {
+    height: var(--nav-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--gap-l);
+    flex-shrink: 0;
+    z-index: 100;
+    position: relative;
+
+    /* Glassmorphism Base */
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    /* Subtle glass border */
+
+    transition: all 0.3s ease;
+}
+
 .nav-tabs {
     display: flex;
     align-items: center;
+    gap: 8px;
+    /* Remove large gap, use padding in tabs */
     height: 100%;
-    margin-left: 0;
 }
 
 .nav-divider {
     width: 1px;
-    height: 18px;
+    height: 16px;
     background-color: var(--border);
+    /* Or use var(--glass-border) if defined globablly, stick to --border for safety */
     margin: 0 16px;
-    opacity: 0.6;
+    opacity: 0.3;
 }
 
 .nav-tab {
@@ -18,35 +41,28 @@
     border: none;
     color: var(--text-secondary);
     font-size: 14px;
-    font-weight: 500;
-    padding: 0 16px;
-    height: 100%;
     cursor: pointer;
-    position: relative;
-    transition: all 0.2s;
+    /* Increase height to match navbar for larger hit area and borders */
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-weight: 500;
     text-decoration: none;
+    /* Keep this from original for consistency if not explicitly removed */
 }
 
 .nav-tab:hover {
     color: var(--text-primary);
-    background-color: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-tab.active {
     color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+    /* Frosted hint */
     font-weight: 600;
-}
-
-.nav-tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 16px;
-    right: 16px;
-    height: 3px;
-    background: var(--primary);
-    border-radius: 3px 3px 0 0;
-    box-shadow: 0 -2px 8px var(--primary-20);
 }

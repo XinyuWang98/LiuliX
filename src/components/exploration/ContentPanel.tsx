@@ -6,6 +6,7 @@ import { ReportGenerator } from '../report/ReportGenerator';
 import { InsightChainFlow } from '../insights/InsightChainFlow';
 import { EmptyStateWelcome } from './EmptyStateWelcome';
 import { ProjectSelector } from './ProjectSelector';
+import { ProjectCardGrid } from './ProjectCardGrid';
 import { Project } from '@/utils/projectUtils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import './ContentPanel.css';
@@ -102,13 +103,25 @@ export function ContentPanel({
                         <button
                             className="btn-ghost btn-sm"
                             onClick={() => setProjectCollapsed(false)}
-                            title="展开项目选择"
+                            title="展开项目列表"
                         >
-                            <ChevronUp size={16} />
+                            <ChevronDown size={16} />
                         </button>
                     </div>
                 ) : (
-                    <EmptyStateWelcome onFilesUploaded={handleProjectUpload} />
+                    // expanded态：显示项目卡片网格或欢迎界面
+                    project ? (
+                        <ProjectCardGrid
+                            currentProject={project}
+                            onProjectSelect={(selectedProject) => {
+                                onProjectUpdate(selectedProject);
+                                setProjectCollapsed(true); // 选择后自动折叠
+                            }}
+                            onNewProject={handleProjectUpload}
+                        />
+                    ) : (
+                        <EmptyStateWelcome onFilesUploaded={handleProjectUpload} />
+                    )
                 )}
             </div>
 

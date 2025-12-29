@@ -1,0 +1,177 @@
+/* ========== 项目卡片样式 ========== */
+.project-card {
+    position: relative;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    padding: var(--gap-l);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+
+    /* 毛玻璃效果 */
+    backdrop-filter: blur(var(--blur-light));
+    -webkit-backdrop-filter: blur(var(--blur-light));
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+    min-height: 200px;
+}
+
+/* Hover效果 */
+.project-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 24px -8px rgba(var(--primary-rgb), 0.2),
+        0 0 0 1px rgba(var(--primary-rgb), 0.1);
+}
+
+/* 激活态 */
+.project-card.active {
+    background: var(--primary-bg);
+    border-color: var(--primary);
+    box-shadow:
+        0 0 0 2px var(--primary),
+        0 8px 24px -8px rgba(var(--primary-rgb), 0.3);
+}
+
+/* 图标区 */
+.card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-m);
+    background: rgba(var(--primary-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.project-card:hover .card-icon {
+    background: rgba(var(--primary-rgb), 0.15);
+    transform: scale(1.05);
+}
+
+/* 标题 */
+.card-title {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.card-title-input {
+    width: 100%;
+    padding: 4px 8px;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    background: var(--bg-input);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-s);
+    color: var(--text-primary);
+    outline: none;
+}
+
+/* 元信息 */
+.card-meta {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+.separator {
+    opacity: 0.5;
+}
+
+/* 文件预览列表 */
+.card-files-preview {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.file-preview-item {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-preview-item svg {
+    flex-shrink: 0;
+}
+
+.more-files {
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+/* 更多操作按钮 */
+.card-more-btn {
+    position: absolute;
+    top: var(--gap-s);
+    right: var(--gap-s);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-s);
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-card:hover .card-more-btn {
+    opacity: 1;
+}
+
+.card-more-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* 新建项目卡片 */
+.new-project-card {
+    border-style: dashed;
+    border-color: var(--border-hover);
+    background: transparent;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-project-card .card-icon.new-icon {
+    background: transparent;
+    border: 2px dashed var(--border-hover);
+    color: var(--text-tertiary);
+}
+
+.new-project-card:hover {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.05);
+}
+
+.new-project-card:hover .card-icon.new-icon {
+    border-color: var(--primary);
+    color: var(--primary);
+}

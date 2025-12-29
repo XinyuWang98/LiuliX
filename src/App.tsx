@@ -12,7 +12,7 @@ import { Project } from './utils/projectUtils';
 import { PanelRight, PanelLeft } from 'lucide-react';
 import { ExplorationFlow } from './components/exploration/ExplorationFlow';
 import { ExplorationFlowV2 } from './components/ExplorationFlowV2'; // V2预览页面
-import { EmptyStateWelcome } from './components/exploration/EmptyStateWelcome';
+import { LandingPage } from './components/landing/LandingPage';
 import { pyodideManager } from './services/PyodideManager';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { useResizable } from '@/hooks/useResizable';
@@ -82,6 +82,22 @@ function AppContent() {
 
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
+    // 页面加载时从IndexedDB恢复最新项目（修复ProjectSelector未显示Bug）
+    useEffect(() => {
+        const restoreLatestProject = async () => {
+            try {
+                const projects = await loadProjects();
+                if (projects.length > 0) {
+                    setSelectedProject(projects[0]);
+                    logger.log('UI', '恢复最新项目', { data: { name: projects[0].name } });
+                }
+            } catch (error) {
+                logger.error('UI', '恢复项目失败', { data: error });
+            }
+        };
+        if (window.location.hash === '#/v2') restoreLatestProject();
     }, []);
 
     // ========== Feature Flag：多层级导航 ==========
@@ -323,7 +339,11 @@ function AppContent() {
                     cleaningTrigger={cleaningTrigger}
                     onFilesUploaded={handleWelcomeUpload}
                 />
+            ) : selectedProject === null ? (
+                /* [NEW] 独立产品首页 (无侧边栏) */
+                <LandingPage onFilesUploaded={handleWelcomeUpload} />
             ) : (
+                /* [EXISTING] 主工作台 (带侧边栏) */
                 <div className="main-content-wrapper">
                     {(showLeft && !(FeatureFlags.MULTI_LEVEL_NAV && activeView === 'dashboard')) ? (
                         <div className="sidebar-container" style={{ width: leftWidth }}>
@@ -357,17 +377,13 @@ function AppContent() {
 
                     <div className="glass-panel main-panel-wrapper">
                         <div className="main-panel-content">
-                            {selectedProject === null ? (
-                                <EmptyStateWelcome onFilesUploaded={handleWelcomeUpload} />
-                            ) : (
-                                <ExplorationFlow
-                                    project={selectedProject}
-                                    onNavigate={(view) => setActiveView(view as 'dashboard' | 'library')}
-                                    cleaningTrigger={cleaningTrigger}
-                                    onProjectUpdate={setSelectedProject}
-                                    aiSuggestions={aiSuggestions}
-                                />
-                            )}
+                            <ExplorationFlow
+                                project={selectedProject}
+                                onNavigate={(view) => setActiveView(view as 'dashboard' | 'library')}
+                                cleaningTrigger={cleaningTrigger}
+                                onProjectUpdate={setSelectedProject}
+                                aiSuggestions={aiSuggestions}
+                            />
                         </div>
                     </div>
 

@@ -19,25 +19,12 @@ export function NavigationBar({
     const { t } = useI18n();
 
     return (
-        <header
-            style={{
-                height: 'var(--nav-height)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 var(--gap-l)',
-                flexShrink: 0,
-                zIndex: 100,
-                position: 'relative',
-                background: 'transparent',
-                borderBottom: '1px solid var(--border)',
-            }}
-        >
+        <header className="navigation-bar">
             {/* Left: Logo + Navigation Tabs */}
             <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                 <Logo
                     layout="horizontal"
-                    size="m"
+                    size="l"
                 />
 
                 <div className="nav-divider" />
@@ -47,7 +34,6 @@ export function NavigationBar({
                         className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
                         onClick={() => window.location.hash = '#/'}
                     >
-                        <LayoutGrid size={16} style={{ marginRight: 6 }} />
                         {t('nav.dashboard')}
                     </button>
 
@@ -55,7 +41,6 @@ export function NavigationBar({
                         className={`nav-tab ${activeView === 'library' ? 'active' : ''}`}
                         onClick={() => window.location.hash = '#/prompts'}
                     >
-                        <BookOpen size={16} style={{ marginRight: 6 }} />
                         {t('nav.promptLibrary')}
                     </button>
                 </nav>

@@ -11,102 +11,147 @@
     justify-content: center;
     background: var(--bg-main);
     z-index: 10;
-    /* 添加一点模糊背景，聚焦视线 */
-    backdrop-filter: blur(4px);
+    overflow: hidden;
+}
+
+/* 动态背景光斑 (Mesh Gradients) - 增强光感，拒绝黯淡 */
+.empty-state-welcome::before,
+.empty-state-welcome::after {
+    content: '';
+    position: absolute;
+    width: 900px;
+    height: 900px;
+    border-radius: 50%;
+    filter: blur(100px);
+    /* 略微减少模糊，让光更聚 */
+    opacity: 0.25;
+    /* 提升不透明度，增加环境光 */
+    z-index: 0;
+    animation: drift 25s infinite alternate ease-in-out;
+}
+
+.empty-state-welcome::before {
+    /* 主光：银白偏冷，模拟天光 */
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+    top: -25%;
+    left: 5%;
+    animation-delay: -5s;
+}
+
+.empty-state-welcome::after {
+    /* 辅光：专业钛灰色/微蓝紫，增加黑色的层次，避免死黑 */
+    background: radial-gradient(circle, rgba(200, 210, 255, 0.15) 0%, transparent 60%);
+    bottom: -25%;
+    right: 5%;
+    animation-delay: -10s;
+}
+
+@keyframes drift {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+        transform: translate(50px, 80px) scale(1.1);
+    }
 }
 
 .welcome-card {
-    /* 布局变量 */
-    --card-width: 560px;
-    --card-padding: 48px;
-    /* gap-xxl 对应的大概值，这里用 px 明确布局限制，但内部间距用变量 */
+    /* 局部布局变量 */
+    --card-width: 640px;
+    --card-padding: 64px;
 
+    position: relative;
     width: min(90%, var(--card-width));
-    padding: 60px 48px;
+    padding: var(--card-padding);
 
-    /* 毛玻璃背景 */
-    background: rgba(var(--bg-panel-rgb, 26, 28, 34), 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* 
+       核心调整：琉璃质感
+       1. 背景色更淡，让背景光透进来
+       2. 叠加线性渐变模拟玻璃表面的反光
+    */
+    background: linear-gradient(145deg,
+            rgba(25, 25, 30, 0.6) 0%,
+            rgba(5, 5, 8, 0.75) 100%);
+    backdrop-filter: blur(40px) brightness(1.1);
+    /* 提亮一点，增加通透感 */
+    -webkit-backdrop-filter: blur(40px) brightness(1.1);
+
+    /* 锐利的边缘高光 - 关键：顶部白光，底部暗影，模拟厚度 */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    /* 强高光 */
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    /* 侧边微光 */
+
     border-radius: var(--radius-xl);
 
-    /* 增强毛玻璃效果 */
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-
-    /* 更加柔和深邃的阴影 */
+    /* 更有层次的阴影 */
     box-shadow:
-        0 20px 40px -8px rgba(0, 0, 0, 0.2),
-        0 12px 20px -8px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        0 40px 100px -20px rgba(0, 0, 0, 0.9),
+        /* 深邃投影 */
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        /* 内部上边缘反光 */
+        inset 0 20px 40px -10px rgba(255, 255, 255, 0.03);
+    /* 表面泛光 */
 
-    text-align: center;
-    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 1;
+
+    /* 初始入场动画 */
+    animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes fadeInUp {
+@keyframes cardEntrance {
     from {
         opacity: 0;
-        transform: translateY(30px) scale(0.98);
+        transform: translateY(20px) scale(0.96);
+        filter: blur(10px);
     }
 
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+        filter: blur(0);
     }
 }
 
-.welcome-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 80px;
-    margin-bottom: var(--gap-xl);
-
-    /* 透明背景，无边框 */
-    background: transparent;
-
-    /* 黑色阴影+发光效果 */
-    box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.3),
-        0 0 40px rgba(255, 255, 255, 0.1);
-
-    color: var(--text-primary);
-}
-
-.welcome-title {
-    font-size: 24px;
-    font-weight: var(--fw-bold);
-    color: var(--text-primary);
-    margin-bottom: var(--gap-l);
-    text-align: center;
-}
-
-/* Logo + 品牌区 */
-.welcome-brand {
-    margin-bottom: var(--gap-l);
+.welcome-header {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: var(--gap-xxl);
 }
 
-/* 副标题 */
+.welcome-prefix {
+    font-size: var(--fs-m);
+    color: rgba(255, 255, 255, 0.4);
+    /* 更淡的灰色 */
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    /* 增加间距 */
+    margin-bottom: var(--gap-m);
+    font-weight: var(--fw-medium);
+}
+
 .welcome-subtitle {
     font-size: var(--fs-l);
-    color: var(--text-secondary);
-    margin-bottom: var(--gap-xxl);
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 48px;
     line-height: 1.6;
     text-align: center;
+    max-width: 480px;
+    font-weight: 300;
 }
 
-
+/* 特性列表 - 极简风格 */
 .welcome-features {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--gap-l);
-    margin-bottom: var(--gap-xxl);
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-bottom: 56px;
     width: 100%;
 }
 
@@ -115,58 +160,183 @@
     flex-direction: column;
     align-items: center;
     gap: var(--gap-m);
-    padding: var(--gap-l);
-    background: var(--bg-subtle);
-    border: 1px solid transparent;
-    border-radius: var(--radius-l);
-    color: var(--text-primary);
-    font-size: var(--fs-sm);
-    transition: all 0.2s ease;
     text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.4s ease;
+    cursor: default;
+}
+
+.feature-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+
+    /* 纯净的玻璃球效果 */
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* 图标颜色改为纯白发光 */
+    color: rgba(255, 255, 255, 0.8);
+
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .feature-item span {
+    font-size: var(--fs-sm);
     white-space: pre-line;
-    line-height: 1.6;
+    line-height: 1.4;
+    transition: color 0.3s ease;
 }
 
-.feature-item:hover {
-    background: var(--bg-accent);
-    border-color: var(--border);
-    transform: translateY(-2px);
+/* Hover 交互 - 点亮辉光 */
+.feature-item:hover .feature-icon-wrapper {
+    transform: translateY(-5px);
+
+    /* 增强玻璃洁净感 */
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+
+    /* 白色冷光 */
+    box-shadow:
+        0 12px 30px -8px rgba(255, 255, 255, 0.15),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
+
+    color: #ffffff;
 }
 
-.feature-item svg {
-    flex-shrink: 0;
-    color: var(--primary);
-    /* 增大图标尺寸 */
-    width: 48px;
-    height: 48px;
-    padding: 12px;
-    background: rgba(var(--primary-rgb), 0.1);
-    border-radius: var(--radius-m);
+.feature-item:hover span {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
+
+/* 强调按钮 - 纯黑流光风格, 去除蓝色 */
 .welcome-upload-btn {
-    width: 100%;
-    padding: var(--gap-l);
+    width: 240px;
+    height: 56px;
+    padding: 0;
     font-size: var(--fs-l);
     font-weight: var(--fw-bold);
+
+    /* 文字颜色：纯白 */
+    color: #ffffff;
+
+    /* 背景：深黑 -> 浅黑 渐变，营造金属质感 */
+    background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+
+    /* 边框：微弱的白光边框 */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    /* 圆弧型 (胶囊状) */
+    border-radius: 9999px;
+
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--gap-m);
-    border-radius: var(--radius-l);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
+
+    cursor: pointer;
     overflow: hidden;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* 初始阴影 - 黑色 */
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    /* 呼吸动画，吸引点击 - 白色系 */
+    animation: buttonPulse 3s infinite ease-in-out;
+}
+
+@keyframes buttonPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        /* 扩散的白光光晕 */
+        box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
 }
 
 .welcome-upload-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px -6px rgba(var(--primary-rgb), 0.4);
+    /* Hover 时增强光亮 - 银色系 */
+    background: linear-gradient(135deg, #333333 0%, #4a4a4a 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.1),
+        /* 外发光 */
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .welcome-upload-btn:active {
     transform: translateY(0);
+    background: #1a1a1a;
+}
+
+/* 内部流光特效 - 银色光束 */
+.welcome-upload-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    /* 银白光束 */
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent);
+    transform: skewX(-25deg);
+    transition: none;
+    pointer-events: none;
+    /* 自动循环流光，强化“提示”作用 */
+    animation: shimmerAuto 4s infinite linear;
+}
+
+/* 让流光自动跑，不需要hover触发，更吸引注意力 */
+@keyframes shimmerAuto {
+
+    0%,
+    80% {
+        left: -100%;
+        opacity: 0;
+    }
+
+    85% {
+        opacity: 1;
+    }
+
+    100% {
+        left: 200%;
+        opacity: 0;
+    }
+}
+
+/* Hover 时加速流光 */
+.welcome-upload-btn:hover::before {
+    animation: shimmerHover 1s infinite;
+}
+
+@keyframes shimmerHover {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 200%;
+    }
 }

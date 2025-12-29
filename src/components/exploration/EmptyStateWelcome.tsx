@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
-import { UploadCloud, FileText, Sparkles } from 'lucide-react';
+import { UploadCloud, Search, Sparkles } from 'lucide-react';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
 import { ParsedFileData } from '@/utils/fileParser';
 import { Logo } from '@/components/common/Logo/Logo';
@@ -11,8 +11,8 @@ interface EmptyStateWelcomeProps {
 }
 
 /**
- * 首次使用欢迎界面 - 显示在页面中心
- * 集成了文件上传功能，点击按钮直接触发文件选择
+ * 首次使用欢迎界面 v2.0
+ * 优化视觉层级，增强 Glassmorphism 质感
  */
 export function EmptyStateWelcome({ onFilesUploaded }: EmptyStateWelcomeProps) {
     const { t } = useI18n();
@@ -25,34 +25,41 @@ export function EmptyStateWelcome({ onFilesUploaded }: EmptyStateWelcomeProps) {
     return (
         <div className="empty-state-welcome">
             <div className="welcome-card">
-                {/* 顶部：欢迎使用 */}
-                <h1 className="welcome-title">{t('welcome.title').replace('LiuliX', '').trim()}</h1>
-
-                {/* 中间：Logo + 品牌名 */}
-                <div className="welcome-brand">
-                    <Logo layout="horizontal" size="xl" showText={true} />
+                {/* 顶部：品牌展示 */}
+                <div className="welcome-header">
+                    <span className="welcome-prefix">{t('welcome.prefix')}</span>
+                    {/* 使用 Glass 变体 Logo，启用流光动效 */}
+                    <Logo layout="horizontal" size="xl" showText={true} variant="glass" />
                 </div>
 
-                {/* 副标题：描述文字 */}
+                {/* 副标题 */}
                 <p className="welcome-subtitle">{t('welcome.subtitle')}</p>
 
+                {/* 特性展示区 - 图标强调模式 */}
                 <div className="welcome-features">
                     <div className="feature-item">
-                        <UploadCloud size={20} />
+                        <div className="feature-icon-wrapper">
+                            <UploadCloud size={28} strokeWidth={1.5} />
+                        </div>
                         <span>{t('welcome.feature1')}</span>
                     </div>
                     <div className="feature-item">
-                        <FileText size={20} />
+                        <div className="feature-icon-wrapper">
+                            <Search size={28} strokeWidth={1.5} />
+                        </div>
                         <span>{t('welcome.feature2')}</span>
                     </div>
                     <div className="feature-item">
-                        <Sparkles size={20} />
+                        <div className="feature-icon-wrapper">
+                            <Sparkles size={28} strokeWidth={1.5} />
+                        </div>
                         <span>{t('welcome.feature3')}</span>
                     </div>
                 </div>
 
+                {/* 核心行动按钮 */}
                 <button
-                    className="btn-primary welcome-upload-btn"
+                    className="welcome-upload-btn"
                     onClick={handleUploadClick}
                 >
                     <UploadCloud size={20} />

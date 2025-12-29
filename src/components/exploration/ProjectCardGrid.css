@@ -1,0 +1,78 @@
+/* ========== 项目卡片网格容器 ========== */
+.project-card-grid-container {
+    width: 100%;
+    padding: var(--gap-xl);
+}
+
+.grid-header {
+    margin-bottom: var(--gap-l);
+}
+
+.grid-header h3 {
+    font-size: var(--fs-l);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+}
+
+/*  卡片网格 - 响应式2-4列 */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--gap-l);
+    max-width: 100%;
+}
+
+@media (min-width: 1400px) {
+    .card-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========== 右键菜单 ========== */
+.context-menu {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-lv2);
+    backdrop-filter: blur(var(--blur-medium));
+    -webkit-backdrop-filter: blur(var(--blur-medium));
+    padding: var(--gap-xs);
+    min-width: 140px;
+    z-index: 9999;
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: var(--gap-s) var(--gap-m);
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+}
+
+.context-menu-item:hover {
+    background: var(--bg-hover);
+}
+
+.context-menu-item.danger {
+    color: var(--danger);
+}
+
+.context-menu-item.danger:hover {
+    background: rgba(var(--danger-rgb), 0.1);
+}
