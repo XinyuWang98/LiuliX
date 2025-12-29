@@ -71,7 +71,7 @@ export function ProjectSelector({ currentProject, onProjectSelect, onNewProject 
                                         <div className="project-info">
                                             <div className="project-name">{project.name}</div>
                                             <div className="project-meta">
-                                                {project.files.length} 文件 · {new Date(project.createdAt).toLocaleDateString()}
+                                                {t('dataSource.project.filesCount', { count: project.files.length })} · {new Date(project.createdAt).toLocaleDateString()}
                                             </div>
                                         </div>
                                     </div>

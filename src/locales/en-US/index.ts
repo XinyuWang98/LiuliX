@@ -2,6 +2,7 @@
 // TODO: Split this into modules like zh-CN after full migration
 import { LanguageConfig } from '@/types/i18n';
 import { prompt } from './prompt';
+import welcome from './welcome';
 
 // Temporarily import from old file structure
 // Will be split into modules in next refactor
@@ -48,7 +49,7 @@ export const enUS: LanguageConfig = {
             mean: 'Mean',
         },
         nav: {
-            appName: 'DataPrism',
+            appName: 'LiuliX',
             noProject: 'No Project Selected',
             dashboard: 'Data Explorer',
             promptLibrary: 'Prompt Library',
@@ -135,7 +136,7 @@ export const enUS: LanguageConfig = {
             connectionSuccessPrefix: 'Connection Successful! Current Model: ',
             autoUpgradeAlert: 'Automatically upgraded to gemini-2.5-flash (2025 Latest)',
             configSaved: 'API Configuration Saved',
-            firstTimeSetup: 'Welcome to DataPrism AI Features',
+            firstTimeSetup: 'Welcome to LiuliX AI Features',
             firstTimeMessage: 'Please select a model to get started. If you choose a model that requires an API Key, you will need to obtain one from Google AI Studio.',
             configureNow: 'Configure Now',
             modelConfigured: 'Currently Using',
@@ -264,7 +265,14 @@ export const enUS: LanguageConfig = {
                 untitled: 'Untitled Project', rename: 'Rename', delete: 'Delete Project',
                 confirmDelete: 'Are you sure?', filesCount: '{count} files', createdAt: 'Created {date}',
                 newProject: 'New Project',
-                themes: { game: 'Game', sales: 'Sales', finance: 'Finance', analytics: 'Analytics', user: 'User', data: 'Data' },
+                themes: {
+                    game: 'Game',
+                    sales: 'Sales',
+                    finance: 'Finance',
+                    analytics: 'Analytics',
+                    user: 'User',
+                    data: 'Data'
+                },
             },
         },
         fileUpload: {
@@ -283,11 +291,7 @@ export const enUS: LanguageConfig = {
             errorGeneric: 'Check file and retry', inputPlaceholder: 'Ask anything about your data...',
         },
         themes: { "apple-dark": "Apple Dark", "apple-light": "Apple Light", neufuture: 'Neufuture Dark', professional: 'Professional', minimal: 'Minimal Light' },
-        welcome: {
-            title: 'Welcome to DataPrism', p0Completed: 'P0 Features Completed:', functionsTitle: 'Features',
-            features: { typeSystem: 'TypeScript types', cssVariables: 'CSS variables', themes: '3 themes', promptLibrary: 'Prompt library', projectConfig: 'Vite+React', themeSwitch: 'Theme switch', fileUpload: 'File upload' },
-            functions: { supportFormats: 'CSV, XLSX, JSON', dragUpload: 'Drag upload', largeFileDetection: 'Large file detection', sampleRatio: 'Sampling' },
-        },
+        welcome,
         workshop: {
             title: 'Smart Workshop', cleaning: 'Cleaning Suggestions', cleaningDesc: 'AI analyzes quality',
             exploration: 'Data Exploration', explorationDesc: 'Auto-generate reports', hypothesis: 'Hypothesis', hypothesisDesc: 'Generate hypotheses',

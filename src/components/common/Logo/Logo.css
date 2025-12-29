@@ -36,6 +36,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    background: transparent;
 }
 
 /* Text Styles - 极简科技排版 + 高端流光 */
@@ -49,24 +51,8 @@
     align-items: baseline;
     position: relative;
 
-    /* 核心流光背景：基底色 + 扫光带 */
-    /* 使用 CSS 变量确保适配亮/暗模式，中间的 high-light 是纯白或高亮色 */
-    background: linear-gradient(120deg,
-            var(--text-primary) 40%,
-            rgba(255, 255, 255, 0.9) 50%,
-            var(--text-primary) 60%);
-    background-size: 200% auto;
-
-    /* 必须的裁切属性 */
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    /* 默认文字颜色透明，显示背景 */
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-
-    /* 动画：慢速、优雅的扫光 */
-    animation: shimmer 6s infinite linear;
+    /* 使用纯色，移除渐变动画 */
+    color: var(--text-primary);
 }
 
 /* 扫光动画定义 */
@@ -82,32 +68,27 @@
 
 /* 暗黑模式优化：增强对比度 */
 [data-theme='dark'] .logo-text {
-    background: linear-gradient(120deg,
-            #94a3b8 40%,
-            /* Slate 400 - 基底 */
-            #ffffff 50%,
-            /* White - 高光带 */
-            #94a3b8 60%
-            /* Slate 400 */
-        );
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-
-    /* 添加极其微妙的白色辉光，增加通透感，非霓虹 */
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.15));
+    color: #94a3b8;
+    /* Slate 400 */
 }
 
 /* Liuli 部分 - 继承父级样式 */
 /* .logo-text-primary 规则已移除，因为不需要额外样式 */
 
-/* X 部分 - 作为品牌核心符号 */
+/* X 部分 - 作为品牌核心符号，弱化灰色+发光效果 */
 .logo-text-secondary {
-    font-weight: 400;
-    /* 移除 opacity，因为它会干扰 background-clip: text */
-    /* opacity: 0.8; */
+    font-weight: 700;
+    /* 与Liuli保持一致 */
     margin-left: 1px;
+
+    /* 覆盖父级的渐变，使用灰色 */
+    background: #94a3b8 !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+
+    /* 添加发光效果 */
+    filter: drop-shadow(0 0 8px rgba(148, 163, 184, 0.6)) drop-shadow(0 0 16px rgba(148, 163, 184, 0.4));
 }
 
 /* Layouts */

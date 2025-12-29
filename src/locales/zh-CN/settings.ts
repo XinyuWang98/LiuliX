@@ -53,7 +53,7 @@ export const settings = {
     connectionSuccessPrefix: '连接成功！当前模型：',
     autoUpgradeAlert: '已自动升级到 gemini-2.5-flash (2025最新版)',
     configSaved: 'API 配置已保存',
-    firstTimeSetup: '欢迎使用 DataPrism AI 功能',
+    firstTimeSetup: '欢迎使用 LiuliX AI 功能',
     firstTimeMessage: '请选择一个模型开始使用。如果选择需要 API Key 的模型，您需要从 Google AI Studio 获取密钥。',
     configureNow: '立即配置',
     modelConfigured: '当前使用',

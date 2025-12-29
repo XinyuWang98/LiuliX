@@ -3,6 +3,7 @@ import { useI18n } from '@/contexts/I18nContext';
 import { UploadCloud, FileText, Sparkles } from 'lucide-react';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
 import { ParsedFileData } from '@/utils/fileParser';
+import { Logo } from '@/components/common/Logo/Logo';
 import './EmptyStateWelcome.css';
 
 interface EmptyStateWelcomeProps {
@@ -24,14 +25,15 @@ export function EmptyStateWelcome({ onFilesUploaded }: EmptyStateWelcomeProps) {
     return (
         <div className="empty-state-welcome">
             <div className="welcome-card">
-                <div className="welcome-icon">
-                    <Sparkles size={48} strokeWidth={1.5} />
+                {/* 顶部：欢迎使用 */}
+                <h1 className="welcome-title">{t('welcome.title').replace('LiuliX', '').trim()}</h1>
+
+                {/* 中间：Logo + 品牌名 */}
+                <div className="welcome-brand">
+                    <Logo layout="horizontal" size="xl" showText={true} />
                 </div>
 
-                <h1 className="welcome-title">
-                    {t('welcome.title').replace('LiuliX', '').trim()}
-                    <span className="liuli-brand">LiuliX</span>
-                </h1>
+                {/* 副标题：描述文字 */}
                 <p className="welcome-subtitle">{t('welcome.subtitle')}</p>
 
                 <div className="welcome-features">

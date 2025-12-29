@@ -22,15 +22,22 @@
     /* gap-xxl 对应的大概值，这里用 px 明确布局限制，但内部间距用变量 */
 
     width: min(90%, var(--card-width));
-    padding: var(--gap-xxl);
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
+    padding: 60px 48px;
+
+    /* 毛玻璃背景 */
+    background: rgba(var(--bg-panel-rgb, 26, 28, 34), 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-xl);
+
+    /* 增强毛玻璃效果 */
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
 
     /* 更加柔和深邃的阴影 */
     box-shadow:
         0 20px 40px -8px rgba(0, 0, 0, 0.2),
-        0 12px 20px -8px rgba(0, 0, 0, 0.1);
+        0 12px 20px -8px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
     text-align: center;
     animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -58,129 +65,84 @@
     width: 80px;
     height: 80px;
     margin-bottom: var(--gap-xl);
-    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-    border-radius: var(--radius-full);
-    color: var(--text-inverse);
-    border: 4px solid var(--bg-panel);
-    box-shadow: 0 8px 16px rgba(var(--primary-rgb), 0.25);
+
+    /* 透明背景，无边框 */
+    background: transparent;
+
+    /* 黑色阴影+发光效果 */
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(255, 255, 255, 0.1);
+
+    color: var(--text-primary);
 }
 
 .welcome-title {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: var(--fw-bold);
     color: var(--text-primary);
-    margin-bottom: var(--gap-m);
-    letter-spacing: -0.5px;
+    margin-bottom: var(--gap-l);
+    text-align: center;
+}
+
+/* Logo + 品牌区 */
+.welcome-brand {
+    margin-bottom: var(--gap-l);
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 8px;
-    /* 调整间距 */
 }
 
-/* 🌈 LiuliX 琉璃品牌字特效 - 极简流光版 */
-.liuli-brand {
-    font-family: var(--font-family);
-    font-weight: 800;
-    letter-spacing: -2px;
-    position: relative;
-    display: inline-block;
-    margin-left: 8px;
-
-    /* 核心流光背景 */
-    background: linear-gradient(120deg,
-            var(--text-primary) 40%,
-            rgba(255, 255, 255, 0.9) 50%,
-            var(--text-primary) 60%);
-    background-size: 200% auto;
-
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    /* 默认透明 */
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-
-    /* 动画：扫光 */
-    animation: shimmer 6s infinite linear;
-}
-
-/* 扫光动画复用，如果在 Logo.css 全局定义了可以省略，否则如果不共享 CSS Scope 需重复定义 */
-@keyframes shimmer {
-    0% {
-        background-position: 100% center;
-    }
-
-    100% {
-        background-position: -100% center;
-    }
-}
-
-/* 暗黑模式适配 */
-[data-theme='dark'] .liuli-brand {
-    background: linear-gradient(120deg,
-            #94a3b8 40%,
-            #ffffff 50%,
-            #94a3b8 60%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    /* 通透感辉光，非霓虹 */
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
-}
-
-/* 兜底：如果背景渐变不生效 */
-@supports not (background-clip: text) {
-    .welcome-title {
-        color: var(--text-primary);
-        background: none;
-    }
-}
-
+/* 副标题 */
 .welcome-subtitle {
-    font-size: var(--fs-m);
+    font-size: var(--fs-l);
     color: var(--text-secondary);
     margin-bottom: var(--gap-xxl);
     line-height: 1.6;
-    max-width: 80%;
+    text-align: center;
 }
 
+
 .welcome-features {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-m);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap-l);
     margin-bottom: var(--gap-xxl);
     width: 100%;
 }
 
 .feature-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--gap-l);
+    gap: var(--gap-m);
     padding: var(--gap-l);
     background: var(--bg-subtle);
     border: 1px solid transparent;
     border-radius: var(--radius-l);
     color: var(--text-primary);
-    font-size: var(--fs-m);
+    font-size: var(--fs-sm);
     transition: all 0.2s ease;
-    text-align: left;
+    text-align: center;
+}
+
+.feature-item span {
+    white-space: pre-line;
+    line-height: 1.6;
 }
 
 .feature-item:hover {
     background: var(--bg-accent);
     border-color: var(--border);
-    transform: translateX(4px);
+    transform: translateY(-2px);
 }
 
 .feature-item svg {
     flex-shrink: 0;
     color: var(--primary);
-    /* 增加图标背景使其更突显 */
-    padding: 8px;
-    width: 36px;
-    height: 36px;
+    /* 增大图标尺寸 */
+    width: 48px;
+    height: 48px;
+    padding: 12px;
     background: rgba(var(--primary-rgb), 0.1);
     border-radius: var(--radius-m);
 }

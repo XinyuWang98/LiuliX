@@ -23,7 +23,7 @@ export default {
     },
     // Keep old keys for backward compatibility if needed, though they are not in type
     uploadButton: '上传第一个文件',
-    feature1: '上传 CSV 文件，一键导入数据',
-    feature2: '智能数据清洗，自动发现问题',
-    feature3: 'AI 洞察分析，快速生成报告',
+    feature1: '上传 CSV 文件\n一键导入数据',
+    feature2: '智能数据清洗\n自动发现问题',
+    feature3: 'AI 洞察分析\n快速生成报告',
 };

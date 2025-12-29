@@ -51,7 +51,7 @@ export const settings = {
     connectionSuccessPrefix: 'Connected successfully! Current model:',
     autoUpgradeAlert: 'Automatically upgraded to gemini-2.5-flash (Latest 2025 version)',
     configSaved: 'API Configuration Saved',
-    firstTimeSetup: 'Welcome to DataPrism AI Features',
+    firstTimeSetup: 'Welcome to LiuliX AI Features',
     firstTimeMessage: 'Please select a model to get started. If you choose a model that requires an API Key, you will need to obtain a key from Google AI Studio.',
     configureNow: 'Configure Now',
     modelConfigured: 'Currently Using',
