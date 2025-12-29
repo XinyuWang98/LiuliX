@@ -1,22 +1,42 @@
-// import { useEvidence } from '@/contexts/EvidenceContext';
-// import { useI18n } from '@/contexts/I18nContext';
-// import { Download, Copy, FileText, CheckCircle } from 'lucide-react';
-// import { useState } from 'react';
-// import { ReportSummary } from './ReportSummary'; // V0 MVP temporarily replaced
+import { useState } from 'react';
+import { useI18n } from '@/contexts/I18nContext';
 import { ReportNotebook } from './ReportNotebook';
-// import { logger } from '@/utils/logger';
+import { EvidencePool } from '@/components/evidence/EvidencePool';
+import { FileText, Layers } from 'lucide-react';
 import './ReportGenerator.css';
 
-// 图标尺寸常量
-// const ICON_SIZE_MEDIUM = 18; // 中等图标尺寸
+const ICON_SIZE = 16;
+
+type TabType = 'notebook' | 'evidence';
 
 export function ReportGenerator() {
-    // V0 MVP: 直接渲染双角色报告笔记本
+    const { t } = useI18n();
+    const [activeTab, setActiveTab] = useState<TabType>('notebook');
+
     return (
         <div className="report-generator-container">
-            <ReportNotebook />
+            {/* Tab切换 */}
+            <div className="report-tabs">
+                <button
+                    className={`report-tab ${activeTab === 'notebook' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('notebook')}
+                >
+                    <FileText size={ICON_SIZE} />
+                    <span>{t('report.tabs.notebook')}</span>
+                </button>
+                <button
+                    className={`report-tab ${activeTab === 'evidence' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('evidence')}
+                >
+                    <Layers size={ICON_SIZE} />
+                    <span>{t('report.tabs.evidence')}</span>
+                </button>
+            </div>
+
+            {/* Tab内容 */}
+            <div className="report-tab-content">
+                {activeTab === 'notebook' ? <ReportNotebook /> : <EvidencePool />}
+            </div>
         </div>
     );
 }
-
-

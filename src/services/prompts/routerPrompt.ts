@@ -35,8 +35,16 @@ export function buildRouterPrompt(
         return `- ${col} (${type})`;
     }).join('\n');
 
-    // 构建采样数据预览
-    const samplePreview = JSON.stringify(sampleData.slice(0, 3), null, 2);
+    // 构建采样数据预览（处理BigInt）
+    const sanitizedSampleData = sampleData.slice(0, 3).map(row => {
+        const sanitized: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(row)) {
+            // 将BigInt转换为Number，避免JSON.stringify报错
+            sanitized[key] = typeof value === 'bigint' ? Number(value) : value;
+        }
+        return sanitized;
+    });
+    const samplePreview = JSON.stringify(sanitizedSampleData, null, 2);
 
     logger.log('AI服务', `[RouterPrompt] 构建 Prompt, ${l2Prompts.length} 个可用模板`);
 

@@ -1,0 +1,44 @@
+/* ========== 图标导航(折叠态) ========== */
+.icon-only-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-m);
+    padding: var(--gap-m) 0;
+    height: 100%;
+}
+
+.icon-nav-item {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.icon-nav-item:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.icon-nav-item.active {
+    background: var(--primary);
+    color: #FFFFFF;
+}
+
+/* 完成标识 */
+.icon-nav-item .complete-icon {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    color: var(--success);
+    background: var(--bg-panel);
+    border-radius: var(--radius-full);
+}

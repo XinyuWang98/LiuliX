@@ -174,16 +174,30 @@ export function calculateRecommendedSampleRows(
 
 /**
  * 计算Pyodide可安全加载的最大行数
- * 根据列数和可用内存动态计算，避免硬编码魔法数字
+ * 根据列数和浏览器实际内存动态计算，避免硬编码魔法数字
  * 
  * @param columnCount 列数
- * @param availableMemoryMB 可用内存（MB），默认512MB
  * @returns 最大行数
  */
-export function calculateMaxRowsForPyodide(
-    columnCount: number,
-    availableMemoryMB: number = 512
-): number {
+export function calculateMaxRowsForPyodide(columnCount: number): number {
+    // 动态获取浏览器内存
+    const browserMemory = getBrowserMemory();
+    const memoryGB = browserMemory / (1024 ** 3);
+
+    // 根据内存分层调整预算比例
+    let budgetRatio = 0.2; // 默认20%
+    if (memoryGB >= 16) {
+        budgetRatio = 0.25; // 16GB+ → 25%
+    } else if (memoryGB >= 8) {
+        budgetRatio = 0.2;  // 8GB  → 20%
+    } else if (memoryGB >= 4) {
+        budgetRatio = 0.15; // 4GB  → 15%
+    } else {
+        budgetRatio = 0.1;  // <4GB → 10%
+    }
+
+    const availableMemoryMB = (browserMemory / (1024 * 1024)) * budgetRatio;
+
     // 每个数据点：8 bytes (number) × 3 (pandas开销系数)
     const BYTES_PER_DATAPOINT = 8 * 3;
     const SAFETY_MARGIN = 0.7; // 安全系数70%，保留30%缓冲
@@ -192,9 +206,11 @@ export function calculateMaxRowsForPyodide(
     const maxDataPoints = availableBytes / BYTES_PER_DATAPOINT;
     const maxRows = Math.floor(maxDataPoints / columnCount);
 
-    // 限制范围：最小1000行，最大50000行
+    // 动态边界：根据内存调整
     const MIN_ROWS = 1000;
-    const MAX_ROWS = 50000;
+    const MAX_ROWS = memoryGB >= 16 ? 200000 :
+        memoryGB >= 8 ? 100000 :
+            memoryGB >= 4 ? 50000 : 30000;
 
     return Math.max(MIN_ROWS, Math.min(maxRows, MAX_ROWS));
 }

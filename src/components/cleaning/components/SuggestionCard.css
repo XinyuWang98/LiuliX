@@ -241,3 +241,41 @@
     white-space: pre-wrap;
     word-break: break-all;
 }
+
+/* 5. 采纳按钮 */
+.adoptBtn-container {
+    padding: 8px var(--gap-m);
+    border-top: 1px solid var(--border-light);
+}
+
+.adoptBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-xs);
+    width: 100%;
+    padding: var(--gap-s) var(--gap-m);
+    border: 1px solid var(--primary);
+    background: transparent;
+    border-radius: var(--radius-s);
+    color: var(--primary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: all var(--transition-s);
+}
+
+.adoptBtn:hover:not(:disabled) {
+    background: var(--primary);
+    color: var(--text-primary);
+}
+
+.adoptBtn.adopted {
+    border-color: var(--color-quality-healthy);
+    color: var(--color-quality-healthy);
+    cursor: not-allowed;
+}
+
+.adoptBtn:disabled {
+    opacity: 0.6;
+}

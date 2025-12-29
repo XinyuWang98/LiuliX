@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { SimpleSuggestion } from '../types/cleaning.types';
 import { useI18n } from '../../../contexts/I18nContext';
-import { ChevronDown, ChevronRight, Copy, Check, Sparkles, Trash2, Eraser, FileX, Calculator, Wand2 } from 'lucide-react';
+import { useEvidence } from '../../../contexts/EvidenceContext';
+import { ChevronDown, ChevronRight, Copy, Check, Sparkles, Trash2, Eraser, FileX, Calculator, Wand2, CheckCircle } from 'lucide-react';
 import { formatSQL } from '../../../utils/sqlFormatter';
 import './SuggestionCard.css';
 
@@ -12,6 +13,7 @@ interface SuggestionCardProps {
     isSelected: boolean;
     isIgnored?: boolean; // 是否被忽略
     onToggle: (id: string) => void;
+    fileName?: string;  // CSV文件名，用于SQL显示
 }
 
 /**
@@ -19,10 +21,32 @@ interface SuggestionCardProps {
  * 格式：【PROMPT/AI】操作描述 推荐度XX%
  * 点击高亮选中，支持多选，选中后直接在卡片内展开详情
  */
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, isIgnored, onToggle }) => {
+export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, isIgnored, onToggle, fileName }) => {
     const { t } = useI18n();
+    const { addRecord, records } = useEvidence();
     const [isSqlExpanded, setIsSqlExpanded] = useState(false);
     const [copied, setCopied] = useState(false);
+
+    // 检查是否已采纳
+    const isAdopted = records.some(r => r.metadata?.suggestionId === suggestion.id);
+
+    // 采纳建议
+    const handleAdopt = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (isAdopted) return;
+
+        addRecord({
+            type: 'cleaning',
+            title: suggestion.label,
+            description: suggestion.reason || t('cleaning.defaultReason'),
+            sql: suggestion.sql,
+            metadata: {
+                suggestionId: suggestion.id,
+                fileName: fileName,
+                confidence: suggestion.confidence
+            }
+        });
+    };
 
     // ✅ 判断来源：优先使用source字段，回退到id前缀判断（向后兼容）
     const isFromRouter = suggestion.source === 'router' || (!suggestion.source && suggestion.id.startsWith('router-'));
@@ -60,10 +84,27 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
         setIsSqlExpanded(!isSqlExpanded);
     };
 
-    // 格式化 SQL 展示
-    const displaySql = suggestion.sql
-        ? formatSQL(suggestion.sql.replace(/__TABLE_NAME__/g, '{table}'))
-        : '';
+    // 格式化SQL展示：用CSV文件名替换DuckDB表名
+    const displaySql = (() => {
+        if (!suggestion.sql) return '';
+
+        let sql = suggestion.sql;
+
+        // 方案1：替换__TABLE_NAME__占位符
+        if (sql.includes('__TABLE_NAME__')) {
+            const csvName = fileName || 'your_table.csv';
+            sql = sql.replace(/__TABLE_NAME__/g, csvName);
+        }
+        // 方案2：替换DuckDB实际表名(如t_xxx_working)
+        else if (sql.match(/t_\d+_(original|working)/g)) {
+            const csvName = fileName || 'your_table.csv';
+            sql = sql.replace(/t_\d+_(original|working)/g, csvName);
+        }
+
+        // 格式化并添加提示注释
+        const formattedSql = formatSQL(sql);
+        return `-- 注意：执行前请将 ${fileName || 'your_table.csv'} 替换为实际表名\n${formattedSql}`;
+    })();
 
     // 计算推荐度颜色
     const getConfidenceColor = (score: number) => {
@@ -134,6 +175,25 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
                     )}
                 </div>
             )}
+
+            {/* 4. 采纳按钮 */}
+            <div className="adoptBtn-container">
+                <button
+                    className={`adoptBtn ${isAdopted ? 'adopted' : ''}`}
+                    onClick={handleAdopt}
+                    disabled={isAdopted}
+                    title={isAdopted ? t('evidence.adopted') : t('evidence.adopt')}
+                >
+                    {isAdopted ? (
+                        <>
+                            <CheckCircle size={14} />
+                            <span>{t('evidence.adopted')}</span>
+                        </>
+                    ) : (
+                        <span>{t('evidence.adopt')}</span>
+                    )}
+                </button>
+            </div>
         </div>
     );
 };

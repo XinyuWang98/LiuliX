@@ -25,6 +25,7 @@ export const insightChain = {
     or: '或',
     results: '洞察结果',
     analyzing: '正在执行洞察分析...',
+    generatingInsight: '正在生成洞察分析...',
 };
 
 // 森林式下钻交互相关翻译
@@ -78,6 +79,8 @@ export const evidence = {
     pin: '置顶',
     unpin: '取消置顶',
     delete: '删除',
+    adopt: '采纳',
+    adopted: '✓ 已采纳',
     affectedRows: '影响 {count} 行',
     rowsChanged: '{before} 行 → {after} 行',
     type: {
@@ -105,6 +108,10 @@ export const quality = {
 
 export const report = {
     title: '分析报告',
+    tabs: {
+        notebook: '报告笔记本',
+        evidence: '证据池',
+    },
     copy: '复制',
     copied: '已复制',
     download: '下载',

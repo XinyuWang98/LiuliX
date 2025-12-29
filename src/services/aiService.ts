@@ -215,13 +215,20 @@ export const askAI = async (
  * - 用于：SQL生成、数据质量检测
  */
 export const askAICleaning = async (prompt: string) => {
+    // ⏱️ 性能监控开始
+    const perfStart = performance.now();
+    const perfMarks: { phase: string; duration: number }[] = [];
+
     try {
         const key = CONFIG.deepseek.key();
-        const res = await ky.post('/api/proxy/deepseek-cleaning', {
+
+        // ⏱️ 阶段1：请求准备
+        const reqPrepStart = performance.now();
+        const requestPayload = {
             headers: {
                 'x-api-key': key,
-                'x-user-id': getUserId(),                    // ✅ 免费试用计数
-                'x-invite-code': getInviteCode() || '',      // ✅ 邀请码验证
+                'x-user-id': getUserId(),
+                'x-invite-code': getInviteCode() || '',
             },
             json: {
                 data: {
@@ -230,8 +237,20 @@ export const askAICleaning = async (prompt: string) => {
                     stream: false
                 }
             },
-            timeout: 60000  // 与后端保持一致
-        }).json<any>();
+            timeout: 60000
+        };
+        const reqPrepTime = performance.now() - reqPrepStart;
+        perfMarks.push({ phase: '请求准备', duration: reqPrepTime });
+
+        // ⏱️ 阶段2：网络请求
+        logger.log('AI调用', '发送请求到DeepSeek API');
+        const networkStart = performance.now();
+        const res = await ky.post('/api/proxy/deepseek-cleaning', requestPayload).json<any>();
+        const networkTime = performance.now() - networkStart;
+        perfMarks.push({ phase: '网络请求+响应', duration: networkTime });
+
+        // ⏱️ 阶段3：响应处理
+        const processingStart = performance.now();
 
         // ✅ 处理超限错误
         if (res.error && res.userType) {
@@ -245,7 +264,20 @@ export const askAICleaning = async (prompt: string) => {
         }
 
         const content = res.choices?.[0]?.message?.content || '';
-        logger.log('AI清洗', '响应成功', { data: { length: content.length } });
+        const processingTime = performance.now() - processingStart;
+        perfMarks.push({ phase: '响应处理+解析', duration: processingTime });
+
+        // ⏱️ 总耗时
+        const totalTime = performance.now() - perfStart;
+
+        // 📊 详细性能日志
+        logger.log('AI清洗', '响应成功', {
+            data: {
+                length: content.length,
+                totalTime: `${(totalTime / 1000).toFixed(2)}s`,
+                breakdown: perfMarks.map(m => `${m.phase}: ${m.duration.toFixed(0)}ms`).join(' | ')
+            }
+        });
 
         return { content, model: 'deepseek-cleaning' };
     } catch (err: any) {

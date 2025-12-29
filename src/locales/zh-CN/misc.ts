@@ -12,6 +12,7 @@ export const workshop = {
     cleaning: '数据清洗建议',
     cleaningDesc: 'AI智能分析数据质量，生成清洗建议',
     exploration: '数据探索',
+    dataExploration: '数据探索', // 新增：页面标题,
     explorationDesc: '自动生成数据分析报告和可视化',
     hypothesis: '分析假设',
     hypothesisDesc: '基于数据特征生成分析假设',

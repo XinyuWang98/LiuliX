@@ -1,0 +1,14 @@
+/* ========== 探索工作台容器 ========== */
+.exploration-workbench {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    /* 占据page-container剩余高度 */
+    min-height: 0;
+    /* 防止flex子元素溢出 */
+    background: var(--bg-main);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    /* 横向布局：导航+内容 */
+}

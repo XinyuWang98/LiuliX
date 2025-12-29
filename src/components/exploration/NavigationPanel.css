@@ -1,0 +1,27 @@
+/* ========== 导航面板容器 ========== */
+.navigation-panel {
+    /* 固定侧栏布局（不再absolute定位） */
+    flex-shrink: 0;
+    background: var(--bg-panel);
+    backdrop-filter: blur(var(--blur-light));
+    border-right: 1px solid var(--border);
+    transition: width var(--transition-s);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 折叠态：64px */
+.navigation-panel.collapsed {
+    width: 64px;
+}
+
+/* 展开态：280px */
+.navigation-panel.expanded {
+    width: 280px;
+}
+
+/* 暗色主题下的边框强化 */
+[data-theme="apple-dark"] .navigation-panel {
+    border-right-color: rgba(255, 255, 255, 0.1);
+}

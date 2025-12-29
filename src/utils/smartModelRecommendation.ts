@@ -53,7 +53,8 @@ export interface ModelRecommendation {
  */
 export async function getSmartModelRecommendation(): Promise<ModelRecommendation> {
     const hardware = await detectHardware();
-    const totalRAM = hardware.memory.total / (1024 * 1024 * 1024); // 转换为GB
+    // 优先使用 deviceMemoryGB，若不存在则使用 storageQuotaGB 推测（除以20作为粗略估算）
+    const totalRAM = hardware.memory.deviceMemoryGB ?? (hardware.memory.storageQuotaGB / 20);
 
     // 策略1: 32GB+ RAM → 推荐 14B 模型
     if (totalRAM >= 32 && hardware.overallScore >= 80) {
@@ -113,7 +114,8 @@ export async function getSmartModelRecommendation(): Promise<ModelRecommendation
  */
 export async function isModelAvailable(modelId: ModelId): Promise<boolean> {
     const hardware = await detectHardware();
-    const totalRAM = hardware.memory.total / (1024 * 1024 * 1024);
+    // 使用与推荐逻辑一致的内存获取方式
+    const totalRAM = hardware.memory.deviceMemoryGB ?? (hardware.memory.storageQuotaGB / 20);
     const modelSpec = MODEL_QUALITY_MATRIX[modelId];
 
     return totalRAM >= modelSpec.minRAM && hardware.overallScore >= 60;

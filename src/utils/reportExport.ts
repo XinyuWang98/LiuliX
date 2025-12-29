@@ -1,4 +1,4 @@
-import { ReportDocument, ReportCell } from '@/types/report';
+import { ReportDocument } from '@/types/report';
 import { formatTimestamp } from '@/utils/dateUtils';
 
 /**
@@ -51,7 +51,6 @@ export function generateMarkdown(document: ReportDocument): string {
  * V0 MVP: 简单的单文件 HTML，包含内联样式
  */
 export function generateHTML(document: ReportDocument): string {
-    const markdown = generateMarkdown(document);
 
     // 简单的 Markdown -> HTML 转换 (V0 使用极简替换，实际项目可能需要 marked 库)
     // 这里为了不引入新依赖，我们构建一个基础的 HTML 结构，主要展示内容

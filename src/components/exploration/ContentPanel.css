@@ -1,0 +1,120 @@
+/* ========== 内容面板V2样式 ========== */
+.content-panel-v2 {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg-main);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xxl);
+    padding: var(--gap-xl);
+    scroll-behavior: smooth;
+}
+
+/* ========== Section 0: 项目选择 ========== */
+.project-section {
+    transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.3s ease,
+        margin-bottom 0.3s ease;
+    overflow: hidden;
+    will-change: height;
+}
+
+.project-section.expanded {
+    height: 500px;
+    opacity: 1;
+    margin-bottom: 0;
+}
+
+.project-section.collapsed {
+    height: 60px;
+    opacity: 1;
+    margin-bottom: var(--gap-l);
+}
+
+/* 折叠态紧凑头部 */
+.project-header-compact {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-m);
+    padding: 0 var(--gap-l);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    backdrop-filter: blur(var(--blur-light));
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.project-header-compact:hover {
+    background: var(--bg-hover);
+}
+
+.project-header-compact>.project-selector {
+    flex: 1;
+    min-width: 0;
+}
+
+.project-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.project-name {
+    flex: 1;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-medium);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ========== Content Section样式 ========== */
+.content-section {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    padding: var(--gap-xl);
+    backdrop-filter: blur(var(--blur-light));
+    animation: slideInFromTop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ========== Section Header ========== */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--gap-l);
+    padding-bottom: var(--gap-m);
+    border-bottom: 1px solid var(--border);
+}
+
+.section-title {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.evidence-badge {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    padding: 4px 12px;
+    background: var(--primary-bg);
+    border-radius: var(--radius-s);
+}

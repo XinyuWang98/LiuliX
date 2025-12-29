@@ -211,10 +211,17 @@ async function executeRouterLayer(
     const suggestions = await router.generate(tableName, columns, stats, aiService);
 
     // ✅ 添加来源标识
-    return suggestions.map(s => ({
+    const withSource = suggestions.map(s => ({
         ...s,
         source: 'router' as const
     }));
+
+    // 🐛 DEBUG: 验证source字段
+    logger.log('AI清洗', `Router层返回 ${withSource.length} 条建议`, {
+        data: withSource.map(s => ({ id: s.id, source: s.source })).slice(0, 2)
+    });
+
+    return withSource;
 }
 
 /**
@@ -243,10 +250,17 @@ async function executeAILayer(
     );
 
     // ✅ 添加来源标识
-    return suggestions.map(s => ({
+    const withSource = suggestions.map(s => ({
         ...s,
         source: 'ai' as const
     }));
+
+    // 🐛 DEBUG: 验证source字段
+    logger.log('AI清洗', `AI层返回 ${withSource.length} 条建议`, {
+        data: withSource.map(s => ({ id: s.id, source: s.source })).slice(0, 2)
+    });
+
+    return withSource;
 }
 
 /**

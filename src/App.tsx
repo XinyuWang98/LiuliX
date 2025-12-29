@@ -7,9 +7,11 @@ import { NavigationBar } from './components/layout/NavigationBar';
 import { LeftSidebar } from './components/layout/LeftSidebar';
 import { PromptLibrary } from './components/prompt/PromptLibrary';
 import { AIWorkshopTools } from './components/workshop/AIWorkshopTools';
+import { FeatureFlags } from '@/utils/featureFlags'; // Feature Flag
 import { Project } from './utils/projectUtils';
 import { PanelRight, PanelLeft } from 'lucide-react';
 import { ExplorationFlow } from './components/exploration/ExplorationFlow';
+import { ExplorationFlowV2 } from './components/ExplorationFlowV2'; // V2预览页面
 import { EmptyStateWelcome } from './components/exploration/EmptyStateWelcome';
 import { pyodideManager } from './services/PyodideManager';
 import { SettingsPage } from './components/settings/SettingsPage';
@@ -68,6 +70,8 @@ function AppContent() {
             const hash = window.location.hash;
             if (hash === '#/prompts') {
                 setActiveView('library');
+            } else if (hash === '#/v2') {
+                setActiveView('v2' as any); // V2预览页面
             } else if (hash === '#/' || hash === '') {
                 setActiveView('dashboard');
             }
@@ -79,6 +83,15 @@ function AppContent() {
         window.addEventListener('hashchange', handleHashChange);
         return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
+
+    // ========== Feature Flag：多层级导航 ==========
+    // 当启用新导航且处于数据探索页面时，隐藏左右侧栏
+    useEffect(() => {
+        if (FeatureFlags.MULTI_LEVEL_NAV && activeView === 'dashboard') {
+            setShowLeft(false);
+            setShowRight(false);
+        }
+    }, [activeView]);
 
     // 左侧边栏拖拽处理
     const { width: leftWidth, startResizing: startLeftResizing, isResizing: isLeftResizing } = useResizable({
@@ -237,6 +250,7 @@ function AppContent() {
     const handleWelcomeUpload = async (files: any[], sampledFlags: boolean[]) => {
         try {
             logger.log('UI', '欢迎界面上传文件处理开始');
+            logger.log('UI', 'Step 1: 准备themeMap');
 
             const themeMap = {
                 game: t('dataSource.project.themes.game'),
@@ -246,6 +260,7 @@ function AppContent() {
                 user: t('dataSource.project.themes.user'),
             };
 
+            logger.log('UI', 'Step 2: 调用ingestFilesAndCreateProject');
             // 1. 创建新项目对象
             const newProject = await ingestFilesAndCreateProject(
                 files,
@@ -253,24 +268,31 @@ function AppContent() {
                 'zh-CN', // 强制中文活 MVP 默认
                 themeMap
             );
+            logger.log('UI', 'Step 3: ingestFilesAndCreateProject完成', { data: { id: newProject?.id } });
 
+            logger.log('UI', 'Step 4: 读取现有项目');
             // 2. 读取现有项目并追加 (防止覆盖)
             const existingProjects = await loadProjects();
+            logger.log('UI', 'Step 5: 读取完成，现有项目数', { data: { count: existingProjects.length } });
+
             const updatedProjects = [newProject, ...existingProjects];
 
+            logger.log('UI', 'Step 6: 保存到IndexedDB');
             // 3. 保存到 IndexedDB
             await saveProjects(updatedProjects);
-            logger.log('UI', '项目已保存到数据库', { data: { id: newProject.id } });
+            logger.log('UI', 'Step 7: IndexedDB保存完成');
 
+            logger.log('UI', 'Step 8: 准备调用setSelectedProject');
             // 4. 更新当前选中项目 (这将触发界面切换到 ExplorationFlow)
             setSelectedProject(newProject);
+            logger.log('UI', 'Step 9: setSelectedProject调用完成！！！');
 
             // 5. 自动展开左侧栏 (可选，增加沉浸感可不展开，但为了让用户看到文件列表，展开较好)
             setShowLeft(true);
 
-            logger.log('UI', '欢迎界面上传文件处理完成');
+            logger.log('UI', 'Step 10: 全流程完成');
         } catch (err) {
-            logger.error('UI', '项目创建失败', err);
+            logger.error('UI', '项目创建失败 - 捕获异常', err);
         }
     };
 
@@ -293,9 +315,17 @@ function AppContent() {
                         onNavigate={setActiveView}
                     />
                 </div>
+            ) : activeView === 'v2' ? (
+                /* V2预览页面：全屏显示 */
+                <ExplorationFlowV2
+                    project={selectedProject}
+                    onProjectUpdate={setSelectedProject}
+                    cleaningTrigger={cleaningTrigger}
+                    onFilesUploaded={handleWelcomeUpload}
+                />
             ) : (
                 <div className="main-content-wrapper">
-                    {showLeft ? (
+                    {(showLeft && !(FeatureFlags.MULTI_LEVEL_NAV && activeView === 'dashboard')) ? (
                         <div className="sidebar-container" style={{ width: leftWidth }}>
                             <LeftSidebar
                                 onProjectSelect={(project) => {
@@ -341,7 +371,7 @@ function AppContent() {
                         </div>
                     </div>
 
-                    {showRight ? (
+                    {(showRight && !(FeatureFlags.MULTI_LEVEL_NAV && activeView === 'dashboard')) ? (
                         <div className="sidebar-container" style={{ width: rightWidth }}>
                             {/* 拖拽手柄 (左侧) */}
                             <div

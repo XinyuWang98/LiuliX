@@ -1,0 +1,17 @@
+/* ========== V2版本独立页面样式 ========== */
+.exploration-flow-v2 {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    background: var(--bg-main);
+    overflow: hidden;
+}
+
+/* ========== 工作台容器 ========== */
+.workbench-v2 {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+}

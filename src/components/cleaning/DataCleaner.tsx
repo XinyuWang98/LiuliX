@@ -272,6 +272,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                                                                 isSelected={selectedIds.includes(s.id)}
                                                                 isIgnored={ignoredIds.includes(s.id)}
                                                                 onToggle={toggleSugg}
+                                                                fileName={activeFile?.name}
                                                             />
                                                         ))}
                                                     </div>

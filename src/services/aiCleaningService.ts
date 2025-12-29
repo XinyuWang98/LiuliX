@@ -106,7 +106,7 @@ export async function generateAICleaningSuggestions(
 
         const aiDuration = (performance.now() - aiStartTime) / 1000;
         logger.log('AI清洗', 'AI响应收到', {
-            data: `${content.length}字符 (耗时${aiDuration.toFixed(1)}秒)`
+            data: `${content.length}字符 (总耗时${aiDuration.toFixed(1)}秒)`
         });
         // 4. 第1层校验：JSON格式
         const aiSuggestions = validateAIResponse(content, t);

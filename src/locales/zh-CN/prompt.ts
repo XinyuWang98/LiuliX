@@ -4,9 +4,7 @@ export const prompt = {
     sourceJson: 'JSON 源码',
     noPython: '# 暂无 Python 模板',
     noSql: '-- 暂无 SQL 模板',
-    info: '信息',
     copied: '已复制',
-},
     library: {
         title: 'Prompt 库',
         description: '高质量分析策略与 Prompt 集合',

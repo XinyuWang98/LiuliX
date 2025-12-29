@@ -83,7 +83,7 @@ async function executeFullMode(
         // ✅ 优化：使用动态内存计算替代魔法数字
         const schema = await db.runQuery(`DESCRIBE ${tableName}`);
         const columnCount = schema.length;
-        const maxRows = calculateMaxRowsForPyodide(columnCount, 512);
+        const maxRows = calculateMaxRowsForPyodide(columnCount);
 
         const countResult = await db.runQuery(`SELECT COUNT(*) as total FROM ${tableName}`);
         const totalRows = Number(countResult[0]?.total || 0);

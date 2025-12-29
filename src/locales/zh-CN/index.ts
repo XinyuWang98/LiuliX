@@ -58,6 +58,7 @@ export const zhCN: LanguageConfig = {
         progress: {
             generatingPrompt: '正在生成Prompt...',
             sendingRequest: '正在发送请求...',
+            generatingInsight: '正在生成洞察分析...',
         },
     },
 };

@@ -4,12 +4,18 @@ import duckdb_eh_wasm from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url';
 import duckdb_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url';
 import duckdb_eh_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url';
 import { IngestionOptions, IngestionResult, ColumnMetadata } from '../types/duckdb';
-import { globalT } from '../contexts/I18nContext';
 import { logger } from '../utils/logger';
+
+// 导入拆分的模块
+import * as IngestionModule from './duckdbIngestion';
+import * as QueryModule from './duckdbQuery';
+import * as StatsModule from './duckdbStats';
+import * as CleaningModule from './duckdbCleaning';
 
 /**
  * 极简务实的 DuckDB Singleton 引擎
- * 负责：初始化、流式摄入、OPFS挂载、Arrow导出
+ * 负责：初始化、连接管理
+ * 核心职责已拆分到专门模块：Ingestion、Query、Stats、Cleaning
  */
 export class DuckDBEngine {
     private static instance: DuckDBEngine;
@@ -76,6 +82,12 @@ export class DuckDBEngine {
         logger.log('DuckDB', '初始化完成');
     }
 
+    public async terminate() {
+        await this.db?.terminate();
+    }
+
+    // ==================== CSV摄入模块 ====================
+
     /**
      * 快速分析 CSV 文件，返回抽样建议
      */
@@ -83,123 +95,30 @@ export class DuckDBEngine {
         strategy: 'FORCE_SAMPLE' | 'WARN' | 'SAFE';
         rowCount: number;
     }> {
-        if (!this.db || !this.conn) throw new Error(globalT('settings.dbNotReady'));
-
-        // 注册临时句柄用于分析
-        await this.db.registerFileHandle(file.name, file, duckdb.DuckDBDataProtocol.BROWSER_FILEREADER, true);
-
-        // 快速 Count (忽略错误行，防止因个别脏数据导致全盘失败)
-        // 添加 max_line_size 参数支持超长行（默认2MB，这里设置为10MB）
-        const result = await this.conn.query(`SELECT count(*) as c FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=10485760)`);
-        const row = result.get(0);
-        const count = row ? Number(row['c']) : 0;
-
-        if (count > 200000) return { strategy: 'FORCE_SAMPLE', rowCount: count };
-        if (count > 100000) return { strategy: 'WARN', rowCount: count };
-        return { strategy: 'SAFE', rowCount: count };
+        if (!this.db || !this.conn) throw new Error('DB not ready');
+        return IngestionModule.analyzeCSV(this.db, this.conn, file);
     }
 
     /**
-     * 这里的核心：流式读取 + 自动抽样 100万行 CSV
+     * 流式读取 + 自动抽样 100万行 CSV
      */
     public async ingestCSV(
         file: File,
         options: IngestionOptions = {},
         onProgress?: (percent: number) => void
     ): Promise<IngestionResult> {
-        if (!this.db || !this.conn) throw new Error(globalT('settings.dbNotReady'));
-
-        // 生成文件唯一标识（基于时间戳）
-        const fileId = `${Date.now()}`;
-        const originalTable = `t_${fileId}_original`; // 原始数据表（只读）
-        const workingTable = `t_${fileId}_working`;  // 工作表（可清洗）
-
-        const autoSampleThreshold = options.autoSampleThreshold || 100000;
-        const sampleRate = options.sampleRate || 0.2;
-
-        // 清理可能存在的同名表
-        try {
-            await this.conn.query(`DROP TABLE IF EXISTS ${originalTable}`);
-            await this.conn.query(`DROP TABLE IF EXISTS ${workingTable}`);
-            logger.log('DuckDB', '创建双表', { data: `${file.name} → ${originalTable} + ${workingTable}` });
-        } catch (cleanupErr) {
-            logger.warn('DuckDB', '清理表失败(忽略)', cleanupErr);
-        }
-
-        // 1. 注册文件句柄（零拷贝）
-        await this.db.registerFileHandle(file.name, file, duckdb.DuckDBDataProtocol.BROWSER_FILEREADER, true);
-
-        // 2. 预检：判断是否需要抽样
-        const fileSizeMB = file.size / (1024 * 1024);
-        let shouldSample = false;
-
-        if (fileSizeMB > 20) {
-            // 对于大文件，先获取总行数判断是否需要抽样
-            const countResult = await this.conn.query(`SELECT count(*) as c FROM read_csv_auto('${file.name}', ignore_errors=true)`);
-            const row = countResult.get(0);
-            const totalRows = row ? Number(row['c']) : 0;
-            if (totalRows > autoSampleThreshold) {
-                shouldSample = true;
-            }
-        }
-
-        // 3. 构建SQL - 先创建 original 表（原始数据，只读）
-        let sql = `CREATE TABLE ${originalTable} AS SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=10485760)`;
-
-        if (shouldSample && options.sampleSize !== -1) {
-            sql += ` USING SAMPLE ${Math.floor(sampleRate * 100)}%`;
-        }
-
-        // 4. 执行解析 - 创建原始表
-        if (onProgress) onProgress(10);
-        const start = performance.now();
-
-        await this.conn.query(sql);
-
-        if (onProgress) onProgress(50);
-
-        // 5. 从 original 复制数据到 working 表
-        await this.conn.query(`CREATE TABLE ${workingTable} AS SELECT * FROM ${originalTable}`);
-
-        if (onProgress) onProgress(100);
-        const time = (performance.now() - start).toFixed(2);
-        logger.log('DuckDB', '双表创建完成', { data: `${file.name}`, duration: Number(time) });
-
-        // 6. 获取 Schema 和行数（从 working 表查询）
-        const info = await this.conn.query(`SELECT count(*) as c FROM ${workingTable}`);
-        const infoRow = info.get(0);
-        const actualRows = infoRow ? Number(infoRow['c']) : 0;
-
-        // 获取列信息
-        const schemaWait = await this.conn.query(`DESCRIBE ${workingTable}`);
-        const columns: ColumnMetadata[] = [];
-        for (let i = 0; i < schemaWait.numRows; i++) {
-            const row = schemaWait.get(i);
-            if (row) {
-                columns.push({
-                    name: String(row['column_name']),
-                    type: String(row['column_type'])
-                });
-            }
-        }
-
-        // 返回 working 表名（所有后续操作都使用 working 表）
-        return {
-            tableName: workingTable, // 重要：返回 working 表名
-            rowCount: actualRows,
-            isSampled: shouldSample,
-            columns
-        };
+        if (!this.db || !this.conn) throw new Error('DB not ready');
+        return IngestionModule.ingestCSV(this.db, this.conn, file, options, onProgress);
     }
+
+    // ==================== 查询模块 ====================
 
     /**
      * 分页查询 - 专门配合 Virtual Scroll
      */
     public async queryChunk(tableName: string, offset: number, limit: number): Promise<any[]> {
         if (!this.conn) return [];
-        const result = await this.conn.query(`SELECT * FROM ${tableName} LIMIT ${limit} OFFSET ${offset}`);
-        // toJSON() returns a basic JS object for each row
-        return result.toArray().map((row: any) => row.toJSON());
+        return QueryModule.queryChunk(this.conn, tableName, offset, limit);
     }
 
     /**
@@ -207,11 +126,37 @@ export class DuckDBEngine {
      */
     public async exportArrowTable(tableName: string): Promise<Uint8Array> {
         if (!this.conn) throw new Error('No connection');
-        const result = await this.conn.query(`SELECT * FROM ${tableName}`);
-        // DuckDB-WASM Arrow Table directly supports toIPCStream() in recent versions
-        // If strict types complain, we can cast to any or use a polyfill
-        return (result as any).toIPCStream();
+        return QueryModule.exportArrowTable(this.conn, tableName);
     }
+
+    /**
+     * 获取表的所有列信息
+     */
+    public async getTableColumns(tableName: string): Promise<ColumnMetadata[]> {
+        if (!this.conn) return [];
+        return QueryModule.getTableColumns(this.conn, tableName);
+    }
+
+    /**
+     * 执行任意SQL查询（便捷方法）
+     */
+    public async runQuery(sql: string): Promise<any[]> {
+        if (!this.conn) throw new Error('DB not ready');
+        return QueryModule.runQuery(this.conn, sql);
+    }
+
+    // ==================== 统计模块 ====================
+
+    /**
+     * 获取表的所有列详细统计信息
+     * 包括：基础统计、数值统计(五数概括+标准差+偏度)、分类统计(TOP 5)、分布直方图
+     */
+    public async getColumnStats(tableName: string): Promise<any[]> {
+        if (!this.conn) return [];
+        return StatsModule.getColumnStats(this.conn, tableName);
+    }
+
+    // ==================== 清洗模块 ====================
 
     /**
      * 执行清洗 SQL
@@ -219,18 +164,8 @@ export class DuckDBEngine {
      * @returns 新表名或受影响行数信息
      */
     public async executeCleaningSQL(sql: string): Promise<string> {
-        if (!this.conn) throw new Error(globalT('settings.dbNotReady'));
-
-        // 简单的安全检查，防止恶意 DROP ALL
-        // 实际场景应限制只能操作当前 session 的表
-        const cleanSQL = sql.trim().replace(/;$/, '');
-
-        const start = performance.now();
-        await this.conn.query(cleanSQL);
-        const time = Number((performance.now() - start).toFixed(2));
-
-        logger.log('DuckDB', '清洗SQL执行完成', { duration: time });
-        return `Execution successful (${time}ms)`;
+        if (!this.conn) throw new Error('DB not ready');
+        return CleaningModule.executeCleaningSQL(this.conn, sql);
     }
 
     /**
@@ -239,296 +174,8 @@ export class DuckDBEngine {
      * @returns 是否成功
      */
     public async resetWorkingTable(workingTableName: string): Promise<boolean> {
-        if (!this.conn) throw new Error(globalT('settings.dbNotReady'));
-
-        // 从 working 表名推导出 original 表名
-        // 例如：t_1234567890_working → t_1234567890_original
-        const originalTableName = workingTableName.replace('_working', '_original');
-
-        logger.log('DuckDB', '开始重置工作表', { data: `${workingTableName} ← ${originalTableName}` });
-
-        try {
-            // 1. 检查 original 表是否存在
-            const checkResult = await this.conn.query(`
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_name = '${originalTableName}'
-            `);
-
-            if (checkResult.numRows === 0) {
-                logger.error('DuckDB', '原始表不存在', originalTableName);
-                return false;
-            }
-
-            // 2. 删除当前 working 表
-            await this.conn.query(`DROP TABLE IF EXISTS ${workingTableName}`);
-
-            // 3. 从 original 重新复制数据到 working
-            await this.conn.query(`
-                CREATE TABLE ${workingTableName} AS 
-                SELECT * FROM ${originalTableName}
-            `);
-            logger.log('DuckDB', '工作表重置完成');
-
-            return true;
-        } catch (error) {
-            logger.error('DuckDB', '重置工作表失败', error);
-            return false;
-        }
-    }
-
-    /**
-     * 获取表的所有列信息
-     */
-    public async getTableColumns(tableName: string): Promise<ColumnMetadata[]> {
-        if (!this.conn) return [];
-        const result = await this.conn.query(`DESCRIBE ${tableName}`);
-        const columns: ColumnMetadata[] = [];
-        for (let i = 0; i < result.numRows; i++) {
-            const row = result.get(i);
-            if (row) {
-                columns.push({
-                    name: String(row['column_name']),
-                    type: String(row['column_type'])
-                });
-            }
-        }
-        return columns;
-    }
-
-    /**
-     * 执行任意SQL查询（便捷方法）
-     */
-    public async runQuery(sql: string): Promise<any[]> {
-        if (!this.conn) throw new Error(globalT('settings.dbNotReady'));
-        const result = await this.conn.query(sql);
-        const rows: any[] = [];
-        for (let i = 0; i < result.numRows; i++) {
-            const row = result.get(i);
-            if (row) {
-                rows.push(row);
-            }
-        }
-        return rows;
-    }
-
-    /**
-     * 获取表的所有列详细统计信息
-     * 包括：基础统计、数值统计(五数概括+标准差+偏度)、分类统计(TOP 5)、分布直方图
-     */
-    public async getColumnStats(tableName: string): Promise<any[]> {
-        if (!this.conn) return [];
-
-        // 1. 获取列名和类型
-        const columns = await this.getTableColumns(tableName);
-        const stats: any[] = [];
-
-        // 2. 为每一列构建聚合查询
-        for (const col of columns) {
-            try {
-                // 基础统计（所有类型）
-                const basicSql = `
-                    SELECT 
-                        count(*) as total,
-                        count("${col.name}") as non_null,
-                        approx_count_distinct("${col.name}") as unique_count
-                    FROM ${tableName}
-                `;
-                const basicResult = await this.conn.query(basicSql);
-                const basicRow = basicResult.get(0);
-
-                const total = Number(basicRow ? basicRow['total'] : 0);
-                const nonNull = Number(basicRow ? basicRow['non_null'] : 0);
-                const nullCount = total - nonNull;
-                const uniqueCount = Number(basicRow ? basicRow['unique_count'] : 0);
-
-                // 判断是否为数值类型
-                const isNumeric = ['INT', 'DOUBLE', 'FLOAT', 'DECIMAL', 'NUMERIC'].some(t =>
-                    col.type.toUpperCase().includes(t)
-                );
-
-                let numericStats = null;
-                let categoricalStats = null;
-                let distribution = null;
-
-                if (isNumeric && nonNull > 0) {
-                    // 数值类型：获取详细统计
-                    try {
-                        const numericSql = `
-                            SELECT 
-                                min("${col.name}") as min_val,
-                                approx_quantile("${col.name}", 0.25) as q1,
-                                median("${col.name}") as median_val,
-                                approx_quantile("${col.name}", 0.75) as q3,
-                                max("${col.name}") as max_val,
-                                stddev("${col.name}") as stddev_val,
-                                skewness("${col.name}") as skewness_val
-                            FROM ${tableName}
-                            WHERE "${col.name}" IS NOT NULL
-                        `;
-                        const numericResult = await this.conn.query(numericSql);
-                        const numericRow = numericResult.get(0);
-
-                        if (numericRow) {
-                            numericStats = {
-                                min: Number(numericRow['min_val']),
-                                q1: Number(numericRow['q1']),
-                                median: Number(numericRow['median_val']),
-                                q3: Number(numericRow['q3']),
-                                max: Number(numericRow['max_val']),
-                                stddev: Number(numericRow['stddev_val']),
-                                skewness: Number(numericRow['skewness_val'])
-                            };
-
-                            // 获取直方图数据 (Smart Binning)
-                            try {
-                                const min = numericStats.min;
-                                const max = numericStats.max;
-                                const uniqueCount = Number(numericRow['skewness_val'] ? 0 : 0) + Number(basicRow ? basicRow['unique_count'] : 0); // Re-fetch unique count from closure variable is cleaner
-
-                                if (min !== max && isFinite(min) && isFinite(max)) {
-                                    // 智能判断：如果唯一值很少 (<= 20)，直接显示具体值的分布
-                                    // 注意：我们直接使用闭包中的 uniqueCount 变量
-                                    if (uniqueCount <= 20) {
-                                        const discreteSql = `
-                                            SELECT 
-                                                "${col.name}" as value,
-                                                count(*) as count 
-                                            FROM ${tableName} 
-                                            WHERE "${col.name}" IS NOT NULL 
-                                            GROUP BY "${col.name}" 
-                                            ORDER BY "${col.name}" ASC
-                                        `;
-                                        const discreteResult: any = await this.conn.query(discreteSql);
-                                        const counts: number[] = [];
-                                        const labels: number[] = [];
-
-                                        for (let i = 0; i < discreteResult.numRows; i++) {
-                                            const row: any = discreteResult.get(i);
-                                            counts.push(Number(row['count']));
-                                            labels.push(Number(row['value']));
-                                        }
-
-                                        distribution = {
-                                            bins: counts.length,
-                                            counts: counts,
-                                            min: min,
-                                            max: max,
-                                            labels: labels // 传递具体值给前端
-                                        };
-
-                                    } else {
-                                        // 连续数值：使用分箱直方图 (10个区间)
-                                        const binWidth = (max - min) / 10;
-                                        // 使用CASE WHEN手动分桶，避免width_bucket兼容性问题
-                                        const histSql = `
-                                            SELECT 
-                                                CASE 
-                                                    WHEN "${col.name}" < ${min + binWidth} THEN 0
-                                                    WHEN "${col.name}" < ${min + binWidth * 2} THEN 1
-                                                    WHEN "${col.name}" < ${min + binWidth * 3} THEN 2
-                                                    WHEN "${col.name}" < ${min + binWidth * 4} THEN 3
-                                                    WHEN "${col.name}" < ${min + binWidth * 5} THEN 4
-                                                    WHEN "${col.name}" < ${min + binWidth * 6} THEN 5
-                                                    WHEN "${col.name}" < ${min + binWidth * 7} THEN 6
-                                                    WHEN "${col.name}" < ${min + binWidth * 8} THEN 7
-                                                    WHEN "${col.name}" < ${min + binWidth * 9} THEN 8
-                                                    ELSE 9
-                                                END as bucket,
-                                                COUNT(*) as count
-                                            FROM ${tableName}
-                                            WHERE "${col.name}" IS NOT NULL
-                                            GROUP BY bucket
-                                            ORDER BY bucket
-                                        `;
-                                        const histResult: any = await this.conn.query(histSql);
-                                        const counts = new Array(10).fill(0);
-
-                                        for (let i = 0; i < histResult.numRows; i++) {
-                                            const row: any = histResult.get(i);
-                                            if (row) {
-                                                const bucket = Number(row['bucket']);
-                                                if (bucket >= 0 && bucket < 10) {
-                                                    counts[bucket] = Number(row['count']);
-                                                }
-                                            }
-                                        }
-
-                                        distribution = {
-                                            bins: 10,
-                                            counts: counts,
-                                            min: min,
-                                            max: max
-                                        };
-                                    }
-                                }
-                            } catch (histError) {
-                                logger.warn('DuckDB', `获取列直方图失败: ${col.name}`, histError);
-                            }
-                        }
-                    } catch (numericError) {
-                        logger.warn('DuckDB', `获取数值统计失败: ${col.name}`, numericError);
-                    }
-                } else if (nonNull > 0) {
-                    // 非数值类型：获取 TOP 5 VALUES
-                    try {
-                        const topValuesSql = `
-                            SELECT 
-                                "${col.name}" as value,
-                                COUNT(*) as count
-                            FROM ${tableName}
-                            WHERE "${col.name}" IS NOT NULL
-                            GROUP BY "${col.name}"
-                            ORDER BY count DESC
-                            LIMIT 5
-                        `;
-                        const topValuesResult = await this.conn.query(topValuesSql);
-                        const topValues = [];
-
-                        for (let i = 0; i < topValuesResult.numRows; i++) {
-                            const row = topValuesResult.get(i);
-                            if (row) {
-                                topValues.push({
-                                    value: String(row['value']),
-                                    count: Number(row['count'])
-                                });
-                            }
-                        }
-
-                        categoricalStats = { topValues };
-                    } catch (catError) {
-                        logger.warn('DuckDB', `获取分类统计失败: ${col.name}`, catError);
-                    }
-                }
-
-                stats.push({
-                    name: col.name,
-                    type: col.type,
-                    total,
-                    nullCount,
-                    uniqueCount,
-                    numericStats,
-                    categoricalStats,
-                    distribution
-                });
-
-            } catch (e) {
-                logger.warn('DuckDB', `获取列统计失败: ${col.name}`, e);
-                stats.push({
-                    name: col.name,
-                    type: col.type,
-                    error: true,
-                    total: 0,
-                    nullCount: 0,
-                    uniqueCount: 0
-                });
-            }
-        }
-        return stats;
-    }
-
-    public async terminate() {
-        await this.db?.terminate();
+        if (!this.conn) throw new Error('DB not ready');
+        return CleaningModule.resetWorkingTable(this.conn, workingTableName);
     }
 
     /**
@@ -540,38 +187,7 @@ export class DuckDBEngine {
      * @returns 是否成功
      */
     public async alterColumnType(tableName: string, columnName: string, newType: string): Promise<boolean> {
-        if (!this.conn) throw new Error(globalT('settings.dbNotReady'));
-
-        const start = performance.now();
-        logger.log('DuckDB', '修改列类型', { data: `${tableName}.${columnName} -> ${newType}` });
-
-        try {
-            // DuckDB 的 ALTER COLUMN TYPE 语法：
-            // ALTER TABLE table_name ALTER columnName TYPE newType
-            // 如果转换失败会报错，DuckDB 0.8+ 支持 TRY_CAST 吗？
-            // 标准语法通常是直接转，失败则报错。
-            // 为了安全，我们可以使用 USING TRY_CAST(columnName AS newType) 如果 DuckDB 支持
-            // 或者先简单的 ALTER，如果为了兼容性，构建 SQL 字符串
-
-            // 针对包含特殊字符的列名，确保引用
-            const safeCol = `"${columnName}"`;
-
-            // 尝试直接转换 (DuckDB 会尝试自动转换)
-            // 如果是 String -> Number 且包含非数字字符，可能会失败
-            // 我们可以使用 USING 表达式来处理错误 (变 NULL)
-            // 语法: ALTER TABLE t ALTER c TYPE INT USING TRY_CAST(c AS INT)
-
-            const sql = `ALTER TABLE ${tableName} ALTER ${safeCol} TYPE ${newType} USING TRY_CAST(${safeCol} AS ${newType})`;
-
-            await this.conn.query(sql);
-
-            const duration = (performance.now() - start).toFixed(2);
-            logger.log('DuckDB', '修改列类型成功', { duration: Number(duration) });
-            return true;
-        } catch (error) {
-            logger.error('DuckDB', '修改列类型失败', error);
-            // 这里可以考虑 fallback 策略，但 MVP 阶段先透传失败
-            return false;
-        }
+        if (!this.conn) throw new Error('DB not ready');
+        return CleaningModule.alterColumnType(this.conn, tableName, columnName, newType);
     }
 }

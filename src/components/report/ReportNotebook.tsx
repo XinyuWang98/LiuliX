@@ -116,7 +116,7 @@ export function ReportNotebook() {
         const url = URL.createObjectURL(blob);
         const a = window.document.createElement('a');
         a.href = url;
-        a.download = `${document.title}_${formatTimestamp(Date.now(), false).replace(/[: ]/g, '_')}.html`;
+        a.download = `${document.title}_${formatTimestamp(Date.now()).replace(/[: ]/g, '_')}.html`;
         a.click();
         URL.revokeObjectURL(url);
         logger.log('报告', 'HTML 报告已下载');
@@ -142,7 +142,7 @@ export function ReportNotebook() {
         return { total, approved };
     }, [document]);
 
-    function formatTimestamp(timestamp: number, showTime: boolean): string {
+    function formatTimestamp(timestamp: number): string {
         return new Date(timestamp).toLocaleString();
     }
 

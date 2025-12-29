@@ -7,6 +7,8 @@ import { CleaningSummaryCard } from './CleaningSummaryCard';
 import { DataCleaner } from '../cleaning/DataCleaner';
 import { ReportGenerator } from '../report/ReportGenerator';
 import { InsightChainFlow } from '../insights/InsightChainFlow';
+import { ExplorationWorkbench } from './ExplorationWorkbench'; // 新增：智能折叠导航
+import { FeatureFlags } from '@/utils/featureFlags'; // 新增：Feature Flag
 import { Project } from '@/utils/projectUtils';
 import { WorkflowStep } from '@/components/common/WorkflowProgressBar';
 import './ExplorationFlow.css';
@@ -21,6 +23,39 @@ interface ExplorationFlowProps {
 
 export function ExplorationFlow({ project, cleaningTrigger, onProjectUpdate, aiSuggestions }: ExplorationFlowProps) {
     const { t } = useI18n();
+
+    // ========== Feature Flag: 多层级导航 ==========
+    if (FeatureFlags.MULTI_LEVEL_NAV) {
+        // 获取insightChain数据（临时从InsightChainFlow获取）
+        const insightChain = {
+            rootCards: [], // TODO: 从实际数据源获取
+        };
+
+        return (
+            <div
+                className="page-container"
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    marginLeft: 0,
+                    marginRight: 0
+                }}
+            >
+                <ExplorationHeader title={t('workshop.dataExploration')} />
+                <ExplorationWorkbench
+                    project={project}
+                    insightChain={insightChain}
+                    onProjectUpdate={onProjectUpdate}
+                    cleaningTrigger={cleaningTrigger}
+                    cleaningComplete={!!project?.files?.length}
+                    reportReady={false}
+                />
+            </div>
+        );
+    }
+
+    // ========== 原有实现（Feature Flag关闭时） ==========
     // const [inputValue, setInputValue] = useState(''); // MVP阶段暂不需要
     const [currentStep, setCurrentStep] = useState<WorkflowStep>('upload');
 

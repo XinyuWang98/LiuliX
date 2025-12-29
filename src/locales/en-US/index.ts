@@ -357,6 +357,7 @@ export const enUS: LanguageConfig = {
             adopt: 'Adopt', ignore: 'Ignore', adopted: 'Adopted', viewCode: 'View Code', copyCode: 'Copy Code', codeCopied: 'Copied',
             conclusion: 'Conclusion', analysisMethod: 'Method', dataSource: 'Source', selectHypothesis: 'Select hypothesis', or: 'or',
             analyzing: 'Analyzing insights...',
+            generatingInsight: 'Generating insights...',
             results: 'Insight Results',
         },
         insight: {
@@ -572,6 +573,11 @@ export const enUS: LanguageConfig = {
             reasonGood: 'Excellent hardware configuration, great local AI performance',
             reasonMedium: 'Average hardware, Cloud AI recommended for speed and experience',
             reasonLow: 'Low hardware spec, strongly recommend Cloud AI for usability'
+        },
+        progress: {
+            generatingPrompt: 'Generating prompt...',
+            sendingRequest: 'Sending request...',
+            generatingInsight: 'Generating insights...',
         },
     },
 };

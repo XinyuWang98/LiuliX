@@ -27,7 +27,7 @@ export async function ingestFilesAndCreateProject(
         logger.error('DuckDB', '初始化失败', err);
     }
 
-    // 处理文件摄取
+    // 处理文件摄取（仅DuckDB，Pyodide后台加载）
     for (let i = 0; i < filesData.length; i++) {
         const fileData = filesData[i];
 
@@ -54,8 +54,26 @@ export async function ingestFilesAndCreateProject(
                 logger.error('DuckDB', 'CSV导入失败', err);
             }
         }
+    }
 
-        // 2. Pyodide Loading (All files with rawContent)
+    // 创建项目对象（不等待Pyodide）
+    const newProject = createProject(filesData, sampledFlags, languageCode, themeTranslations);
+
+    // 2. Pyodide Loading - 后台异步加载（不阻塞返回）
+    loadFilesToPyodideAsync(filesData).catch(err => {
+        logger.error('Python', 'Pyodide后台加载失败', err);
+    });
+
+    return newProject;
+}
+
+/**
+ * 后台异步加载文件到Pyodide（不阻塞主流程）
+ */
+async function loadFilesToPyodideAsync(filesData: ParsedFileData[]): Promise<void> {
+    logger.log('Python', 'Pyodide后台加载开始', { data: { count: filesData.length } });
+
+    const loadTasks = filesData.map(async (fileData) => {
         if (fileData.rawContent) {
             try {
                 await pyodideManager.loadData(fileData.fileName, fileData.rawContent);
@@ -67,17 +85,15 @@ export async function ingestFilesAndCreateProject(
             // 对于大文件（无rawContent），尝试通过 ArrayBuffer 加载到 Pyodide FS
             try {
                 const buffer = await fileData.originalFile.arrayBuffer();
-                // 暂时只支持写入 FS，Pyodide 需要读取逻辑（通常由 parser 处理）
-                // 这里主要是确保 Pyodide 环境有这个文件
                 await pyodideManager.writeFile(fileData.fileName, new Uint8Array(buffer));
                 logger.log('Python', '文件写入虚拟文件系统', { data: { file: fileData.fileName } });
             } catch (err) {
                 logger.error('Python', 'FS写入失败', err);
             }
         }
-    }
+    });
 
-    // 创建项目对象
-    const newProject = createProject(filesData, sampledFlags, languageCode, themeTranslations);
-    return newProject;
+    // 并发加载所有文件
+    await Promise.all(loadTasks);
+    logger.log('Python', 'Pyodide后台加载完成', { data: { count: filesData.length } });
 }
