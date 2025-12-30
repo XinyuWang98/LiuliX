@@ -1,0 +1,304 @@
+/* LiuliX Design System - Core Atomic Styles */
+
+/* Base Variables Refined for Component Level - Strictly Matching Spec 3.1 */
+:root {
+    /* 1. Environment - Deep Space */
+    --liuli-bg: #010305;
+    /* Spec 3.1: Deep Blue-Black */
+
+    /* 2. Light Source */
+    --beam-core: rgba(200, 230, 255, 0.25);
+    /* Brightened from 0.15 for better visibility */
+    --beam-glow: rgba(50, 100, 255, 0.3);
+    /* Brightened */
+
+    /* 3. Material - Optical Glass */
+    --liuli-glass-light: rgba(255, 255, 255, 0.03);
+    --liuli-glass-medium: rgba(255, 255, 255, 0.03);
+    --liuli-glass-heavy: rgba(20, 20, 23, 0.7);
+
+    /* 4. Typography (Mapped from Legacy --text-*) */
+    --liuli-text-primary: #FFFFFF;
+    --liuli-text-secondary: rgba(235, 245, 255, 0.6);
+    /* Cool Blue-Grey */
+    --liuli-text-dim: rgba(235, 245, 255, 0.3);
+    --liuli-font-sans: "Inter", -apple-system, sans-serif;
+    --liuli-font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+    /* 5. Spacing (Mapped from Legacy --gap-*) */
+    --liuli-space-xs: 4px;
+    --liuli-space-s: 8px;
+    --liuli-space-m: 16px;
+    --liuli-space-l: 24px;
+    --liuli-space-xl: 32px;
+
+    --liuli-border-light: rgba(255, 255, 255, 0.08);
+    --liuli-border-highlight: rgba(255, 255, 255, 0.4);
+    --liuli-border-side: rgba(255, 255, 255, 0.15);
+
+    --liuli-blur: 16px;
+    --liuli-glow-primary: 0 0 16px rgba(0, 122, 255, 0.3);
+
+    /* 6. Functional Colors */
+    --liuli-success: #30D158;
+    --liuli-warning: #FF453A;
+    --liuli-accent: #0A84FF;
+}
+
+/* =========================================
+   0. Global Reset for Liuli Context
+   ========================================= */
+.liuli-root {
+    color: var(--liuli-text-primary);
+    font-family: var(--liuli-font-sans);
+}
+
+/* =========================================
+   1. LiuliGlass (Container) - Spec 4.2
+   ========================================= */
+.liuli-glass {
+    /* Spec 4.2: Linear Gradient Background */
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+
+    /* Spec 4.2: Blur 16px */
+    backdrop-filter: blur(var(--liuli-blur));
+    -webkit-backdrop-filter: blur(var(--liuli-blur));
+
+    /* Spec 4.2: Fresnel Borders */
+    border: 1px solid var(--liuli-border-light);
+    border-top: 1px solid var(--liuli-border-highlight);
+    border-left: 1px solid var(--liuli-border-side);
+
+    /* Spec 4.2: Radius 20px */
+    border-radius: 20px;
+
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all var(--transition-m) var(--ease-out);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Variants */
+.liuli-glass.intensity-light {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(8px);
+}
+
+.liuli-glass.intensity-heavy {
+    background: var(--liuli-glass-heavy);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Interactive */
+.liuli-glass.interactive {
+    cursor: pointer;
+}
+
+.liuli-glass.interactive:hover {
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    border-top-color: rgba(255, 255, 255, 0.6);
+    /* Brighter highlight on hover */
+}
+
+/* Glow Effect */
+.liuli-glass.has-glow:hover {
+    box-shadow: var(--liuli-glow-primary);
+}
+
+/* =========================================
+   2. LiuliButton (Action) - Spec 4.3
+   ========================================= */
+.liuli-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    /* Spec 4.3: Pill Shape */
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* Sizes */
+.liuli-button.size-sm {
+    padding: 4px 12px;
+    font-size: 12px;
+    height: 28px;
+}
+
+.liuli-button.size-md {
+    padding: 8px 20px;
+    font-size: 14px;
+    height: 36px;
+}
+
+.liuli-button.size-lg {
+    padding: 12px 28px;
+    font-size: 16px;
+    height: 44px;
+}
+
+.liuli-button.size-icon {
+    padding: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+/* Variants */
+/* Primary: Glowing Capsule */
+.liuli-button.variant-primary {
+    background: rgba(0, 0, 0, 0.6);
+    /* More translucent black */
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 122, 255, 0.2);
+    /* Subtle blue glow */
+    backdrop-filter: blur(8px);
+}
+
+.liuli-button.variant-primary:hover {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(0, 122, 255, 0.5);
+    box-shadow: 0 0 20px rgba(0, 122, 255, 0.4);
+    /* Stronger glow */
+    transform: translateY(-1px);
+}
+
+.liuli-button.variant-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 0 5px rgba(0, 122, 255, 0.4);
+}
+
+/* Secondary: Glassy */
+.liuli-button.variant-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+}
+
+.liuli-button.variant-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Ghost: Text only, hover background */
+.liuli-button.variant-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+}
+
+.liuli-button.variant-ghost:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+/* Danger */
+.liuli-button.variant-danger {
+    background: rgba(255, 69, 58, 0.1);
+    color: #FF453A;
+    border: 1px solid rgba(255, 69, 58, 0.2);
+}
+
+.liuli-button.variant-danger:hover {
+    background: rgba(255, 69, 58, 0.2);
+    border-color: rgba(255, 69, 58, 0.5);
+    box-shadow: 0 0 10px rgba(255, 69, 58, 0.2);
+}
+
+/* Disabled State */
+.liuli-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(100%);
+}
+
+/* Loading Spinner */
+.liuli-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* =========================================
+   3. LiuliInput (Data Entry)
+   ========================================= */
+.liuli-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.liuli-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--liuli-border-light);
+    border-radius: 12px;
+    /* Smoother radius for inputs */
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s;
+    font-family: inherit;
+    backdrop-filter: blur(4px);
+}
+
+/* Input with Icon */
+.liuli-input.has-icon {
+    padding-left: 38px;
+}
+
+.liuli-input-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-secondary);
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+.liuli-input:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.liuli-input:focus {
+    outline: none;
+    border-color: var(--bg-accent);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.liuli-input:focus+.liuli-input-icon {
+    color: var(--bg-accent);
+}
+
+/* Error State */
+.liuli-input.error {
+    border-color: var(--warning);
+}
+
+.liuli-input.error:focus {
+    box-shadow: 0 0 0 2px rgba(255, 69, 58, 0.2);
+}

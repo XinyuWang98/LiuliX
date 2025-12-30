@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-// import { useI18n } from '@/contexts/I18nContext'; // TODO: 后续国际化时启用
+import { useI18n } from '@/contexts/I18nContext';
 import { logger } from '@/utils/logger';
 import { Download, RefreshCw, CheckCircle, AlertCircle, Loader, ChevronDown } from 'lucide-react';
 
@@ -22,36 +22,7 @@ interface ModelListResponse {
 }
 
 // 推荐模型列表（基于测试结果排序）
-const RECOMMENDED_MODELS = [
-    {
-        id: 'qwen2.5-coder:7b',
-        name: 'Qwen2.5-Coder 7B ⭐',
-        desc: '推荐！代码/SQL专用，质量优秀，需16GB+内存',
-        quality: 4,
-        minRAM: 16
-    },
-    {
-        id: 'qwen2.5-coder:14b',
-        name: 'Qwen2.5-Coder 14B',
-        desc: '顶配专业模型，需32GB+内存',
-        quality: 5,
-        minRAM: 32
-    },
-    {
-        id: 'qwen2.5-coder:3b',
-        name: 'Qwen2.5-Coder 3B',
-        desc: '⚠️ 不推荐（质量未达标，仅测试用）',
-        quality: 1,
-        minRAM: 4
-    },
-    {
-        id: 'qwen2.5:7b',
-        name: 'Qwen2.5 7B',
-        desc: '通用对话模型',
-        quality: 3,
-        minRAM: 16
-    },
-];
+// 推荐模型列表移至组件内以支持国际化
 
 interface LocalModelSelectorProps {
     currentModel: string;
@@ -64,13 +35,47 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
     onModelChange,
     disabled = false,
 }) => {
-    // TODO: 后续国际化时使用 const { t } = useI18n();
+    const { t } = useI18n();
     const [models, setModels] = useState<OllamaModel[]>([]);
     const [ollamaAvailable, setOllamaAvailable] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [customModel, setCustomModel] = useState('');
     const [showCustomInput, setShowCustomInput] = useState(false);
+
+    // Dynamic descriptions for recommended models based on locale
+    const getRecommendedModels = () => [
+        {
+            id: 'qwen2.5-coder:7b',
+            name: 'Qwen2.5-Coder 7B ⭐',
+            desc: t('settings.qwen7bDesc'),
+            quality: 4,
+            minRAM: 16
+        },
+        {
+            id: 'qwen2.5-coder:14b',
+            name: 'Qwen2.5-Coder 14B',
+            desc: t('settings.qwen14bDesc'),
+            quality: 5,
+            minRAM: 32
+        },
+        {
+            id: 'qwen2.5-coder:3b',
+            name: 'Qwen2.5-Coder 3B',
+            desc: t('settings.qwen3bDesc'),
+            quality: 1,
+            minRAM: 4
+        },
+        {
+            id: 'qwen2.5:7b',
+            name: 'Qwen2.5 7B',
+            desc: t('settings.qwenGeneralDesc'),
+            quality: 3,
+            minRAM: 16
+        },
+    ];
+
+    const recommendedList = getRecommendedModels();
 
     // 获取已安装的模型列表
     const fetchModels = async () => {
@@ -85,11 +90,11 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                 setModels(data.models);
                 logger.log('AI服务', `发现 ${data.models.length} 个已安装模型`);
             } else {
-                setError(data.error || 'Ollama 服务未运行');
+                setError(data.error || t('settings.ollamaNotRunning'));
             }
         } catch (err) {
             setOllamaAvailable(false);
-            setError('无法连接到后端服务');
+            setError(t('settings.connectionError'));
             logger.error('AI服务', '获取模型列表失败', err);
         } finally {
             setIsLoading(false);
@@ -114,7 +119,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
     // 下载模型
     const downloadModel = async (modelId: string) => {
         setDownloadingModel(modelId);
-        setDownloadProgress('准备下载...');
+        setDownloadProgress(t('settings.downloading'));
 
         try {
             logger.log('本地模型', `开始下载模型: ${modelId}`);
@@ -132,7 +137,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
             const result = await response.json();
 
             if (result.success) {
-                setDownloadProgress('下载成功！');
+                setDownloadProgress(t('settings.downloadSuccess'));
                 logger.log('本地模型', `模型下载成功: ${modelId}`);
 
                 // 刷新模型列表
@@ -144,11 +149,11 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                     handleModelSelect(modelId);
                 }, 1500);
             } else {
-                throw new Error(result.error || '下载失败');
+                throw new Error(result.error || t('settings.downloadFailed'));
             }
         } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : '下载失败';
-            setDownloadProgress(`❌ ${errorMsg}`);
+            const errorMsg = err instanceof Error ? err.message : t('settings.downloadFailed');
+            setDownloadProgress(t('settings.downloadFailed')); // Simplified for i18n compliance
             logger.error('本地模型', `模型下载失败: ${modelId}`, err);
 
             setTimeout(() => {
@@ -183,7 +188,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
             return (
                 <div className="ollama-status checking">
                     <Loader size={16} className="spinning" />
-                    <span>检测 Ollama 服务...</span>
+                    <span>{t('settings.ollamaChecking')}</span>
                 </div>
             );
         }
@@ -192,7 +197,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
             return (
                 <div className="ollama-status offline">
                     <AlertCircle size={16} />
-                    <span>Ollama 未运行</span>
+                    <span>{t('settings.ollamaNotRunning')}</span>
                     <a
                         href="https://ollama.com/download"
                         target="_blank"
@@ -200,7 +205,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                         className="ollama-download-link"
                     >
                         <Download size={14} />
-                        下载安装
+                        {t('settings.ollamaDownload')}
                     </a>
                 </div>
             );
@@ -209,11 +214,11 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
         return (
             <div className="ollama-status online">
                 <CheckCircle size={16} />
-                <span>Ollama 已连接 ({models.length} 个模型)</span>
+                <span>{t('settings.ollamaConnected', { count: models.length })}</span>
                 <button
                     onClick={fetchModels}
                     className="ollama-refresh-btn"
-                    title="刷新模型列表"
+                    title={t('settings.ollamaRefresh')}
                 >
                     <RefreshCw size={14} />
                 </button>
@@ -241,11 +246,11 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
         if (installed) {
             return `${installed.name} (${formatSize(installed.size)})`;
         }
-        const recommended = RECOMMENDED_MODELS.find(rm => rm.id === currentModel);
+        const recommended = recommendedList.find(rm => rm.id === currentModel);
         if (recommended) {
             return `${recommended.name}`;
         }
-        return currentModel || '选择模型...';
+        return currentModel || t('settings.modelSelection');
     };
 
     return (
@@ -270,7 +275,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                             {/* 已安装模型 */}
                             {models.length > 0 && (
                                 <div className="model-dropdown-group">
-                                    <div className="model-dropdown-group-label">已安装模型</div>
+                                    <div className="model-dropdown-group-label">{t('settings.installedModels')}</div>
                                     {models.map(m => (
                                         <button
                                             key={m.name}
@@ -290,8 +295,8 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
 
                             {/* 推荐模型 */}
                             <div className="model-dropdown-group">
-                                <div className="model-dropdown-group-label">推荐模型 (点击下载)</div>
-                                {RECOMMENDED_MODELS.filter(rm => !models.some(m => m.name.startsWith(rm.id))).map(rm => (
+                                <div className="model-dropdown-group-label">{t('settings.recommendedModels')}</div>
+                                {recommendedList.filter(rm => !models.some(m => m.name.startsWith(rm.id))).map(rm => (
                                     <button
                                         key={rm.id}
                                         className={`model-dropdown-item ${downloadingModel === rm.id ? 'downloading' : ''}`}
@@ -321,7 +326,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                                         setIsDropdownOpen(false);
                                     }}
                                 >
-                                    <span className="model-name">✏️ 自定义模型...</span>
+                                    <span className="model-name">{t('settings.customModel')}</span>
                                 </button>
                             </div>
                         </div>
@@ -336,13 +341,13 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                     <div className="custom-model-input">
                         <input
                             type="text"
-                            placeholder="输入 Ollama 模型标签，如 llama3:8b"
+                            placeholder={t('settings.customModelPlaceholder')}
                             value={customModel}
                             onChange={(e) => setCustomModel(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleCustomSubmit()}
                         />
-                        <button onClick={handleCustomSubmit}>确认</button>
-                        <button onClick={() => setShowCustomInput(false)}>取消</button>
+                        <button onClick={handleCustomSubmit}>{t('settings.save')}</button>
+                        <button onClick={() => setShowCustomInput(false)}>{t('settings.clear')}</button>
                     </div>
                 )
             }
@@ -359,7 +364,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
             {
                 ollamaAvailable && models.length === 0 && (
                     <div className="model-tip">
-                        💡 请在上方推荐模型中选择并下载模型
+                        {t('settings.selectModelTip')}
                     </div>
                 )
             }

@@ -1,6 +1,7 @@
 /**
  * 分析能力包配置清单
  * 定义所有可用的分析能力包及其包含的方法
+ * 注意：所有name/description字段都是i18n键，需要在组件中使用t()翻译
  */
 
 import { AnalysisPackage } from '../types/analysisPackage';
@@ -10,66 +11,66 @@ import { AnalysisPackage } from '../types/analysisPackage';
  */
 const basicPackage: AnalysisPackage = {
     id: 'basic',
-    name: '基础分析',
+    name: 'packages.basic.name',
     icon: '📊',
     pyodidePackages: ['pandas', 'numpy', 'matplotlib'],
-    sizeEstimate: '~8MB',
+    sizeEstimate: 'packages.basic.sizeEstimate',
     isBuiltIn: true,
     order: 0,
     methods: [
         {
             promptId: 'worker-distribution-v1',
-            name: '分布分析',
-            description: '查看单一变量的数据分布情况',
-            outputCharts: ['直方图', '柱状图']
+            name: 'packages.basic.methods.distribution.name',
+            description: 'packages.basic.methods.distribution.desc',
+            outputCharts: ['packages.charts.histogram', 'packages.charts.bar']
         },
         {
             promptId: 'worker-correlation-v1',
-            name: '相关性分析',
-            description: '分析两个变量之间的关系',
-            outputCharts: ['散点图', '箱线图', '热力图']
+            name: 'packages.basic.methods.correlation.name',
+            description: 'packages.basic.methods.correlation.desc',
+            outputCharts: ['packages.charts.scatter', 'packages.charts.box', 'packages.charts.heatmap']
         },
         {
             promptId: 'worker-trend-v1',
-            name: '趋势分析',
-            description: '分析数值随时间的变化趋势',
-            outputCharts: ['折线图', '移动平均线']
+            name: 'packages.basic.methods.trend.name',
+            description: 'packages.basic.methods.trend.desc',
+            outputCharts: ['packages.charts.line', 'packages.charts.movingAvg']
         },
         {
             promptId: 'worker-stats-v1',
-            name: '描述性统计',
-            description: '计算均值、中位数、标准差等统计指标',
-            outputCharts: ['统计摘要条形图']
+            name: 'packages.basic.methods.stats.name',
+            description: 'packages.basic.methods.stats.desc',
+            outputCharts: ['packages.charts.statsSummaryBar']
         },
         {
             promptId: 'worker-groupby-v1',
-            name: '分组聚合',
-            description: '按分类变量分组计算聚合指标',
-            outputCharts: ['分组柱状图']
+            name: 'packages.basic.methods.groupby.name',
+            description: 'packages.basic.methods.groupby.desc',
+            outputCharts: ['packages.charts.groupedBar']
         },
         {
             promptId: 'worker-topn-v1',
-            name: 'Top N 排行',
-            description: '找出频次最高的 Top N 项',
-            outputCharts: ['排行柱状图']
+            name: 'packages.basic.methods.topn.name',
+            description: 'packages.basic.methods.topn.desc',
+            outputCharts: ['packages.charts.rankingBar']
         },
         {
             promptId: 'worker-missing-v1',
-            name: '缺失值分析',
-            description: '可视化缺失值分布模式',
-            outputCharts: ['缺失值矩阵图']
+            name: 'packages.basic.methods.missing.name',
+            description: 'packages.basic.methods.missing.desc',
+            outputCharts: ['packages.charts.missingMatrix']
         },
         {
             promptId: 'worker-outlier-v1',
-            name: '异常值检测',
-            description: '识别数据中的异常离群点',
-            outputCharts: ['箱线图', '散点标注图']
+            name: 'packages.basic.methods.outlier.name',
+            description: 'packages.basic.methods.outlier.desc',
+            outputCharts: ['packages.charts.box', 'packages.charts.scatterAnnotated']
         },
         {
             promptId: 'worker-crosstab-v1',
-            name: '交叉表分析',
-            description: '分析两个分类变量的交叉分布',
-            outputCharts: ['热力图', '堆叠柱状图']
+            name: 'packages.basic.methods.crosstab.name',
+            description: 'packages.basic.methods.crosstab.desc',
+            outputCharts: ['packages.charts.heatmap', 'packages.charts.stacked']
         }
     ]
 };
@@ -79,24 +80,24 @@ const basicPackage: AnalysisPackage = {
  */
 const sklearnPackage: AnalysisPackage = {
     id: 'sklearn',
-    name: '机器学习',
+    name: 'packages.sklearn.name',
     icon: '🧠',
     pyodidePackages: ['scikit-learn'],
-    sizeEstimate: '~12MB',
+    sizeEstimate: 'packages.sklearn.sizeEstimate',
     isBuiltIn: false,
     order: 1,
     methods: [
         {
             promptId: 'worker-cluster-v1',
-            name: 'K-Means 聚类',
-            description: '发现数据中的潜在群体',
-            outputCharts: ['PCA 降维散点图', '群体分布图']
+            name: 'packages.sklearn.methods.cluster.name',
+            description: 'packages.sklearn.methods.cluster.desc',
+            outputCharts: ['packages.charts.pcaScatter', 'packages.charts.clusterDist']
         },
         {
             promptId: 'worker-decision-tree-v1',
-            name: '决策树分析',
-            description: '挖掘影响目标变量的关键规则',
-            outputCharts: ['决策树可视化图']
+            name: 'packages.sklearn.methods.decisionTree.name',
+            description: 'packages.sklearn.methods.decisionTree.desc',
+            outputCharts: ['packages.charts.decisionTreeVis']
         }
         // 后续可扩展：随机森林、特征重要性图等
     ]
@@ -107,18 +108,18 @@ const sklearnPackage: AnalysisPackage = {
  */
 const statsmodelsPackage: AnalysisPackage = {
     id: 'statsmodels',
-    name: '统计建模',
+    name: 'packages.statsmodels.name',
     icon: '📈',
     pyodidePackages: ['statsmodels'],
-    sizeEstimate: '~8MB',
+    sizeEstimate: 'packages.statsmodels.sizeEstimate',
     isBuiltIn: false,
     order: 2,
     methods: [
         {
             promptId: 'worker-regression-v1',
-            name: 'OLS 回归分析',
-            description: '量化各因素对目标变量的独立影响',
-            outputCharts: ['系数森林图 (Coefficient Plot)']
+            name: 'packages.statsmodels.methods.regression.name',
+            description: 'packages.statsmodels.methods.regression.desc',
+            outputCharts: ['packages.charts.coefficientPlot']
         }
         // 后续可扩展：时序预测 (Holt-Winters)、假设检验等
     ]
@@ -132,24 +133,24 @@ const statsmodelsPackage: AnalysisPackage = {
 /*
 const nlpPackage: AnalysisPackage = {
     id: 'nlp',
-    name: '文本分析',
+    name: 'packages.nlp.name',
     icon: '📝',
     pyodidePackages: ['jieba'],
-    sizeEstimate: '~18MB',
+    sizeEstimate: 'packages.nlp.sizeEstimate',
     isBuiltIn: false,
     order: 3,
     methods: [
         {
             promptId: 'worker-wordcloud-v1',
-            name: '中文词云',
-            description: '从文本数据生成词云可视化',
-            outputCharts: ['词云图']
+            name: 'packages.nlp.methods.wordcloud.name',
+            description: 'packages.nlp.methods.wordcloud.desc',
+            outputCharts: ['packages.charts.wordcloud']
         },
         {
             promptId: 'worker-text-freq-v1',
-            name: '词频统计',
-            description: '统计文本中的高频词汇',
-            outputCharts: ['词频柱状图', '词频表格']
+            name: 'packages.nlp.methods.textFreq.name',
+            description: 'packages.nlp.methods.textFreq.desc',
+            outputCharts: ['packages.charts.wordFreqBar', 'packages.charts.wordFreqTable']
         }
     ]
 };
@@ -243,7 +244,7 @@ export const getRequiredPackageForPrompt = (promptId: string): AnalysisPackage |
 
 export interface ChartFont {
     id: string;
-    name: string;
+    name: string; // i18n key
     language: string;
     fontFile: string;
     fontUrl: string;   // CDN URL
@@ -252,11 +253,12 @@ export interface ChartFont {
 
 /**
  * 可用的图表字体列表
+ * 注意：name字段是i18n键，需要在组件中使用t()翻译
  */
 export const chartFonts: ChartFont[] = [
     {
         id: 'simhei',
-        name: '中文 (SimHei)',
+        name: 'packages.fonts.simhei',
         language: 'zh-CN',
         fontFile: 'SimHei.ttf',
         fontUrl: '/fonts/SimHei.ttf',
@@ -264,7 +266,7 @@ export const chartFonts: ChartFont[] = [
     },
     {
         id: 'msgothic',
-        name: '日文 (MS Gothic)',
+        name: 'packages.fonts.msgothic',
         language: 'ja-JP',
         fontFile: 'msgothic.ttc',
         fontUrl: '/fonts/msgothic.ttc',
@@ -272,7 +274,7 @@ export const chartFonts: ChartFont[] = [
     },
     {
         id: 'malgun',
-        name: '韩文 (Malgun Gothic)',
+        name: 'packages.fonts.malgun',
         language: 'ko-KR',
         fontFile: 'malgun.ttf',
         fontUrl: '/fonts/malgun.ttf',

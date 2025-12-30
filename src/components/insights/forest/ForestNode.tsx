@@ -1,8 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { ForestNodeProps } from './types';
-import { ChevronRight, ChevronDown, Activity, Box, Layers, PlayCircle } from 'lucide-react';
+import { ChevronRight, ChevronDown, Activity, Layers, PlayCircle } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
-import { getRenderedCode } from '@/services/insights/inflater';
 
 /**
  * ForestNode - 单个洞察卡片 (玻璃拟态 + 暗夜风格)
@@ -10,12 +9,9 @@ import { getRenderedCode } from '@/services/insights/inflater';
 export const ForestNode: React.FC<ForestNodeProps> = ({
     node,
     depth,
-    parentId,
     onToggle,
-    onDrillDown,
-    availableColumns
+    onDrillDown
 }) => {
-    const { t } = useI18n();
     const nodeRef = useRef<HTMLDivElement>(null);
 
     // 状态标签配置
@@ -26,22 +22,21 @@ export const ForestNode: React.FC<ForestNodeProps> = ({
     };
 
     const tag = getStatusTag();
-    const hasChildren = node.children && node.children.length > 0;
     const hasDrillActions = node.drillDownActions && node.drillDownActions.length > 0;
 
-    // 结果渲染 (简化版，复用现有 InsightCard 逻辑或直接嵌入)
-    // 这里为了演示 Forest 效果，我们先渲染图表 (Image) 和 简介 (Summary)
+    // 结果渲染 (简化版, 复用现有 InsightCard 逻辑或直接嵌入)
+    // 这里为了演示 Forest 效果, 我们先渲染图表 (Image) 和 简介 (Summary)
 
     return (
         <div
-            id={`node-${node.id}`}
+            id={`node - ${node.id} `}
             ref={nodeRef}
             className={`
-                relative group transition-all duration-300 ease-out
-                flex flex-col
-                backdrop-blur-md rounded-xl border
-                hover:translate-x-1 hover:shadow-[var(--forest-glow)]
-            `}
+                relative group transition - all duration - 300 ease - out
+                flex flex - col
+backdrop - blur - md rounded - xl border
+hover: translate - x - 1 hover: shadow - [var(--forest - glow)]
+`}
             style={{
                 backgroundColor: 'var(--forest-card-bg)',
                 borderColor: 'var(--forest-card-border)',
@@ -62,9 +57,9 @@ export const ForestNode: React.FC<ForestNodeProps> = ({
             >
                 <div className="flex items-center gap-3">
                     <div className={`
-                        p-2 rounded-lg 
+p - 2 rounded - lg 
                         ${depth === 0 ? 'bg-blue-500/10 text-blue-400' : 'bg-slate-700/30 text-slate-400'}
-                    `}>
+`}>
                         {depth === 0 ? <Activity size={18} /> : <Layers size={18} />}
                     </div>
 
@@ -74,7 +69,7 @@ export const ForestNode: React.FC<ForestNodeProps> = ({
                         </span>
 
                         <div className="flex items-center gap-2 mt-2">
-                            <span className={`text-[10px] px-2 py-0.5 rounded border ${tag.color} font-mono tracking-wide`}>
+                            <span className={`text - [10px] px - 2 py - 0.5 rounded border ${tag.color} font - mono tracking - wide`}>
                                 {tag.label}
                             </span>
                             <span className="text-[10px] text-[var(--forest-text-muted)] font-mono">
@@ -103,7 +98,7 @@ export const ForestNode: React.FC<ForestNodeProps> = ({
                     {node.result?.image ? (
                         <div className="rounded-lg overflow-hidden border border-[var(--forest-card-border)] bg-black/20">
                             <img
-                                src={node.result.image.startsWith('data:image') ? node.result.image : `data:image/png;base64,${node.result.image}`}
+                                src={node.result.image.startsWith('data:image') ? node.result.image : `data: image / png; base64, ${node.result.image} `}
                                 alt="Chart"
                                 className="w-full h-auto object-contain max-h-[200px]"
                             />

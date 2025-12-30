@@ -28,7 +28,7 @@ export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesS
 
     /* MVP: 仅关注中文(simhei)，默认启用中文环境下的字体 */
     const [enabledIds, setEnabledIds] = useState<string[]>(getEnabledPackages());
-    const [expandedIds, setExpandedIds] = useState<string[]>(analysisPackages.map(p => p.id));
+    const [expandedIds, setExpandedIds] = useState<string[]>([]);
     const [enabledFontIds, setEnabledFontIds] = useState<string[]>(fontSettings.fonts);
 
     const isSimHeiEnabled = enabledFontIds.includes('simhei');
@@ -61,12 +61,7 @@ export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesS
         setEnabledFonts(newFonts);
     };
 
-    const checkboxStyle = {
-        width: '18px',
-        height: '18px',
-        cursor: 'pointer',
-        accentColor: 'var(--primary-color, #22d3ee)'
-    };
+    // checkbox样式使用CSS类 .pkg-checkbox
 
     // 辅助文本样式：使用 CSS 变量，无硬编码
     const subtleTextStyle = {
@@ -78,14 +73,14 @@ export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesS
     return (
         <>
             <h2 className="settings-section-title">
-                {t('settings.analysisPackages') || '分析能力'}
+                {t('settings.analysisPackages')}
             </h2>
             <p className="settings-section-desc">
-                {t('settings.analysisPackagesDesc') || '勾选需要的分析能力，系统将在启动时下载对应的 Python 库'}
+                {t('settings.analysisPackagesDesc')}
             </p>
 
-            {/* Packaging List */}
-            <div className="flex flex-col gap-4 mb-8">
+            {/* Packaging List - Grid Layout */}
+            <div className="analysis-packages-grid">
                 {analysisPackages.map(pkg => {
                     const isEnabled = enabledIds.includes(pkg.id) || pkg.isBuiltIn;
                     const isExpanded = expandedIds.includes(pkg.id);
@@ -109,27 +104,27 @@ export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesS
                                                 type="checkbox"
                                                 checked={true}
                                                 disabled={true}
-                                                style={{ ...checkboxStyle, cursor: 'not-allowed', opacity: 0.8 }}
+                                                className="pkg-checkbox pkg-checkbox-disabled"
                                             />
                                         ) : (
                                             <input
                                                 type="checkbox"
                                                 checked={isEnabled}
                                                 onChange={() => { }}
-                                                style={checkboxStyle}
+                                                className="pkg-checkbox"
                                             />
                                         )}
                                     </div>
 
-                                    <span className="text-xl opacity-80">{pkg.icon}</span>
+                                    <span className="text-xl opacity-80" style={{ color: isEnabled ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{pkg.icon}</span>
                                     <div className="flex flex-col">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-medium text-sm">
-                                                {pkg.name}
+                                            <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+                                                {t(pkg.name)}
                                             </span>
                                             {pkg.isBuiltIn && (
-                                                <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded opacity-60">
-                                                    {t('settings.builtIn') || '内置'}
+                                                <span className="pkg-badge pkg-badge-builtin">
+                                                    {t('settings.builtIn')}
                                                 </span>
                                             )}
                                         </div>
@@ -138,10 +133,10 @@ export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesS
 
                                 {/* Right Side: Size + Chevron */}
                                 <div className="flex items-center gap-4 text-secondary-text">
-                                    <span style={subtleTextStyle}>
-                                        {pkg.sizeEstimate}
+                                    <span className="pkg-size-badge">
+                                        {t(pkg.sizeEstimate)}
                                     </span>
-                                    {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                    {isExpanded ? <ChevronDown size={18} color="var(--text-secondary)" /> : <ChevronRight size={18} color="var(--text-secondary)" />}
                                 </div>
                             </div>
 
@@ -152,17 +147,17 @@ export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesS
                                         {pkg.methods.map(method => (
                                             <div key={method.promptId} className="method-grid-card">
                                                 <div className="method-card-header">
-                                                    <span className="font-medium text-sm text-primary-300">
-                                                        {method.name}
+                                                    <span className="font-medium text-sm" style={{ color: 'var(--text-accent)' }}>
+                                                        {t(method.name)}
                                                     </span>
                                                 </div>
-                                                <div className="method-card-desc">
-                                                    {method.description}
+                                                <div className="method-card-desc" style={{ color: 'var(--text-secondary)' }}>
+                                                    {t(method.description)}
                                                 </div>
                                                 <div className="method-card-tags">
                                                     {method.outputCharts.map((chart, i) => (
                                                         <span key={i} className="chart-tag">
-                                                            {chart}
+                                                            {t(chart)}
                                                         </span>
                                                     ))}
                                                 </div>
@@ -179,34 +174,35 @@ export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesS
             {/* Font Settings - Switch Card */}
             <SettingsGroup>
                 <div className="settings-group-title">
-                    {t('settings.chartDisplayConfig') || '图表显示配置'}
+                    {t('settings.chartDisplayConfig')}
                 </div>
                 <div className="font-setting-card">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-primary-400">
+                    <div className="font-setting-main">
+                        <div className="font-icon-wrapper">
                             <Type size={20} />
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium text-sm text-primary-text">
-                                    {/* 这里暂时保留中文硬编码，因为这是对配置项本身的描述，如果需要也可以国际化但不急 */}
-                                    中文图表支持 (SimHei)
+                        <div className="font-info">
+                            <div className="font-header">
+                                <span className="font-title">
+                                    {t('settings.simheiTitle')}
                                 </span>
-                                <span style={subtleTextStyle}>~10MB</span>
+                                <span className="font-size-badge">{t('settings.simheiSize')}</span>
                             </div>
-                            <span className="text-xs text-secondary-text max-w-[400px]">
-                                启用后将自动下载字体文件，确保图表中的中文能正确显示。
+                            <span className="font-desc">
+                                {t('settings.simheiDesc')}
                             </span>
                         </div>
                     </div>
-
-                    <label className="settings-switch">
+                    <label className="switch-label">
                         <input
                             type="checkbox"
                             checked={isSimHeiEnabled}
                             onChange={handleToggleChineseFont}
+                            className="switch-input"
                         />
-                        <span className="settings-slider"></span>
+                        <div className={`switch-track ${isSimHeiEnabled ? 'checked' : ''}`}>
+                            <div className="switch-thumb"></div>
+                        </div>
                     </label>
                 </div>
             </SettingsGroup>

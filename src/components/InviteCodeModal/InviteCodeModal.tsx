@@ -37,7 +37,7 @@ export const InviteCodeModal = ({ onClose, onSuccess }: InviteCodeModalProps) =>
             });
 
             if (response.ok) {
-                const data = await response.json();
+                // const data = await response.json(); // 暂时未使用
                 saveInviteCode(code);
 
                 // 清空当前使用记录，下次刷新会以邀请码用户身份计数

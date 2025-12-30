@@ -12,6 +12,7 @@ export const dataSource = {
         recentProjects: '最近项目',
         noProjects: '暂无项目',
         newProject: '新建项目',
+        filesCount: '{count} 个文件',
         untitled: '未命名项目',
         rename: '重命名',
         delete: '删除项目',

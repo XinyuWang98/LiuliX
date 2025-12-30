@@ -72,7 +72,7 @@ export function useSuggestionGeneration(
             // 1. 获取数据
             let data: any[] = [];
             try {
-                data = await fetchDataForAnalysis(activeFile, t);
+                data = await fetchDataForAnalysis(activeFile);
             } catch (err: any) {
                 if (err.message === 'FALLBACK_TO_METADATA') {
                     // 使用元数据降级方案

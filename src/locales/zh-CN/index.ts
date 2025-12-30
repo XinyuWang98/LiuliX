@@ -2,6 +2,7 @@
 import { LanguageConfig } from '@/types/i18n';
 import { common, data, nav, sidebar, chat, language, hardware } from './common';
 import { settings } from './settings';
+import { packages } from './packages';
 import { prompt } from './prompt';
 import { dataSource } from './dataSource';
 import { fileUpload } from './fileUpload';
@@ -49,6 +50,7 @@ export const zhCN: LanguageConfig = {
         hardware,
         header,
         inviteCode,
+        packages,
         // ✅ 新增：analysis别名和progress翻译
         analysis: {
             initializing: '正在准备分析环境...',

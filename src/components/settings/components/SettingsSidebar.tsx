@@ -11,7 +11,7 @@ interface SettingsSidebarProps {
 }
 
 export const SettingsSidebar = ({ activeCategory, onCategoryChange, searchQuery, onSearchChange }: SettingsSidebarProps) => {
-    const { t } = useI18n();
+    const { t, language } = useI18n();
 
     const categories = [
         { id: 'commonly-used', label: t('settings.commonlyUsed'), icon: Settings },
@@ -25,16 +25,17 @@ export const SettingsSidebar = ({ activeCategory, onCategoryChange, searchQuery,
     const shouldShowCategory = (categoryId: string) => {
         if (!searchQuery.trim()) return true;
         const query = searchQuery.toLowerCase();
-        // Simple mapping for demo, usually this logic stays in parent or a hook
-        const categoryLabels: Record<string, string[]> = {
+
+        // 双语搜索关键词映射（支持中英文搜索）
+        const categoryKeywords: Record<string, string[]> = {
             'commonly-used': ['常用', 'common', '本地', 'local', '模型', 'model'],
             'user-role': ['角色', 'role', '分析师', 'analyst', '专家', 'expert'],
             'ai-config': ['ai', '配置', 'config', 'api', 'key', '硬件', 'hardware', '推荐', 'recommendation'],
-            'analysis-packages': ['分析', 'analysis', '能力', 'package', 'sklearn', 'statsmodels', '机器学习'],
+            'analysis-packages': ['分析', 'analysis', '能力', 'package', 'sklearn', 'statsmodels', '机器学习', 'machine learning'],
             'performance': ['性能', 'performance', '质量', 'quality', '列', 'column', '超时', 'timeout'],
             'advanced': ['高级', 'advanced']
         };
-        return categoryLabels[categoryId]?.some(label => label.includes(query)) || false;
+        return categoryKeywords[categoryId]?.some(label => label.includes(query)) || false;
     };
 
     const filteredCategories = categories.filter(cat => shouldShowCategory(cat.id));

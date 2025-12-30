@@ -34,6 +34,7 @@ export function ExplorationFlowV2({
     const navigationTree = [
         {
             id: 'project-selection',
+            type: 'section' as const,
             label: '项目选择',
             icon: FolderOpen,
             status: project ? 'completed' : 'current',
@@ -41,6 +42,7 @@ export function ExplorationFlowV2({
         },
         {
             id: 'cleaning',
+            type: 'section' as const,
             label: '数据清洗',
             icon: Database,
             status: project ? 'current' : 'locked',
@@ -48,6 +50,7 @@ export function ExplorationFlowV2({
         },
         {
             id: 'insights',
+            type: 'section' as const,
             label: '洞察分析',
             icon: Lightbulb,
             status: project ? 'current' : 'locked',
@@ -56,6 +59,7 @@ export function ExplorationFlowV2({
         },
         {
             id: 'report',
+            type: 'section' as const,
             label: '分析报告',
             icon: FileText,
             status: adoptedCount > 0 ? 'current' : 'locked',
@@ -76,7 +80,6 @@ export function ExplorationFlowV2({
                 <ContentPanel
                     selectedItemId={selectedItemId}
                     project={project}
-                    insightChain={{ rootCards: [] }}
                     onProjectUpdate={onProjectUpdate}
                     cleaningTrigger={cleaningTrigger}
                     onFilesUploaded={onFilesUploaded}

@@ -14,11 +14,10 @@
 /* 角色卡片 */
 .role-card {
     /* 复用theme-card基础样式 */
-    background: var(--setting-card-bg);
-    border: var(--setting-card-border);
-    border-radius: var(--setting-card-radius);
+    background: var(--liuli-glass);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
     padding: 16px;
-    /* Reduced from 24px */
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
@@ -27,69 +26,59 @@
 }
 
 .role-card:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--liuli-glass-hover);
+    border-color: var(--border-highlight);
     transform: translateY(-2px);
 }
 
 .role-card.active {
-    border-color: var(--bg-accent);
-    background: var(--setting-active-item-bg);
-    box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.2);
-    /* Reduced shadow spread */
+    border-color: var(--text-accent);
+    background: rgba(0, 242, 254, 0.05);
+    /* Slight cyan tint */
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
 }
 
 /* 角色图标容器 */
 .role-icon-wrapper {
     margin-bottom: 14px;
-    /* Increased from 12px */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 48px;
-    /* Fixed height for icon area */
 }
 
-/* 角色图标 SVG */
 /* 角色图标 SVG */
 .role-icon-svg {
     width: 32px;
     height: 32px;
-    color: var(--setting-active-item-text);
-    /* Use bright text color instead of bg accent */
-    opacity: 1;
-    /* Remove transparency */
-    filter: drop-shadow(0 0 2px rgba(34, 211, 238, 0.5));
-    /* Add subtle glow by default */
+    color: var(--text-secondary);
+    opacity: 0.8;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.1));
 }
 
 .role-card.active .role-icon-svg {
-    filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.8));
-    /* Stronger glow when active */
+    color: var(--text-accent);
+    filter: drop-shadow(0 0 12px var(--glow-primary));
     transform: scale(1.1);
-    /* Slight pop */
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 1;
 }
 
 /* 角色标题 */
 .role-title {
     font-size: 15px;
-    /* Reduced from 18px */
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 6px;
-    /* Reduced from 8px */
 }
 
 /* 角色描述 */
 .role-desc {
     font-size: 12px;
-    /* Reduced from 13px */
     color: var(--text-secondary);
     line-height: 1.5;
     margin-bottom: 12px;
-    /* Reduced from 16px */
     min-height: 36px;
-    /* Align heights */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -98,40 +87,63 @@
 /* 角色特性列表 */
 .role-features {
     font-size: 11px;
-    /* Reduced from 12px */
     color: var(--text-secondary);
     text-align: left;
     background: rgba(0, 0, 0, 0.2);
+    /* Keep generic dark for contrast inside card */
     padding: 10px;
-    /* Reduced from 12px */
     border-radius: 6px;
     line-height: 1.6;
-    /* Reduced from 1.8 */
 }
 
 /* 配置值徽章 */
 .config-value-badge {
     font-size: 13px;
-    color: var(--setting-active-item-text);
-    /* #22d3ee */
-    background: rgba(6, 182, 212, 0.1);
+    color: var(--text-accent);
+    background: rgba(0, 242, 254, 0.1);
     padding: 4px 12px;
     border-radius: 6px;
-    border: 1px solid rgba(6, 182, 212, 0.2);
+    border: 1px solid rgba(0, 242, 254, 0.2);
     font-weight: 500;
 }
 
-/* 布局辅助类（替代内联样式） */
+/* 布局辅助类 */
 .role-info-text {
     margin-top: 16px;
+    color: var(--text-secondary);
 }
 
 .config-detail-title {
     margin-top: 32px;
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 .config-badge-wrapper {
     display: flex;
     gap: 8px;
     align-items: center;
+}
+
+
+/* P1/P2 阶段徽章 */
+.setting-badge-hint {
+    font-size: var(--fs-xxs);
+    padding: 2px 6px;
+    border-radius: var(--radius-s);
+    background: var(--chart-warning-bg);
+    color: var(--chart-warning);
+    border: 1px solid var(--color-quality-warning);
+    font-weight: var(--fw-bold);
+}
+
+/* 提示信息样式 */
+.settings-info-text {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    line-height: var(--line-height);
+    padding: var(--gap-s);
+    background: var(--bg-panel);
+    border-radius: var(--radius-m);
+    border-left: 3px solid var(--text-accent);
 }

@@ -42,7 +42,7 @@ export function ProjectSelector({ currentProject, onProjectSelect, onNewProject 
             >
                 <FolderOpen size={18} />
                 <span className="current-project-name">
-                    {currentProject?.name || t('project.selectProject')}
+                    {currentProject?.name || t('dataSource.project.selectProject')}
                 </span>
                 <ChevronDown size={16} className={isOpen ? 'rotated' : ''} />
             </button>
@@ -52,13 +52,13 @@ export function ProjectSelector({ currentProject, onProjectSelect, onNewProject 
                     <div className="project-selector-backdrop" onClick={() => setIsOpen(false)} />
                     <div className="project-selector-dropdown">
                         <div className="dropdown-header">
-                            <span>{t('project.recentProjects')}</span>
+                            <span>{t('dataSource.project.recentProjects')}</span>
                         </div>
 
                         <div className="dropdown-list">
                             {projects.length === 0 ? (
                                 <div className="dropdown-empty">
-                                    {t('project.noProjects')}
+                                    {t('dataSource.project.noProjects')}
                                 </div>
                             ) : (
                                 projects.map(project => (
@@ -87,7 +87,7 @@ export function ProjectSelector({ currentProject, onProjectSelect, onNewProject 
                             }}
                         >
                             <Plus size={16} />
-                            {t('project.newProject')}
+                            {t('dataSource.project.newProject')}
                         </button>
                     </div>
                 </>

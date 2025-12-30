@@ -1,5 +1,5 @@
 import { useI18n } from '@contexts/I18nContext';
-import { Settings, User, BookOpen, LayoutGrid } from 'lucide-react';
+import { Settings, Library, User } from 'lucide-react';
 import { Logo } from '@/components/common/Logo/Logo';
 import { FreeTrialBadge } from '@/components/Header/FreeTrialBadge';
 import '@/components/Header/FreeTrialBadge.css';
@@ -31,14 +31,14 @@ export function NavigationBar({
 
                 <nav className="nav-tabs">
                     <button
-                        className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
+                        className={`nav - tab ${activeView === 'dashboard' ? 'active' : ''} `}
                         onClick={() => window.location.hash = '#/'}
                     >
                         {t('nav.dashboard')}
                     </button>
 
                     <button
-                        className={`nav-tab ${activeView === 'library' ? 'active' : ''}`}
+                        className={`nav - tab ${activeView === 'library' ? 'active' : ''} `}
                         onClick={() => window.location.hash = '#/prompts'}
                     >
                         {t('nav.promptLibrary')}

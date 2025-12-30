@@ -63,6 +63,25 @@
   --color-accent: #FF6B35;
   --color-accent-muted: rgba(255, 107, 53, 0.2);
 
+  /* ========== LiuliX Ascension 主题变量 ========== */
+  /* 深邃苍穹背景 */
+  --liuli-bg: #010305;
+
+  /* 文字 - 主白/蓝调灰白 */
+  --text-main: #ffffff;
+  --text-dim: rgba(180, 200, 255, 0.6);
+
+  /* 强调色 - 霓虹青 */
+  --text-accent: #00f2fe;
+
+  /* 推荐色 - 用于硬件检测等 */
+  --recommend-color: #4ade80;
+
+  /* 琉璃玻璃态基础 */
+  --glass-surface: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.15);
+
+
 
 
   /* ========== 4.1.2 间距系统(gap & padding) ========== */

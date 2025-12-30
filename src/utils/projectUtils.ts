@@ -102,9 +102,16 @@ export function generateProjectName(
  */
 export interface ProjectFile {
     id: string;
+    name: string;
     data: ParsedFileData;
     sampled: boolean;
     addedAt: Date;
+
+    // 添加为ContentPanel提供快捷属性
+    columns?: Array<{ name: string; type?: string }>;
+    rowCount?: number;
+    tableName?: string;
+    originalName?: string;
 
     /** 预处理分析缓存 */
     /** 预处理分析缓存 */
@@ -201,6 +208,7 @@ export function createProject(
         isExpanded: true,  // 新创建的项目默认展开
         files: files.map((data, index) => ({
             id: generateId(),
+            name: data.fileName, // 从 ParsedFileData 获取文件名
             data,
             sampled: sampledFlags[index],
             addedAt: new Date(),

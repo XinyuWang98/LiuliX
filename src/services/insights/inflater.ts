@@ -9,7 +9,6 @@
  */
 
 import { L1Recommendation, InsightNode, DrillDownAction } from '@/types/insightTree';
-import { UserPrompt } from '@/types/prompt';
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 

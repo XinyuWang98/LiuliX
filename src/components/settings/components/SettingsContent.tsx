@@ -2,8 +2,9 @@
 import { useI18n } from '@/contexts/I18nContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { SettingsGroup, SettingsRow } from './SettingsSection';
-import { Switch } from './Switch';
-import { Play, CheckCircle, AlertCircle, ArrowUp, ArrowDown, Loader } from 'lucide-react';
+import Switch from './Switch';
+import { LiuliButton } from '@/components/common/liulix/LiuliButton';
+import { Play, CheckCircle, AlertCircle, ArrowUp, ArrowDown, Loader, Monitor, Globe } from 'lucide-react';
 import '../SettingsPage.css';
 import { SUPPORTED_MODELS } from '@/services/localLLMService';
 import { LogDownloadButton } from './LogDownloadButton';
@@ -66,19 +67,23 @@ export const SettingsContent = (props: SettingsContentProps) => {
                             label={t('settings.interfaceLanguage')}
                             description={t('settings.interfaceLanguageDesc')}
                             action={
-                                <div className="language-selection">
-                                    <button
+                                <div className="language-selection" style={{ display: 'flex', gap: 8 }}>
+                                    <LiuliButton
+                                        variant={language.code === 'zh-CN' ? 'primary' : 'secondary'}
+                                        size="sm"
                                         onClick={() => setLanguage('zh-CN')}
-                                        className={`language-btn ${language.code === 'zh-CN' ? 'active' : ''}`}
+                                        leftIcon={<Globe size={14} />}
                                     >
-                                        中文
-                                    </button>
-                                    <button
+                                        {t('settings.langZhCN')}
+                                    </LiuliButton>
+                                    <LiuliButton
+                                        variant={language.code === 'en-US' ? 'primary' : 'secondary'}
+                                        size="sm"
                                         onClick={() => setLanguage('en-US')}
-                                        className={`language-btn ${language.code === 'en-US' ? 'active' : ''}`}
+                                        leftIcon={<Globe size={14} />}
                                     >
-                                        English
-                                    </button>
+                                        {t('settings.langEnUS')}
+                                    </LiuliButton>
                                 </div>
                             }
                         />
@@ -126,10 +131,10 @@ export const SettingsContent = (props: SettingsContentProps) => {
                             </div>
                         ) : hardwareScore !== undefined ? (
                             <div className="hardware-detection-row">
-                                <div className="score-badge" style={{
-                                    backgroundColor: hardwareScore >= 80 ? 'var(--recommend-color)' :
-                                        hardwareScore >= 60 ? '#f59e0b' : 'var(--bg-accent)'
-                                }}>
+                                <Monitor size={20} className="hardware-icon" />
+                                <div className={`score-badge ${hardwareScore >= 80 ? 'score-badge-strong' :
+                                    hardwareScore >= 60 ? 'score-badge-warning' : 'score-badge-weak'
+                                    }`}>
                                     {hardwareScore >= 80 ? t('settings.hardwareStrong') :
                                         hardwareScore >= 60 ? t('settings.hardwareMedium') : t('settings.hardwareWeak')}
                                 </div>
@@ -170,7 +175,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         )}
                         {/* 调用逻辑说明 */}
                         <div className="model-logic-info">
-                            <div className="model-logic-title">💡 {t('settings.modelLogicTitle')}</div>
+                            <div className="model-logic-title">{t('settings.modelLogicTitle')}</div>
                             <ul className="model-logic-list">
                                 <li>{props.useLocalModel ? t('settings.modelLogicLocal') : t('settings.modelLogicAPI')}</li>
                                 {props.useLocalModel && <li>{t('settings.modelLogicFallback')}</li>}
@@ -181,57 +186,63 @@ export const SettingsContent = (props: SettingsContentProps) => {
                     {/* API Keys */}
                     <SettingsGroup title={t('settings.apiPriorityAndKeys')}>
                         <div className="api-keys-list">
-                            {props.priority.map((model, index) => (
-                                <div
-                                    key={model}
-                                    className="api-key-item"
-                                >
-                                    <div className="api-key-header">
-                                        <div className="api-key-header-left">
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 8 }}>
-                                                <button
-                                                    onClick={() => props.onMoveUp(index)}
-                                                    disabled={index === 0}
-                                                    className="move-btn"
-                                                    style={{ border: 'none', background: 'transparent', cursor: index === 0 ? 'default' : 'pointer', opacity: index === 0 ? 0.3 : 1, padding: 0, display: 'flex' }}
-                                                >
-                                                    <ArrowUp size={14} color="var(--text-secondary)" />
-                                                </button>
-                                                <button
-                                                    onClick={() => props.onMoveDown(index)}
-                                                    disabled={index === props.priority.length - 1}
-                                                    className="move-btn"
-                                                    style={{ border: 'none', background: 'transparent', cursor: index === props.priority.length - 1 ? 'default' : 'pointer', opacity: index === props.priority.length - 1 ? 0.3 : 1, padding: 0, display: 'flex' }}
-                                                >
-                                                    <ArrowDown size={14} color="var(--text-secondary)" />
-                                                </button>
+                            {props.priority.map((model, index) => {
+                                // MVP阶段只启用DeepSeek
+                                const isDisabled = model !== 'deepseek';
+                                return (
+                                    <div
+                                        key={model}
+                                        className={`api-key-item ${isDisabled ? 'disabled' : ''}`}
+                                        style={{ opacity: isDisabled ? 0.5 : 1 }}
+                                    >
+                                        <div className="api-key-header">
+                                            <div className="api-key-header-left">
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 8 }}>
+                                                    <button
+                                                        onClick={() => !isDisabled && props.onMoveUp(index)}
+                                                        disabled={index === 0 || isDisabled}
+                                                        className="move-btn"
+                                                        style={{ border: 'none', background: 'transparent', cursor: (index === 0 || isDisabled) ? 'default' : 'pointer', opacity: (index === 0 || isDisabled) ? 0.3 : 1, padding: 0, display: 'flex' }}
+                                                    >
+                                                        <ArrowUp size={14} color="var(--text-secondary)" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => !isDisabled && props.onMoveDown(index)}
+                                                        disabled={index === props.priority.length - 1 || isDisabled}
+                                                        className="move-btn"
+                                                        style={{ border: 'none', background: 'transparent', cursor: (index === props.priority.length - 1 || isDisabled) ? 'default' : 'pointer', opacity: (index === props.priority.length - 1 || isDisabled) ? 0.3 : 1, padding: 0, display: 'flex' }}
+                                                    >
+                                                        <ArrowDown size={14} color="var(--text-secondary)" />
+                                                    </button>
+                                                </div>
+                                                <span className="api-key-model-name">{MODEL_NAMES[model]}</span>
                                             </div>
-                                            <span className="api-key-model-name">{MODEL_NAMES[model]}</span>
+                                            <span className="api-key-priority-badge">#{index + 1}</span>
                                         </div>
-                                        <span className="api-key-priority-badge">#{index + 1}</span>
-                                    </div>
 
-                                    <div className="api-key-input-row">
-                                        <input
-                                            type="password"
-                                            placeholder="sk-..."
-                                            value={props.keys[model] || ''}
-                                            onChange={(e) => props.onKeyChange(model, e.target.value)}
-                                            className="api-key-input"
-                                        />
-                                        <button
-                                            onClick={() => props.onTestKey(model as any)}
-                                            disabled={props.testStatus[model] === 'loading'}
-                                            className={`api-test-btn ${props.testStatus[model] === 'success' ? 'success' : props.testStatus[model] === 'error' ? 'error' : ''}`}
-                                        >
-                                            {props.testStatus[model] === 'loading' ? <div className="settings-spinner-small" /> :
-                                                props.testStatus[model] === 'success' ? <CheckCircle size={16} /> :
-                                                    props.testStatus[model] === 'error' ? <AlertCircle size={16} /> :
-                                                        <Play size={14} />}
-                                        </button>
+                                        <div className="api-key-input-row">
+                                            <input
+                                                type="password"
+                                                placeholder={isDisabled ? t('settings.mvpNotAvailable') : "sk-..."}
+                                                value={props.keys[model] || ''}
+                                                onChange={(e) => !isDisabled && props.onKeyChange(model, e.target.value)}
+                                                className="api-key-input"
+                                                disabled={isDisabled}
+                                            />
+                                            <button
+                                                onClick={() => !isDisabled && props.onTestKey(model as any)}
+                                                disabled={props.testStatus[model] === 'loading' || isDisabled}
+                                                className={`api-test-btn ${props.testStatus[model] === 'success' ? 'success' : props.testStatus[model] === 'error' ? 'error' : ''}`}
+                                            >
+                                                {props.testStatus[model] === 'loading' ? <div className="settings-spinner-small" /> :
+                                                    props.testStatus[model] === 'success' ? <CheckCircle size={16} /> :
+                                                        props.testStatus[model] === 'error' ? <AlertCircle size={16} /> :
+                                                            <Play size={14} />}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </SettingsGroup>
                 </>
@@ -243,7 +254,13 @@ export const SettingsContent = (props: SettingsContentProps) => {
                     <h2 className="settings-section-title">{t('config.performanceQuality')}</h2>
                     <p className="settings-section-desc">{t('settings.performanceDesc')}</p>
 
-                    <DataAnalysisSection />
+                    <SettingsGroup title={t('settings.dataAnalysisStrategy')}>
+                        <DataAnalysisSection />
+                    </SettingsGroup>
+
+                    <SettingsGroup title={t('settings.dataPrivacyTitle')}>
+                        <DataPrivacySection />
+                    </SettingsGroup>
 
                     <SettingsGroup title={t('settings.dataProcessing')}>
                         <SettingsRow
@@ -274,7 +291,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                                         step={10}
                                         className="setting-number-input"
                                     />
-                                    <span className="setting-unit-label">{t('settings.performanceTimeoutUnit') || 'Seconds'}</span>
+                                    <span className="setting-unit-label">{t('settings.performanceTimeoutUnit')}</span>
                                 </div>
                             }
                         />
@@ -287,7 +304,6 @@ export const SettingsContent = (props: SettingsContentProps) => {
                 <>
                     <h2 className="settings-section-title">{t('settings.advanced')}</h2>
                     <p className="settings-section-desc">{t('settings.advancedDesc')}</p>
-                    <DataPrivacySection />
                     <SettingsGroup>
                         <SettingsRow
                             label={t('settings.devMode')}

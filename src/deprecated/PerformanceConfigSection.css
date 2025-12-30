@@ -1,0 +1,66 @@
+/**
+ * PerformanceConfigSection 组件样式
+ * 符合全局规则：使用CSS变量，禁止硬编码
+ */
+
+/* 配置区域容器 */
+.performance-config-container {
+    background-color: var(--bg-secondary);
+    padding: var(--gap-l);
+    border-radius: var(--radius-l);
+    margin-bottom: var(--gap-l);
+    border: 1px solid var(--border-light);
+}
+
+/* 区域标题 */
+.performance-config-title {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-bold);
+    margin-bottom: var(--gap-m);
+    color: var(--text-primary);
+}
+
+/* 滑块配置项容器 */
+.performance-slider-group {
+    margin-bottom: var(--gap-l);
+}
+
+.performance-slider-group:last-child {
+    margin-bottom: 0;
+}
+
+/* 滑块标签行 */
+.performance-slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--gap-s);
+}
+
+/* 滑块标签文字 */
+.performance-slider-label {
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+    font-weight: var(--fw-medium);
+}
+
+/* 滑块当前值 */
+.performance-slider-value {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-bold);
+    color: var(--color-retry-button);
+}
+
+/* 警告标签 */
+.performance-warning-tag {
+    margin-left: var(--gap-s);
+    font-size: var(--fs-xs);
+    color: var(--color-quality-warning);
+}
+
+/* 滑块描述文字 */
+.performance-slider-desc {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin-top: var(--gap-xs);
+}

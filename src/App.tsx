@@ -18,6 +18,7 @@ import { SettingsPage } from './components/settings/SettingsPage';
 import { useResizable } from '@/hooks/useResizable';
 import { logger } from './utils/logger';
 import { Logo } from './components/common/Logo/Logo';
+import { LiuliShowcase } from './pages/LiuliShowcase'; // [NEW] Design System
 import './App.css';
 import { ingestFilesAndCreateProject } from './utils/projectImporter';
 import { saveProjects, loadProjects } from './utils/indexedDB';
@@ -53,7 +54,7 @@ function LoadingScreen({ progress, message }: LoadingScreenProps) {
 function AppContent() {
     const { t } = useI18n();
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-    const [activeView, setActiveView] = useState<'dashboard' | 'library'>('dashboard');
+    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'v2' | 'design'>('dashboard');
     const [cleaningTrigger, setCleaningTrigger] = useState(0); // 用于触发数据清洗建议生成
     const [isPyodideReady, setIsPyodideReady] = useState(false);
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
@@ -72,6 +73,8 @@ function AppContent() {
                 setActiveView('library');
             } else if (hash === '#/v2') {
                 setActiveView('v2' as any); // V2预览页面
+            } else if (hash === '#/design') {
+                setActiveView('design'); // [NEW] Design System
             } else if (hash === '#/' || hash === '') {
                 setActiveView('dashboard');
             }
@@ -339,6 +342,9 @@ function AppContent() {
                     cleaningTrigger={cleaningTrigger}
                     onFilesUploaded={handleWelcomeUpload}
                 />
+            ) : activeView === 'design' ? (
+                /* [NEW] Design System Showcase */
+                <LiuliShowcase />
             ) : selectedProject === null ? (
                 /* [NEW] 独立产品首页 (无侧边栏) */
                 <LandingPage onFilesUploaded={handleWelcomeUpload} />

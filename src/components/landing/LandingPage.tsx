@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { Logo } from '@/components/common/Logo/Logo';
-import { UploadCloud, Sparkles, Search, Command, ShieldCheck, BrainCircuit, FileSearch } from 'lucide-react';
+import { UploadCloud, ShieldCheck, BrainCircuit, FileSearch } from 'lucide-react';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
 import './LandingPage.css';
 import '@/components/exploration/EmptyStateWelcome.css';

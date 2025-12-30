@@ -2,30 +2,21 @@
   LiuliX Design System - Landing Page Styles
   Theme: Ascension (Stairway to Light)
   Core: Verticality, Data Rain, Central Beam
+  
+  注意：颜色变量使用全局 variables.css 定义
+  本文件仅定义 Landing Page 专属样式变量
 */
 
 :root {
-    /* 1. 环境 - 深邃苍穹 */
-    --liuli-bg: #010305;
-    /* 极致深蓝黑 */
-
-    /* 2. 光源 - 垂直光柱 */
+    /* Landing Page 专属变量 - 光束效果 */
     --beam-core: rgba(200, 230, 255, 0.15);
-    /* 核心光柱，冷白 */
     --beam-glow: rgba(50, 100, 255, 0.2);
-    /* 外围晕光，深蓝 */
     --beam-highlight: rgba(255, 255, 255, 0.8);
-    /* 高光点 */
 
-    /* 3. 材质 - 结晶体 */
-    --glass-surface: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.15);
-    /* 垂直流动的渐变边框，呼应光雨 */
+    /* 琉璃材质 - 流动边框渐变 */
     --glass-border-flow: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 100%);
-
-    --text-main: #ffffff;
-    --text-dim: rgba(180, 200, 255, 0.6);
 }
+
 
 .landing-page-container {
     position: relative;

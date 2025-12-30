@@ -140,7 +140,7 @@ export const UserRoleSettings = () => {
                 />
                 <SettingsRow
                     label={t('config.samplingRows')}
-                    description={t('config.samplingRowsDesc') || 'Sampling Rows'}
+                    description={t('config.samplingRowsDesc')}
                     action={<span className="config-value-badge">{config.insights.samplingRows}</span>}
                 />
             </SettingsGroup>

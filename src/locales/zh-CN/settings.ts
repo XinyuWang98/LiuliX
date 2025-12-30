@@ -150,12 +150,12 @@ export const settings = {
 
     // 数据隐私选项
     dataPrivacy: {
-        autoSanitize: '自动脱敏（推荐）',
+        autoSanitize: '自动脱敏',
         autoSanitizeBadge: '推荐',
         autoSanitizeDesc: '仅发送列名和统计信息，不含具体数据值',
         sendRaw: '发送原始数据',
         sendRawDesc: '发送采样数据到云端API以获得更准确的建议',
-        localModelHint: '💡 提示：使用本地模型时，数据完全不会离开浏览器',
+        localModelHint: '使用本地模型时，数据完全不会离开浏览器',
     },
 
     // 数据分析策略选项
@@ -192,9 +192,41 @@ export const settings = {
     hardwareRecCloud: '推荐云端模型',
     hardwareUnknown: '未检测到硬件信息',
 
+    // SimHei Font
+    simheiTitle: '中文图表支持 (SimHei)',
+    simheiSize: '~10MB',
+    simheiDesc: '启用后将自动下载字体文件，确保图表中的中文能正确显示。',
+
+    // Local Model Selector & Status
+    ollamaChecking: '检测 Ollama 服务...',
+    ollamaNotRunning: 'Ollama 未运行',
+    ollamaDownload: '下载安装',
+    ollamaConnected: 'Ollama 已连接 ({count} 个模型)',
+    ollamaRefresh: '刷新模型列表',
+    installedModels: '已安装模型',
+    recommendedModels: '推荐模型 (点击下载)',
+    customModel: '✏️ 自定义模型...',
+    customModelPlaceholder: '输入 Ollama 模型标签，如 llama3:8b',
+    downloading: '准备下载...',
+    downloadSuccess: '下载成功！',
+    downloadFailed: '❌ 下载失败',
+    selectModelTip: '💡 请在上方推荐模型中选择并下载模型',
+    connectionError: '无法连接到后端服务',
+    qwen7bDesc: '推荐！代码/SQL专用，质量优秀，需16GB+内存',
+    qwen14bDesc: '顶配专业模型，需32GB+内存',
+    qwen3bDesc: '⚠️ 不推荐（质量未达标，仅测试用）',
+    qwenGeneralDesc: '通用对话模型',
+
     // 模型调用逻辑说明
     modelLogicTitle: '调用逻辑',
     modelLogicLocal: '优先使用本地模型（Ollama），数据完全离线不上传',
     modelLogicAPI: '使用云端API，需配置有效的API Key',
-    modelLogicFallback: '如果本地模型不可用，自动降级到云端API'
+    modelLogicFallback: '如果启用本地模型，将优先使用本地模型，但会根据配置的API Key兜底',
+
+    // MVP阶段功能限制
+    mvpNotAvailable: 'MVP阶段暂不可用',
+
+    // 语言名称
+    langZhCN: '中文',
+    langEnUS: 'English',
 };

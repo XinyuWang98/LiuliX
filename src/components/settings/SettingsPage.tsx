@@ -27,12 +27,12 @@ export const SettingsPage = ({ onClose }: SettingsPageProps) => {
     const [recommendation, setRecommendation] = useState<AIModeRecommendation | null>(null);
     const [isDetecting, setIsDetecting] = useState(false);
 
-    // API Keys
+    // API Keys - MVP阶段只开放De epSeek
     const [priority, setPriority] = useState<AIModel[]>(() => {
         try {
-            return JSON.parse(localStorage.getItem('ai_priority') || '["gemini","grok","claude","deepseek"]');
+            return JSON.parse(localStorage.getItem('ai_priority') || '["deepseek","gemini","grok","claude"]');
         } catch {
-            return ['gemini', 'grok', 'claude', 'deepseek'];
+            return ['deepseek', 'gemini', 'grok', 'claude'];
         }
     });
     const [keys, setKeys] = useState<Record<string, string>>({});

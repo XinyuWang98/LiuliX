@@ -1,4 +1,4 @@
-import { useState, useMemo, ReactNode } from 'react';
+import { useState, useMemo } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { Database, Lightbulb, FileText } from 'lucide-react';
 import { NavigationPanel } from './NavigationPanel';
@@ -96,7 +96,6 @@ export function ExplorationWorkbench({
             <ContentPanel
                 selectedItemId={selectedItemId}
                 project={project}
-                insightChain={insightChain}
                 onProjectUpdate={onProjectUpdate}
                 cleaningTrigger={cleaningTrigger}
             />

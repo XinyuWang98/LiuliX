@@ -1,4 +1,4 @@
-
+import React from 'react';
 import '../SettingsPage.css';
 
 interface SwitchProps {
@@ -7,17 +7,18 @@ interface SwitchProps {
     id?: string;
 }
 
-export const Switch = ({ checked, onChange, id }: SwitchProps) => {
+const Switch = ({ checked, onChange, id }: SwitchProps) => {
     return (
         <div
-            className="ios-switch"
-            data-checked={checked}
+            className={`switch-root ${checked ? 'checked' : ''}`}
             onClick={() => onChange(!checked)}
             role="switch"
             aria-checked={checked}
             id={id}
         >
-            <div className="ios-switch-thumb" />
+            <div className="switch-thumb" />
         </div>
     );
 };
+
+export default Switch;

@@ -23,14 +23,7 @@ export function DataPrivacySection() {
     };
 
     return (
-        <div className="settings-section">
-            <h3 className="settings-section-title">
-                {t('settings.dataPrivacyTitle')}
-            </h3>
-            <p className="settings-section-desc">
-                {t('settings.dataPrivacyDesc')}
-            </p>
-
+        <>
             <div className="settings-options">
                 <label className="settings-option">
                     <input
@@ -73,6 +66,6 @@ export function DataPrivacySection() {
             <div className="settings-note">
                 {t('settings.dataPrivacy.localModelHint')}
             </div>
-        </div>
+        </>
     );
 }

@@ -1,5 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
-import { useI18n } from '@/contexts/I18nContext';
+import { useRef, useEffect } from 'react';
 import { useEvidence } from '@/contexts/EvidenceContext';
 import { DataCleaner } from '../cleaning/DataCleaner';
 import { ReportGenerator } from '../report/ReportGenerator';
@@ -8,44 +7,32 @@ import { EmptyStateWelcome } from './EmptyStateWelcome';
 import { ProjectSelector } from './ProjectSelector';
 import { ProjectCardGrid } from './ProjectCardGrid';
 import { Project } from '@/utils/projectUtils';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import './ContentPanel.css';
 
 interface ContentPanelProps {
     selectedItemId: string;
     project: Project | null;
-    insightChain: any;
     onProjectUpdate: (project: Project) => void;
     cleaningTrigger: number;
-    onProjectSelect?: (project: Project) => void;
     onFilesUploaded?: (files: any[], sampledFlags: boolean[]) => void;
 }
 
 export function ContentPanel({
     selectedItemId,
     project,
-    insightChain,
     onProjectUpdate,
     cleaningTrigger,
-    onProjectSelect,
     onFilesUploaded
 }: ContentPanelProps) {
-    const { t } = useI18n();
     const { records: evidenceRecords } = useEvidence();
     const projectRef = useRef<HTMLDivElement>(null);
     const cleaningRef = useRef<HTMLDivElement>(null);
     const insightsRef = useRef<HTMLDivElement>(null);
     const reportRef = useRef<HTMLDivElement>(null);
 
-    const [projectCollapsed, setProjectCollapsed] = useState(false);
-
-    useEffect(() => {
-        if (project) {
-            setProjectCollapsed(true);
-        } else {
-            setProjectCollapsed(false);
-        }
-    }, [project]);
+    // 移除自动折叠逻辑，改为由selectedItemId控制渲染
+    // 原逻辑：有project时自动折叠，导致ProjectCardGrid永远不显示
+    // 新逻辑：通过selectedItemId判断是否显示ProjectCardGrid
 
     useEffect(() => {
         const refs: Record<string, React.RefObject<HTMLDivElement>> = {
@@ -87,40 +74,43 @@ export function ContentPanel({
             <div
                 ref={projectRef}
                 id="project-selection"
-                className={`project-section ${projectCollapsed ? 'collapsed' : 'expanded'}`}
+                className={`project-section ${selectedItemId === 'project-selection' && project ? 'expanded' : 'collapsed'}`}
             >
-                {projectCollapsed && project ? (
-                    <div className="project-header-compact">
-                        <ProjectSelector
-                            currentProject={project}
-                            onProjectSelect={(selectedProject) => {
-                                if (selectedProject) {
-                                    onProjectUpdate(selectedProject);
-                                }
-                            }}
-                            onNewProject={() => setProjectCollapsed(false)}
-                        />
-                        <button
-                            className="btn-ghost btn-sm"
-                            onClick={() => setProjectCollapsed(false)}
-                            title="展开项目列表"
-                        >
-                            <ChevronDown size={16} />
-                        </button>
-                    </div>
-                ) : (
-                    // expanded态：显示项目卡片网格或欢迎界面
+                {selectedItemId === 'project-selection' ? (
+                    // 当导航选中"项目选择"时，显示ProjectCardGrid或EmptyStateWelcome
                     project ? (
                         <ProjectCardGrid
                             currentProject={project}
                             onProjectSelect={(selectedProject) => {
                                 onProjectUpdate(selectedProject);
-                                setProjectCollapsed(true); // 选择后自动折叠
+                                // 切换项目后保持在项目选择页面
                             }}
-                            onNewProject={handleProjectUpload}
+                            onNewProject={() => {
+                                // 点击新建项目时触发文件上传
+                                if (onFilesUploaded) {
+                                    // 这里需要触发文件选择器，暂时留空
+                                }
+                            }}
                         />
                     ) : (
                         <EmptyStateWelcome onFilesUploaded={handleProjectUpload} />
+                    )
+                ) : (
+                    // 当导航选中其他section时，显示collapsed的ProjectSelector
+                    project && (
+                        <div className="project-header-compact">
+                            <ProjectSelector
+                                currentProject={project}
+                                onProjectSelect={(selectedProject) => {
+                                    if (selectedProject) {
+                                        onProjectUpdate(selectedProject);
+                                    }
+                                }}
+                                onNewProject={() => {
+                                    // 点击新建项目，这里不需要特殊处理
+                                }}
+                            />
+                        </div>
                     )
                 )}
             </div>
@@ -144,8 +134,10 @@ export function ContentPanel({
                         <h2 className="section-title">洞察分析</h2>
                     </div>
                     <InsightChainFlow
-                        project={project}
-                        fileName={project.files?.[0]?.name || ''}
+                        columns={project.files?.[0]?.columns?.map(c => c.name) || []}
+                        rowCount={project.files?.[0]?.rowCount || 0}
+                        tableName={project.files?.[0]?.tableName}
+                        fileName={project.files?.[0]?.originalName || project.files?.[0]?.name}
                         hideTitle={true}
                     />
                 </div>

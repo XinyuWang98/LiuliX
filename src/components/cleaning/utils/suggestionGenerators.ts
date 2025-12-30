@@ -23,8 +23,7 @@ const DUPLICATE_THRESHOLD = 10;
  * 从DuckDB或内存中读取数据
  */
 export async function fetchDataForAnalysis(
-    activeFile: any,
-    t: (key: string, params?: any) => string
+    activeFile: any
 ): Promise<any[]> {
     let data: any[] = [];
 

@@ -18,7 +18,7 @@ export function LogDownloadButton() {
 
     const handleDownload = () => {
         logCapture.download('markdown');
-        alert(t('settings.testLogDownloadSuccess') || '✅ Logs downloaded!');
+        alert(t('settings.testLogDownloadSuccess'));
     };
 
     return (

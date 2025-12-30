@@ -125,9 +125,106 @@ export const settings = {
         charts: 'Output Charts',
     },
 
+    // SimHei Font
+    simheiTitle: 'Chinese Chart Support (SimHei)',
+    simheiSize: '~10MB',
+    simheiDesc: 'Automatically downloads font file to ensure correct Chinese display in charts.',
+
+    // Local Model Selector & Status
+    ollamaChecking: 'Checking Ollama Service...',
+    ollamaNotRunning: 'Ollama Not Running',
+    ollamaDownload: 'Download & Install',
+    ollamaConnected: 'Ollama Connected ({count} models)',
+    ollamaRefresh: 'Refresh List',
+    installedModels: 'Installed Models',
+    recommendedModels: 'Recommended Models (Click to Download)',
+    customModel: '✏️ Custom Model...',
+    customModelPlaceholder: 'Enter Ollama model tag, e.g., llama3:8b',
+    downloading: 'Preparing Download...',
+    downloadSuccess: 'Download Success!',
+    downloadFailed: '❌ Download Failed',
+    selectModelTip: '💡 Please select and download a model from the recommendations above',
+    connectionError: 'Cannot connect to backend service',
+    qwen7bDesc: 'Recommended! Specialized for Code/SQL, High Quality, Requires 16GB+ RAM',
+    qwen14bDesc: 'Top-tier Professional Model, Requires 32GB+ RAM',
+    qwen3bDesc: '⚠️ Not Recommended (Low Quality, Testing Only)',
+    qwenGeneralDesc: 'General Chat Model',
+
     // Model Call Logic
     modelLogicTitle: 'How It Works',
     modelLogicLocal: 'Local model (Ollama) is prioritized - data stays offline',
     modelLogicAPI: 'Uses Cloud API - requires a valid API Key',
-    modelLogicFallback: 'Falls back to Cloud API if local model is unavailable'
+    modelLogicFallback: 'If local model is enabled, it will be prioritized with API Key as fallback',
+
+    // MVP Stage Limitations
+    mvpNotAvailable: 'Not available in MVP',
+
+    // User Role Settings
+    userRole: 'User Role',
+    userRoleDesc: 'Select your role for a tailored experience',
+    roleAnalyst: 'Data Analyst',
+    roleAnalystDesc: 'Familiar with SQL/Python\nFull control required',
+    roleAnalystFeatures: '• SQL Editable\n• Detailed Config\n• Deep Analysis Priority',
+    roleExpert: 'Business Expert',
+    roleExpertDesc: 'Focus on Insights\nEfficiency & Automation',
+    roleExpertFeatures: '• Standardization\n• One-click Actions\n• Auto-generated Results',
+    roleSwitchHint: 'ℹ️ Switching roles applies configuration immediately. AI settings and language are managed separately.',
+    currentConfigDetail: 'Current Config Details',
+    cleaningEngine: 'Cleaning Engine',
+    cleaningRouter: 'Router Quick Templates',
+    cleaningAI: 'AI Deep Analysis',
+    minSuggestions: 'Min Suggestions',
+    showSQL: 'Show SQL',
+    defaultExpanded: 'Default Expanded',
+    defaultCollapsed: 'Default Collapsed',
+    reportTemplate: 'Report Template',
+    templateBusiness: 'Business Concise',
+    templateTechnical: 'Technical Detailed',
+
+    // Data Privacy Options
+    dataPrivacy: {
+        autoSanitize: 'Auto Sanitize',
+        autoSanitizeBadge: 'Recommended',
+        autoSanitizeDesc: 'Send only column names and stats, no raw data values',
+        sendRaw: 'Send Raw Data',
+        sendRawDesc: 'Send sampled data to Cloud API for more accurate suggestions',
+        localModelHint: 'When using local model, data never leaves your browser',
+    },
+
+    // Data Analysis Strategy Options
+    dataAnalysis: {
+        samplingHint: 'Select AI sampling rows (affects speed and accuracy)',
+        fastMode: 'Fast Mode',
+        fastModeBadge: 'Coming Soon',
+        fastModeDesc: 'AI Sample: 500 rows | Inference: ~2s',
+        balancedMode: 'Balanced Mode (MVP)',
+        balancedModeBadge: 'Default',
+        balancedModeDesc: 'AI Sample: 1000 rows | Inference: ~5s',
+        preciseMode: 'Precise Mode',
+        preciseModeBadge: 'Coming Soon',
+        preciseModeDesc: 'AI Sample: 5000 rows (Dynamic) | Inference: ~10s',
+    },
+
+    // Loading State
+    loadingState: {
+        releasing: 'Releasing resources...',
+        initializing: 'Initializing Neural Engine...',
+    },
+
+    testLog: 'Test Logs',
+    testLogDownload: 'Download Test Logs',
+    testLogDownloadDesc: 'Export full test logs (all operations, errors, performance data)',
+    testLogDownloadSuccess: '✅ Logs downloaded!\n\nFormat: Markdown\nUsage: Submit Issue, Diagnostics',
+
+    hardwareStrong: 'Powerful',
+    hardwareMedium: 'Moderate',
+    hardwareWeak: 'Weak',
+    hardwareScore: 'Score: {score}',
+    hardwareRecLocal: 'Local Model Recommended',
+    hardwareRecCloud: 'Cloud Model Recommended',
+    hardwareUnknown: 'Hardware unknown',
+
+    // Language Names
+    langZhCN: '中文',
+    langEnUS: 'English',
 };

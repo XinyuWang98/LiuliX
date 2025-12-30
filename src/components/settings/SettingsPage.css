@@ -1,19 +1,14 @@
 /* LiuliX Settings - Ascension Theme */
+/* 注意：颜色变量使用全局 variables.css 定义 */
+/* 本文件仅定义 Settings 模态框专属变量 */
 
 :root {
-    /* Core Colors from Visual Spec */
-    --liuli-bg: #010305;
+    /* Settings Modal 专属变量 */
     --liuli-glass: rgba(255, 255, 255, 0.03);
     --liuli-glass-hover: rgba(255, 255, 255, 0.06);
     --liuli-glass-active: rgba(255, 255, 255, 0.1);
 
-    --border-light: rgba(255, 255, 255, 0.15);
     --border-highlight: rgba(255, 255, 255, 0.4);
-
-    --text-primary: #ffffff;
-    --text-secondary: rgba(180, 200, 255, 0.6);
-    --text-accent: #00f2fe;
-
     --glow-primary: rgba(0, 242, 254, 0.3);
 
     /* Layout */
@@ -21,16 +16,18 @@
     --modal-height: 85vh;
 }
 
-/* Modal Overlay - Deep Space Backdrop */
+
+/* Modal Overlay - Deep Space Backdrop with Radial Glow */
 .settings-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(1, 3, 5, 0.85);
-    /* Deep dark background */
-    backdrop-filter: blur(8px);
+    /* Ascension Polish: Radial gradient to reveal the Light Beam in the center while keeping edges dark */
+    background: radial-gradient(circle at center, rgba(30, 40, 60, 0.2) 0%, rgba(1, 3, 5, 0.95) 100%);
+    backdrop-filter: blur(4px);
+    /* Reduced blur on overlay to see the data rain clearly */
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -44,9 +41,11 @@
     height: var(--modal-height);
     max-height: 900px;
     display: flex;
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    /* Radial Vignette: Clear center, darkening edges */
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 20%, rgba(0, 0, 0, 0.4) 100%);
+    backdrop-filter: blur(200px);
+    /* Heavier blur for the object itself */
+    -webkit-backdrop-filter: blur(200px);
 
     border: 1px solid var(--border-light);
     border-top: 1px solid var(--border-highlight);
@@ -55,7 +54,7 @@
 
     box-shadow:
         0 40px 80px -20px rgba(0, 0, 0, 0.6),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
     /* Inner stroke */
 
     overflow: hidden;
@@ -153,7 +152,11 @@
     flex: 1;
     padding: 40px 48px;
     overflow-y: auto;
-    background: transparent;
+    overflow-y: auto;
+    /* Fix: Gradient background to improve legibility at the bottom */
+    /* background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(1, 3, 5, 0.5) 100%); */
+    /* Extra blur layer for the content area */
+    /* backdrop-filter: blur(10px); */
 }
 
 .settings-section-title {
@@ -212,24 +215,35 @@
 }
 
 .settings-row:hover {
-    background: var(--liuli-glass-hover);
-    border-color: rgba(255, 255, 255, 0.25);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.settings-label {
+.settings-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    /* Take available space */
+}
+
+.settings-row-label {
     font-size: 16px;
     font-weight: 500;
     color: var(--text-primary);
-    display: block;
-    margin-bottom: 4px;
 }
 
-.settings-description {
+.settings-row-desc {
     font-size: 13px;
     color: var(--text-secondary);
     line-height: 1.4;
+    max-width: 80%;
+    /* Prevent too wide description */
+}
+
+.settings-row-action {
+    flex-shrink: 0;
+    margin-left: 16px;
 }
 
 /* Inputs & Buttons - Glass Style */
@@ -252,7 +266,121 @@
     background: rgba(0, 0, 0, 0.3);
 }
 
+/* API Key Section Layout (Missing Styles Fix) */
+.api-keys-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.api-key-item {
+    background: var(--liuli-glass);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.api-key-item:hover {
+    background: var(--liuli-glass-hover);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.api-key-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.api-key-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.api-key-model-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.api-key-priority-badge {
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+.api-key-input-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.api-key-input {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.api-test-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.api-test-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.api-test-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.api-test-btn.success {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.3);
+    background: rgba(74, 222, 128, 0.1);
+}
+
+.api-test-btn.error {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+    background: rgba(248, 113, 113, 0.1);
+}
+
 /* Switch Component (Custom) */
+.switch-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.switch-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
 .switch-root {
     width: 44px;
     height: 24px;
@@ -288,6 +416,29 @@
     box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
 }
 
+/* Switch Track - 内部轨道样式 */
+.switch-track {
+    width: 44px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.switch-track.checked {
+    background: rgba(0, 242, 254, 0.2);
+    border-color: rgba(0, 242, 254, 0.5);
+}
+
+.switch-track.checked .switch-thumb {
+    left: 20px;
+    background: var(--text-accent);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+}
+
 /* Themes Grid */
 .theme-card {
     background: rgba(255, 255, 255, 0.05);
@@ -317,15 +468,57 @@
     cursor: not-allowed;
 }
 
+/* Hardware Detection Section */
+.hardware-detection-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-m);
+    padding: var(--gap-m);
+    background: var(--liuli-glass);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-m);
+}
+
+.score-desc {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* 硬件检测图标 */
+.hardware-icon {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
 /* Hardware Detection Badge */
 .score-badge {
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--radius-s);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
     color: #000;
-    /* Contrast text on bright tag */
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+/* 硬件评分徽章 - 强（>= 80分）*/
+.score-badge-strong {
+    background-color: var(--recommend-color);
+}
+
+/* 硬件评分徽章 - 中（60-79分）*/
+.score-badge-warning {
+    background-color: var(--color-quality-warning);
+}
+
+/* 硬件评分徽章 - 弱（< 60分）*/
+.score-badge-weak {
+    background-color: var(--bg-accent);
 }
 
 /* Animations */
@@ -375,4 +568,509 @@
 
 .settings-content::-webkit-scrollbar-track {
     background: transparent;
+}
+
+/* --- Component Specific Styles (Added for Detail Pages) --- */
+
+/* Data Analysis & Privacy Radio Options */
+.settings-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-option {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: var(--liuli-glass);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-items: flex-start;
+}
+
+.settings-option:hover {
+    background: var(--liuli-glass-hover);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.settings-option:has(input:checked) {
+    background: rgba(0, 242, 254, 0.05);
+    border-color: var(--text-accent);
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+}
+
+.settings-option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+.settings-option input[type="radio"] {
+    margin-top: 4px;
+    accent-color: var(--text-accent);
+}
+
+/* Checkbox 圆形样式（模拟radio外观，保持多选功能） */
+.settings-modal-container input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.settings-modal-container input[type="checkbox"]:hover {
+    border-color: var(--text-accent);
+}
+
+.settings-modal-container input[type="checkbox"]:checked {
+    background: var(--text-accent);
+    border-color: var(--text-accent);
+}
+
+/* Analysis Package checkbox 圆形样式 */
+/* 包卡片间距 */
+.analysis-packages-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+}
+
+.pkg-checkbox {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px;
+    min-height: 13px;
+    max-width: 13px;
+    max-height: 13px;
+    padding: 0 !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.pkg-checkbox:hover {
+    border-color: var(--text-accent) !important;
+}
+
+.pkg-checkbox:checked {
+    background: transparent !important;
+    border-color: var(--text-accent) !important;
+}
+
+/* 选中状态内部青色圆点 */
+.pkg-checkbox:checked::after {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--text-accent);
+    border-radius: 50%;
+}
+
+.pkg-checkbox-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.option-content {
+    flex: 1;
+}
+
+.option-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.option-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.badge.coming-soon {
+    background: rgba(255, 165, 0, 0.15);
+    color: #ffb700;
+    border: 1px solid rgba(255, 165, 0, 0.3);
+}
+
+/* Local Model Selector & Ollama Status */
+.local-model-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ollama-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.ollama-status.online {
+    background: rgba(0, 255, 150, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.ollama-status.offline {
+    background: rgba(255, 50, 50, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.ollama-status.checking {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+}
+
+.ollama-refresh-btn {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.ollama-refresh-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ollama-download-link {
+    margin-left: auto;
+    color: inherit;
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+/* Custom Dropdown */
+.model-dropdown-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.model-dropdown-trigger {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--liuli-glass);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.model-dropdown-trigger:hover,
+.model-dropdown-trigger.open {
+    background: var(--liuli-glass-hover);
+    border-color: var(--text-accent);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.1);
+}
+
+.model-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    /* Glassmorphism for dropdown */
+    background: rgba(10, 15, 30, 0.85);
+    /* Slightly darker glass for dropdown legibility */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    z-index: 1100;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 8px;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.model-dropdown-group-label {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.model-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.1s;
+}
+
+.model-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.model-dropdown-item.selected {
+    background: rgba(0, 242, 254, 0.1);
+    color: var(--text-accent);
+}
+
+.model-check {
+    opacity: 0;
+    width: 16px;
+}
+
+.model-check.visible {
+    opacity: 1;
+}
+
+.model-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.model-size,
+.model-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+/* Analysis Packages */
+.analysis-pkg-card {
+    background: var(--liuli-glass);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.analysis-pkg-card:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: var(--liuli-glass-hover);
+}
+
+.analysis-pkg-card.expanded {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-highlight);
+}
+
+.analysis-pkg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+.analysis-pkg-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.analysis-pkg-content {
+    border-top: 1px solid var(--border-light);
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* 方法卡片网格布局 - 2列 */
+.analysis-methods-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap-s);
+}
+
+.method-grid-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.chart-tag {
+    display: inline-block;
+    font-size: 11px;
+    background: rgba(0, 242, 254, 0.1);
+    color: var(--text-accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 4px;
+}
+
+/* 包徽章样式 - 统一内置/推荐样式 */
+.pkg-badge {
+    display: inline-block;
+    font-size: var(--fs-xxs);
+    padding: 2px 8px;
+    border-radius: var(--radius-s);
+    font-weight: var(--fw-medium);
+}
+
+.pkg-badge-builtin {
+    background: rgba(100, 149, 237, 0.15);
+    color: #6495ed;
+}
+
+.pkg-badge-recommend {
+    background: rgba(0, 242, 254, 0.15);
+    color: var(--text-accent);
+}
+
+/* 包大小徽章 */
+.pkg-size-badge {
+    font-size: var(--fs-xxs);
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+}
+
+/* 模型调用逻辑说明 */
+.model-logic-info {
+    margin-top: var(--gap-m);
+    padding: 14px;
+    background: var(--bg-panel);
+    border-radius: var(--radius-m);
+    border-left: 3px solid var(--text-accent);
+}
+
+.model-logic-title {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--gap-s);
+}
+
+.model-logic-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.model-logic-list li {
+    padding-left: var(--gap-m);
+    position: relative;
+}
+
+.model-logic-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--text-accent);
+}
+
+/* ========== Font Setting Card ========== */
+.font-setting-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-m);
+    padding: var(--gap-m);
+    margin-top: var(--gap-m);
+    background: var(--liuli-glass);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-m);
+}
+
+.font-setting-main {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-m);
+    flex: 1;
+}
+
+.font-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-m);
+    color: var(--text-accent);
+    flex-shrink: 0;
+}
+
+.font-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+}
+
+.font-header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+}
+
+.font-title {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-primary);
+}
+
+.font-size-badge {
+    font-size: var(--fs-xxs);
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+}
+
+.font-desc {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Switch位置修复 - 确保在卡片右侧 */
+.settings-group>.switch-root {
+    flex-shrink: 0;
 }
