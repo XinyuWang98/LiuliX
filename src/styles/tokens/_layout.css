@@ -1,0 +1,32 @@
+:root {
+    /* ========== 3. Layout (Spacing, Radius, Z-Index) ========== */
+
+    /* Spacing System */
+    --gap-xxs: 2px;
+    --gap-xs: 4px;
+    --gap-s: 8px;
+    --gap-m: 16px;
+    --gap-l: 24px;
+    --gap-xl: 32px;
+
+    /* Radius System */
+    --radius-s: 4px;
+    --radius-m: 8px;
+    --radius-l: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* Layout Dimensions */
+    --nav-height: 64px;
+    --sidebar-left-width: 280px;
+    --sidebar-right-width: 320px;
+    --modal-height: 85vh;
+    /* From SettingsPage.css */
+
+    /* Z-Index Layers */
+    --z-base: 1;
+    --z-sticky: 100;
+    --z-dropdown: 900;
+    --z-modal: 1000;
+    --z-toast: 2000;
+}

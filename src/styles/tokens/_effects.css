@@ -1,0 +1,59 @@
+:root {
+    /* ========== 4. Effects (Shadows, Glass, Animation) ========== */
+
+    /* Light Beams (From LiuliX Spec) */
+    --beam-core: rgba(200, 230, 255, 0.25);
+    --beam-glow: rgba(50, 100, 255, 0.3);
+    --beam-highlight: rgba(255, 255, 255, 0.8);
+
+    /* Glassmorphism System */
+
+    /* 1. Surfaces */
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    /* Standard */
+    --glass-secondary: rgba(255, 255, 255, 0.05);
+    --glass-hover: rgba(255, 255, 255, 0.06);
+    --glass-active: rgba(255, 255, 255, 0.1);
+    --glass-heavy: rgba(20, 20, 23, 0.7);
+
+    /* [NEW] Vignette Glass (Darkening Edges) */
+    --glass-vignette-bg: radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 20%, rgba(60, 64, 70, 0.4) 100%);
+
+    /* [NEW] Ultra Clear Glass */
+    --glass-ultra-clear-bg: linear-gradient(165deg, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.005) 100%);
+
+    /* 2. Blurs */
+    --blur-light: 8px;
+    --blur-medium: 12px;
+    /* Standard Liuli Blur */
+    --blur-heavy: 20px;
+    --blur-heavy-80: 80px;
+    /* [NEW] Deep Blur */
+    --blur-ultra: 200px;
+    /* [NEW] Ultra Blur for Monolith */
+
+    /* 3. Borders */
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-border-light: rgba(255, 255, 255, 0.08);
+    /* Fainter */
+    --glass-border-highlight: rgba(255, 255, 255, 0.4);
+    /* Top highlight */
+
+    /* Shadows & Glows */
+    --shadow-light: rgba(255, 255, 255, 0.05);
+    --shadow-dark: rgba(0, 0, 0, 0.3);
+    --shadow-lv1: 0 1px 4px rgba(0, 0, 0, 0.15);
+    --shadow-lv2: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 16px rgba(0, 245, 255, 0.4);
+    --glow-primary: rgba(0, 242, 254, 0.3);
+    --forest-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --forest-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+
+    /* Animations */
+    --transition-fast: 0.1s;
+    --transition-s: 0.15s;
+    --transition-m: 0.3s;
+    --transition-l: 0.6s;
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}

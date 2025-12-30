@@ -1,0 +1,6 @@
+/* LiuliX Design System - Design Token Entry Point */
+@import './_colors.css';
+@import './_typography.css';
+@import './_layout.css';
+@import './_effects.css';
+@import './_components.css';

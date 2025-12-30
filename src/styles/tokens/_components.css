@@ -1,0 +1,54 @@
+:root {
+    /* ========== 5. Components (Specific) ========== */
+
+    /* Buttons */
+    --btn-radius: var(--radius-m);
+    --btn-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --btn-transition: 0.2s ease;
+    --btn-font-weight: var(--fw-medium);
+    --btn-padding-y: 8px;
+    --btn-padding-x: 16px;
+    --btn-height-sm: 36px;
+
+    /* Inputs */
+    --input-bg: rgba(0, 0, 0, 0.3);
+
+    /* Icons */
+    --icon-s: 16px;
+    --icon-m: 20px;
+    --icon-l: 24px;
+    --icon-xl: 32px;
+    --icon-color: var(--text-primary);
+    --icon-hover: var(--bg-accent);
+
+    /* Progress Bar */
+    --progress-height: 4px;
+    --progress-bg: #333333;
+    --progress-fill: var(--bg-accent);
+    --progress-radius: 2px;
+
+    /* Scrollbar */
+    --scrollbar-track: rgba(255, 255, 255, 0.02);
+    --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+
+    /* DataGrid */
+    --grid-row-height: 40px;
+    --grid-col-width: 150px;
+    --grid-min-height: 400px;
+    --grid-header-z: 10;
+    --highlight-row: rgba(255, 200, 100, 0.15);
+    --highlight-col: rgba(100, 150, 255, 0.12);
+    --highlight-cell: rgba(255, 200, 100, 0.35);
+
+    /* Modals */
+    --modal-backdrop: rgba(0, 0, 0, 0.6);
+
+    /* Tree View */
+    --tree-row-height: 28px;
+    --tree-indent: 20px;
+
+    /* Stat Cards */
+    --stat-card-min-width: 120px;
+    --stat-bar-height: 4px;
+}

@@ -1,0 +1,66 @@
+:root {
+    /* ========== 1. Colors (Colors) ========== */
+
+    /* Ascension Theme Palette */
+    --liuli-bg: #010305;
+    /* Deep Space Black */
+    --bg-main: #1C1C1E;
+    /* Legacy: Main Background */
+    --bg-panel: rgba(44, 44, 46, 0.75);
+    /* Legacy: Panel Background */
+    --bg-secondary: #252527;
+    /* Secondary Background */
+    --bg-element: #2C2C2E;
+
+    /* Text Colors */
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(235, 245, 255, 0.6);
+    /* LiuliX Cooled Grey */
+    --text-tertiary: #6C6C6E;
+    --text-dim: rgba(235, 245, 255, 0.3);
+    --text-accent: #00f2fe;
+    /* Neon Cyan */
+    --text-inverse: #FFFFFF;
+
+    /* Brand Colors */
+    --primary: hsl(231, 76%, 66%);
+    --primary-hover: hsl(231, 76%, 56%);
+    --primary-active: hsl(231, 76%, 46%);
+    --bg-accent: #007AFF;
+    /* Legacy Blue */
+
+    /* Functional Colors */
+    --success: #30D158;
+    --warning: #FF453A;
+    --error: var(--warning);
+    --info: #0A84FF;
+
+    /* Chart Colors */
+    --chart-primary: rgba(102, 126, 234, 1);
+    --chart-primary-bg: rgba(102, 126, 234, 0.6);
+    --chart-secondary: rgba(75, 192, 192, 1);
+    --chart-secondary-bg: rgba(75, 192, 192, 0.6);
+    --chart-success: rgba(76, 175, 80, 1);
+    --chart-success-bg: rgba(76, 175, 80, 0.6);
+    --chart-warning: rgba(255, 193, 7, 1);
+    --chart-warning-bg: rgba(255, 193, 7, 0.6);
+    --chart-danger: rgba(244, 67, 54, 1);
+    --chart-danger-bg: rgba(244, 67, 54, 0.6);
+
+    /* Feature Colors */
+    --color-quality-critical: #ef4444;
+    --color-quality-warning: #f59e0b;
+    --color-quality-healthy: #10b981;
+    --color-retry-button: #3b82f6;
+    --color-retry-hover: #2563eb;
+    --recommend-color: #4ade80;
+
+    /* Forest Theme */
+    --forest-bg: #0f172a;
+    --forest-card-bg: rgba(30, 41, 59, 0.6);
+    --forest-card-border: rgba(96, 165, 250, 0.3);
+    --forest-spine-color: #3b82f6;
+    --forest-line-color: #60a5fa;
+    --forest-accent: #3b82f6;
+    --forest-text-muted: #94a3b8;
+}

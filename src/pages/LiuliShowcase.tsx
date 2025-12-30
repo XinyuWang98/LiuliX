@@ -118,6 +118,39 @@ export const LiuliShowcase = () => {
                     </div>
                 </div>
 
+                {/* [NEW] Glass Variants (v2026) */}
+                <div className="showcase-section">
+                    <div className="showcase-section-title">Glass Variants (v2026 Updates)</div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                        {/* 1. Vignette (Dark Edge) - For Modals */}
+                        <LiuliGlass
+                            variant="vignette"
+                            blur="ultra"
+                            style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                            <div style={{ textAlign: 'center' }}>
+                                <p className="demo-label" style={{ color: '#fff' }}>Variant: Vignette</p>
+                                <p className="demo-label" style={{ color: 'var(--text-dim)' }}>Blur: Ultra (200px)</p>
+                                <LiuliTag variant="primary" className="mt-2">Settings Modal Style</LiuliTag>
+                            </div>
+                        </LiuliGlass>
+
+                        {/* 2. Ultra Clear - For Overlays */}
+                        <LiuliGlass
+                            variant="ultra-clear"
+                            blur="standard"
+                            style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                            <div style={{ textAlign: 'center' }}>
+                                <p className="demo-label" style={{ color: '#fff' }}>Variant: Ultra Clear</p>
+                                <p className="demo-label" style={{ color: 'var(--text-dim)' }}>Blur: Standard</p>
+                                <LiuliTag variant="neutral" className="mt-2">Overlay / HUD Style</LiuliTag>
+                            </div>
+                        </LiuliGlass>
+                    </div>
+                </div>
+
                 {/* 4. Cards Example (Composition) */}
                 <LiuliGlass className="showcase-section" style={{ padding: 0 }}>
                     <div style={{ padding: 24, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>

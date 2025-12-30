@@ -1,21 +1,5 @@
 /* LiuliX Settings - Ascension Theme */
-/* 注意：颜色变量使用全局 variables.css 定义 */
-/* 本文件仅定义 Settings 模态框专属变量 */
-
-:root {
-    /* Settings Modal 专属变量 */
-    --liuli-glass: rgba(255, 255, 255, 0.03);
-    --liuli-glass-hover: rgba(255, 255, 255, 0.06);
-    --liuli-glass-active: rgba(255, 255, 255, 0.1);
-
-    --border-highlight: rgba(255, 255, 255, 0.4);
-    --glow-primary: rgba(0, 242, 254, 0.3);
-
-    /* Layout */
-    --sidebar-width: 260px;
-    --modal-height: 85vh;
-}
-
+/* 注意：颜色变量使用全局 variables.css 及 src/styles/tokens 定义 */
 
 /* Modal Overlay - Deep Space Backdrop with Radial Glow */
 .settings-modal-overlay {
@@ -27,7 +11,6 @@
     /* Ascension Polish: Radial gradient to reveal the Light Beam in the center while keeping edges dark */
     background: radial-gradient(circle at center, rgba(30, 40, 60, 0.2) 0%, rgba(1, 3, 5, 0.95) 100%);
     backdrop-filter: blur(4px);
-    /* Reduced blur on overlay to see the data rain clearly */
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -38,24 +21,26 @@
 /* Modal Container - The "Crystal Monolith" */
 .settings-modal-container {
     width: 1100px;
-    height: var(--modal-height);
+    height: 85vh;
+    /* Replaced local var --modal-height */
     max-height: 900px;
     display: flex;
-    /* Radial Vignette: Clear center, darkening edges */
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 20%, rgba(0, 0, 0, 0.4) 100%);
-    backdrop-filter: blur(200px);
-    /* Heavier blur for the object itself */
-    -webkit-backdrop-filter: blur(200px);
+
+    /* [MIGRATED] Use Token: Vignette Variant */
+    background: var(--glass-vignette-bg);
+
+    /* [MIGRATED] Use Token: Ultra Blur */
+    backdrop-filter: blur(var(--blur-ultra));
+    -webkit-backdrop-filter: blur(var(--blur-ultra));
 
     border: 1px solid var(--border-light);
     border-top: 1px solid var(--border-highlight);
-    /* Fresnel highlight */
-    border-radius: 24px;
+    border-radius: var(--radius-xl);
+    /* Replaced 24px */
 
     box-shadow:
         0 40px 80px -20px rgba(0, 0, 0, 0.6),
         inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-    /* Inner stroke */
 
     overflow: hidden;
     color: var(--text-primary);

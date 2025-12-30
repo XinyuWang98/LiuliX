@@ -1,78 +1,29 @@
 /* LiuliX Design System - Core Atomic Styles */
 
 /* Base Variables Refined for Component Level - Strictly Matching Spec 3.1 */
-:root {
-    /* 1. Environment - Deep Space */
-    --liuli-bg: #010305;
-    /* Spec 3.1: Deep Blue-Black */
-
-    /* 2. Light Source */
-    --beam-core: rgba(200, 230, 255, 0.25);
-    /* Brightened from 0.15 for better visibility */
-    --beam-glow: rgba(50, 100, 255, 0.3);
-    /* Brightened */
-
-    /* 3. Material - Optical Glass */
-    --liuli-glass-light: rgba(255, 255, 255, 0.03);
-    --liuli-glass-medium: rgba(255, 255, 255, 0.03);
-    --liuli-glass-heavy: rgba(20, 20, 23, 0.7);
-
-    /* 4. Typography (Mapped from Legacy --text-*) */
-    --liuli-text-primary: #FFFFFF;
-    --liuli-text-secondary: rgba(235, 245, 255, 0.6);
-    /* Cool Blue-Grey */
-    --liuli-text-dim: rgba(235, 245, 255, 0.3);
-    --liuli-font-sans: "Inter", -apple-system, sans-serif;
-    --liuli-font-mono: "JetBrains Mono", "Fira Code", monospace;
-
-    /* 5. Spacing (Mapped from Legacy --gap-*) */
-    --liuli-space-xs: 4px;
-    --liuli-space-s: 8px;
-    --liuli-space-m: 16px;
-    --liuli-space-l: 24px;
-    --liuli-space-xl: 32px;
-
-    --liuli-border-light: rgba(255, 255, 255, 0.08);
-    --liuli-border-highlight: rgba(255, 255, 255, 0.4);
-    --liuli-border-side: rgba(255, 255, 255, 0.15);
-
-    --liuli-blur: 16px;
-    --liuli-glow-primary: 0 0 16px rgba(0, 122, 255, 0.3);
-
-    /* 6. Functional Colors */
-    --liuli-success: #30D158;
-    --liuli-warning: #FF453A;
-    --liuli-accent: #0A84FF;
-}
-
 /* =========================================
    0. Global Reset for Liuli Context
    ========================================= */
 .liuli-root {
-    color: var(--liuli-text-primary);
-    font-family: var(--liuli-font-sans);
+    color: var(--text-primary);
+    font-family: var(--font-family);
 }
 
 /* =========================================
    1. LiuliGlass (Container) - Spec 4.2
    ========================================= */
 .liuli-glass {
-    /* Spec 4.2: Linear Gradient Background */
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+    /* Default: Standard Glass */
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--blur-medium));
+    -webkit-backdrop-filter: blur(var(--blur-medium));
 
-    /* Spec 4.2: Blur 16px */
-    backdrop-filter: blur(var(--liuli-blur));
-    -webkit-backdrop-filter: blur(var(--liuli-blur));
+    border: 1px solid var(--glass-border);
+    border-top: 1px solid var(--glass-border-highlight);
+    border-left: 1px solid var(--glass-border-light);
 
-    /* Spec 4.2: Fresnel Borders */
-    border: 1px solid var(--liuli-border-light);
-    border-top: 1px solid var(--liuli-border-highlight);
-    border-left: 1px solid var(--liuli-border-side);
-
-    /* Spec 4.2: Radius 20px */
-    border-radius: 20px;
-
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lv2);
     transition: all var(--transition-m) var(--ease-out);
     position: relative;
     overflow: hidden;
@@ -80,14 +31,43 @@
 
 /* Variants */
 .liuli-glass.intensity-light {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(8px);
+    background: var(--glass-secondary);
+    backdrop-filter: blur(var(--blur-light));
 }
 
 .liuli-glass.intensity-heavy {
-    background: var(--liuli-glass-heavy);
-    backdrop-filter: blur(24px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    background: var(--glass-heavy);
+    backdrop-filter: blur(var(--blur-heavy));
+    box-shadow: var(--forest-shadow);
+}
+
+/* [NEW] Variant: Vignette (for Modals) */
+.liuli-glass.variant-vignette {
+    background: var(--glass-vignette-bg);
+    border: 1px solid var(--border-light);
+    border-top: 1px solid var(--border-highlight);
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.6);
+}
+
+/* [NEW] Variant: Ultra Clear (for Overlays) */
+.liuli-glass.variant-ultra-clear {
+    background: var(--glass-ultra-clear-bg);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* [NEW] Blur Overrides */
+.liuli-glass.blur-standard {
+    backdrop-filter: blur(var(--blur-medium));
+}
+
+.liuli-glass.blur-heavy {
+    backdrop-filter: blur(var(--blur-heavy-80));
+    -webkit-backdrop-filter: blur(var(--blur-heavy-80));
+}
+
+.liuli-glass.blur-ultra {
+    backdrop-filter: blur(var(--blur-ultra));
+    -webkit-backdrop-filter: blur(var(--blur-ultra));
 }
 
 /* Interactive */
@@ -96,16 +76,15 @@
 }
 
 .liuli-glass.interactive:hover {
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+    background: var(--glass-hover);
     transform: translateY(-2px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     border-top-color: rgba(255, 255, 255, 0.6);
-    /* Brighter highlight on hover */
 }
 
 /* Glow Effect */
 .liuli-glass.has-glow:hover {
-    box-shadow: var(--liuli-glow-primary);
+    box-shadow: var(--shadow-glow);
 }
 
 /* =========================================

@@ -1,19 +1,21 @@
 /* Ascension Theme Background - The "Digital Ascension" Atmosphere */
 
+/*
+  Ascension Background - The "Digital Stairway"
+  Strictly matches LandingPage.css visual effects
+*/
+
 .ascension-bg-container {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
     background-color: var(--liuli-bg);
-    /* #010305 Deep Blue-Black */
-    z-index: -1;
-    /* Always behind everything */
-    pointer-events: none;
     overflow: hidden;
 
-    /* 
+    /*
        Layer 1: The Core Beam (通天光柱)
        This creates the central vertical light source.
     */
