@@ -1,10 +1,10 @@
 import { useRef, useEffect } from 'react';
+import { useI18n } from '@/contexts/I18nContext';
 import { useEvidence } from '@/contexts/EvidenceContext';
 import { DataCleaner } from '../cleaning/DataCleaner';
 import { ReportGenerator } from '../report/ReportGenerator';
 import { InsightChainFlow } from '../insights/InsightChainFlow';
 import { EmptyStateWelcome } from './EmptyStateWelcome';
-import { ProjectSelector } from './ProjectSelector';
 import { ProjectCardGrid } from './ProjectCardGrid';
 import { Project } from '@/utils/projectUtils';
 import './ContentPanel.css';
@@ -24,16 +24,14 @@ export function ContentPanel({
     cleaningTrigger,
     onFilesUploaded
 }: ContentPanelProps) {
+    const { t } = useI18n();
     const { records: evidenceRecords } = useEvidence();
     const projectRef = useRef<HTMLDivElement>(null);
     const cleaningRef = useRef<HTMLDivElement>(null);
     const insightsRef = useRef<HTMLDivElement>(null);
     const reportRef = useRef<HTMLDivElement>(null);
 
-    // 移除自动折叠逻辑，改为由selectedItemId控制渲染
-    // 原逻辑：有project时自动折叠，导致ProjectCardGrid永远不显示
-    // 新逻辑：通过selectedItemId判断是否显示ProjectCardGrid
-
+    // 导航滚动逻辑
     useEffect(() => {
         const refs: Record<string, React.RefObject<HTMLDivElement>> = {
             'project-selection': projectRef,
@@ -46,22 +44,11 @@ export function ContentPanel({
         if (targetRef?.current) {
             targetRef.current.scrollIntoView({
                 behavior: 'smooth',
-                block: 'start'
+                block: 'start',
+                inline: 'nearest'
             });
         }
     }, [selectedItemId]);
-
-    // 项目加载后自动滚动到数据清洗
-    useEffect(() => {
-        if (project && cleaningRef.current) {
-            setTimeout(() => {
-                cleaningRef.current?.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }, 500); // 等待折叠动画完成
-        }
-    }, [project]);
 
     const handleProjectUpload = async (files: any[], sampledFlags: boolean[]) => {
         if (onFilesUploaded) {
@@ -71,54 +58,35 @@ export function ContentPanel({
 
     return (
         <div className="content-panel-v2">
+            {/* 项目选择区域 - 始终渲染在顶部，可通过滚动访问 */}
             <div
                 ref={projectRef}
                 id="project-selection"
-                className={`project-section ${selectedItemId === 'project-selection' && project ? 'expanded' : 'collapsed'}`}
+                className={`project-section ${selectedItemId === 'project-selection' ? 'expanded' : 'collapsed'}`}
             >
-                {selectedItemId === 'project-selection' ? (
-                    // 当导航选中"项目选择"时，显示ProjectCardGrid或EmptyStateWelcome
-                    project ? (
-                        <ProjectCardGrid
-                            currentProject={project}
-                            onProjectSelect={(selectedProject) => {
-                                onProjectUpdate(selectedProject);
-                                // 切换项目后保持在项目选择页面
-                            }}
-                            onNewProject={() => {
-                                // 点击新建项目时触发文件上传
-                                if (onFilesUploaded) {
-                                    // 这里需要触发文件选择器，暂时留空
-                                }
-                            }}
-                        />
-                    ) : (
-                        <EmptyStateWelcome onFilesUploaded={handleProjectUpload} />
-                    )
+                {project ? (
+                    <ProjectCardGrid
+                        currentProject={project}
+                        onProjectSelect={(selectedProject) => {
+                            onProjectUpdate(selectedProject);
+                        }}
+                        onNewProject={() => {
+                            // 点击新建项目时触发文件上传
+                            if (onFilesUploaded) {
+                                // 触发文件选择器
+                            }
+                        }}
+                    />
                 ) : (
-                    // 当导航选中其他section时，显示collapsed的ProjectSelector
-                    project && (
-                        <div className="project-header-compact">
-                            <ProjectSelector
-                                currentProject={project}
-                                onProjectSelect={(selectedProject) => {
-                                    if (selectedProject) {
-                                        onProjectUpdate(selectedProject);
-                                    }
-                                }}
-                                onNewProject={() => {
-                                    // 点击新建项目，这里不需要特殊处理
-                                }}
-                            />
-                        </div>
-                    )
+                    <EmptyStateWelcome onFilesUploaded={handleProjectUpload} />
                 )}
             </div>
 
+            {/* 数据清洗 Section */}
             {project && (
                 <div ref={cleaningRef} id="cleaning" className="content-section">
                     <div className="section-header">
-                        <h2 className="section-title">数据清洗建议</h2>
+                        <h2 className="section-title">{t('exploration.sections.cleaning')}</h2>
                     </div>
                     <DataCleaner
                         project={project}
@@ -128,10 +96,11 @@ export function ContentPanel({
                 </div>
             )}
 
+            {/* 洞察分析 Section */}
             {project && (
                 <div ref={insightsRef} id="insights" className="content-section">
                     <div className="section-header">
-                        <h2 className="section-title">洞察分析</h2>
+                        <h2 className="section-title">{t('exploration.sections.insights')}</h2>
                     </div>
                     <InsightChainFlow
                         columns={project.files?.[0]?.columns?.map(c => c.name) || []}
@@ -143,11 +112,11 @@ export function ContentPanel({
                 </div>
             )}
 
-            {/* Section 3: Analysis Report */}
+            {/* 分析报告 Section */}
             {project && evidenceRecords.length > 0 && (
                 <div ref={reportRef} id="report" className="content-section">
                     <div className="section-header">
-                        <h2 className="section-title">分析报告</h2>
+                        <h2 className="section-title">{t('exploration.sections.report')}</h2>
                         <span className="evidence-badge">
                             已采纳 {evidenceRecords.length} 条
                         </span>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useI18n } from '@/contexts/I18nContext';
-import { ExplorationHeader } from './exploration/ExplorationHeader';
+import { AscensionBackground } from '@/components/common/liulix/AscensionBackground';
 import { NavigationPanel } from './exploration/NavigationPanel';
 import { ContentPanel } from './exploration/ContentPanel';
 import { Project } from '@/utils/projectUtils';
@@ -20,7 +19,6 @@ export function ExplorationFlowV2({
     cleaningTrigger,
     onFilesUploaded
 }: ExplorationFlowV2Props) {
-    const { t } = useI18n();
     const [selectedItemId, setSelectedItemId] = useState('project-selection');
 
     const insightCount = 3;
@@ -70,7 +68,7 @@ export function ExplorationFlowV2({
 
     return (
         <div className="exploration-flow-v2">
-            <ExplorationHeader title={t('workshop.dataExploration')} />
+            <AscensionBackground />
             <div className="workbench-v2">
                 <NavigationPanel
                     sections={navigationTree}

@@ -31,7 +31,7 @@
     /* Adaptive height: flex-shrink allowed, auto basis */
     max-height: 60%;
     /* Max height constraint */
-    min-height: 48px;
+    min-height: 300px;
     /* Min height for header */
     display: flex;
     flex-direction: column;

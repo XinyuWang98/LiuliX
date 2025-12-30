@@ -66,20 +66,17 @@ export function ProjectCard({ project, isActive, onClick, onContextMenu, onRenam
             <div className="card-meta">
                 <span className="file-count">{project.files.length} 个文件</span>
                 <span className="separator">·</span>
-                <span className="time">{formatRelativeTime(project.createdAt)}</span>
+                <span className="time">{formatRelativeTime(project.updatedAt || project.createdAt)}</span>
             </div>
 
-            {/* 文件列表预览 */}
+            {/* 文件列表（显示所有，可滚动） */}
             <div className="card-files-preview">
-                {project.files.slice(0, 3).map(file => (
+                {project.files.map(file => (
                     <div key={file.id} className="file-preview-item">
                         <FileText size={14} />
                         <span>{file.name}</span>
                     </div>
                 ))}
-                {project.files.length > 3 && (
-                    <div className="more-files">+{project.files.length - 3} more</div>
-                )}
             </div>
 
             {/* 更多操作按钮 */}

@@ -2,10 +2,37 @@
 .navigation-panel {
     /* 固定侧栏布局（不再absolute定位） */
     flex-shrink: 0;
-    background: var(--bg-panel);
-    backdrop-filter: blur(var(--blur-light));
-    border-right: 1px solid var(--border);
-    transition: width var(--transition-s);
+
+    /* 超高透明毛玻璃效果 */
+    background: rgba(10, 10, 20, 0.25);
+    /* 75% 透明（从 50% 增加） */
+    backdrop-filter: blur(40px) saturate(150%);
+    /* 超强模糊 + 饱和度增强 */
+    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    /* Safari 支持 */
+
+    /* 圆角毛玻璃风格 */
+    border-radius: var(--radius-xl);
+    /* 添加圆角 */
+    margin: var(--gap-m);
+    /* 添加外边距以显示圆角 */
+
+    /* Fresnel 边缘高光 */
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* 全边框以配合圆角 */
+
+    /* 添加内阴影增强深度 */
+    box-shadow:
+        inset -1px 0 0 0 rgba(255, 255, 255, 0.05),
+        /* 内侧高光 */
+        2px 0 20px rgba(0, 0, 0, 0.3);
+    /* 右侧阴影 */
+
+    /* 平滑过渡 */
+    transition: width var(--easing-smooth) 0.3s,
+        box-shadow var(--easing-smooth) 0.2s;
+
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -19,6 +46,13 @@
 /* 展开态：280px */
 .navigation-panel.expanded {
     width: 280px;
+    box-shadow:
+        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
+        /* 内侧高光增强 */
+        2px 0 30px rgba(0, 0, 0, 0.5),
+        /* 右侧深阴影 */
+        0 0 60px rgba(99, 102, 241, 0.05);
+    /* 微弱的紫色光晕 */
 }
 
 /* 暗色主题下的边框强化 */

@@ -4,6 +4,8 @@
    ========================================================== */
 
 .exploration-header-bar {
+    position: relative;
+    /* 为进度条提供定位上下文 */
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
@@ -23,4 +25,23 @@
     color: var(--text-primary);
     white-space: nowrap;
     line-height: 1;
+}
+
+/* ========== 进度指示器 ========== */
+.progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--glass-border);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg,
+            var(--accent-primary),
+            var(--accent-secondary));
+    transition: width var(--easing-smooth) 0.3s;
 }

@@ -15,7 +15,10 @@ export interface NavSection {
     type: 'section';
     icon: typeof Database | typeof Lightbulb | typeof FileText;
     label: string;
-    complete?: boolean;
+    status?: 'completed' | 'current' | 'locked';  // 状态指示
+    complete?: boolean;  // 保留兼容性
+    count?: number;  // 洞察数量
+    adoptedCount?: number;  // 已采纳数量
     children?: NavInsightNode[];
 }
 

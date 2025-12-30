@@ -62,8 +62,37 @@
     text-align: left;
 }
 
-.nav-section-item .complete-icon {
+/* 状态图标样式 */
+.nav-section-item .status-icon {
+    transition: color var(--easing-smooth) 0.2s;
+}
+
+.nav-section-item .status-icon.completed {
     color: var(--success);
+}
+
+.nav-section-item .status-icon.current {
+    color: var(--accent-primary);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.nav-section-item .status-icon.locked {
+    color: var(--text-tertiary);
+    opacity: 0.4;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
 }
 
 .nav-section-item .expand-btn {
@@ -85,6 +114,23 @@
 
 .nav-insight-node {
     margin-bottom: var(--gap-xxs);
+}
+
+/* 深度缩进（替代内联样式） */
+.nav-insight-node.depth-2 {
+    margin-left: 0;
+}
+
+.nav-insight-node.depth-3 {
+    margin-left: 16px;
+}
+
+.nav-insight-node.depth-4 {
+    margin-left: 32px;
+}
+
+.nav-insight-node.depth-5 {
+    margin-left: 48px;
 }
 
 .nav-insight-item {

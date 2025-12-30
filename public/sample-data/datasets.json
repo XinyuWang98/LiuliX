@@ -1,0 +1,46 @@
+{
+    "datasets": [
+        {
+            "id": "titanic",
+            "name": "Titanic - 生存预测",
+            "file": "titanic.csv",
+            "rows": 891,
+            "columns": 12,
+            "size": "59KB",
+            "description": "经典分类问题，包含缺失值，适合测试清洗功能",
+            "tags": [
+                "classification",
+                "cleaning",
+                "beginner"
+            ]
+        },
+        {
+            "id": "iris",
+            "name": "Iris - 鸢尾花分类",
+            "file": "iris.csv",
+            "rows": 150,
+            "columns": 5,
+            "size": "3.8KB",
+            "description": "最简单的测试集，无缺失值，适合快速验证",
+            "tags": [
+                "classification",
+                "beginner",
+                "minimal"
+            ]
+        },
+        {
+            "id": "housing",
+            "name": "Housing - 房价预测",
+            "file": "housing.csv",
+            "rows": 20640,
+            "columns": 10,
+            "size": "1.4MB",
+            "description": "回归问题，大数据集，适合性能测试",
+            "tags": [
+                "regression",
+                "performance",
+                "intermediate"
+            ]
+        }
+    ]
+}

@@ -188,6 +188,7 @@ export interface Project {
     id: string;
     name: string;
     createdAt: Date;
+    updatedAt?: Date;  // 最后更新时间（可选，默认使用 createdAt）
     files: ProjectFile[];
     isExpanded: boolean;
 }

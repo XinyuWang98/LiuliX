@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Circle, Lock } from 'lucide-react';
 import { NavSection, NavInsightNode } from './ExplorationWorkbench';
 import { logger } from '@/utils/logger';
 import './FullNavTree.css';
@@ -58,7 +58,11 @@ function SectionNode({ section, selectedId, onSelect }: {
             >
                 <Icon size={18} />
                 <span className="nav-label">{section.label}</span>
-                {section.complete && <Check size={14} className="complete-icon" />}
+
+                {/* 状态图标 */}
+                {section.status === 'completed' && <Check size={14} className="status-icon completed" />}
+                {section.status === 'current' && <Circle size={14} className="status-icon current" />}
+                {section.status === 'locked' && <Lock size={14} className="status-icon locked" />}
                 {section.children && section.children.length > 0 && (
                     <button
                         className="expand-btn"
@@ -121,8 +125,7 @@ function InsightNodeItem({ node, selectedId, onSelect, depth }: {
 
     return (
         <div
-            className="nav-insight-node"
-            style={{ marginLeft: `${(depth - 2) * 16}px` }}
+            className={`nav-insight-node depth-${depth}`}
         >
             <button
                 className={`nav-insight-item ${isSelected ? 'selected' : ''}`}

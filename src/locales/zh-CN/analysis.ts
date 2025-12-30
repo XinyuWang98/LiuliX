@@ -68,6 +68,11 @@ export const exploration = {
         insights: '洞察分析',
         report: '分析报告',
         chat: 'AI 助手',
+    },
+    sections: {
+        cleaning: '数据清洗建议',
+        insights: '洞察分析',
+        report: '分析报告',
     }
 };
 
