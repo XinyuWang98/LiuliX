@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { DuckDBEngine } from '../db/duckdbEngine';
-import { ColumnMetadata, ColumnStats } from '../types/duckdb';
+import type { ColumnInfo, ColumnStats } from '../types/duckdb';
 import { useI18n } from '../contexts/I18nContext';
 import { formatTimestamp } from '../utils/dateUtils';
-import { Loader, ChevronDown, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader, ChevronDown, ChevronUp, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useErrorToast } from '../hooks/useErrorToast';
-import './VirtualDataGridV2.css';
 import { NumericStatsPanel } from './datagrid/NumericStatsPanel';
 import { CategoricalStatsPanel } from './datagrid/CategoricalStatsPanel';
 import { MiniHistogram } from './datagrid/MiniHistogram';
 import { MiniBarChart } from './datagrid/MiniBarChart';
 import { SingleValueIndicator } from './datagrid/SingleValueIndicator';
+import './VirtualDataGrid.css';
 
 interface VirtualDataGridProps {
     tableName: string;
@@ -256,7 +256,7 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
             <div className="enhancedGridHeader" ref={headerRef} style={{ overflowX: 'hidden' }}>
                 <div
                     className="enhancedHeaderCell enhancedHeaderCell序号列"
-                    style={{ minWidth: `${序号列宽度}px`, maxWidth: `${序号列宽度}px` }}
+                    style={{ minWidth: `${序号列宽度}px`, maxWidth: `${序号列宽度}px`, width: `${序号列宽度}px` }}
                 >
                     <div className="headerCellTop">
                         <span className="headerCellName">#</span>
@@ -276,8 +276,9 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
                             style={{
                                 minWidth: `${getColumnWidth(col)}px`,
                                 maxWidth: `${getColumnWidth(col)}px`,
+                                width: `${getColumnWidth(col)}px`,
                                 textAlign: 'left',
-                                '--null-rate': `${nullRate}%`,
+                                '--null-rate': `${nullRate}% `,
                                 position: 'relative',
                             } as React.CSSProperties}
                         >
@@ -301,7 +302,7 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
                                         <div
                                             className="missing-rate-bar-fill"
                                             style={{
-                                                width: `${nullRate}%`,
+                                                width: `${nullRate}% `,
                                                 backgroundColor: nullRate > 50 ? 'var(--error)' : nullRate > 10 ? 'var(--warning)' : 'var(--success)'
                                             }}
                                         />
@@ -331,13 +332,11 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
 
                                 {/* 5. Detailed Stats Panel (Expandable) */}
                                 {showStats && stat && (
-                                    <div className="headerDetailedStats">
-                                        {isNumericType && stat.numericStats ? (
-                                            <NumericStatsPanel stat={stat.numericStats} />
-                                        ) : !isNumericType && stat.categoricalStats ? (
-                                            <CategoricalStatsPanel stat={stat.categoricalStats} type={col.type} columnName={col.name} />
-                                        ) : null}
-                                    </div>
+                                    isNumericType && stat.numericStats ? (
+                                        <NumericStatsPanel stat={stat.numericStats} />
+                                    ) : !isNumericType && stat.categoricalStats ? (
+                                        <CategoricalStatsPanel stat={stat.categoricalStats} type={col.type} columnName={col.name} />
+                                    ) : null
                                 )}
                             </div>
                         </div>
@@ -358,8 +357,8 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
                         return (
                             <div key={rowIdx} className="simpleTableRow">
                                 <div
-                                    className={`enhancedGridCell enhancedGridCell序号 ${isSelectedRow ? 'highlightRow' : ''}`}
-                                    style={{ minWidth: `${序号列宽度}px`, maxWidth: `${序号列宽度}px` }}
+                                    className={`enhancedGridCell enhancedGridCell序号 ${isSelectedRow ? 'highlightRow' : ''} `}
+                                    style={{ minWidth: `${序号列宽度}px`, maxWidth: `${序号列宽度}px`, width: `${序号列宽度}px` }}
                                     onClick={() => setSelectedCell({ rowIdx, colName: '' })}
                                 >
                                     {currentPage * 每页行数 + rowIdx + 1}
@@ -372,11 +371,12 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
                                     return (
                                         <div
                                             key={colIdx}
-                                            className={`enhancedGridCell ${isSelectedRow ? 'highlightRow' : ''} ${isSelectedCol ? 'highlightCol' : ''} ${isSelectedRow && isSelectedCol ? 'highlightCell' : ''}`}
+                                            className={`enhancedGridCell ${isSelectedRow ? 'highlightRow' : ''} ${isSelectedCol ? 'highlightCol' : ''} ${isSelectedRow && isSelectedCol ? 'highlightCell' : ''} `}
                                             onClick={() => setSelectedCell({ rowIdx, colName: col.name })}
                                             style={{
                                                 minWidth: `${getColumnWidth(col)}px`,
                                                 maxWidth: `${getColumnWidth(col)}px`,
+                                                width: `${getColumnWidth(col)}px`,
                                                 justifyContent: isNumericType ? 'flex-end' : 'flex-start',
                                             }}
                                             title={String(row[col.name] ?? '')}
@@ -433,7 +433,7 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
                         return (
                             <button
                                 key={typeOption.value}
-                                className={`type-dropdown-item ${isSelected ? 'selected' : ''}`}
+                                className={`type - dropdown - item ${isSelected ? 'selected' : ''} `}
                                 onClick={() => handleTypeChange(activeTypeMenu, typeOption.value)}
                             >
                                 {typeOption.label}

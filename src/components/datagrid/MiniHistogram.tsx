@@ -35,20 +35,20 @@ export const MiniHistogram: React.FC<MiniHistogramProps> = ({ distribution, type
     };
 
     return (
-        <div className="headerMiniHistogram">
+        <div className="mini-chart-inline">
             {counts.map((count, idx) => {
                 let tooltipText = `${t('grid.count')}: ${count}`;
 
                 if (labels && labels[idx] !== undefined) {
-                    // 离散模式：直接显示具体值
+                    // 离散模式：直接显示具体�?
                     const displayVal = formatTooltipValue(labels[idx]);
                     tooltipText = `${t('grid.value')}: ${displayVal}\n${tooltipText}`;
                 } else if (hasRange) {
-                    // 连续模式：显示区间
+                    // 连续模式：显示区�?
                     const start = min + idx * binWidth;
                     const end = min + (idx + 1) * binWidth;
 
-                    // 如果认为是时间，尝试格式化
+                    // 如果认为是时间，尝试格式�?
                     let startStr = String(start);
                     let endStr = String(end);
 
@@ -67,10 +67,9 @@ export const MiniHistogram: React.FC<MiniHistogramProps> = ({ distribution, type
                 return (
                     <div
                         key={idx}
-                        className="histogramBar"
+                        className="bar-inline"
                         style={{
-                            height: `${(count / maxCount) * 100}%`
-                        }}
+                            height: `${(count / maxCount) * 100}%`,                            background: 'var(--primary)'                        }}
                         title={tooltipText}
                     />
                 );
@@ -78,3 +77,4 @@ export const MiniHistogram: React.FC<MiniHistogramProps> = ({ distribution, type
         </div>
     );
 };
+

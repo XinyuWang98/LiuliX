@@ -1,0 +1,66 @@
+/* 历史记录标签页样式 - 符合 LiuliX "Ascension" 视觉规范 */
+
+.historyList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
+    padding: var(--gap-m);
+}
+
+.historyItem {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-m);
+    padding: var(--gap-s) var(--gap-m);
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.historyItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--glass-border-highlight);
+}
+
+.historyTime {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.historyAction {
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.deltaTag {
+    padding: 4px var(--gap-s);
+    border-radius: var(--radius-m);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.deltaTag.negative {
+    background: rgba(255, 59, 48, 0.15);
+    color: #ff3b30;
+}
+
+.deltaTag.positive {
+    background: rgba(52, 199, 89, 0.15);
+    color: #34c759;
+}
+
+.historyEmpty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--text-dim);
+    font-size: var(--fs-base);
+}

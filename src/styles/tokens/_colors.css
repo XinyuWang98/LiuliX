@@ -4,12 +4,19 @@
     /* Ascension Theme Palette */
     --liuli-bg: #010305;
     /* Deep Space Black */
-    --bg-main: #1C1C1E;
-    /* Legacy: Main Background */
-    --bg-panel: rgba(44, 44, 46, 0.75);
-    /* Legacy: Panel Background */
-    --bg-secondary: #252527;
-    /* Secondary Background */
+
+    /* @deprecated 遗留变量 - 已迁移到 LiuliX 系统，请使用 --glass-* 系列 */
+    --bg-main: transparent;
+    /* 兼容方案：指向透明背景，由外层 LiuliGlass 提供 */
+
+    /* @deprecated 遗留变量 - 已迁移到 LiuliX 系统，请使用 var(--glass-surface) */
+    --bg-panel: var(--glass-surface);
+    /* 兼容方案：指向标准玻璃态表面 */
+
+    /* @deprecated 遗留变量 - 已迁移到 LiuliX 系统，请使用 var(--glass-secondary) */
+    --bg-secondary: var(--glass-secondary);
+    /* 兼容方案：指向次要玻璃态表面 */
+
     --bg-element: #2C2C2E;
 
     /* Text Colors */

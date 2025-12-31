@@ -1,0 +1,98 @@
+/* 建议列表标签页样式 - 符合 LiuliX "Ascension" 视觉规范 */
+
+.suggestionsTabContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+}
+
+/* 分类标签导航 */
+.suggestionTabs {
+    display: flex;
+    gap: var(--gap-s);
+    padding: var(--gap-m) var(--gap-m) 0;
+    overflow-x: auto;
+}
+
+.suggestionTabs .tabItem {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: var(--gap-s) var(--gap-m);
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.suggestionTabs .tabItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--glass-border-highlight);
+}
+
+.suggestionTabs .tabItem.active {
+    background: var(--text-accent);
+    color: var(--liuli-bg);
+    border-color: var(--text-accent);
+    font-weight: 600;
+}
+
+.suggestionTabs .tabItem.ai-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+}
+
+.suggestionTabs .tabIcon {
+    display: flex;
+    align-items: center;
+}
+
+.suggestionTabs .tabCount {
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+/* 建议卡片列表 */
+.cardRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--gap-m);
+    padding: 0 var(--gap-m) var(--gap-m);
+}
+
+/* 空状态样式 */
+.aiEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-m);
+    min-height: 200px;
+    padding: var(--gap-l);
+    color: var(--text-dim);
+}
+
+.aiEmpty.state-initial {
+    background: radial-gradient(circle at center, rgba(0, 242, 254, 0.05) 0%, transparent 70%);
+}
+
+.aiEmpty .emptyIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+}
+
+.aiEmpty .emptyText {
+    font-size: var(--fs-base);
+    text-align: center;
+    max-width: 400px;
+}

@@ -67,7 +67,6 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            background: 'transparent',
             overflow: 'hidden',
         }}>
             {/* 顶栏 */}
@@ -324,8 +323,8 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
                         错误: {error}
                     </div>
                 ) : (useDuckDB && duckInfo) ? (
-                    /* DuckDB 虚拟表格 V2 */
-                    <div className="virtual-grid-glass-wrapper">
+                    /* DuckDB 虚拟表格 V2 - 使用 LiuliGlass 组件 */
+                    <LiuliGlass intensity="medium" className="virtual-grid-glass-wrapper">
                         <VirtualDataGridV2
                             tableName={duckInfo.tableName}
                             rowCount={duckInfo.rowCount}
@@ -333,7 +332,7 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
                             selectedColumns={selectedColumns}
                             showStats={showStats}
                         />
-                    </div>
+                    </LiuliGlass>
                 ) : dataInfo ? (
                     /* 常规 Pyodide 表格 */
                     <DataTable

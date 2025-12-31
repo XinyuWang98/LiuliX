@@ -26,19 +26,19 @@ export const MiniBarChart: React.FC<MiniBarChartProps> = ({ categoricalStats, ty
     };
 
     return (
-        <div className="headerMiniBarChart">
+        <div className="mini-chart-inline">
             {categoricalStats.topValues.map((item, idx) => {
                 const displayValue = formatTooltipValue(item.value);
                 return (
-                    <div key={idx} className="miniBarItem" title={`${t('grid.value')}: ${displayValue}\n${t('grid.count')}: ${item.count}`}>
-                        <div
-                            className="miniBar"
-                            style={{
-                                height: `${(item.count / maxCount) * 100}%`,
-                                width: '100%' // 确保宽度充满
-                            }}
-                        />
-                    </div>
+                    <div
+                        key={idx}
+                        className="bar-inline"
+                        style={{
+                            height: `${(item.count / maxCount) * 100}%`,
+                            background: 'var(--primary)'
+                        }}
+                        title={`${t('grid.value')}: ${displayValue}\n${t('grid.count')}: ${item.count}`}
+                    />
                 );
             })}
         </div>
