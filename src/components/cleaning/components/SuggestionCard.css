@@ -5,7 +5,8 @@
     display: flex;
     flex-direction: column;
     /* Basic Glassmorphism */
-    background: var(--glass-bg);
+    background: var(--glass-surface);
+    /* 使用标准玻璃变量 */
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-m);
     padding: 0;
@@ -26,8 +27,9 @@
 
 /* Prompt模板卡片特殊样式 */
 .suggestionCard.card-prompt {
-    background: linear-gradient(145deg, rgba(16, 185, 129, 0.05), rgba(var(--bg-element-rgb), 0.9));
-    border-color: rgba(16, 185, 129, 0.2);
+    background: linear-gradient(145deg, rgba(var(--success-rgb, 16, 185, 129), 0.05), rgba(var(--bg-element-rgb), 0.9));
+    border-color: rgba(var(--success-rgb, 16, 185, 129), 0.2);
+    /* 使用成功色变量，回退到绿色 */
 }
 
 /* 兼容旧版 */
@@ -84,16 +86,18 @@
 
 /* AI来源图标样式 */
 .bg-ai {
-    background: linear-gradient(135deg, var(--primary), #8b5cf6);
-    color: #fff;
+    background: linear-gradient(135deg, var(--primary), var(--accent, #8b5cf6));
+    /* 使用主色+强调色 */
+    color: var(--text-primary);
     box-shadow: 0 2px 4px rgba(var(--primary-rgb), 0.3);
 }
 
 /* Prompt模板来源图标样式 */
 .bg-prompt {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #fff;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, var(--success, #10b981), var(--success-dark, #059669));
+    /* 使用成功色变量 */
+    color: var(--text-primary);
+    box-shadow: 0 2px 4px rgba(var(--success-rgb, 16, 185, 129), 0.3);
 }
 
 /* 兼容旧版 */
@@ -130,7 +134,8 @@
 
 /* Prompt模板来源标签颜色 */
 .sourceLabel.prompt {
-    color: #10b981;
+    color: var(--success, #10b981);
+    /* 使用成功色变量 */
 }
 
 .suggestionTitle {
@@ -235,8 +240,8 @@
     display: block;
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
-    color: #a5d6ff;
-    /* Soft cyan for code */
+    color: var(--code-color, #a5d6ff);
+    /* 使用代码颜色变量，保留青色回退 */
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-all;

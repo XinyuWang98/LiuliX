@@ -44,6 +44,8 @@ const formatSmartNumber = (num: number): string => {
 export const NumericStatsPanel: React.FC<NumericStatsPanelProps> = ({ stat }) => {
     return (
         <div className="stats-panel numeric-panel">
+            <div className="panel-header">SUMMARY</div>
+            <div className="separator"></div>
             <div className="stat-row">
                 <span className="stat-label">MIN</span>
                 <span className="stat-value" title={String(stat.min)}>{formatSmartNumber(stat.min)}</span>
@@ -64,7 +66,6 @@ export const NumericStatsPanel: React.FC<NumericStatsPanelProps> = ({ stat }) =>
                 <span className="stat-label">MAX</span>
                 <span className="stat-value" title={String(stat.max)}>{formatSmartNumber(stat.max)}</span>
             </div>
-            <div className="stat-row separator"></div>
             <div className="stat-row">
                 <span className="stat-label">STD DEV</span>
                 <span className="stat-value" title={String(stat.stddev)}>{formatSmartNumber(stat.stddev)}</span>

@@ -20,21 +20,7 @@
     position: relative;
 }
 
-.section-header {
-    padding: var(--gap-l);
-    border-bottom: 1px solid var(--glass-border);
-    background: rgba(0, 0, 0, 0.15);
-}
-
-.section-title {
-    margin: 0;
-    font-size: var(--fs-lg);
-    font-weight: var(--fw-semibold);
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: var(--gap-s);
-}
+/* .section-header 和 .section-title 已移至 liulix.css 作为设计系统标准 */
 
 /* DataViewer 内嵌样式调整 */
 .data-section .data-viewer-demo {

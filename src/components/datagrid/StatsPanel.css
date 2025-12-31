@@ -1,17 +1,18 @@
 /* 统计面板通用样式 */
 .stats-panel {
     background: transparent;
-    /* 完全移除背景 */
+    /* 背景由父级列头单元格提供 */
+    border: none;
+    backdrop-filter: none;
+    /* 模糊效果由父级列头提供 */
     border-radius: var(--radius-s);
-    padding: var(--gap-s) 0;
-    /* 仅保留上下 padding，移除左右 padding */
+    padding: var(--gap-s);
     font-size: var(--fs-xs);
     color: var(--text-secondary);
     margin-top: var(--gap-xs);
-    border: none;
-    /* 移除边框，消除分割感 */
-    backdrop-filter: none;
-    /* 移除模糊 */
+    /* 移除固定高度限制，避免出现滚动条 */
+    height: auto;
+    overflow: visible;
 }
 
 .stat-row {
@@ -61,9 +62,15 @@
 
 .separator {
     height: 1px;
-    background: var(--border-light);
-    margin: 4px 0;
-    opacity: 0.5;
+    background: rgba(255, 255, 255, 0.2);
+    /* 提高不透明度让分隔符可见 */
+    margin: 6px 0;
+    /* 增加间距突出标题 */
+    opacity: 1;
+    /* 移除额外削弱 */
+    min-height: 1px;
+    flex-shrink: 0;
+    /* 防止压缩 */
 }
 
 /* Categorical Panel Specific */
@@ -73,14 +80,16 @@
     gap: 2px;
 }
 
-/* 移除 panel-header 的特殊样式，使其与 stat-label 一致 */
+/* panel-header 作为标题，字体应比下方统计信息（stat-label: 11px）略大 */
 .panel-header {
     color: var(--text-tertiary);
     font-weight: 500;
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 12px;
+    /* 从 10px 增加到 12px，确保标题层次 */
     letter-spacing: 0.5px;
-    /* 移除边框和额外边距，与 numeric panel 保持一致 */
+    margin-bottom: 4px;
+    /* 添加底部间距 */
 }
 
 .panel-body {

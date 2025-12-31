@@ -4,9 +4,7 @@
     background: var(--glass-surface);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-l);
-    /* 从 xl 改为 l (12px) */
     padding: var(--gap-m);
-    /* 从 l (24px) 改为 m (16px) */
     cursor: pointer;
     transition: all var(--transition-smooth) cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
@@ -15,19 +13,11 @@
     backdrop-filter: blur(var(--blur-medium));
     -webkit-backdrop-filter: blur(var(--blur-medium));
 
-    /* 横向布局：图标（左）+ 内容（右，分3行）- 使用 !important 覆盖 Demo 样式 */
-    display: grid !important;
-    grid-template-columns: auto 1fr !important;
-    /* 图标列 + 内容列 */
-    grid-template-rows: auto auto 1fr !important;
-    /* 标题行 + 元信息行 + 文件列表行 */
-    column-gap: var(--gap-m);
-    /* 列间距 */
-    row-gap: 6px;
-    /* 行间距缩小 */
-    align-items: start;
+    /* 单列布局：标题、元信息、文件列表垂直排列 */
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px;
     min-height: auto;
-    /* 移除固定最小高度 */
 }
 
 /* Hover效果 */
@@ -48,16 +38,13 @@
         0 8px 24px -8px rgba(var(--primary-rgb), 0.3);
 }
 
-/* 图标区（左侧，跨3行） */
+/* 图标（inline，在标题前方） */
 .card-icon {
-    grid-column: 1;
-    grid-row: 1 / 4;
-    /* 跨越3行 */
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-m);
     background: rgba(var(--primary-rgb), 0.1);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--primary);
@@ -70,20 +57,22 @@
     transform: scale(1.05);
 }
 
-/* 标题区（右侧第一行） */
+/* 标题行（图标 + 标题） */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+}
+
 .card-title {
-    grid-column: 2;
-    grid-row: 1;
+    flex: 1;
     font-size: var(--fs-base);
     font-weight: var(--fw-semibold);
     color: var(--text-primary);
     line-height: 1.4;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
     margin: 0;
 }
 
@@ -99,10 +88,8 @@
     outline: none;
 }
 
-/* 元信息（第2行） */
+/* 元信息 */
 .card-meta {
-    grid-column: 2;
-    grid-row: 2;
     font-size: var(--fs-xs);
     color: var(--text-tertiary);
     display: flex;
@@ -114,13 +101,14 @@
     opacity: 0.5;
 }
 
-/* 文件预览列表（第3行） */
+/* 文件预览列表（第3行）- 响应式 Grid */
 .card-files-preview {
     grid-column: 2;
     grid-row: 3;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 4px 8px;
+    /* 行间距 4px，列间距 8px */
     font-size: var(--fs-xs);
     color: var(--text-secondary);
     max-height: 80px;
@@ -132,14 +120,23 @@
 .file-preview-item {
     display: flex;
     align-items: center;
-    gap: var(--gap-xs);
+    gap: 4px;
+    /* 缩小间距 */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 11px;
+    /* 略微缩小字体 */
 }
 
 .file-preview-item svg {
     flex-shrink: 0;
+}
+
+.file-preview-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .more-files {
@@ -202,4 +199,16 @@
 .new-project-card:hover .card-icon.new-icon {
     border-color: var(--primary);
     color: var(--primary);
+}
+
+/* 文件数量警告样式 */
+.card-meta.near-limit .file-count {
+    color: var(--warning);
+    font-weight: var(--fw-semibold);
+}
+
+.limit-warning {
+    font-size: 12px;
+    color: var(--warning);
+    margin-left: 2px;
 }

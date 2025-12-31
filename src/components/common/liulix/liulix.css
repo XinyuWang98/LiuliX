@@ -29,6 +29,11 @@
     overflow: hidden;
 }
 
+/* 无阴影变体 - 用于嵌入式容器，避免内部阴影 */
+.liuli-glass.no-shadow {
+    box-shadow: none;
+}
+
 /* Variants */
 .liuli-glass.intensity-light {
     background: var(--glass-secondary);
@@ -280,4 +285,45 @@
 
 .liuli-input.error:focus {
     box-shadow: 0 0 0 2px rgba(255, 69, 58, 0.2);
+}
+/* =========================================
+   4. Section Title (模块标题)
+   ========================================= */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--gap-l);
+    padding-bottom: var(--gap-m);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.section-title {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* =========================================
+   5. Padding Utilities (填充工具类)
+   ========================================= */
+.liuli-glass.padding-none {
+    padding: 0;
+}
+
+.liuli-glass.padding-small {
+    padding: 12px;
+}
+
+.liuli-glass.padding-medium {
+    padding: 16px;
+}
+
+.liuli-glass.padding-large {
+    padding: 24px;
+}
+
+.liuli-glass.padding-xlarge {
+    padding: 32px;
 }

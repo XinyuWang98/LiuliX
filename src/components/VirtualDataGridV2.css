@@ -483,7 +483,8 @@
     font-weight: var(--fw-medium);
     color: var(--text-secondary);
     background-color: var(--bg-secondary);
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+    /* 移除阴影，用户要求消除灰色阴影 */
+    box-shadow: none;
 }
 
 /* 移除序号列hover效果 */

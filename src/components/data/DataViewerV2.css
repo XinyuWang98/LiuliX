@@ -9,7 +9,7 @@
     flex-shrink: 0;
     border-bottom: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(30px);
+    backdrop-filter: blur(var(--blur-medium));
 }
 
 /* 玻璃容器布局（样式由 LiuliGlass 提供）*/

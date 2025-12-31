@@ -42,31 +42,36 @@ export function ProjectCard({ project, isActive, onClick, onContextMenu, onRenam
             onClick={onClick}
             onContextMenu={onContextMenu}
         >
-            {/* 项目图标 */}
-            <div className="card-icon">
-                <FolderOpen size={32} />
+            {/* 标题行：图标 + 项目名称 */}
+            <div className="card-header">
+                <div className="card-icon">
+                    <FolderOpen size={24} />
+                </div>
+                {isEditing ? (
+                    <input
+                        className="card-title-input"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onBlur={handleRenameSubmit}
+                        onKeyDown={handleKeyDown}
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                ) : (
+                    <div className="card-title" title={project.name}>
+                        {project.name}
+                    </div>
+                )}
             </div>
 
-            {/* 项目名称 */}
-            {isEditing ? (
-                <input
-                    className="card-title-input"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onBlur={handleRenameSubmit}
-                    onKeyDown={handleKeyDown}
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                />
-            ) : (
-                <div className="card-title" title={project.name}>
-                    {project.name}
-                </div>
-            )}
-
             {/* 项目元信息 */}
-            <div className="card-meta">
-                <span className="file-count">{t('exploration.project.card.fileCount', { count: project.files.length })}</span>
+            <div className={`card-meta ${project.files.length >= 9 ? 'near-limit' : ''}`}>
+                <span className="file-count">
+                    {project.files.length} / 10 {t('exploration.project.card.filesLabel')}
+                </span>
+                {project.files.length >= 9 && (
+                    <span className="limit-warning" title={t('exploration.project.card.nearLimit')}>⚠</span>
+                )}
                 <span className="separator">·</span>
                 <span className="time">{formatRelativeTime(project.updatedAt || project.createdAt)}</span>
             </div>

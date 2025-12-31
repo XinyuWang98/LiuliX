@@ -70,6 +70,7 @@ export const exploration = {
         chat: 'AI 助手',
     },
     sections: {
+        projects: '项目选择',
         cleaning: '数据清洗建议',
         insights: '洞察分析',
         report: '分析报告',
@@ -84,6 +85,8 @@ export const exploration = {
         },
         card: {
             fileCount: '{{count}} 个文件',
+            filesLabel: '个文件',
+            nearLimit: '接近文件上限（最多10个）',
             uploadNew: '上传新文件'
         }
     }

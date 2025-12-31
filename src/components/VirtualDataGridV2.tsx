@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { DuckDBEngine } from '../db/duckdbEngine';
-import type { ColumnInfo, ColumnStats } from '../types/duckdb';
+import type { ColumnStats, ColumnMetadata } from '../types/duckdb';
 import { useI18n } from '../contexts/I18nContext';
 import { formatTimestamp } from '../utils/dateUtils';
-import { Loader, ChevronDown, ChevronUp, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { useErrorToast } from '../hooks/useErrorToast';
 import { NumericStatsPanel } from './datagrid/NumericStatsPanel';
 import { CategoricalStatsPanel } from './datagrid/CategoricalStatsPanel';
@@ -112,7 +112,6 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
     const [selectedCell, setSelectedCell] = useState<{ rowIdx: number; colName: string } | null>(null);
 
     // 交互状态
-    const [modifyingColumn, setModifyingColumn] = useState<string | null>(null);
     const [activeTypeMenu, setActiveTypeMenu] = useState<string | null>(null);
     const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
 
@@ -165,19 +164,30 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
         return () => observer.disconnect();
     }, []);
 
-    // 计算列宽逻辑
+    // 计算列宽逻辑 - 优化 bonusWidth 分配策略
     useEffect(() => {
         if (containerWidth === 0 || visibleColumns.length === 0) return;
+
+        const 窄列阈值 = 180; // 只有基础宽度小于此值的列才分配 bonusWidth
         let totalBaseWidth = 序号列宽度;
+
         const baseWidths = visibleColumns.map(col => {
             const nameLength = col.name.length;
             return Math.max(最小列宽, Math.min(最大列宽, nameLength * 列名字符宽度系数 + 列宽基础偏移));
         });
+
         totalBaseWidth += baseWidths.reduce((a, b) => a + b, 0);
         const availableSpace = containerWidth - 20;
+
         if (totalBaseWidth < availableSpace) {
             const extra = availableSpace - totalBaseWidth;
-            setBonusWidth(Math.floor(extra / visibleColumns.length));
+            // 只给窄列分配 bonusWidth
+            const narrowColumnCount = baseWidths.filter(w => w < 窄列阈值).length;
+            if (narrowColumnCount > 0) {
+                setBonusWidth(Math.floor(extra / narrowColumnCount));
+            } else {
+                setBonusWidth(0);
+            }
         } else {
             setBonusWidth(0);
         }
@@ -186,7 +196,13 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
     const getColumnWidth = useCallback((col: ColumnMetadata) => {
         const nameLength = col.name.length;
         const baseWidth = Math.max(最小列宽, Math.min(最大列宽, nameLength * 列名字符宽度系数 + 列宽基础偏移));
-        return baseWidth + bonusWidth;
+
+        const 窄列阈值 = 180; // 与 useEffect 中保持一致
+        // 只有窄列才分配 bonusWidth
+        if (baseWidth < 窄列阈值) {
+            return baseWidth + bonusWidth;
+        }
+        return baseWidth;
     }, [bonusWidth]);
 
     // 加载统计信息
@@ -226,7 +242,6 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
     const handleTypeChange = async (columnName: string, newType: string) => {
         setActiveTypeMenu(null);
         setDropdownPos(null);
-        setModifyingColumn(columnName);
         try {
             const success = await engine.alterColumnType(tableName, columnName, newType);
             if (success) {
@@ -238,8 +253,6 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
             }
         } catch (error) {
             showError({ message: t('grid.dataType.failed') + ': ' + (error as Error).message });
-        } finally {
-            setModifyingColumn(null);
         }
     };
 

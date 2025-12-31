@@ -41,6 +41,10 @@
     border-right: 1px solid var(--border);
     box-sizing: border-box;
     /* 绉婚櫎 min-height锛岃鎵€鏈夊垪鑷劧绛夐珮 */
+    /* 为整个列头添加深色背景，提升统计信息可读性 */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    border-radius: var(--radius-s);
 }
 
 .headerCellTop {
@@ -227,7 +231,8 @@
     border-radius: var(--radius-s);
     overflow: hidden;
     margin: var(--gap-xs) 0;
-    border: 1px solid var(--border-light);
+    border: none;
+    /* 根据用户反馈移除边框 */
 }
 
 .bar-inline {
@@ -258,7 +263,8 @@
     border-radius: var(--radius-s);
     overflow: hidden;
     margin: var(--gap-xs) 0;
-    border: 1px solid var(--border-light);
+    border: none;
+    /* 根据用户反馈移除边框 */
 }
 
 .miniBarItem {
@@ -504,20 +510,22 @@
 
 /* 绉婚櫎鍗曞厓鏍糷over鏁堟灉 */
 
-/* 搴忓彿鍒椾笓灞炴牱锟?*/
-.enhancedHeaderCell搴忓彿锟? .enhancedGridCell搴忓彿 {
+/* 序号列专属样式 - Row Number Column */
+.enhancedHeaderCell.row-number-col,
+.enhancedGridCell.row-number {
     position: sticky;
     left: 0;
     z-index: 2;
     text-align: center;
     align-items: center;
-    /* 纭繚鍨傜洿鏂瑰悜灞呬腑 (瀵逛簬 header 锟?flex-col) */
+    /* 确保垂直方向居中 (对于 header 是 flex-col) */
     justify-content: center;
-    /* 纭繚姘村钩鏂瑰悜灞呬腑 */
+    /* 确保水平方向居中 */
     font-weight: var(--fw-medium);
     color: var(--text-secondary);
     background-color: var(--bg-secondary);
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+    /* 移除阴影，用户要求消除灰色阴影 */
+    box-shadow: none;
 }
 
 /* 绉婚櫎搴忓彿鍒梙over鏁堟灉 */
@@ -528,10 +536,10 @@
     background-color: rgba(10, 132, 255, 0.08) !important;
 }
 
-/* 淇搴忓彿鍒楅珮浜椂鐨勯€忔槑搴﹂棶棰橈紙纭繚涓嶉€忓嚭涓嬫柟鍐呭锟?*/
-.enhancedGridCell搴忓彿.highlightRow {
+/* 修复序号列高亮时的透明度问题（确保不透出下方内容） */
+.enhancedGridCell.row-number.highlightRow {
     background: rgba(var(--primary-rgb), 0.12) !important;
-    /* 搴忓彿鍒楅珮浜◢娣?*/
+    /* 序号列高亮稍浓 */
 }
 
 .enhancedGridCell.highlightCol {

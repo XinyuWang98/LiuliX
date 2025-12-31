@@ -341,10 +341,10 @@
 
 /* stats-panel 组件的容器wrapper，确保统计卡片高度一致 */
 .header-cell-inline .stats-panel {
-    /* 固定高度确保所有列统计卡片高度一致 */
-    height: 180px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    /* 改为 auto 高度，让内容自动撑开，避免滚动条 */
+    height: auto;
+    overflow: visible;
+    /* 移除滚动，完全显示内容 */
 }
 
 .header-cell-inline .stats-panel::-webkit-scrollbar {

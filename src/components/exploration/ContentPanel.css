@@ -107,15 +107,6 @@
     }
 }
 
-/* ========== Section Header ========== */
-.section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--gap-l);
-    padding-bottom: var(--gap-m);
-    border-bottom: 1px solid var(--glass-border);
-}
 
 .section-title {
     font-size: var(--fs-xl);

@@ -47,6 +47,7 @@ export const CategoricalStatsPanel: React.FC<CategoricalStatsPanelProps> = ({ st
     return (
         <div className="stats-panel categorical-panel">
             <div className="panel-header">TOP 5 VALUES</div>
+            <div className="separator"></div>
             <div className="panel-body">
                 {stat.topValues.map((item, idx) => (
                     <div key={idx} className="stat-row">

@@ -37,8 +37,8 @@ export const LiuliShowcase = () => {
             <div className="showcase-grid">
 
                 {/* 1. Buttons */}
-                <LiuliGlass className="showcase-section" style={{ padding: 24 }}>
-                    <div className="showcase-section-title">LiuliButton (Buttons)</div>
+                <LiuliGlass className="showcase-section" padding="large">
+                    <div className="section-title">LiuliButton (Buttons)</div>
 
                     <div className="component-row">
                         <div className="component-label">Variants</div>
@@ -76,8 +76,8 @@ export const LiuliShowcase = () => {
                 </LiuliGlass>
 
                 {/* 2. Inputs */}
-                <LiuliGlass className="showcase-section" style={{ padding: 24 }}>
-                    <div className="showcase-section-title">LiuliInput (Data Entry)</div>
+                <LiuliGlass className="showcase-section" padding="large">
+                    <div className="section-title">LiuliInput (Data Entry)</div>
 
                     <div className="component-row" style={{ width: '100%' }}>
                         <div className="component-label">Default</div>
@@ -97,7 +97,7 @@ export const LiuliShowcase = () => {
 
                 {/* 3. Glass Panels */}
                 <div className="showcase-section">
-                    <div className="showcase-section-title">LiuliGlass (Containers)</div>
+                    <div className="section-title">LiuliGlass (Containers)</div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                         <LiuliGlass intensity="light" className="demo-glass">
@@ -123,7 +123,7 @@ export const LiuliShowcase = () => {
 
                 {/* [NEW] Glass Variants (v2026) */}
                 <div className="showcase-section">
-                    <div className="showcase-section-title">Glass Variants (v2026 Updates)</div>
+                    <div className="section-title">Glass Variants (v2026 Updates)</div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                         {/* 1. Vignette (Dark Edge) - For Modals */}
@@ -155,9 +155,9 @@ export const LiuliShowcase = () => {
                 </div>
 
                 {/* 4. Cards Example (Composition) */}
-                <LiuliGlass className="showcase-section" style={{ padding: 0 }}>
+                <LiuliGlass className="showcase-section" padding="none">
                     <div style={{ padding: 24, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div className="showcase-section-title" style={{ border: 'none', padding: 0 }}>
+                        <div className="section-title" style={{ border: 'none', padding: 0 }}>
                             Composite Card
                         </div>
                     </div>
@@ -182,7 +182,7 @@ export const LiuliShowcase = () => {
                 {/* [NEW] LAYOUT PROTOTYPES (Containerization) */}
                 {/* ========================================================================================== */}
                 <div className="showcase-section" style={{ gridColumn: '1 / -1' }}>
-                    <div className="showcase-section-title" style={{ marginBottom: 32 }}>
+                    <div className="section-title" style={{ marginBottom: 32 }}>
                         Layout Prototypes (Containerization)
                         <div style={{ fontSize: 14, fontWeight: 'normal', marginTop: 8, opacity: 0.7 }}>
                             Solving the "scattered cards" issue by wrapping modules in cohesive Glass Containers.
@@ -222,7 +222,7 @@ export const LiuliShowcase = () => {
                     </LiuliGlass>
 
                     {/* Prototype B: Data Cleaning Suggestions */}
-                    <LiuliGlass className="layout-container-prototype" style={{ marginTop: 40 }}>
+                    <LiuliGlass className="layout-container-prototype mt-40">
                         <div className="layout-header">
                             <h2 style={{ fontSize: 20, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
                                 <span style={{ color: 'var(--success)' }}>✨</span>
@@ -251,7 +251,7 @@ export const LiuliShowcase = () => {
                     </LiuliGlass>
 
                     {/* Prototype C: Insight Analysis */}
-                    <LiuliGlass className="layout-container-prototype" style={{ marginTop: 40 }}>
+                    <LiuliGlass className="layout-container-prototype mt-40">
                         <div className="layout-header">
                             <h2 style={{ fontSize: 20, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
                                 <span style={{ color: 'var(--accent)' }}>🧠</span>
@@ -272,7 +272,7 @@ export const LiuliShowcase = () => {
                     {/* [NEW] Project Selection State Demo (Expanded vs Collapsed) */}
                     {/* ========================================================================================== */}
                     <div style={{ marginTop: 64 }}>
-                        <div className="showcase-section-title" style={{ marginBottom: 32 }}>
+                        <div className="section-title" style={{ marginBottom: 32 }}>
                             项目选择状态演示 (Expanded vs Collapsed)
                             <div style={{ fontSize: 14, fontWeight: 'normal', marginTop: 8, opacity: 0.7 }}>
                                 展示"完全展开（等待选择）"和"收起（已选择）"两种状态的对比
@@ -358,7 +358,7 @@ export const LiuliShowcase = () => {
                     {/* [NEW] Interactive State Demo */}
                     {/* ========================================================================================== */}
                     <div style={{ marginTop: 64 }}>
-                        <div className="showcase-section-title" style={{ marginBottom: 32 }}>
+                        <div className="section-title" style={{ marginBottom: 32 }}>
                             可交互状态演示
                             <div style={{ fontSize: 14, fontWeight: 'normal', marginTop: 8, opacity: 0.7 }}>
                                 通过按钮切换展开/收起状态，实时查看效果
@@ -371,7 +371,7 @@ export const LiuliShowcase = () => {
                     {/* [NEW] Data Cleaning Module Demo (Complete Overview) */}
                     {/* ========================================================================================== */}
                     <div style={{ marginTop: 64 }}>
-                        <div className="showcase-section-title" style={{ marginBottom: 32 }}>
+                        <div className="section-title" style={{ marginBottom: 32 }}>
                             数据清洗建议模块演示（完整总览 - 统一版）
                             <div style={{ fontSize: 14, fontWeight: 'normal', marginTop: 8, opacity: 0.7 }}>
                                 展示完整的数据清洗工作流：DataViewer（数据预览 + 统计分析）→ 清洗建议（AI建议 + 操作执行）
@@ -386,7 +386,7 @@ export const LiuliShowcase = () => {
                     {/* [NEW] Data Cleaning Atomic Components Demo */}
                     {/* ========================================================================================== */}
                     <div style={{ marginTop: 64 }}>
-                        <div className="showcase-section-title" style={{ marginBottom: 32 }}>
+                        <div className="section-title" style={{ marginBottom: 32 }}>
                             数据清洗原子组件展示（独立调试）
                             <div style={{ fontSize: 14, fontWeight: 'normal', marginTop: 8, opacity: 0.7 }}>
                                 拆分的原子组件独立展示，方便调试和修改。修改原子组件会自动应用到上面的总览中

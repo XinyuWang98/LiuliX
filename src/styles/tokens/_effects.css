@@ -8,12 +8,15 @@
 
     /* Glassmorphism System */
 
-    /* 1. Surfaces */
-    --glass-surface: rgba(255, 255, 255, 0.03);
-    /* Standard */
-    --glass-secondary: rgba(255, 255, 255, 0.05);
-    --glass-hover: rgba(255, 255, 255, 0.06);
-    --glass-active: rgba(255, 255, 255, 0.1);
+    /* 1. Surfaces - 进一步提高透明度以提升清透感 */
+    --glass-surface: rgba(255, 255, 255, 0.005);
+    /* 从 0.01 进一步降低到 0.005 */
+    --glass-secondary: rgba(255, 255, 255, 0.02);
+    /* 从 0.03 降低到 0.02 */
+    --glass-hover: rgba(255, 255, 255, 0.04);
+    /* 从 0.05 降低到 0.04 */
+    --glass-active: rgba(255, 255, 255, 0.06);
+    /* 从 0.08 降低到 0.06 */
     --glass-heavy: rgba(20, 20, 23, 0.7);
 
     /* [NEW] Vignette Glass (Darkening Edges) */
@@ -22,11 +25,13 @@
     /* [NEW] Ultra Clear Glass */
     --glass-ultra-clear-bg: linear-gradient(165deg, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.005) 100%);
 
-    /* 2. Blurs */
-    --blur-light: 8px;
-    --blur-medium: 12px;
-    /* Standard Liuli Blur */
-    --blur-heavy: 20px;
+    /* 2. Blurs - 进一步降低模糊值以提升清透度 */
+    --blur-light: 2px;
+    /* 从 4px 进一步降低到 2px */
+    --blur-medium: 4px;
+    /* 从 8px 降低到 4px - 清透标准 */
+    --blur-heavy: 8px;
+    /* 从 12px 降低到 8px */
     --blur-heavy-80: 80px;
     /* [NEW] Deep Blur */
     --blur-ultra: 200px;
@@ -42,8 +47,9 @@
     /* Shadows & Glows */
     --shadow-light: rgba(255, 255, 255, 0.05);
     --shadow-dark: rgba(0, 0, 0, 0.3);
-    --shadow-lv1: 0 1px 4px rgba(0, 0, 0, 0.15);
-    --shadow-lv2: 0 4px 12px rgba(0, 0, 0, 0.3);
+    /* 移除灰色阴影 - 用户要求消除所有灰色阴影效果 */
+    --shadow-lv1: none;
+    --shadow-lv2: none;
     --shadow-glow: 0 0 16px rgba(0, 245, 255, 0.4);
     --glow-primary: rgba(0, 242, 254, 0.3);
     --forest-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);

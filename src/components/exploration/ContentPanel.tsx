@@ -66,7 +66,11 @@ export function ContentPanel({
                 id="project-selection"
                 className={`project-section ${selectedItemId === 'project-selection' ? 'expanded' : 'collapsed'}`}
             >
-                <LiuliGlass className="content-module-container">  {/* Added Container */}
+                <LiuliGlass className="content-module-container">
+                    {/* 模块标题 */}
+                    <div className="section-header">
+                        <h2 className="section-title">{t('exploration.sections.projects')}</h2>
+                    </div>
                     <ProjectCardGrid
                         currentProject={project}
                         onProjectSelect={(selectedProject) => {
@@ -83,7 +87,7 @@ export function ContentPanel({
             {/* 2. 数据清洗 Section */}
             {project && (
                 <div ref={cleaningRef} id="cleaning" className="content-section">
-                    <LiuliGlass className="content-module-container"> {/* Added Container */}
+                    <LiuliGlass className="content-module-container no-shadow"> {/* 移除阴影 */}
                         <div className="section-header">
                             <h2 className="section-title">{t('exploration.sections.cleaning')}</h2>
                         </div>
