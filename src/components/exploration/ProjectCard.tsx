@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FolderOpen, FileText, MoreVertical, Plus } from 'lucide-react';
 import { Project } from '@/utils/projectUtils';
 import { formatRelativeTime } from '@/utils/time';
+import { useI18n } from '@/contexts/I18nContext';
 import './ProjectCard.css';
 
 interface ProjectCardProps {
@@ -13,6 +14,7 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, isActive, onClick, onContextMenu, onRename }: ProjectCardProps) {
+    const { t } = useI18n();
     const [isEditing, setIsEditing] = useState(false);
     const [editName, setEditName] = useState(project.name);
 
@@ -64,7 +66,7 @@ export function ProjectCard({ project, isActive, onClick, onContextMenu, onRenam
 
             {/* 项目元信息 */}
             <div className="card-meta">
-                <span className="file-count">{project.files.length} 个文件</span>
+                <span className="file-count">{t('exploration.project.card.fileCount', { count: project.files.length })}</span>
                 <span className="separator">·</span>
                 <span className="time">{formatRelativeTime(project.updatedAt || project.createdAt)}</span>
             </div>
@@ -99,12 +101,13 @@ interface NewProjectCardProps {
 }
 
 export function NewProjectCard({ onClick }: NewProjectCardProps) {
+    const { t } = useI18n();
     return (
         <div className="project-card new-project-card" onClick={onClick}>
             <div className="card-icon new-icon">
                 <Plus size={32} />
             </div>
-            <div className="card-title">上传新文件</div>
+            <div className="card-title">{t('exploration.project.card.uploadNew')}</div>
         </div>
     );
 }

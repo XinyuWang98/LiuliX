@@ -1,0 +1,26 @@
+/* DataViewerV2 专用样式 */
+
+/* 顶部栏 */
+.data-viewer-v2-topbar {
+    padding: var(--gap-s) var(--gap-xs);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+}
+
+/* 玻璃容器 */
+.virtual-grid-glass-wrapper {
+    flex: 1;
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* 对齐 Design 页面 */
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

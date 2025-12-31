@@ -4,6 +4,7 @@ import { Project } from '@/utils/projectUtils';
 import { loadProjects, saveProjects, deleteProject as deleteProjectFromDB } from '@/utils/indexedDB';
 import { ProjectCard, NewProjectCard } from './ProjectCard';
 import { logger } from '@/utils/logger';
+import { useI18n } from '@/contexts/I18nContext';
 import './ProjectCardGrid.css';
 
 interface ProjectCardGridProps {
@@ -13,13 +14,14 @@ interface ProjectCardGridProps {
 }
 
 export function ProjectCardGrid({ currentProject, onProjectSelect, onNewProject }: ProjectCardGridProps) {
+    const { t } = useI18n();
     const [projects, setProjects] = useState<Project[]>([]);
     const [contextMenu, setContextMenu] = useState<{ projectId: string; x: number; y: number } | null>(null);
 
-    // 加载项目列表
+    // 加载项目列表（监听 currentProject 变化以自动刷新）
     useEffect(() => {
         loadProjectsList();
-    }, []);
+    }, [currentProject]);
 
     const loadProjectsList = async () => {
         try {
@@ -83,7 +85,7 @@ export function ProjectCardGrid({ currentProject, onProjectSelect, onNewProject 
     return (
         <div className="project-card-grid-container">
             <div className="grid-header">
-                <h3>最近项目</h3>
+                <h3>{t('exploration.project.grid.title')}</h3>
             </div>
 
             <div className="card-grid">
@@ -118,11 +120,11 @@ export function ProjectCardGrid({ currentProject, onProjectSelect, onNewProject 
                         setContextMenu(null);
                     }}>
                         <Edit2 size={14} />
-                        <span>重命名</span>
+                        <span>{t('exploration.project.context.rename')}</span>
                     </div>
                     <div className="context-menu-item danger" onClick={() => handleDeleteProject(contextMenu.projectId)}>
                         <Trash2 size={14} />
-                        <span>删除</span>
+                        <span>{t('exploration.project.context.delete')}</span>
                     </div>
                 </div>
             )}

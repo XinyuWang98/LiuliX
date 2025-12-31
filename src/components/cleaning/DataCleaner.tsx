@@ -3,7 +3,7 @@ import { Sparkles, Play, CheckCircle2, RefreshCw, History, X } from 'lucide-reac
 
 import { SuggestionCard } from './components/SuggestionCard';
 import { useI18n } from '../../contexts/I18nContext';
-import { DataViewer } from '../data/DataViewer';
+import { DataViewerV2 as DataViewer } from '../data/DataViewerV2'; // 替换为 V2 组件但保留别名以减少改动
 import { AILoading } from '../common/AILoading';
 import {
     DataCleanerProps,

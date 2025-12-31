@@ -1,0 +1,159 @@
+/* ========================================
+   数据清洗建议卡片组件样式
+   遵循 LiuliX Ascension 视觉语言规范
+   ======================================== */
+
+.cleaning-suggestion-card {
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s var(--easing-smooth);
+    border: 1px solid var(--glass-border);
+}
+
+.cleaning-suggestion-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.cleaning-suggestion-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 16px rgba(0, 242, 254, 0.4);
+}
+
+/* 卡片头部 */
+.cleaning-suggestion-card .card-header {
+    padding: var(--gap-m) var(--gap-l);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-m);
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.cleaning-suggestion-card .header-left-content {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-m);
+    flex: 1;
+    min-width: 0;
+}
+
+
+
+.cleaning-suggestion-card .source-tag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-s);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.cleaning-suggestion-card .source-tag.tag-ai {
+    background: rgba(0, 242, 254, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+}
+
+.cleaning-suggestion-card .source-tag.tag-prompt {
+    background: rgba(var(--primary-rgb), 0.15);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.cleaning-suggestion-card .suggestion-label {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-medium);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cleaning-suggestion-card .confidence-badge {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    flex-shrink: 0;
+}
+
+/* 卡片内容 */
+.cleaning-suggestion-card .card-content {
+    padding: var(--gap-l);
+}
+
+.cleaning-suggestion-card .reason-text {
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.cleaning-suggestion-card .sql-code-block {
+    margin-top: var(--gap-m);
+    padding: var(--gap-m);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    overflow-x: auto;
+}
+
+.cleaning-suggestion-card .sql-code {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    color: var(--accent);
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* 卡片底部 */
+.cleaning-suggestion-card .card-footer {
+    padding: var(--gap-s) var(--gap-l);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--glass-border);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.cleaning-suggestion-card .card-footer:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.cleaning-suggestion-card .sql-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cleaning-suggestion-card .sql-label {
+    font-family: var(--font-mono);
+}
+
+.cleaning-suggestion-card .copy-btn {
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cleaning-suggestion-card .copy-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}

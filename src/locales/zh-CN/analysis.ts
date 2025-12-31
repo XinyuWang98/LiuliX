@@ -73,6 +73,19 @@ export const exploration = {
         cleaning: '数据清洗建议',
         insights: '洞察分析',
         report: '分析报告',
+    },
+    project: {
+        grid: {
+            title: '最近项目'
+        },
+        context: {
+            rename: '重命名',
+            delete: '删除'
+        },
+        card: {
+            fileCount: '{{count}} 个文件',
+            uploadNew: '上传新文件'
+        }
     }
 };
 
@@ -129,6 +142,7 @@ export const report = {
     totalRecords: '证据总数',
     cleaningOps: '清洗操作',
     insights: '关键洞察',
+    evidenceAdopted: '已采纳 {{count}} 条',
     previewHint: '点击上方按钮可复制或下载完整的 Markdown 报告',
     aiAssistant: 'AI 报告小助手',
     evidenceCollected: '已收集证据 #{start} - #{end}，生成最终报告如下：',

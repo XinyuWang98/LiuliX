@@ -50,10 +50,10 @@ export const CategoricalStatsPanel: React.FC<CategoricalStatsPanelProps> = ({ st
             <div className="panel-body">
                 {stat.topValues.map((item, idx) => (
                     <div key={idx} className="stat-row">
-                        <span className="stat-value text-ellipsis" title={String(item.value)}>
+                        <span className="stat-label text-ellipsis" title={String(item.value)}>
                             {formatDisplayValue(item.value, type, columnName)}
                         </span>
-                        <span className="stat-count">{item.count}</span>
+                        <span className="stat-value">{item.count}</span>
                     </div>
                 ))}
             </div>

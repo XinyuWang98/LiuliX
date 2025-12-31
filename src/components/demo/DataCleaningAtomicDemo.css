@@ -1,0 +1,107 @@
+/* ========================================
+   数据清洗原子组件独立展示样式
+   ======================================== */
+
+.data-cleaning-atomic-demo {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.atomic-section {
+    margin-bottom: var(--gap-xxl);
+    padding: var(--gap-xl);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-l);
+}
+
+.atomic-section-title {
+    margin: 0 0 var(--gap-s);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+}
+
+.atomic-section-desc {
+    margin: 0 0 var(--gap-l);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* 卡片展示网格 */
+.atomic-demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: var(--gap-l);
+}
+
+.demo-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+}
+
+.demo-label {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 标签页展示 */
+.demo-tabs-wrapper {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+}
+
+.demo-info {
+    margin-top: var(--gap-m);
+    padding: var(--gap-m);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-m);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+.demo-info strong {
+    color: var(--primary);
+}
+
+/* 空状态展示网格 */
+.empty-states-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--gap-l);
+}
+
+.empty-state-demo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+}
+
+.empty-state-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-l);
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .atomic-demo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .empty-states-grid {
+        grid-template-columns: 1fr;
+    }
+}

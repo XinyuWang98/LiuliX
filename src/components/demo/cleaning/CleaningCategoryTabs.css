@@ -1,0 +1,59 @@
+/* ========================================
+   数据清洗分类标签页样式
+   遵循 LiuliX Ascension 视觉语言规范
+   ======================================== */
+
+.cleaning-category-tabs {
+    padding: var(--gap-m) var(--gap-l);
+    display: flex;
+    gap: var(--gap-s);
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+}
+
+.category-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-s) var(--gap-m);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: all 0.2s var(--easing-smooth);
+}
+
+.category-tab:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.category-tab.active {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.3);
+}
+
+.category-tab.ai-tab.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
+}
+
+.tab-icon {
+    display: flex;
+    align-items: center;
+}
+
+.tab-label {
+    white-space: nowrap;
+}
+
+.tab-count {
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
+}

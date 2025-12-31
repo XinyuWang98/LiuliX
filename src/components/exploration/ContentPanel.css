@@ -25,21 +25,16 @@
 
 .project-section.expanded {
     height: auto;
-    min-height: 400px;
     opacity: 1;
     margin-bottom: var(--gap-l);
     overflow: visible;
-    /* 展开时可滚动 */
 }
 
 .project-section.collapsed {
     height: auto;
-    /* 改为auto，让内容撑开高度 */
-    min-height: 60px;
     opacity: 1;
     margin-bottom: var(--gap-l);
     overflow: visible;
-    /* 确保可见 */
 }
 
 /* 折叠态紧凑头部 */
@@ -85,19 +80,19 @@
 }
 
 /* ========== Content Section样式 ========== */
+/* ========== Content Section样式 ========== */
 .content-section {
-    /* L1 级玻璃态：基础玻璃容器 */
-    background: var(--glass-surface);
-    backdrop-filter: blur(var(--blur-medium));
-
-    /* 玻璃边框 + 圆角 */
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-
-    padding: var(--gap-xl);
+    /* 仅保留布局属性，视觉样式移交给 LiuliGlass */
+    /* padding: var(--gap-xl);  <-- Moved to inner container */
 
     /* 进入动画 */
     animation: slideInFromTop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.content-module-container {
+    padding: var(--gap-xl);
+    height: auto;
+    /* 改为 auto 以自适应内容高度 */
 }
 
 @keyframes slideInFromTop {

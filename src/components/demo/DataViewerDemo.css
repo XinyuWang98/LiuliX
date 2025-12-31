@@ -1,0 +1,526 @@
+/* ========================================
+   DataViewer 演示组件样式（优化版 - 内嵌统计）
+   微型图和统计信息直接内嵌在表格列头中
+   遵循 LiuliX Ascension 视觉语言规范
+   ======================================== */
+
+.data-viewer-demo {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.viewer-container {
+    padding: 0;
+    overflow: hidden;
+}
+
+/* ========== 文件标签栏 ========== */
+.file-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--gap-m) var(--gap-l);
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.2);
+    gap: var(--gap-m);
+}
+
+.tabs-left {
+    display: flex;
+    gap: var(--gap-xs);
+    flex: 1;
+    overflow-x: auto;
+}
+
+.tabs-left::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tabs-left::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: var(--radius-s);
+}
+
+.file-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-s) var(--gap-m);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: all 0.2s var(--easing-smooth);
+    white-space: nowrap;
+}
+
+.file-tab:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.file-tab.active {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.3);
+}
+
+.tab-name {
+    font-weight: var(--fw-semibold);
+}
+
+.tab-stats {
+    font-size: var(--fs-xs);
+    color: var(--text-dim);
+}
+
+.tabs-right {
+    display: flex;
+    gap: var(--gap-s);
+    flex-shrink: 0;
+    align-items: center;
+    position: relative;
+}
+
+/* 列筛选按钮 */
+.column-filter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s var(--easing-smooth);
+}
+
+.column-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.3);
+}
+
+/* 列筛选面板 */
+.column-filter-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 240px;
+    max-height: 400px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(16px);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--gap-m) var(--gap-l);
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-title {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+}
+
+.filter-count {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+    color: var(--primary);
+}
+
+.filter-list {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: var(--gap-s);
+}
+
+.filter-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.filter-list::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: var(--radius-s);
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: var(--gap-s) var(--gap-m);
+    cursor: pointer;
+    border-radius: var(--radius-s);
+    transition: background 0.2s;
+}
+
+.filter-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.filter-label {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+/* ========== 数据表格（固定表头滚动） ========== */
+.table-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.table-wrapper .data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--fs-sm);
+    display: block;
+}
+
+/* 表头固定 */
+.table-wrapper .data-table thead {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.4);
+    /* 调淡表头背景，提升通透感 */
+    backdrop-filter: blur(16px);
+}
+
+.table-wrapper .data-table thead tr {
+    display: flex;
+}
+
+/* 表体滚动 */
+.table-wrapper .data-table tbody {
+    display: block;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.table-wrapper .data-table tbody::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-wrapper .data-table tbody::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: var(--radius-s);
+}
+
+.table-wrapper .data-table tbody::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.table-wrapper .data-table tbody tr {
+    display: flex;
+}
+
+.table-wrapper .data-table tbody td {
+    flex: 1;
+    min-width: 150px;
+    padding: var(--gap-s) var(--gap-m);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* 极淡的行分隔线 */
+    border-right: 1px solid transparent;
+}
+
+.cell-content {
+    font-family: var(--font-sans);
+    font-feature-settings: 'tnum';
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 对齐表头 */
+.table-wrapper .data-table th {
+    flex: 1;
+    min-width: 150px;
+    padding: var(--gap-m);
+    text-align: left;
+    border-bottom: 2px solid var(--glass-border);
+    border-right: 1px solid var(--glass-border);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    vertical-align: top;
+}
+
+.table-wrapper .data-table th:last-child {
+    border-right: none;
+}
+
+/* 列头单元格（内嵌所有信息） */
+.header-cell-inline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+}
+
+.column-name {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    /* 改为 UI 字体，与整体风格融合 */
+}
+
+.column-type {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-normal);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 缺失率进度条（新增，符合 V2） */
+.missing-rate-container {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    margin-top: var(--gap-xs);
+}
+
+.missing-rate-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: var(--radius-s);
+    overflow: hidden;
+}
+
+.missing-rate-bar-fill {
+    height: 100%;
+    transition: all 0.3s var(--easing-smooth);
+}
+
+.missing-rate-text {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    font-weight: var(--fw-medium);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Unique 值计数（新增，符合 V2） */
+.unique-count {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin-top: 2px;
+    font-weight: var(--fw-normal);
+}
+
+/* stats-panel 组件的容器wrapper，确保统计卡片高度一致 */
+.header-cell-inline .stats-panel {
+    /* 固定高度确保所有列统计卡片高度一致 */
+    height: 180px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.header-cell-inline .stats-panel::-webkit-scrollbar {
+    width: 4px;
+}
+
+.header-cell-inline .stats-panel::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: var(--radius-s);
+}
+
+.header-cell-inline .stats-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
+.column-stats-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.stat-item strong {
+    color: var(--text-primary);
+    font-weight: var(--fw-semibold);
+}
+
+/* 内嵌微型图 */
+.mini-chart-inline {
+    height: 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    margin-top: var(--gap-xs);
+    padding: 2px 0;
+}
+
+.bar-inline {
+    flex: 1;
+    min-width: 3px;
+    border-radius: 2px 2px 0 0;
+    transition: all 0.2s var(--easing-smooth);
+    opacity: 0.7;
+}
+
+.bar-inline:hover {
+    opacity: 1;
+}
+
+/* 表格行 */
+.table-wrapper .data-table tbody tr {
+    transition: background 0.2s;
+}
+
+.table-wrapper .data-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.table-wrapper .data-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.table-wrapper .data-table tbody tr:nth-child(even):hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.table-wrapper .data-table td {
+    flex: 1;
+    min-width: 150px;
+    padding: var(--gap-m);
+    border-bottom: 1px solid var(--glass-border);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+}
+
+.table-wrapper .data-table td:last-child {
+    border-right: none;
+}
+
+/* .cell-content 样式已在上方定义，此处移除重复定义 */
+
+.cell-content.null-value {
+    font-style: italic;
+}
+
+.cell-content .null-indicator {
+    color: var(--text-dim);
+    opacity: 0.5;
+}
+
+/* ========== 底部统计栏 ========== */
+.stats-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--gap-m) var(--gap-l);
+    border-top: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.2);
+    font-size: var(--fs-xs);
+    color: var(--text-dim);
+}
+
+.stats-left,
+.stats-right {
+    display: flex;
+    gap: var(--gap-m);
+}
+
+.stats-item {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}
+
+/* 分页控制器 */
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+}
+
+.page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s var(--easing-smooth);
+}
+
+.page-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.3);
+}
+
+.page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    font-weight: var(--fw-medium);
+    min-width: 80px;
+    text-align: center;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .file-tabs {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tabs-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .table-container {
+        max-height: 400px;
+    }
+
+    .data-table th {
+        min-width: 100px;
+    }
+}

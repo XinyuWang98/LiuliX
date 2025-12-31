@@ -1,13 +1,17 @@
 /* 统计面板通用样式 */
 .stats-panel {
-    background: rgba(0, 0, 0, 0.2);
+    background: transparent;
+    /* 完全移除背景 */
     border-radius: var(--radius-s);
-    padding: var(--gap-s);
+    padding: var(--gap-s) 0;
+    /* 仅保留上下 padding，移除左右 padding */
     font-size: var(--fs-xs);
-    /* 12px */
     color: var(--text-secondary);
     margin-top: var(--gap-xs);
-    border: 1px solid var(--border-light);
+    border: none;
+    /* 移除边框，消除分割感 */
+    backdrop-filter: none;
+    /* 移除模糊 */
 }
 
 .stat-row {
@@ -32,20 +36,26 @@
 
 .stat-label {
     color: var(--text-tertiary);
-    /* 淡色标签 */
     font-weight: 500;
     text-transform: uppercase;
-    font-size: 10px;
-    /* 小号标签 */
+    font-size: 11px;
+    /* 统一字号为 11px */
     letter-spacing: 0.5px;
+    font-family: var(--font-sans);
+    /* 统一字体 */
 }
 
 .stat-value {
-    color: var(--text-primary);
-    /* 高亮数值 */
-    font-family: var(--font-mono);
-    /* 等宽字体对齐 */
-    font-weight: 600;
+    color: var(--text-secondary);
+    /* 降低亮度，避免晃眼 */
+    font-family: var(--font-sans);
+    /* 统一使用 Sans 字体 */
+    font-size: 11px;
+    /* 调小字号 */
+    font-weight: 500;
+    /* 减细字重 */
+    font-feature-settings: 'tnum';
+    /* 等宽数字 */
     text-align: right;
 }
 
@@ -60,31 +70,45 @@
 .categorical-panel {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
+/* 移除 panel-header 的特殊样式，使其与 stat-label 一致 */
 .panel-header {
-    font-size: 10px;
     color: var(--text-tertiary);
+    font-weight: 500;
     text-transform: uppercase;
-    font-weight: bold;
-    margin-bottom: 2px;
-    border-bottom: 1px solid var(--border-light);
-    padding-bottom: 2px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    /* 移除边框和额外边距，与 numeric panel 保持一致 */
+}
+
+.panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* categorical 中的 stat-label 需要左对齐（显示文本），且覆盖默认的 uppercase */
+.categorical-panel .stat-label {
+    text-align: left;
+    flex: 1;
+    text-transform: none;
+    /* 保持原始大小写 */
+    color: var(--text-tertiary);
+    /* 恢复为 Label 颜色，消除视觉差距 */
+    font-family: var(--font-sans);
+    /* 统一字体 */
+    font-size: 11px;
+    /* 统一字号 */
+    font-feature-settings: 'tnum';
+    /* 等宽数字 */
 }
 
 .text-ellipsis {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 70%;
 }
 
-.stat-count {
-    color: var(--text-tertiary);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0 4px;
-    border-radius: 4px;
-}
+/* stat-count 已被 stat-value 替代 */

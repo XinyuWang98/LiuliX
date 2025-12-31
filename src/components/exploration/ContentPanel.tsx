@@ -4,9 +4,10 @@ import { useEvidence } from '@/contexts/EvidenceContext';
 import { DataCleaner } from '../cleaning/DataCleaner';
 import { ReportGenerator } from '../report/ReportGenerator';
 import { InsightChainFlow } from '../insights/InsightChainFlow';
-import { EmptyStateWelcome } from './EmptyStateWelcome';
 import { ProjectCardGrid } from './ProjectCardGrid';
+import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
 import { Project } from '@/utils/projectUtils';
+import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
 import './ContentPanel.css';
 
 interface ContentPanelProps {
@@ -26,6 +27,7 @@ export function ContentPanel({
 }: ContentPanelProps) {
     const { t } = useI18n();
     const { records: evidenceRecords } = useEvidence();
+    const fileUploaderRef = useRef<FileUploaderRef>(null);
     const projectRef = useRef<HTMLDivElement>(null);
     const cleaningRef = useRef<HTMLDivElement>(null);
     const insightsRef = useRef<HTMLDivElement>(null);
@@ -58,57 +60,57 @@ export function ContentPanel({
 
     return (
         <div className="content-panel-v2">
-            {/* 项目选择区域 - 始终渲染在顶部，可通过滚动访问 */}
+            {/* 1. 项目选择模块 (Project Selection) */}
             <div
                 ref={projectRef}
                 id="project-selection"
                 className={`project-section ${selectedItemId === 'project-selection' ? 'expanded' : 'collapsed'}`}
             >
-                {project ? (
+                <LiuliGlass className="content-module-container">  {/* Added Container */}
                     <ProjectCardGrid
                         currentProject={project}
                         onProjectSelect={(selectedProject) => {
                             onProjectUpdate(selectedProject);
                         }}
                         onNewProject={() => {
-                            // 点击新建项目时触发文件上传
-                            if (onFilesUploaded) {
-                                // 触发文件选择器
-                            }
+                            // 复用 FileUploader 组件的文件选择功能
+                            fileUploaderRef.current?.triggerUpload();
                         }}
                     />
-                ) : (
-                    <EmptyStateWelcome onFilesUploaded={handleProjectUpload} />
-                )}
+                </LiuliGlass>
             </div>
 
-            {/* 数据清洗 Section */}
+            {/* 2. 数据清洗 Section */}
             {project && (
                 <div ref={cleaningRef} id="cleaning" className="content-section">
-                    <div className="section-header">
-                        <h2 className="section-title">{t('exploration.sections.cleaning')}</h2>
-                    </div>
-                    <DataCleaner
-                        project={project}
-                        onProjectUpdate={onProjectUpdate}
-                        cleaningTrigger={cleaningTrigger}
-                    />
+                    <LiuliGlass className="content-module-container"> {/* Added Container */}
+                        <div className="section-header">
+                            <h2 className="section-title">{t('exploration.sections.cleaning')}</h2>
+                        </div>
+                        <DataCleaner
+                            project={project}
+                            onProjectUpdate={onProjectUpdate}
+                            cleaningTrigger={cleaningTrigger}
+                        />
+                    </LiuliGlass>
                 </div>
             )}
 
-            {/* 洞察分析 Section */}
+            {/* 3. 洞察分析 Section */}
             {project && (
                 <div ref={insightsRef} id="insights" className="content-section">
-                    <div className="section-header">
-                        <h2 className="section-title">{t('exploration.sections.insights')}</h2>
-                    </div>
-                    <InsightChainFlow
-                        columns={project.files?.[0]?.columns?.map(c => c.name) || []}
-                        rowCount={project.files?.[0]?.rowCount || 0}
-                        tableName={project.files?.[0]?.tableName}
-                        fileName={project.files?.[0]?.originalName || project.files?.[0]?.name}
-                        hideTitle={true}
-                    />
+                    <LiuliGlass className="content-module-container"> {/* Added Container */}
+                        <div className="section-header">
+                            <h2 className="section-title">{t('exploration.sections.insights')}</h2>
+                        </div>
+                        <InsightChainFlow
+                            columns={project.files?.[0]?.columns?.map(c => c.name) || []}
+                            rowCount={project.files?.[0]?.rowCount || 0}
+                            tableName={project.files?.[0]?.tableName}
+                            fileName={project.files?.[0]?.originalName || project.files?.[0]?.name}
+                            hideTitle={true}
+                        />
+                    </LiuliGlass>
                 </div>
             )}
 
@@ -118,12 +120,17 @@ export function ContentPanel({
                     <div className="section-header">
                         <h2 className="section-title">{t('exploration.sections.report')}</h2>
                         <span className="evidence-badge">
-                            已采纳 {evidenceRecords.length} 条
+                            {t('report.evidenceAdopted', { count: evidenceRecords.length })}
                         </span>
                     </div>
                     <ReportGenerator />
                 </div>
             )}
+
+            {/* 隐藏的 FileUploader 组件 - 复用现有的文件上传逻辑 */}
+            <div style={{ display: 'none' }}>
+                <FileUploader ref={fileUploaderRef} onFilesUploaded={handleProjectUpload} />
+            </div>
         </div>
     );
 }

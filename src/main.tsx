@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 
 // 导入全局样式
+import './styles/tokens/index.css';
 import './styles/variables.css';
 import './styles/reset.css';
 import './styles/global.css';

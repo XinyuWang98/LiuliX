@@ -1,0 +1,69 @@
+/* ========================================
+   数据清洗空状态样式
+   遵循 LiuliX Ascension 视觉语言规范
+   ======================================== */
+
+.cleaning-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: var(--gap-m);
+    padding: var(--gap-xl);
+}
+
+.empty-icon {
+    color: var(--primary);
+    opacity: 0.5;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.empty-emoji {
+    font-size: 48px;
+}
+
+.empty-message {
+    margin: 0;
+    font-size: var(--fs-base);
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* 加载状态动画 */
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--glass-border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* 状态特定样式 */
+.cleaning-empty-state.state-success .empty-message {
+    color: var(--success);
+}
+
+.cleaning-empty-state.state-error .empty-message {
+    color: var(--warning);
+}
