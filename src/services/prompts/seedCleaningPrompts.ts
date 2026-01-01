@@ -22,6 +22,13 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_remove_duplicates',
         title: '删除重复行',
         description: '删除表中的完全重复记录，保留唯一值',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-remove-duplicates-v1',
+        packageId: 'basic',  // 清洗类归入basic
+        requiredPackages: [],  // SQL清洗不需要Python包
+        outputCharts: [],  // 清洗类不输出图表
+
         layer: 'L2_EXECUTION',
         template: '', // 清洗模板不需要Prompt（由Router调用）
         sqlTemplate: 'CREATE OR REPLACE TABLE __TABLE_NAME__ AS SELECT DISTINCT * FROM __TABLE_NAME__',

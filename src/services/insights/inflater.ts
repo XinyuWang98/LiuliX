@@ -20,12 +20,33 @@ function generateId(): string {
 /**
  * 渲染代码模板
  * 将 {{variable}} 占位符替换为实际值
+ * 模板中占位符无引号,由此函数根据类型添加引号
  */
 export function renderTemplate(template: string, params: Record<string, unknown>): string {
     let result = template;
     for (const [key, value] of Object.entries(params)) {
         const placeholder = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-        result = result.replace(placeholder, String(value));
+
+        // 智能类型转换（模板中无引号,由此函数添加）
+        let replacement: string;
+        if (Array.isArray(value)) {
+            // 数组 → Python list
+            replacement = JSON.stringify(value);  // ["a", "b"] → '["a", "b"]'
+        } else if (typeof value === 'number') {
+            // 数字 → 直接转字符串
+            replacement = String(value);
+        } else if (typeof value === 'boolean') {
+            // 布尔值 → Python True/False  
+            replacement = value ? 'True' : 'False';
+        } else if (value === null || value === undefined) {
+            // 空值 → None
+            replacement = 'None';
+        } else {
+            // 字符串 → 加引号
+            replacement = `'${value}'`;
+        }
+
+        result = result.replace(placeholder, replacement);
     }
     return result;
 }

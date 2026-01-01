@@ -7,6 +7,7 @@
 
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
+import { PROMPT_IDS } from '@/constants/promptIds';  // v2.1: 使用ID常量
 
 /**
  * 构建 Router Prompt
@@ -241,13 +242,13 @@ export function buildFallbackRecommendations(
     // 规则 1: 数值列存在 → 分布分析
     if (numericCol) {
         recommendations.push({
-            promptId: 'worker-distribution-v1',
+            promptId: PROMPT_IDS.DISTRIBUTION,
             params: { column_name: numericCol },
             reason: `查看 ${numericCol} 的数据分布`
         });
 
         recommendations.push({
-            promptId: 'worker-stats-v1',
+            promptId: PROMPT_IDS.STATS,
             params: { column_name: numericCol },
             reason: `${numericCol} 的描述性统计`
         });
@@ -260,7 +261,7 @@ export function buildFallbackRecommendations(
     });
     if (numericCols.length >= 2) {
         recommendations.push({
-            promptId: 'worker-correlation-v1',
+            promptId: PROMPT_IDS.CORRELATION,
             params: { col_x: numericCols[0], col_y: numericCols[1] },
             reason: `分析 ${numericCols[0]} 与 ${numericCols[1]} 的关系`
         });
@@ -269,7 +270,7 @@ export function buildFallbackRecommendations(
     // 规则 3: 日期列 + 数值列 → 趋势分析
     if (dateCol && numericCol) {
         recommendations.push({
-            promptId: 'worker-trend-v1',
+            promptId: PROMPT_IDS.TREND,
             params: { date_col: dateCol, value_col: numericCol },
             reason: `${numericCol} 随时间的变化趋势`
         });

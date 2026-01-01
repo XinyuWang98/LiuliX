@@ -1,0 +1,109 @@
+/* CodeBlock 组件样式 */
+.code-block {
+    position: relative;
+    border-radius: var(--radius-md);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+    max-height: 600px;
+    /* 限制最大高度，确保有滚动条 */
+}
+
+.code-block pre {
+    margin: 0;
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    /* 只允许垂直滚动 */
+    overflow-x: hidden;
+    /* 禁止水平滚动 */
+    max-height: 568px;
+    /* 减去边框和padding后的高度 */
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    background: transparent;
+    white-space: pre-wrap;
+    /* 自动换行，保留格式 */
+    word-wrap: break-word;
+    /* 长单词强制换行 */
+}
+
+.code-block code {
+    font-family: inherit;
+    background: transparent;
+    padding: 0;
+}
+
+/* 复制按钮 */
+.code-block-copy {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--glass-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    transition: all 0.2s var(--ease-out);
+    backdrop-filter: blur(8px);
+    z-index: 1;
+}
+
+.code-block-copy:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    border-color: var(--border-default);
+}
+
+.code-block-copy:active {
+    transform: scale(0.95);
+}
+
+/* 行号支持（可选） */
+.code-block pre.line-numbers {
+    padding-left: calc(var(--spacing-lg) + 3em);
+}
+
+.code-block pre.line-numbers code {
+    counter-reset: linenumber;
+}
+
+.code-block pre.line-numbers code>span {
+    display: block;
+}
+
+.code-block pre.line-numbers code>span::before {
+    counter-increment: linenumber;
+    content: counter(linenumber);
+    display: inline-block;
+    width: 2.5em;
+    margin-left: -3.5em;
+    margin-right: 1em;
+    text-align: right;
+    color: var(--text-tertiary);
+    user-select: none;
+}
+
+/* 滚动条样式 - 只针对垂直滚动条 */
+.code-block pre::-webkit-scrollbar {
+    width: 8px;
+    /* 垂直滚动条宽度 */
+}
+
+.code-block pre::-webkit-scrollbar-track {
+    background: var(--surface-sunken);
+}
+
+.code-block pre::-webkit-scrollbar-thumb {
+    background: var(--text-tertiary);
+    border-radius: var(--radius-full);
+}
+
+.code-block pre::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}

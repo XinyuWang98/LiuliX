@@ -314,6 +314,24 @@ export interface LanguageConfig {
                 title: string;
                 description: string;
             };
+            sidebar: {
+                all: string;
+                cleaning: string;
+                analysis: string;
+            };
+            detail: {
+                infoTab: string;
+                codeTab: string;
+                description: string;
+                tags: string;
+                inputVariables: string;
+                author: string;
+                version: string;
+                updated: string;
+                copyCode: string;
+                tryIt: string;
+                sourceJson: string;
+            };
             category: {
                 analysis: string;
                 cleaning: string;

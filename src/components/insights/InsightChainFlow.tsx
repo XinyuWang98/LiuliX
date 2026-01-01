@@ -45,8 +45,12 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
     // 加载洞察函数（V2 + 质量门控）
     const handleLoadInsights = async () => {
+        // ✅ 优先级：传入的 tableName > file.data.tableName > file.tableName
+        // 遵循与 useDataLoader.ts 一致的模式
+        const effectiveTableName = tableName || file?.data?.tableName || file?.tableName;
+
         logger.log('AI洞察', '使用V2增强模式（含双重质量门控）');
-        const result = await loadInsights(columns, rowCount, tableName, file);
+        const result = await loadInsights(columns, rowCount, effectiveTableName, file);
         setInsightNodes(result); // 直接设置 InsightNode[]
     };
 

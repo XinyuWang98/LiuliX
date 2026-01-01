@@ -10,6 +10,13 @@ export const workerCleanOutlierPrompt: UserPrompt = {
   title: '剔除异常值',
   description: '删除数值列中的异常值行，使用IQR或Z-score方法识别异常',
 
+
+
+  // 能力包配置 (v2.1)
+  slug: 'worker-clean-outlier-v1',
+  packageId: 'basic',
+  requiredPackages: ['matplotlib', 'numpy', 'pandas'],
+  outputCharts: ['line', 'box'],
   layer: 'L2_EXECUTION',
 
   dimensions: [
@@ -33,8 +40,8 @@ import matplotlib.pyplot as plt
 
 def analyze(df):
     try:
-        column_name = '{{column_name}}'
-        method = '{{outlier_method}}' # iqr or zscore (default iqr)
+        column_name = {{column_name}}
+        method = {{outlier_method}} # iqr or zscore (default iqr)
         
         # 1. 数据准备
         df_clean = df.copy()

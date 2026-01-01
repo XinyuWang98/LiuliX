@@ -10,6 +10,12 @@ export const workerClusterPrompt: UserPrompt = {
     title: '聚类分析',
     description: '使用 K-Means 算法对数据进行分群，发现潜在的群体特征',
 
+    // 能力包配置 (v2.1)
+    slug: 'worker-cluster-v1',
+    packageId: 'sklearn',
+    requiredPackages: ['scikit-learn', 'pandas', 'numpy', 'matplotlib'],
+    outputCharts: ['scatter', 'cluster'],
+
     layer: 'L2_EXECUTION',
 
     dimensions: [

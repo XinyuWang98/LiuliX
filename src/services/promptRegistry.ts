@@ -65,17 +65,36 @@ class PromptRegistry implements IPromptRegistry {
     }
 
     /**
-     * 获取单个 Prompt
+     * 获取单个 Prompt（支持ID或slug）
+     * v2.1: 增强支持slug查询，向后兼容
      */
-    public getPrompt(id: string): UserPrompt | undefined {
-        return this.prompts.get(id);
+    public getPrompt(idOrSlug: string): UserPrompt | undefined {
+        // 先尝试ID查询
+        const byId = this.prompts.get(idOrSlug);
+        if (byId) return byId;
+
+        // 再尝试slug查询
+        return this.getPromptBySlug(idOrSlug);
     }
 
     /**
-     * 检查 Prompt 是否存在
+     * 按slug查询Prompt（v2.1新增）
+     * 用于向后兼容语义化ID引用
      */
-    public hasPrompt(id: string): boolean {
-        return this.prompts.has(id);
+    public getPromptBySlug(slug: string): UserPrompt | undefined {
+        for (const prompt of this.prompts.values()) {
+            if (prompt.slug === slug) {
+                return prompt;
+            }
+        }
+        return undefined;
+    }
+
+    /**
+     * 检查 Prompt 是否存在（支持ID或slug）
+     */
+    public hasPrompt(idOrSlug: string): boolean {
+        return this.prompts.has(idOrSlug) || this.getPromptBySlug(idOrSlug) !== undefined;
     }
 
     /**

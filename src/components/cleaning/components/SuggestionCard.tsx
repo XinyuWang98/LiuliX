@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { SimpleSuggestion } from '../types/cleaning.types';
 import { useI18n } from '../../../contexts/I18nContext';
 import { useEvidence } from '../../../contexts/EvidenceContext';
-import { ChevronDown, ChevronRight, Copy, Check, Sparkles, Trash2, Eraser, FileX, Calculator, Wand2, CheckCircle } from 'lucide-react';
-import { formatSQL } from '../../../utils/sqlFormatter';
+import { ChevronDown, ChevronRight, Sparkles, Trash2, Eraser, FileX, Calculator, Wand2, CheckCircle } from 'lucide-react';
+import { CodeBlock } from '@/components/common/CodeBlock';
 import './SuggestionCard.css';
 
 interface SuggestionCardProps {
@@ -25,7 +25,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
     const { t } = useI18n();
     const { addRecord, records } = useEvidence();
     const [isSqlExpanded, setIsSqlExpanded] = useState(false);
-    const [copied, setCopied] = useState(false);
+
 
     // 检查是否已采纳
     const isAdopted = records.some(r => r.metadata?.suggestionId === suggestion.id);
@@ -72,13 +72,6 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
         return <Sparkles size={16} className="icon-default" />;
     };
 
-    const handleCopyObj = (e: React.MouseEvent, text: string) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
     const toggleSql = (e: React.MouseEvent) => {
         e.stopPropagation();
         setIsSqlExpanded(!isSqlExpanded);
@@ -101,10 +94,10 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
             sql = sql.replace(/t_\d+_(original|working)/g, csvName);
         }
 
-        // 格式化并添加提示注释
-        const formattedSql = formatSQL(sql);
-        return `-- 注意：执行前请将 ${fileName || 'your_table.csv'} 替换为实际表名\n${formattedSql}`;
+        // 添加提示注释
+        return `-- 注意：执行前请将 ${fileName || 'your_table.csv'} 替换为实际表名\n${sql}`;
     })();
+
 
     // 计算推荐度颜色
     const getConfidenceColor = (score: number) => {
@@ -150,9 +143,13 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
                 {/* SQL Code Body (Above the Toggle) */}
                 {suggestion.sql && isSqlExpanded && (
                     <div className="sqlBody">
-                        <code className="sqlCode">
-                            {displaySql}
-                        </code>
+                        <CodeBlock
+                            code={displaySql}
+                            language="sql"
+                            formatted={true}
+                            copyable={false}
+                            className="suggestion-code-block"
+                        />
                     </div>
                 )}
             </div>
@@ -164,15 +161,6 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
                         {isSqlExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         <span className="sqlLabel">EXECUTE SQL</span>
                     </div>
-                    {isSqlExpanded && (
-                        <button
-                            className="copyBtn"
-                            onClick={(e) => handleCopyObj(e, displaySql)}
-                            title="Copy SQL"
-                        >
-                            {copied ? <Check size={12} /> : <Copy size={12} />}
-                        </button>
-                    )}
                 </div>
             )}
 

@@ -10,6 +10,13 @@ export const workerDecisionTreePrompt: UserPrompt = {
     title: '决策树分析',
     description: '使用决策树模型发现影响目标变量的关键规则（白盒可解释）',
 
+
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-decision-tree-v1',
+    packageId: 'sklearn',
+    requiredPackages: ['matplotlib', 'pandas', 'scikit-learn'],
+    outputCharts: ['line', 'box'],
     layer: 'L2_EXECUTION',
 
     dimensions: [
@@ -33,7 +40,7 @@ import json
 plt.switch_backend('Agg')
 
 # 1. 数据准备
-target_col = '{{target_col}}'
+target_col = {{target_col}}
 feature_cols = {{feature_cols}}
 max_depth = {{max_depth}}
 

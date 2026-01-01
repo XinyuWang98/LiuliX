@@ -10,7 +10,14 @@ export const workerCleanDropnaPrompt: UserPrompt = {
     title: '删除空值行',
     description: '删除数据集中包含空值的行，可指定列或全表扫描',
 
-    layer: 'L2_EXECUTION',
+    
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-clean-dropna-v1',
+    packageId: 'basic',
+    requiredPackages: [],
+    outputCharts: ['chart'],
+layer: 'L2_EXECUTION',
 
     dimensions: [
         { category: 'industry', value: 'general', label: '通用' },

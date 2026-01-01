@@ -10,7 +10,14 @@ export const workerCleanDedupPrompt: UserPrompt = {
     title: '去除重复行',
     description: '删除数据集中的重复行，可按指定列或全行去重',
 
-    layer: 'L2_EXECUTION',
+    
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-clean-dedup-v1',
+    packageId: 'basic',
+    requiredPackages: [],
+    outputCharts: ['chart'],
+layer: 'L2_EXECUTION',
 
     dimensions: [
         { category: 'industry', value: 'general', label: '通用' },

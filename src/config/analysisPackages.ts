@@ -1,170 +1,133 @@
 /**
- * 分析能力包配置清单
- * 定义所有可用的分析能力包及其包含的方法
- * 注意：所有name/description字段都是i18n键，需要在组件中使用t()翻译
+ * 分析能力包配置（v2.1 自动派生版本）
+ * 
+ * 变更说明：
+ * - ❌ 移除所有硬编码的 promptId
+ * - ✅ 从 PromptRegistry 自动派生能力包配置
+ * - ✅ 保持导出API完全兼容
+ * 
+ * 核心原理：
+ * 1. Prompt模板包含 `packageId` 和 `requiredPackages` 字段
+ * 2. 本文件从注册表读取所有Prompt，按 packageId 分组
+ * 3. 自动汇总每个包的 `requiredPackages`
+ * 4. 生成 `AnalysisPackage[]` 数组
  */
 
-import { AnalysisPackage } from '../types/analysisPackage';
+import { promptRegistry } from '@/services/promptRegistry';
+import type { AnalysisPackage } from '@/types/analysisPackage';
 
-/**
- * 基础分析包 (内置，始终加载)
- */
-const basicPackage: AnalysisPackage = {
-    id: 'basic',
-    name: 'packages.basic.name',
-    icon: '📊',
-    pyodidePackages: ['pandas', 'numpy', 'matplotlib'],
-    sizeEstimate: 'packages.basic.sizeEstimate',
-    isBuiltIn: true,
-    order: 0,
-    methods: [
-        {
-            promptId: 'worker-distribution-v1',
-            name: 'packages.basic.methods.distribution.name',
-            description: 'packages.basic.methods.distribution.desc',
-            outputCharts: ['packages.charts.histogram', 'packages.charts.bar']
-        },
-        {
-            promptId: 'worker-correlation-v1',
-            name: 'packages.basic.methods.correlation.name',
-            description: 'packages.basic.methods.correlation.desc',
-            outputCharts: ['packages.charts.scatter', 'packages.charts.box', 'packages.charts.heatmap']
-        },
-        {
-            promptId: 'worker-trend-v1',
-            name: 'packages.basic.methods.trend.name',
-            description: 'packages.basic.methods.trend.desc',
-            outputCharts: ['packages.charts.line', 'packages.charts.movingAvg']
-        },
-        {
-            promptId: 'worker-stats-v1',
-            name: 'packages.basic.methods.stats.name',
-            description: 'packages.basic.methods.stats.desc',
-            outputCharts: ['packages.charts.statsSummaryBar']
-        },
-        {
-            promptId: 'worker-groupby-v1',
-            name: 'packages.basic.methods.groupby.name',
-            description: 'packages.basic.methods.groupby.desc',
-            outputCharts: ['packages.charts.groupedBar']
-        },
-        {
-            promptId: 'worker-topn-v1',
-            name: 'packages.basic.methods.topn.name',
-            description: 'packages.basic.methods.topn.desc',
-            outputCharts: ['packages.charts.rankingBar']
-        },
-        {
-            promptId: 'worker-missing-v1',
-            name: 'packages.basic.methods.missing.name',
-            description: 'packages.basic.methods.missing.desc',
-            outputCharts: ['packages.charts.missingMatrix']
-        },
-        {
-            promptId: 'worker-outlier-v1',
-            name: 'packages.basic.methods.outlier.name',
-            description: 'packages.basic.methods.outlier.desc',
-            outputCharts: ['packages.charts.box', 'packages.charts.scatterAnnotated']
-        },
-        {
-            promptId: 'worker-crosstab-v1',
-            name: 'packages.basic.methods.crosstab.name',
-            description: 'packages.basic.methods.crosstab.desc',
-            outputCharts: ['packages.charts.heatmap', 'packages.charts.stacked']
-        }
-    ]
+// ========== 包元数据配置 ==========
+// 这是唯一需要手动维护的部分（UI展示信息）
+
+interface PackageMetadata {
+    name: string;      // i18n key
+    icon: string;
+    isBuiltIn: boolean;
+    order: number;
+    sizeEstimate: string;
+}
+
+const PACKAGE_METADATA: Record<string, PackageMetadata> = {
+    basic: {
+        name: 'packages.basic.name',
+        icon: '📊',
+        isBuiltIn: true,
+        order: 0,
+        sizeEstimate: '~5MB'
+    },
+    sklearn: {
+        name: 'packages.sklearn.name',
+        icon: '🧠',
+        isBuiltIn: false,
+        order: 1,
+        sizeEstimate: '~15MB'
+    },
+    statsmodels: {
+        name: 'packages.statsmodels.name',
+        icon: '📈',
+        isBuiltIn: false,
+        order: 2,
+        sizeEstimate: '~8MB'
+    },
+    nlp: {
+        name: 'packages.nlp.name',
+        icon: '📝',
+        isBuiltIn: false,
+        order: 3,
+        sizeEstimate: '~12MB'
+    }
 };
 
-/**
- * 机器学习包 (scikit-learn)
- */
-const sklearnPackage: AnalysisPackage = {
-    id: 'sklearn',
-    name: 'packages.sklearn.name',
-    icon: '🧠',
-    pyodidePackages: ['scikit-learn'],
-    sizeEstimate: 'packages.sklearn.sizeEstimate',
-    isBuiltIn: false,
-    order: 1,
-    methods: [
-        {
-            promptId: 'worker-cluster-v1',
-            name: 'packages.sklearn.methods.cluster.name',
-            description: 'packages.sklearn.methods.cluster.desc',
-            outputCharts: ['packages.charts.pcaScatter', 'packages.charts.clusterDist']
-        },
-        {
-            promptId: 'worker-decision-tree-v1',
-            name: 'packages.sklearn.methods.decisionTree.name',
-            description: 'packages.sklearn.methods.decisionTree.desc',
-            outputCharts: ['packages.charts.decisionTreeVis']
-        }
-        // 后续可扩展：随机森林、特征重要性图等
-    ]
-};
+// ========== 自动生成能力包配置 ==========
 
 /**
- * 统计建模包 (statsmodels)
+ * 从 Prompt Registry 自动生成能力包配置
  */
-const statsmodelsPackage: AnalysisPackage = {
-    id: 'statsmodels',
-    name: 'packages.statsmodels.name',
-    icon: '📈',
-    pyodidePackages: ['statsmodels'],
-    sizeEstimate: 'packages.statsmodels.sizeEstimate',
-    isBuiltIn: false,
-    order: 2,
-    methods: [
-        {
-            promptId: 'worker-regression-v1',
-            name: 'packages.statsmodels.methods.regression.name',
-            description: 'packages.statsmodels.methods.regression.desc',
-            outputCharts: ['packages.charts.coefficientPlot']
+export function generateAnalysisPackages(): AnalysisPackage[] {
+    // 获取所有 L2 执行层 Prompt（不包括清洗类）
+    const allPrompts = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
+        .filter(p => !p.id.startsWith('cleaner-'));  // 排除清洗Prompt
+
+    // 按 packageId 分组
+    const packageMap = new Map<string, typeof allPrompts>();
+
+    for (const prompt of allPrompts) {
+        const pkgId = prompt.packageId || 'basic';  // 默认归入basic
+
+        if (!packageMap.has(pkgId)) {
+            packageMap.set(pkgId, []);
         }
-        // 后续可扩展：时序预测 (Holt-Winters)、假设检验等
-    ]
-};
+        packageMap.get(pkgId)!.push(prompt);
+    }
+
+    // 生成能力包配置数组
+    const packages: AnalysisPackage[] = [];
+
+    for (const [pkgId, prompts] of packageMap.entries()) {
+        const metadata = PACKAGE_METADATA[pkgId];
+
+        if (!metadata) {
+            console.warn(`[AnalysisPackages] 未知的 packageId: ${pkgId}，跳过`);
+            continue;
+        }
+
+        // 汇总所有需要的 Python 包（自动去重）
+        const pyodidePackagesSet = new Set<string>();
+        for (const prompt of prompts) {
+            if (prompt.requiredPackages) {
+                prompt.requiredPackages.forEach(pkg => pyodidePackagesSet.add(pkg));
+            }
+        }
+        const pyodidePackages = Array.from(pyodidePackagesSet).sort();
+
+        // 构建能力包对象
+        packages.push({
+            id: pkgId,
+            name: metadata.name,
+            icon: metadata.icon,
+            pyodidePackages,
+            sizeEstimate: metadata.sizeEstimate,
+            isBuiltIn: metadata.isBuiltIn,
+            order: metadata.order,
+            methods: prompts.map(p => ({
+                promptId: p.id,
+                name: `packages.${pkgId}.methods.${p.name}.name`,
+                description: p.description,
+                outputCharts: p.outputCharts || ['chart']
+            }))
+        });
+    }
+
+    // 按 order 排序
+    return packages.sort((a, b) => a.order - b.order);
+}
 
 /**
- * 文本分析包 (NLP)
- * 中文分词、词云、文本频率分析
- * 暂时禁用：jieba 因 CORS 策略无法从 CDN 加载，需本地化部署后再启用
+ * 导出的能力包配置（惰性生成）
  */
-/*
-const nlpPackage: AnalysisPackage = {
-    id: 'nlp',
-    name: 'packages.nlp.name',
-    icon: '📝',
-    pyodidePackages: ['jieba'],
-    sizeEstimate: 'packages.nlp.sizeEstimate',
-    isBuiltIn: false,
-    order: 3,
-    methods: [
-        {
-            promptId: 'worker-wordcloud-v1',
-            name: 'packages.nlp.methods.wordcloud.name',
-            description: 'packages.nlp.methods.wordcloud.desc',
-            outputCharts: ['packages.charts.wordcloud']
-        },
-        {
-            promptId: 'worker-text-freq-v1',
-            name: 'packages.nlp.methods.textFreq.name',
-            description: 'packages.nlp.methods.textFreq.desc',
-            outputCharts: ['packages.charts.wordFreqBar', 'packages.charts.wordFreqTable']
-        }
-    ]
-};
-*/
+export const analysisPackages: AnalysisPackage[] = generateAnalysisPackages();
 
-/**
- * 所有可用的分析能力包
- */
-export const analysisPackages: AnalysisPackage[] = [
-    basicPackage,
-    sklearnPackage,
-    statsmodelsPackage,
-    // nlpPackage // 暂时禁用：jieba 因 CORS 策略无法从 CDN 加载，需本地化部署后再启用
-];
+// ========== 导出函数（保持API兼容） ==========
 
 /**
  * 根据 ID 获取能力包
@@ -228,9 +191,6 @@ export const isPromptAvailable = (promptId: string, enabledPackageIds: string[])
 /**
  * 获取 Prompt 所需的能力包信息 (用于提示用户启用)
  */
-/**
- * 获取 Prompt 所需的能力包信息 (用于提示用户启用)
- */
 export const getRequiredPackageForPrompt = (promptId: string): AnalysisPackage | null => {
     for (const pkg of analysisPackages) {
         if (pkg.methods.some(m => m.promptId === promptId)) {
@@ -240,7 +200,7 @@ export const getRequiredPackageForPrompt = (promptId: string): AnalysisPackage |
     return null;
 };
 
-// --- 图表字体配置 ---
+// ========== 图表字体配置 ==========
 
 export interface ChartFont {
     id: string;
@@ -282,7 +242,7 @@ export const chartFonts: ChartFont[] = [
     }
 ];
 
-// --- 持久化存储 ---
+// ========== 持久化存储 ==========
 
 const PACKAGES_STORAGE_KEY = 'analysis_packages_enabled';
 const FONT_STORAGE_KEY = 'chart_fonts_enabled';

@@ -8,31 +8,10 @@ import { compressMetadataForPrompt } from '@/utils/promptCompressor';
 import { buildCleaningPrompt } from './prompts/cleaningSuggestions';
 import { validateAIResponse, validateSQLSafety, validateWithDryRun } from '@/utils/sqlValidator';
 import { sampleDataForAI } from '@/utils/sampleData';
+import { validateColumnNamesInSQL } from '@/utils/columnValidator';  // 🆕 使用公共工具
 import { logger } from '@/utils/logger';
 export { type CleaningSuggestion } from './aiService';
-/**
- * 验证SQL中的列名是否存在于列名映射表中
- */
-function validateColumnNamesInSQL(
-    sql: string,
-    columnMapping: Map<string, string>,
-    tableName: string // ✅ 新增参数
-): { valid: boolean; invalidColumns?: string[] } {
-    const columnPattern = /"([^"]+)"/g;
-    const matches = [...sql.matchAll(columnPattern)];
-    const referencedColumns = matches.map(m => m[1]);
-    const validColumns = Array.from(columnMapping.keys());
-
-    // 过滤掉不在validColumns中，但恰好是tableName的引用
-    const invalidColumns = referencedColumns.filter(col =>
-        !validColumns.includes(col) && col !== tableName
-    );
-
-    if (invalidColumns.length > 0) {
-        return { valid: false, invalidColumns };
-    }
-    return { valid: true };
-}
+// ✅ 已移除独立实现，使用 utils/columnValidator.ts
 /**
  * 生成AI清洗建议（完整版）
  */
@@ -58,11 +37,32 @@ export async function generateAICleaningSuggestions(
     try {
         logger.group('AI清洗', '生成清洗建议流程');
 
-        // 1. 数据脱敏
+        // 1. 数据脱敏（🆕 遵守用户隐私设置）
         logger.log('AI清洗', '数据脱敏中');
         onProgress?.(t('cleaning.desensitizing'));
 
-        const { metadata: desensitizedData, columnMapping } = buildDesensitizedMetadata(columns, stats);
+        // 🆕 检查用户隐私设置
+        const { getPrivacyConfig } = await import('@/utils/dataPrivacy');
+        const userConfig = getPrivacyConfig();
+
+        let desensitizedData, columnMapping;
+        if (userConfig.mode === 'send_raw') {
+            // 用户选择发送原始数据，跳过脱敏
+            logger.log('AI清洗', '用户设置: 发送原始数据（跳过脱敏）');
+            desensitizedData = columns.map((col, index) => ({
+                name: col.name,
+                type: col.type,
+                nullable: col.nullable || false,
+                isSensitive: false,
+                stats: stats[index] || {},
+                sampleValues: stats[index]?.sampleData?.slice(0, 3) || []
+            }));
+            columnMapping = new Map(columns.map(c => [c.name, c.name]));
+        } else {
+            // 自动脱敏（原有逻辑）
+            ({ metadata: desensitizedData, columnMapping } = buildDesensitizedMetadata(columns, stats));
+        }
+
         const qualityIssues = generateQualityIssues(desensitizedData);
 
         // 1.5. Prompt压缩优化（减少Token消耗）
@@ -131,12 +131,15 @@ export async function generateAICleaningSuggestions(
                 return false;
             }
 
+
             // 列名验证（新增）
-            const columnCheck = validateColumnNamesInSQL(executableSQL, columnMapping, tableName);
+            const validColumns = Array.from(columnMapping.values());
+            const columnCheck = validateColumnNamesInSQL(executableSQL, validColumns, tableName);
             if (!columnCheck.valid) {
                 logger.warn('数据清洗', `建议${sugg.id}被过滤 列名错误: ${columnCheck.invalidColumns?.join(', ')}`);
                 return false;
             }
+
 
             return true;
         });

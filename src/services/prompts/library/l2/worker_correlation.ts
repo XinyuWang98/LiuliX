@@ -10,6 +10,12 @@ export const workerCorrelationPrompt: UserPrompt = {
     title: '双变量相关性分析',
     description: '分析两个变量之间的关系（线性相关、聚类模式、分布差异）',
 
+    // 能力包配置 (v2.1)
+    slug: 'worker-correlation-v1',
+    packageId: 'basic',
+    requiredPackages: ['pandas', 'numpy', 'matplotlib'],
+    outputCharts: ['scatter', 'box', 'heatmap'],
+
     layer: 'L2_EXECUTION',
 
     // 四维矩阵标签
@@ -33,8 +39,8 @@ import json
 
 plt.switch_backend('Agg')
 
-col_x = '{{col_x}}'
-col_y = '{{col_y}}'
+col_x = {{col_x}}
+col_y = {{col_y}}
 
 x_data = df[col_x]
 y_data = df[col_y]

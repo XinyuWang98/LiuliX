@@ -32,7 +32,8 @@ export type ServiceName =
     | '系统'
     | '报告'  // 🆕 报告生成服务
     | '诊断工具'  // 🆕 WebLLM诊断等工具
-    | '日志捕获';  // 🆕 日志捕获工具
+    | '日志捕获'  // 🆕 日志捕获工具
+    | '列名校验';  // 🆕 列名校验工具
 
 export interface LogOptions {
     data?: any; // 附加数据

@@ -10,6 +10,13 @@ export const workerTopnPrompt: UserPrompt = {
     title: 'Top N 排名',
     description: '找出某列数值最大或最小的前N条记录，展示排名榜单',
 
+
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-topn-v1',
+    packageId: 'basic',
+    requiredPackages: ['matplotlib', 'pandas'],
+    outputCharts: ['bar', 'line'],
     layer: 'L2_EXECUTION',
 
     dimensions: [
@@ -64,10 +71,11 @@ import json
 def analyze(df):
     try:
         # 参数提取
-        column_name = '{{column_name}}'
+        column_name = {{column_name}}
         n = int('{{n}}')
+        topn = {{topn}}
         # 处理布尔值字符串 (JS true -> Python True)
-        ascending_param = '{{ascending}}'.lower()
+        ascending_param = str({{ascending}}).lower()
         ascending = True if ascending_param == 'true' else False
 
         # 1. 数据准备

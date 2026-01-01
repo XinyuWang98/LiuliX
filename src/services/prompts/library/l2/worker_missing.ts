@@ -10,7 +10,14 @@ export const workerMissingPrompt: UserPrompt = {
     title: '缺失值分析',
     description: '扫描全表，统计各列缺失数量和比例，识别缺失模式',
 
-    layer: 'L2_EXECUTION',
+    
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-missing-v1',
+    packageId: 'basic',
+    requiredPackages: [],
+    outputCharts: ['chart'],
+layer: 'L2_EXECUTION',
 
     dimensions: [
         { category: 'industry', value: 'general', label: '通用' },

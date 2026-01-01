@@ -10,6 +10,13 @@ export const workerGroupbyPrompt: UserPrompt = {
     title: '分组聚合分析',
     description: '按分类列分组，对数值列聚合（求和/均值/计数），比较不同组之间的差异',
 
+
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-groupby-v1',
+    packageId: 'basic',
+    requiredPackages: ['matplotlib', 'numpy', 'pandas'],
+    outputCharts: ['bar', 'line', 'box'],
     layer: 'L2_EXECUTION',
 
     dimensions: [
@@ -63,9 +70,9 @@ import base64
 import json
 
 # 参数
-group_col = '{{group_col}}'
-value_col = '{{value_col}}'
-agg_func = '{{agg_func}}'
+group_col = {{group_col}}
+value_col = {{value_col}}
+agg_func = {{agg_func}}
 
 # 检查列是否存在
 if group_col not in df.columns or value_col not in df.columns:

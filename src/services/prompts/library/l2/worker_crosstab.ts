@@ -10,6 +10,13 @@ export const workerCrosstabPrompt: UserPrompt = {
     title: '交叉表分析',
     description: '分析两个分类列的共现频次，绘制热力图展示交叉表',
 
+
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-crosstab-v1',
+    packageId: 'basic',
+    requiredPackages: ['matplotlib', 'numpy', 'pandas'],
+    outputCharts: ['bar', 'line', 'box'],
     layer: 'L2_EXECUTION',
 
     dimensions: [
@@ -32,8 +39,8 @@ import json
 
 plt.switch_backend('Agg')
 
-row_col = '{{row_col}}'
-col_col = '{{col_col}}'
+row_col = {{row_col}}
+col_col = {{col_col}}
 
 # 准备数据
 df_copy = df.copy()

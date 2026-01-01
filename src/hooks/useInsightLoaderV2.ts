@@ -220,6 +220,32 @@ export function useInsightLoaderV2() {
                     }
                 }
 
+                // 🆕 方案 B: 列名校验（使用公共工具）
+                const { validateColumnsExist } = await import('@/utils/columnValidator');
+
+                const paramsToValidate: Record<string, unknown> = {};
+                const columnParamKeys = ['column_name', 'col_x', 'col_y', 'date_col', 'value_col', 'group_col'];
+
+                for (const key of columnParamKeys) {
+                    if (node.params?.[key]) {
+                        paramsToValidate[key] = node.params[key];
+                    }
+                }
+
+                const validationResult = validateColumnsExist(paramsToValidate, 有效列名);
+
+                if (!validationResult.valid) {
+                    logger.warn('AI洞察', `跳过无效列名的洞察: ${node.title}`, {
+                        data: { invalidColumns: validationResult.invalidColumns, validColumns: 有效列名 }
+                    });
+                    node.result = {
+                        code: '',
+                        summary: `列名校验失败: 列 ${validationResult.invalidColumns?.join(', ')} 不存在于数据集中`,
+                        columnsUsed: []
+                    };
+                    continue;
+                }
+
                 // 如果节点已有代码，执行它
                 if (node.result?.code) {
                     try {
@@ -247,6 +273,7 @@ export function useInsightLoaderV2() {
                             assessment.mode,
                             tableName || ''
                         );
+
 
                         node.isLoading = false;
 

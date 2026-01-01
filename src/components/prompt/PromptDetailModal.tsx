@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UserPrompt } from '@/types/prompt';
 import { useI18n } from '@/contexts/I18nContext';
-import { X, Copy, Check, Terminal, FileJson, Database, Medal, Flame } from 'lucide-react';
-import Prism from 'prismjs';
-import 'prismjs/themes/prism-tomorrow.css'; // 使用 Dark 主题
-import 'prismjs/components/prism-python';
-import 'prismjs/components/prism-sql';
-import 'prismjs/components/prism-json';
+import { X, Terminal, FileJson, Database, Medal, Flame } from 'lucide-react';
+import { CodeBlock } from '@/components/common/CodeBlock';
 import './PromptDetailModal.css';
 
 interface PromptDetailModalProps {
@@ -20,7 +16,6 @@ type TabType = 'python' | 'sql' | 'json';
 export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, open, onClose }) => {
     const { t, formatDate } = useI18n();
     const [activeTab, setActiveTab] = useState<TabType>('python');
-    const [copied, setCopied] = useState(false);
 
     // Reset tab when prompt changes
     useEffect(() => {
@@ -28,13 +23,6 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
             setActiveTab('python');
         }
     }, [open, prompt]);
-
-    // Syntax highlighting
-    useEffect(() => {
-        if (open) {
-            Prism.highlightAll();
-        }
-    }, [open, activeTab, prompt]);
 
     // Determine available tabs safely
     const hasPython = !!prompt?.codeTemplate;
@@ -58,26 +46,6 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
     }, [onClose]);
 
     if (!open || !prompt) return null;
-
-    const getCodeContent = () => {
-        switch (activeTab) {
-            case 'python':
-                return prompt.codeTemplate || t('prompt.detail.noPython');
-            case 'sql':
-                return prompt.sqlTemplate || t('prompt.detail.noSql');
-            case 'json':
-                // Hide technical internal fields if needed, but for now show all except maybe huge raw data if any
-                return JSON.stringify(prompt, null, 2);
-            default:
-                return '';
-        }
-    };
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(getCodeContent());
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
 
     return (
         <div className="prompt-detail-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -128,6 +96,10 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                         <div className="meta-section spacer-top">
                             <div className="meta-section-title">{t('prompt.detail.info')}</div>
                             <div className="meta-list">
+                                <div className="meta-kv">
+                                    <span className="meta-key">ID</span>
+                                    <span className="meta-value">{prompt.id}</span>
+                                </div>
                                 <div className="meta-kv">
                                     <span className="meta-key">{t('prompt.detail.author')}</span>
                                     <span className="meta-value">{prompt.author}</span>
@@ -190,16 +162,30 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                         </div>
 
                         <div className="code-content">
-                            <button className="copy-btn" onClick={handleCopy}>
-                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                                {copied ? t('prompt.detail.copied') : t('prompt.detail.copyCode')}
-                            </button>
-
-                            <div className="code-block-wrapper">
-                                <pre className={`language-${activeTab}`}>
-                                    <code>{getCodeContent()}</code>
-                                </pre>
-                            </div>
+                            {activeTab === 'python' && prompt.codeTemplate && (
+                                <CodeBlock
+                                    code={prompt.codeTemplate}
+                                    language="python"
+                                    formatted={true}
+                                    copyable={true}
+                                />
+                            )}
+                            {activeTab === 'sql' && prompt.sqlTemplate && (
+                                <CodeBlock
+                                    code={prompt.sqlTemplate}
+                                    language="sql"
+                                    formatted={true}
+                                    copyable={true}
+                                />
+                            )}
+                            {activeTab === 'json' && (
+                                <CodeBlock
+                                    code={JSON.stringify(prompt, null, 2)}
+                                    language="json"
+                                    formatted={false}
+                                    copyable={true}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
