@@ -74,6 +74,16 @@ export const enUS: LanguageConfig = {
         analysis: {
             readyHint: 'Analysis is ready',
             waitingForData: 'Waiting for data...',
+            initializing: 'Initializing environment...',
+        },
+
+        progress: {
+            generatingPrompt: 'Generating prompt...',
+            sendingRequest: 'Requesting AI...',
+            analyzingResponse: 'Parsing response...',
+            validating: 'Validating code...',
+            generatingInsight: 'Generating insight...',
+            generatingHypothesis: 'Generating hypothesis...',
         },
 
         language: {
@@ -633,6 +643,67 @@ export const enUS: LanguageConfig = {
                 finish: 'Loading complete',
             }
         },
+
+        packages: {
+            basic: {
+                name: 'Basic Analysis',
+                sizeEstimate: 'Always Loaded',
+                methods: {
+                    distribution: { name: 'Distribution', desc: 'Histograms/Bar charts' },
+                    correlation: { name: 'Correlation', desc: 'Variable relationships' },
+                    trend: { name: 'Trend', desc: 'Time series analysis' },
+                    stats: { name: 'Summary Stats', desc: 'Mean, Median, etc.' },
+                    groupby: { name: 'Grouping', desc: 'Categorical aggregation' },
+                    topn: { name: 'Top-N', desc: 'Top ranked items' },
+                    missing: { name: 'Missing Values', desc: 'Missing data patterns' },
+                    outlier: { name: 'Outliers', desc: 'Detect anomalies' },
+                    crosstab: { name: 'Crosstab', desc: 'Multidimensional stats' },
+                },
+            },
+            sklearn: {
+                name: 'Scikit-learn',
+                sizeEstimate: '~8MB (Lazy Load)',
+                methods: {
+                    cluster: { name: 'Clustering', desc: 'K-Means, etc.' },
+                    decisionTree: { name: 'Decision Tree', desc: 'Visualize trees' },
+                },
+            },
+            statsmodels: {
+                name: 'Statsmodels',
+                sizeEstimate: '~12MB (Lazy Load)',
+                methods: {
+                    regression: { name: 'Regression', desc: 'Linear/Logistic models' },
+                },
+            },
+            charts: {
+                histogram: 'Histogram',
+                bar: 'Bar Chart',
+                scatter: 'Scatter Plot',
+                box: 'Box Plot',
+                heatmap: 'Heatmap',
+                line: 'Line Chart',
+                movingAvg: 'Moving Avg',
+                statsSummaryBar: 'Stats Bar',
+                groupedBar: 'Grouped Bar',
+                rankingBar: 'Ranking Bar',
+                missingMatrix: 'Missing Matrix',
+                scatterAnnotated: 'Scatter (Annotated)',
+                stacked: 'Stacked Chart',
+                pcaScatter: 'PCA Scatter',
+                clusterDist: 'Cluster Dist',
+                decisionTreeVis: 'Decision Tree',
+                coefficientPlot: 'Coefficients',
+                wordcloud: 'Word Cloud',
+                wordFreqBar: 'Word Freq Bar',
+                wordFreqTable: 'Word Freq Table',
+            },
+            fonts: {
+                simhei: 'Chinese (SimHei)',
+                msgothic: 'Japanese (MS Gothic)',
+                malgun: 'Korean (Malgun Gothic)'
+            }
+        },
+
         config: {
             performanceQuality: 'Performance & Quality',
             maxColumns: 'Max Columns',

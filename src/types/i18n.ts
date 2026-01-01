@@ -76,6 +76,16 @@ export interface LanguageConfig {
         analysis: {
             readyHint: string;
             waitingForData: string;
+            initializing: string;
+        };
+
+        progress: {
+            generatingPrompt: string;
+            sendingRequest: string;
+            analyzingResponse: string;
+            validating: string;
+            generatingInsight: string;
+            generatingHypothesis: string;
         };
         language: {
             title: string;
@@ -946,6 +956,67 @@ export interface LanguageConfig {
                 loadingFromCache: string;
                 downloading: string;
                 finish: string;
+            };
+        };
+
+        // 分析能力包
+        packages: {
+            basic: {
+                name: string;
+                sizeEstimate: string;
+                methods: {
+                    distribution: { name: string; desc: string };
+                    correlation: { name: string; desc: string };
+                    trend: { name: string; desc: string };
+                    stats: { name: string; desc: string };
+                    groupby: { name: string; desc: string };
+                    topn: { name: string; desc: string };
+                    missing: { name: string; desc: string };
+                    outlier: { name: string; desc: string };
+                    crosstab: { name: string; desc: string };
+                };
+            };
+            sklearn: {
+                name: string;
+                sizeEstimate: string;
+                methods: {
+                    cluster: { name: string; desc: string };
+                    decisionTree: { name: string; desc: string };
+                };
+            };
+            statsmodels: {
+                name: string;
+                sizeEstimate: string;
+                methods: {
+                    regression: { name: string; desc: string };
+                };
+            };
+            charts: {
+                histogram: string;
+                bar: string;
+                scatter: string;
+                box: string;
+                heatmap: string;
+                line: string;
+                movingAvg: string;
+                statsSummaryBar: string;
+                groupedBar: string;
+                rankingBar: string;
+                missingMatrix: string;
+                scatterAnnotated: string;
+                stacked: string;
+                pcaScatter: string;
+                clusterDist: string;
+                decisionTreeVis: string;
+                coefficientPlot: string;
+                wordcloud: string;
+                wordFreqBar: string;
+                wordFreqTable: string;
+            };
+            fonts: {
+                simhei: string;
+                msgothic: string;
+                malgun: string;
             };
         };
 

@@ -9,6 +9,7 @@ import { useInsightLoaderV2 } from '@/hooks/useInsightLoaderV2';
 import { useInsightRefresh } from '@/hooks/useInsightRefresh';
 import { getRenderedCode } from '@/services/insights/inflater';
 import { executeInsightWithMode } from '@/services/skills/modeExecutor';
+import { ProjectFile } from '@/utils/projectUtils';
 import './InsightChainFlow.css';
 
 const INIT_DELAY_MS = 800;
@@ -18,6 +19,7 @@ interface InsightChainFlowProps {
     rowCount: number;
     sampleData?: any[];
     tableName?: string;
+    file?: ProjectFile;
     fileName?: string;
     insightCache?: {
         isStale?: boolean;
@@ -26,7 +28,7 @@ interface InsightChainFlowProps {
     hideTitle?: boolean;
 }
 
-export function InsightChainFlow({ columns, rowCount, tableName, fileName, insightCache, hideTitle = false }: InsightChainFlowProps) {
+export function InsightChainFlow({ columns, rowCount, tableName, file, insightCache, hideTitle = false }: InsightChainFlowProps) {
     const { t } = useI18n();
 
     // 使用 InsightNode 状态
@@ -44,7 +46,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, fileName, insig
     // 加载洞察函数（V2 + 质量门控）
     const handleLoadInsights = async () => {
         logger.log('AI洞察', '使用V2增强模式（含双重质量门控）');
-        const result = await loadInsights(columns, rowCount, tableName, fileName);
+        const result = await loadInsights(columns, rowCount, tableName, file);
         setInsightNodes(result); // 直接设置 InsightNode[]
     };
 

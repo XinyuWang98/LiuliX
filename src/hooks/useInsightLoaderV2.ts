@@ -4,6 +4,7 @@
  */
 import { useState, useRef } from 'react';
 import { InsightNode } from '@/types/insightTree';
+import { ProjectFile } from '@/utils/projectUtils';
 import { sampleDataForAI } from '@/utils/sampleData';
 import { DuckDBEngine } from '@/db/duckdbEngine';
 import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/batchInsightGenerator';
@@ -37,7 +38,7 @@ export function useInsightLoaderV2() {
         columns: string[],
         rowCount: number,
         tableName?: string,
-        currentFile?: any  // 🆕 当前文件对象（用于缓存管理）
+        currentFile?: ProjectFile  // 🆕 当前文件对象（用于缓存管理）
     ): Promise<InsightNode[]> => {
         setIsLoading(true);
         setLoadingStage('progress.generatingPrompt');

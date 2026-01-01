@@ -71,6 +71,10 @@ async function executeFullMode(
     mode: ExecutionMode,
     tableName: string  // ✅ 添加tableName参数
 ): Promise<ModeExecutionResult> {
+    if (!tableName) {
+        throw new Error('Table name is required for full mode execution');
+    }
+
     const code = suggestion.full_mode.code;
 
     logger.log('Skills', `执行full_mode代码`, { data: { codeLength: code.length } });

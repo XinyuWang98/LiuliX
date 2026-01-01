@@ -1,66 +1,95 @@
-// 分析能力包中文翻译
 export const packages = {
-    // 基础分析包
     basic: {
-        name: '基础分析',
-        sizeEstimate: '~8MB',
+        name: '基础分析包',
+        sizeEstimate: '总是加载',
         methods: {
-            distribution: { name: '分布分析', desc: '查看单一变量的数据分布情况' },
-            correlation: { name: '相关性分析', desc: '分析两个变量之间的关系' },
-            trend: { name: '趋势分析', desc: '分析数值随时间的变化趋势' },
-            stats: { name: '描述性统计', desc: '计算均值、中位数、标准差等统计指标' },
-            groupby: { name: '分组聚合', desc: '按分类变量分组计算聚合指标' },
-            topn: { name: 'Top N 排行', desc: '找出频次最高的 Top N 项' },
-            missing: { name: '缺失值分析', desc: '可视化缺失值分布模式' },
-            outlier: { name: '异常值检测', desc: '识别数据中的异常离群点' },
-            crosstab: { name: '交叉表分析', desc: '分析两个分类变量的交叉分布' },
-        }
+            distribution: {
+                name: '分布分析',
+                desc: '查看数据分布情况 (直方图/条形图)',
+            },
+            correlation: {
+                name: '相关性分析',
+                desc: '分析变量间的相关关系',
+            },
+            trend: {
+                name: '趋势分析',
+                desc: '分析时间序列趋势',
+            },
+            stats: {
+                name: '统计摘要',
+                desc: '基础统计指标 (均值/中位数等)',
+            },
+            groupby: {
+                name: '分组聚合',
+                desc: '按类别分组统计',
+            },
+            topn: {
+                name: 'Top-N 分析',
+                desc: '查看排名靠前的数据',
+            },
+            missing: {
+                name: '缺失值分析',
+                desc: '可视化缺失数据模式',
+            },
+            outlier: {
+                name: '异常值检测',
+                desc: '识别数据中的异常点',
+            },
+            crosstab: {
+                name: '交叉表分析',
+                desc: '多维度交叉统计',
+            },
+        },
     },
-
-    // 机器学习包
     sklearn: {
-        name: '机器学习',
-        sizeEstimate: '~12MB',
+        name: '机器学习包 (Scikit-learn)',
+        sizeEstimate: '~8MB (延迟加载)',
         methods: {
-            cluster: { name: 'K-Means 聚类', desc: '发现数据中的潜在群体' },
-            decisionTree: { name: '决策树分析', desc: '挖掘影响目标变量的关键规则' },
-        }
+            cluster: {
+                name: '聚类分析',
+                desc: 'K-Means 等聚类算法',
+            },
+            decisionTree: {
+                name: '决策树分析',
+                desc: '构建并可视化决策树',
+            },
+        },
     },
-
-    // 统计建模包
     statsmodels: {
-        name: '统计建模',
-        sizeEstimate: '~8MB',
+        name: '统计建模包 (Statsmodels)',
+        sizeEstimate: '~12MB (延迟加载)',
         methods: {
-            regression: { name: 'OLS 回归分析', desc: '量化各因素对目标变量的独立影响' },
-        }
+            regression: {
+                name: '回归分析',
+                desc: '线性回归/逻辑回归建模',
+            },
+        },
     },
-
-    // 图表类型
     charts: {
         histogram: '直方图',
-        bar: '柱状图',
+        bar: '条形图',
         scatter: '散点图',
         box: '箱线图',
         heatmap: '热力图',
         line: '折线图',
-        movingAvg: '移动平均线',
-        statsSummaryBar: '统计摘要条形图',
-        groupedBar: '分组柱状图',
-        rankingBar: '排行柱状图',
-        missingMatrix: '缺失值矩阵图',
-        scatterAnnotated: '散点标注图',
-        stacked: '堆叠柱状图',
-        pcaScatter: 'PCA 降维散点图',
-        clusterDist: '群体分布图',
-        decisionTreeVis: '决策树可视化图',
-        coefficientPlot: '系数森林图 (Coefficient Plot)',
+        movingAvg: '移动平均',
+        statsSummaryBar: '统计图',
+        groupedBar: '分组条形图',
+        rankingBar: '排行榜',
+        missingMatrix: '缺失矩阵',
+        scatterAnnotated: '标记散点图',
+        stacked: '堆叠图',
+        pcaScatter: 'PCA降维图',
+        clusterDist: '聚类分布图',
+        decisionTreeVis: '决策树',
+        coefficientPlot: '系数图',
+        wordcloud: '词云',
+        wordFreqBar: '词频图',
+        wordFreqTable: '词频表',
     },
-
-    // 字体
     fonts: {
-        simhei: '中文 (SimHei)',
-        msgothic: '日文 (MS Gothic)',
-        malgun: '韩文 (Malgun Gothic)',
+        simhei: '中文字体 (SimHei)',
+        msgothic: '日语字体 (MS Gothic)',
+        malgun: '韩语字体 (Malgun Gothic)'
     }
 };

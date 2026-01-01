@@ -9,9 +9,11 @@ import { cleaning } from './cleaning';
 import { themes, workshop, grid, pagination, workflow } from './misc';
 import welcome from './welcome';
 import { header, inviteCode } from './header';
-import { insightChain, insight, exploration, evidence, quality, report, analysis } from './analysis';
+import { insightChain, insight, exploration, evidence, quality, report, analysis, progress } from './analysis';
 import { aiCost, aiRetry, cache, localModel, config } from './ai';
+
 import { errors } from './errors';
+import { packages } from './packages';
 
 export const zhCN: LanguageConfig = {
     code: 'zh-CN',
@@ -50,5 +52,7 @@ export const zhCN: LanguageConfig = {
         header,
         inviteCode,
         analysis,
+        progress,
+        packages,
     },
 };
