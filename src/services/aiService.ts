@@ -243,7 +243,7 @@ export const askAICleaning = async (prompt: string) => {
         perfMarks.push({ phase: '请求准备', duration: reqPrepTime });
 
         // ⏱️ 阶段2：网络请求
-        logger.log('AI调用', '发送请求到DeepSeek API');
+        logger.log('AI服务', '发送请求到DeepSeek API');
         const networkStart = performance.now();
         const res = await ky.post('/api/proxy/deepseek-cleaning', requestPayload).json<any>();
         const networkTime = performance.now() - networkStart;

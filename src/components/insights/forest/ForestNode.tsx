@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { ForestNodeProps } from './types';
 import { ChevronRight, ChevronDown, Activity, Layers, PlayCircle } from 'lucide-react';
-import { useI18n } from '@/contexts/I18nContext';
 
 /**
  * ForestNode - 单个洞察卡片 (玻璃拟态 + 暗夜风格)

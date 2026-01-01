@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import { Sparkles, CheckCircle2, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
 import { SuggestionCard } from './SuggestionCard';
 import { AILoading } from '@/components/common/AILoading';
-import { CleaningSuggestion, SuggestionCategory, ICON_SIZE_LARGE, CATEGORY_META } from '../types/cleaning.types';
+import { SimpleSuggestion, ProjectFile, SuggestionCategory, ICON_SIZE_LARGE, CATEGORY_META } from '../types/cleaning.types';
 import { groupByCategory } from '../utils/suggestionUtils';
-import { ProjectFile } from '@/types/project';
 import './SuggestionsTab.css';
 
 interface SuggestionsTabProps {
-    suggestions: CleaningSuggestion[];
+    suggestions: SimpleSuggestion[];
     selectedIds: string[];
     ignoredIds: string[];
     loading: boolean;

@@ -1,4 +1,3 @@
-import React from 'react';
 import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
 import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import { LiuliInput } from '@/components/common/liulix/LiuliInput';

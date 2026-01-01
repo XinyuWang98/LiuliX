@@ -24,27 +24,6 @@ interface I18nContextType {
 // 创建上下文
 const I18nContext = createContext<I18nContextType | null>(null);
 
-/**
- * 获取嵌套对象的值
- * @param obj 对象
- * @param path 路径,如 'welcome.title'
- */
-function getNestedValue(obj: any, path: string): string {
-    return path.split('.').reduce((current, key) => current?.[key], obj) || path;
-}
-
-/**
- * 替换字符串中的变量
- * @param str 字符串模板
- * @param params 参数对象
- */
-function interpolate(str: string, params?: Record<string, string | number>): string {
-    if (!params) return str;
-
-    return Object.entries(params).reduce((result, [key, value]) => {
-        return result.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value));
-    }, str);
-}
 
 /**
  * i18n Provider 组件

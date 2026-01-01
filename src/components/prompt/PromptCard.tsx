@@ -1,7 +1,6 @@
-import React from 'react';
 import { UserPrompt } from '@/types/prompt';
 import { useI18n } from '@/contexts/I18nContext';
-import { Flame, Medal, Calendar, Eye } from 'lucide-react';
+import { Flame, Medal, Calendar } from 'lucide-react';
 import './PromptCard.css';
 
 interface PromptCardProps {

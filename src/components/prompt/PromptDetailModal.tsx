@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserPrompt } from '@/types/prompt';
 import { useI18n } from '@/contexts/I18nContext';
-import { X, Copy, Check, Terminal, FileJson, Database, Medal, Flame, Calendar } from 'lucide-react';
+import { X, Copy, Check, Terminal, FileJson, Database, Medal, Flame } from 'lucide-react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css'; // 使用 Dark 主题
 import 'prismjs/components/prism-python';

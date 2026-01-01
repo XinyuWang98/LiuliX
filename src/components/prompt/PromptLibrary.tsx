@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { promptRegistry } from '@/services/promptRegistry';
 import { UserPrompt, PromptFilter } from '@/types/prompt';
 import { LibrarySidebar } from '@/components/prompt/LibrarySidebar';
 import { PromptCard } from '@/components/prompt/PromptCard';
 import { PromptDetailModal } from '@/components/prompt/PromptDetailModal';
-import { Check, Search, Sparkles, Flame } from 'lucide-react';
+import { Search, Flame } from 'lucide-react';
 import './PromptLibrary.css';
 
 interface PromptLibraryProps {
@@ -13,7 +13,7 @@ interface PromptLibraryProps {
     onNavigate: (view: 'dashboard' | 'library') => void;
 }
 
-export const PromptLibrary: React.FC<PromptLibraryProps> = ({ activeView, onNavigate }) => {
+export const PromptLibrary: React.FC<PromptLibraryProps> = ({ activeView: _activeView, onNavigate: _onNavigate }) => {
     const { t } = useI18n();
     const [filter, setFilter] = useState<PromptFilter>({});
     const [selectedPrompt, setSelectedPrompt] = useState<UserPrompt | null>(null);

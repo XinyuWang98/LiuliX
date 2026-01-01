@@ -1,9 +1,10 @@
 // 数据清洗模块的类型定义和常量配置
 
-import { Project } from '../../../utils/projectUtils';
+import { Project, ProjectFile } from '../../../utils/projectUtils';
+import { CleaningSuggestion } from '../../../services/aiService';
 
-// 重新导出Project类型，方便引用
-export type { Project };
+// 重新导出类型，方便其他模块引用
+export type { Project, ProjectFile, CleaningSuggestion };
 
 // ==================== 接口定义 ====================
 

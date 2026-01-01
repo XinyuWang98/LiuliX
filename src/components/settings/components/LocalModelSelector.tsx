@@ -152,7 +152,6 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                 throw new Error(result.error || t('settings.downloadFailed'));
             }
         } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : t('settings.downloadFailed');
             setDownloadProgress(t('settings.downloadFailed')); // Simplified for i18n compliance
             logger.error('本地模型', `模型下载失败: ${modelId}`, err);
 

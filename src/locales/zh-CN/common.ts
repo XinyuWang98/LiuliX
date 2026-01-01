@@ -113,4 +113,10 @@ export const hardware = {
     useRecommended: '使用推荐配置',
     keepCurrent: '保持当前配置',
     redetect: '重新检测',
+
+    // 推荐理由详情（新增修复 TS2739）
+    reasonMacPlus: 'MacBook Pro M系列：硬件性能优秀，本地AI体验流畅',
+    reasonGood: '硬件配置优秀，本地AI性能良好',
+    reasonMedium: '硬件配置中等，建议使用云端AI以获得更好体验',
+    reasonLow: '硬件配置较低，强烈建议使用云端AI',
 };
