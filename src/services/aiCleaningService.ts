@@ -3,7 +3,7 @@
  * 包含数据脱敏、AI调用、三层校验、降级机制、大文件采样
  */
 import type { CleaningSuggestion } from './aiService';
-import { buildDesensitizedMetadata, generateQualityIssues } from '@/utils/dataSanitizer';
+import { generateQualityIssues } from '@/utils/dataSanitizer';
 import { compressMetadataForPrompt } from '@/utils/promptCompressor';
 import { buildCleaningPrompt } from './prompts/cleaningSuggestions';
 import { validateAIResponse, validateSQLSafety, validateWithDryRun } from '@/utils/sqlValidator';
@@ -41,27 +41,23 @@ export async function generateAICleaningSuggestions(
         logger.log('AI清洗', '数据脱敏中');
         onProgress?.(t('cleaning.desensitizing'));
 
-        // 🆕 检查用户隐私设置
-        const { getPrivacyConfig } = await import('@/utils/dataPrivacy');
-        const userConfig = getPrivacyConfig();
+        // 🔒 数据脱敏（使用统一工具）
+        const { unifiedSanitize } = await import('@/utils/unifiedDataSanitizer');
 
-        let desensitizedData, columnMapping;
-        if (userConfig.mode === 'send_raw') {
-            // 用户选择发送原始数据，跳过脱敏
-            logger.log('AI清洗', '用户设置: 发送原始数据（跳过脱敏）');
-            desensitizedData = columns.map((col, index) => ({
-                name: col.name,
-                type: col.type,
-                nullable: col.nullable || false,
-                isSensitive: false,
-                stats: stats[index] || {},
-                sampleValues: stats[index]?.sampleData?.slice(0, 3) || []
-            }));
-            columnMapping = new Map(columns.map(c => [c.name, c.name]));
-        } else {
-            // 自动脱敏（原有逻辑）
-            ({ metadata: desensitizedData, columnMapping } = buildDesensitizedMetadata(columns, stats));
-        }
+        const { metadata: desensitizedData, columnMapping } = await unifiedSanitize(
+            columns,
+            stats,
+            [], // sampledData is not available at this stage
+            {
+                respectUserSettings: true,
+                intelligentDetection: true,
+                granularity: 'fine'
+            }
+        );
+
+        logger.log('数据清洗', '脱敏完成', {
+            data: { columns: columns.length }
+        });
 
         const qualityIssues = generateQualityIssues(desensitizedData);
 

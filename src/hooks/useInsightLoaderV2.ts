@@ -12,7 +12,6 @@ import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/servi
 import { buildRouterPrompt, parseRouterResponse, buildFallbackRecommendations } from '@/services/prompts/routerPrompt';
 import { inflateRecommendations } from '@/services/insights/inflater';
 import { logger } from '../utils/logger';
-import { prepareAIInput } from '@/utils/dataPrivacy';
 import { assessMemoryBeforeExecution } from '@/utils/memoryAssessment';
 import { executeInsightWithMode } from '@/services/skills/modeExecutor';
 import { getFallbackInsights } from '@/utils/fallbackTemplates';
@@ -91,12 +90,46 @@ export function useInsightLoaderV2() {
                 采样数据 = sampledData;
             }
 
-            // ========== 步骤2.5：数据脱敏检查 ==========
-            const { mode: privacyMode } = await prepareAIInput(
-                tableName || '',
+
+            // ========== 步骤2.5：数据脱敏（使用统一工具） ==========
+            // 获取列信息用于脱敏
+            let 列信息: any[] = [];
+            let 统计信息: any[] = [];
+            if (tableName) {
+                try {
+                    const engine = DuckDBEngine.getInstance();
+                    const describeResult = await engine.runQuery(`DESCRIBE ${tableName}`);
+                    列信息 = describeResult.map((row: any) => ({
+                        name: row.column_name,
+                        type: row.column_type
+                    }));
+                    // 从采样数据构造基础统计
+                    统计信息 = 列信息.map((col: any) => {
+                        const values = 采样数据.map((row: any) => row[col.name]);
+                        return {
+                            sampleData: values.slice(0, 3)
+                        };
+                    });
+                } catch (e) {
+                    logger.warn('AI洞察', '获取列信息失败，使用空列表');
+                }
+            }
+
+            const { unifiedSanitize } = await import('@/utils/unifiedDataSanitizer');
+            const { privacyMode } = await unifiedSanitize(
+                列信息,
+                统计信息,
                 采样数据,
-                totalRows
+                {
+                    respectUserSettings: true,
+                    intelligentDetection: true,
+                    granularity: 'coarse'  // 洞察使用粗粒度
+                }
             );
+
+            logger.log('数据隐私', `脱敏完成 模式=${privacyMode}`, {
+                data: { columns: 列信息.length, mode: privacyMode }
+            });
 
             // ========== 步骤3：AI生成洞察（双模式） ==========
 
@@ -121,7 +154,7 @@ export function useInsightLoaderV2() {
             if (USE_ROUTER_MODE) {
                 prompt = buildRouterPrompt(
                     选中列名,
-                    privacyMode === 'auto_sanitize' ? [] : 采样数据,
+                    privacyMode === 'sanitized' ? [] : 采样数据,
                     columnTypes
                 );
                 logger.log('AI服务', '[Router] 使用 Router Prompt 模式');
@@ -131,7 +164,7 @@ export function useInsightLoaderV2() {
                     选中列名,
                     采样数据.length,
                     totalRows,
-                    privacyMode === 'auto_sanitize' ? [] : 采样数据,
+                    privacyMode === 'sanitized' ? [] : 采样数据,
                     t
                 );
                 logger.log('AI服务', '[Coder] 使用传统 Coder Prompt 模式');

@@ -14,6 +14,7 @@ export type ServiceName =
     | 'AI洞察预加载'
     | 'AI服务'
     | 'AI配置'  // 🆕 AI配置与推荐
+    | 'AI代码增强'  // 🆕 AI代码增强服务
     | '本地模型'
     | 'DuckDB'
     | '数据清洗'
@@ -29,6 +30,7 @@ export type ServiceName =
     | 'Skills'
     | 'UI'
     | '用户操作'  // 🆕 用户操作（采纳洞察等）
+    | '用户设置'  // 🆕 用户设置管理
     | '系统'
     | '报告'  // 🆕 报告生成服务
     | '诊断工具'  // 🆕 WebLLM诊断等工具

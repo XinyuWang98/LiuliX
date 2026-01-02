@@ -25,9 +25,9 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
 
         // 能力包配置 (v2.1)
         slug: 'cleaner-remove-duplicates-v1',
-        packageId: 'basic',  // 清洗类归入basic
-        requiredPackages: [],  // SQL清洗不需要Python包
-        outputCharts: [],  // 清洗类不输出图表
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
 
         layer: 'L2_EXECUTION',
         template: '', // 清洗模板不需要Prompt（由Router调用）
@@ -49,6 +49,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_fill_null_median',
         title: '缺失值填充（中位数）',
         description: '使用中位数填充数值列的缺失值',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-fill-null-median-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = {median_value} WHERE "{column_name}" IS NULL',
@@ -69,6 +75,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_fill_null_unknown',
         title: '缺失值填充（Unknown）',
         description: '使用"Unknown"标记文本列的缺失值',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-fill-null-unknown-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = \'Unknown\' WHERE "{column_name}" IS NULL',
@@ -91,6 +103,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_standardize_date',
         title: '日期格式标准化',
         description: '将日期列统一为 YYYY-MM-DD 格式',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-standardize-date-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = strptime("{column_name}", \'%Y-%m-%d\') WHERE regexp_matches("{column_name}", \'^\\\\d{4}-\\\\d{2}-\\\\d{2}$\')',
@@ -111,6 +129,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_standardize_email',
         title: '邮箱格式标准化',
         description: '将邮箱转为小写并去除前后空格',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-standardize-email-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = lower(trim("{column_name}"))',
@@ -133,6 +157,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_filter_outliers_iqr',
         title: '异常值过滤（IQR规则）',
         description: '使用四分位距(IQR)规则过滤数值列的异常值，删除超出Q1-1.5*IQR和Q3+1.5*IQR范围的记录',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-filter-outliers-iqr-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'CREATE OR REPLACE TABLE __TABLE_NAME__ AS SELECT * FROM __TABLE_NAME__ WHERE "{column_name}" >= {q1_minus_iqr} AND "{column_name}" <= {q3_plus_iqr}',
@@ -153,6 +183,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_format_money',
         title: '金额格式化（2位小数）',
         description: '将金额/价格列统一保留2位小数',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-format-money-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = ROUND(CAST("{column_name}" AS DOUBLE), 2)',
@@ -173,6 +209,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_drop_null_column',
         title: '删除全空列',
         description: '删除数据全部为NULL的无效列',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-drop-null-column-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'ALTER TABLE __TABLE_NAME__ DROP COLUMN "{column_name}"',
@@ -193,6 +235,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_cast_to_numeric',
         title: '类型转换（转数值）',
         description: '将文本列转换为数值类型，无效值转为NULL',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-cast-to-numeric-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = TRY_CAST("{column_name}" AS DOUBLE)',
@@ -213,6 +261,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_fill_null_mean',
         title: '缺失值填充（均值）',
         description: '使用平均值填充数值列的缺失值',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-fill-null-mean-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = {mean_value} WHERE "{column_name}" IS NULL',
@@ -233,6 +287,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_fill_null_mode',
         title: '缺失值填充（众数）',
         description: '使用最常见值（众数）填充分类列的缺失值',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-fill-null-mode-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = \'{mode_value}\' WHERE "{column_name}" IS NULL',
@@ -253,6 +313,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_standardize_phone',
         title: '电话号码标准化',
         description: '去除电话号码中的非数字字符（空格、横线、括号等）',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-standardize-phone-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = regexp_replace("{column_name}", \'[^0-9]\', \'\', \'g\')',
@@ -273,6 +339,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_trim_whitespace',
         title: '文本清洗（去除空白）',
         description: '去除文本列的前后空白字符和多余空格',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-trim-whitespace-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = regexp_replace(trim("{column_name}"), \'\\s+\', \' \', \'g\')',
@@ -293,6 +365,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_delete_null_rows',
         title: '删除空白行',
         description: '删除指定列为NULL的记录',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-delete-null-rows-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'CREATE OR REPLACE TABLE __TABLE_NAME__ AS SELECT * FROM __TABLE_NAME__ WHERE "{column_name}" IS NOT NULL',
@@ -313,6 +391,12 @@ export const SEED_CLEANING_PROMPTS: UserPrompt[] = [
         name: 'cleaner_standardize_case',
         title: '大小写标准化',
         description: '将文本列统一转为小写（或大写）',
+
+        // 能力包配置 (v2.1)
+        slug: 'cleaner-standardize-case-v1',
+        packageId: 'basic',
+        requiredPackages: [],
+        outputCharts: [],
         layer: 'L2_EXECUTION',
         template: '',
         sqlTemplate: 'UPDATE __TABLE_NAME__ SET "{column_name}" = {case_function}("{column_name}")',
