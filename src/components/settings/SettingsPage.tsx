@@ -7,7 +7,7 @@ import { detectHardware, type HardwareDetectionResult } from '@/utils/hardwareDe
 import { getAIModeRecommendation, type AIModeRecommendation } from '@/utils/aiModeRecommendation';
 import { getAnalysisConfig, setAnalysisConfig } from '@/config/analysisConfig';
 import { askAI, type AIModel } from '@/services/aiService';
-import { localLLMService, SUPPORTED_MODELS } from '@/services/localLLMService';
+import { localLLMService } from '@/services/localLLMService';
 import { logger } from '@/utils/logger';
 
 interface SettingsPageProps {
@@ -84,17 +84,18 @@ export const SettingsPage = ({ onClose }: SettingsPageProps) => {
         setTimeout(async () => {
             try {
                 if (enabled) {
-                    // 🔧 快速修复：直接使用唯一可用的模型ID
-                    // TODO: 后续升级到 Qwen-3B 时需要更新 SUPPORTED_MODELS
-                    const modelID = SUPPORTED_MODELS.QWEN_7B;
-                    await localLLMService.reload(modelID);
-                    logger.log('AI服务', '已切换至本地模型');
+                    // ✅ 修复：只更新UI状态，延迟到用户选择模型后再加载
+                    // 不立即加载模型，避免在Ollama未启动时导致开关失效
+                    setUseLocalModel(true);
+                    localStorage.setItem('use_local_model', 'true');
+                    logger.log('AI服务', '本地AI模式已启用，等待用户选择模型');
                 } else {
+                    // 关闭时卸载模型
                     await localLLMService.unload();
+                    setUseLocalModel(false);
+                    localStorage.setItem('use_local_model', 'false');
                     logger.log('AI服务', '已卸载本地模型');
                 }
-                setUseLocalModel(enabled);
-                localStorage.setItem('use_local_model', enabled.toString());
             } catch (error) {
                 logger.error('UI', 'AI模式切换失败', error);
                 // Revert on failure

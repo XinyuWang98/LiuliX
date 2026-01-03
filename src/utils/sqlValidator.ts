@@ -26,7 +26,19 @@ export function validateAIResponse(
     t: (key: string, params?: Record<string, any>) => string
 ): CleaningSuggestion[] | null {
     try {
-        const parsed = JSON.parse(response);
+        // 🆕 P0修复: 剥离Markdown代码块标记（本地模型兼容）
+        // 本地模型（如qwen2.5-coder）常返回格式：```json\n{...}\n```
+        let cleanedResponse = response.trim();
+
+        // 检测并移除Markdown代码块
+        const markdownJsonPattern = /^```(?:json)?\s*\n([\s\S]*?)\n```$/;
+        const match = cleanedResponse.match(markdownJsonPattern);
+        if (match) {
+            cleanedResponse = match[1].trim();
+            console.log('[JSON解析] 检测到Markdown格式，已自动剥离代码块标记');
+        }
+
+        const parsed = JSON.parse(cleanedResponse);
 
         // 检查必要字段
         if (!parsed.suggestions || !Array.isArray(parsed.suggestions)) {

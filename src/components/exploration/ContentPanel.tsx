@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { useEvidence } from '@/contexts/EvidenceContext';
 import { DataCleaner } from '../cleaning/DataCleaner';
@@ -32,6 +32,22 @@ export function ContentPanel({
     const cleaningRef = useRef<HTMLDivElement>(null);
     const insightsRef = useRef<HTMLDivElement>(null);
     const reportRef = useRef<HTMLDivElement>(null);
+
+    // 🆕 Active File Management - 支持多文件项目的洞察刷新
+    const [activeFileId, setActiveFileId] = useState<string | null>(null);
+
+    // 🆕 当project.files变化时，自动选择第一个文件（如果当前没有选中文件）
+    useEffect(() => {
+        if (project?.files && project.files.length > 0) {
+            // 如果当前activeFileId不存在或已不在files列表中，选择第一个文件
+            const currentFileExists = project.files.some(f => f.id === activeFileId);
+            if (!currentFileExists) {
+                setActiveFileId(project.files[0].id);
+            }
+        } else {
+            setActiveFileId(null);
+        }
+    }, [project?.files, activeFileId]);
 
     // 导航滚动逻辑
     useEffect(() => {
@@ -101,23 +117,29 @@ export function ContentPanel({
             )}
 
             {/* 3. 洞察分析 Section */}
-            {project && (
-                <div ref={insightsRef} id="insights" className="content-section">
-                    <LiuliGlass className="content-module-container"> {/* Added Container */}
-                        <div className="section-header">
-                            <h2 className="section-title">{t('exploration.sections.insights')}</h2>
-                        </div>
-                        <InsightChainFlow
-                            columns={project.files?.[0]?.columns?.map(c => c.name) || []}
-                            rowCount={project.files?.[0]?.rowCount || 0}
-                            tableName={project.files?.[0]?.tableName}
-                            file={project.files?.[0]}
-                            fileName={project.files?.[0]?.originalName || project.files?.[0]?.name}
-                            hideTitle={true}
-                        />
-                    </LiuliGlass>
-                </div>
-            )}
+            {project && (() => {
+                // 🆕 根据activeFileId查找当前激活的文件
+                const activeFile = project.files?.find(f => f.id === activeFileId);
+                if (!activeFile) return null;
+
+                return (
+                    <div ref={insightsRef} id="insights" className="content-section">
+                        <LiuliGlass className="content-module-container"> {/* Added Container */}
+                            <div className="section-header">
+                                <h2 className="section-title">{t('exploration.sections.insights')}</h2>
+                            </div>
+                            <InsightChainFlow
+                                columns={activeFile.columns?.map(c => c.name) || []}
+                                rowCount={activeFile.rowCount || 0}
+                                tableName={activeFile.tableName}
+                                file={activeFile}
+                                fileName={activeFile.originalName || activeFile.name}
+                                hideTitle={true}
+                            />
+                        </LiuliGlass>
+                    </div>
+                );
+            })()}
 
             {/* 分析报告 Section */}
             {project && evidenceRecords.length > 0 && (
