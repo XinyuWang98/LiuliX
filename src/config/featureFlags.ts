@@ -28,6 +28,7 @@ export interface FeatureFlags {
     // 实验性功能
     SKILLS_ARCHITECTURE: boolean;       // Skills架构（已实现，默认关闭）
     PYODIDE_OFFLINE: boolean;           // Pyodide离线模式
+    USE_AST_CODE_ENHANCER: boolean;     // AST代码增强器（v3.0，默认关闭）
 }
 
 /**
@@ -58,7 +59,8 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 
     // 实验性功能
     SKILLS_ARCHITECTURE: false,  // 已实现，默认关闭
-    PYODIDE_OFFLINE: false
+    PYODIDE_OFFLINE: false,
+    USE_AST_CODE_ENHANCER: true  // ✅ v3.0 AST增强器已启用（2026-01-03测试）
 };
 
 /**

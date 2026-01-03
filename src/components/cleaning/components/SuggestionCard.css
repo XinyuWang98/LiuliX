@@ -6,8 +6,8 @@
     flex-direction: column;
     /* Basic Glassmorphism */
     background: var(--glass-surface);
-    /* 使用标准玻璃变量 */
-    border: 1px solid var(--glass-border);
+    /* 移除外侧白色边框 */
+    border: none;
     border-radius: var(--radius-m);
     padding: 0;
     cursor: pointer;
@@ -247,10 +247,10 @@
     word-break: break-all;
 }
 
-/* 5. 采纳按钮 */
+/* 5. 采纳按钮 - 隐藏 */
 .adoptBtn-container {
-    padding: 8px var(--gap-m);
-    border-top: 1px solid var(--border-light);
+    display: none;
+    /* 隐藏采纳按钮 */
 }
 
 .adoptBtn {

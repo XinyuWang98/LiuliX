@@ -71,10 +71,10 @@ function extractColumnsUsed(params: Record<string, unknown>): string[] {
 /**
  * 膨胀单个 L1 推荐为 InsightNode
  */
-export function inflateRecommendation(
+export async function inflateRecommendation(
     rec: L1Recommendation,
     depth: number = 0
-): InsightNode | null {
+): Promise<InsightNode | null> {
     // 1. 获取 Prompt 模板
     const prompt = promptRegistry.getPrompt(rec.promptId);
 
@@ -95,8 +95,8 @@ export function inflateRecommendation(
     if (prompt.executionMode === 'TEMPLATE_FILL' && prompt.codeTemplate) {
         const rawCode = renderTemplate(prompt.codeTemplate, rec.params);
 
-        // ✅ v2.0: 自动增强代码（零Token成本）
-        const enhanceResult = CodeEnhancer.enhance(rawCode, {
+        // ✅ v3.0: 异步自动增强代码（零Token成本）
+        const enhanceResult = await CodeEnhancer.enhance(rawCode, {
             columns: extractColumnsUsed(rec.params),
             dfName: 'df',
             promptType: prompt.name
@@ -156,13 +156,13 @@ export function inflateRecommendation(
 /**
  * 批量膨胀 L1 推荐列表
  */
-export function inflateRecommendations(
+export async function inflateRecommendations(
     recommendations: L1Recommendation[]
-): InsightNode[] {
+): Promise<InsightNode[]> {
     const nodes: InsightNode[] = [];
 
     for (const rec of recommendations) {
-        const node = inflateRecommendation(rec, 0);
+        const node = await inflateRecommendation(rec, 0);
         if (node) {
             nodes.push(node);
         }
@@ -176,7 +176,7 @@ export function inflateRecommendations(
  * 获取 Prompt 的渲染后代码
  * 用于在 Hook 中执行
  */
-export function getRenderedCode(promptId: string, params: Record<string, unknown>): string | null {
+export async function getRenderedCode(promptId: string, params: Record<string, unknown>): Promise<string | null> {
     const prompt = promptRegistry.getPrompt(promptId);
 
     if (!prompt) {
@@ -191,8 +191,8 @@ export function getRenderedCode(promptId: string, params: Record<string, unknown
 
     const rawCode = renderTemplate(prompt.codeTemplate, params);
 
-    // ✅ v2.0: 自动增强代码
-    const enhanceResult = CodeEnhancer.enhance(rawCode, {
+    // ✅ v3.0: 异步自动增强代码
+    const enhanceResult = await CodeEnhancer.enhance(rawCode, {
         columns: extractColumnsUsed(params),
         dfName: 'df',
         promptType: prompt.name

@@ -4,7 +4,9 @@
     align-items: center;
     gap: 4px;
     /* Reduced gap for more tabs */
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    /* 关键：允许 flex item 收缩到内容以下，防止撑破容器 */
     overflow: hidden;
     /* Prevent tabs from overflowing container */
     padding-right: var(--gap-m);
@@ -16,9 +18,9 @@
     gap: 6px;
     height: 32px;
     padding: 0 12px;
-    border: none;
+    border: 1px solid transparent;
     border-radius: var(--radius-s);
-    background: transparent;
+    background: rgba(255, 255, 255, 0.02);
     color: var(--text-secondary);
     font-size: var(--fs-sm);
     cursor: pointer;
@@ -31,13 +33,18 @@
 }
 
 .smartTab:hover {
-    background: var(--bg-hover);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
     color: var(--text-primary);
 }
 
 .smartTab.active {
-    background: var(--primary);
-    color: #fff;
+    background: rgba(0, 0, 0, 0.6);
+    /* Glowing black glass */
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 122, 255, 0.2);
+    backdrop-filter: blur(8px);
+    color: #FFFFFF;
     font-weight: 500;
 }
 

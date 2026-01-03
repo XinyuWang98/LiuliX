@@ -149,15 +149,16 @@
     animation: spin 1s linear infinite;
 }
 
-/* 内容区域 */
+/* 内容区域 - 高度自适应，移除滚动条 */
 .bottomModuleContent {
-    min-height: 200px;
-    max-height: 400px;
-    overflow-y: auto;
+    min-height: auto;
+    /* 不设置最大高度，让其自适应 */
+    max-height: none;
+    overflow-y: visible;
 }
 
-/* 自定义滚动条 */
-.bottomModuleContent::-webkit-scrollbar {
+/* 移除滚动条样式（不再需要） */
+/* .bottomModuleContent::-webkit-scrollbar {
     width: 8px;
 }
 
@@ -172,4 +173,4 @@
 
 .bottomModuleContent::-webkit-scrollbar-thumb:hover {
     background: var(--glass-border-highlight);
-}
+} */

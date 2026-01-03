@@ -1,11 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { Project } from '@/utils/projectUtils';
 import { loadProjects, saveProjects, deleteProject as deleteProjectFromDB } from '@/utils/indexedDB';
-import { ProjectCard, NewProjectCard } from './ProjectCard';
+import { ProjectCard, NewProjectCard, ProjectCardHandle } from './ProjectCard';
 import { logger } from '@/utils/logger';
 import { useI18n } from '@/contexts/I18nContext';
 import './ProjectCardGrid.css';
+
+// 菜单尺寸常量（用于防溢出计算）
+const MENU_WIDTH = 140;
+const MENU_HEIGHT = 80; // 预估高度
 
 interface ProjectCardGridProps {
     currentProject: Project | null;
@@ -17,6 +21,7 @@ export function ProjectCardGrid({ currentProject, onProjectSelect, onNewProject 
     const { t } = useI18n();
     const [projects, setProjects] = useState<Project[]>([]);
     const [contextMenu, setContextMenu] = useState<{ projectId: string; x: number; y: number } | null>(null);
+    const cardRefs = useRef<Map<string, ProjectCardHandle>>(new Map());
 
     // 加载项目列表（监听 currentProject 变化以自动刷新）
     useEffect(() => {
@@ -33,10 +38,25 @@ export function ProjectCardGrid({ currentProject, onProjectSelect, onNewProject 
         }
     };
 
-    // 右键菜单处理
+    // 右键菜单处理（修复：添加防溢出逻辑）
     const handleContextMenu = (e: React.MouseEvent, projectId: string) => {
         e.preventDefault();
-        setContextMenu({ projectId, x: e.clientX, y: e.clientY });
+
+        // 计算菜单位置（防止溢出屏幕）
+        let x = e.clientX;
+        let y = e.clientY;
+
+        // 右边界检测
+        if (x + MENU_WIDTH > window.innerWidth) {
+            x = window.innerWidth - MENU_WIDTH - 10; // 留10px边距
+        }
+
+        // 下边界检测
+        if (y + MENU_HEIGHT > window.innerHeight) {
+            y = window.innerHeight - MENU_HEIGHT - 10;
+        }
+
+        setContextMenu({ projectId, x, y });
     };
 
     // 删除项目
@@ -92,6 +112,13 @@ export function ProjectCardGrid({ currentProject, onProjectSelect, onNewProject 
                 {projects.map(project => (
                     <ProjectCard
                         key={project.id}
+                        ref={(ref) => {
+                            if (ref) {
+                                cardRefs.current.set(project.id, ref);
+                            } else {
+                                cardRefs.current.delete(project.id);
+                            }
+                        }}
                         project={project}
                         isActive={currentProject?.id === project.id}
                         onClick={() => onProjectSelect(project)}
@@ -116,7 +143,11 @@ export function ProjectCardGrid({ currentProject, onProjectSelect, onNewProject 
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="context-menu-item" onClick={() => {
-                        // 触发重命名（需要在ProjectCard中处理）
+                        // 修复：触发卡片的重命名编辑模式
+                        const cardHandle = cardRefs.current.get(contextMenu.projectId);
+                        if (cardHandle) {
+                            cardHandle.startEdit();
+                        }
                         setContextMenu(null);
                     }}>
                         <Edit2 size={14} />

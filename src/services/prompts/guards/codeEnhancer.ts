@@ -1,13 +1,15 @@
 /**
- * AI代码增强器 v2.0
+ * AI代码增强器 v3.0 统一接口
  * 
- * 在AI生成的Python代码执行前自动注入防御逻辑
+ * 支持AST/正则方案动态切换，跨平台适配（Web/PC）
  * 零Token成本，确定性修复
  * 
  * @author AntiGravity
- * @date 2026-01-02
+ * @date 2026-01-03
  */
 
+import { logger } from '@/utils/logger';
+import { getFeatureFlags } from '@/config/featureFlags';
 
 export interface EnhanceContext {
     columns: string[];      // 数据集列名
@@ -20,16 +22,74 @@ export interface EnhanceResult {
     rulesApplied: string[]; // 应用的规则列表
     originalLength: number; // 原始代码长度
     enhancedLength: number; // 增强后代码长度
+    success?: boolean;      // 增强是否成功（v3.0新增）
+    error?: string;         // 错误信息（v3.0新增）
+    stats?: Record<string, any>;  // 统计信息（v3.0新增）
+}
+
+/**
+ * 动态选择平台适配器
+ */
+async function getAdapter() {
+    if (typeof window !== 'undefined') {
+        // Web端：使用Pyodide
+        const { PyodideEnhancerAdapter } = await import('@/adapters/web/pyodideEnhancerAdapter');
+        return PyodideEnhancerAdapter;
+    } else {
+        // PC端：使用Native Python（Tauri，未来实现）
+        throw new Error('PC端适配器未实现');
+    }
 }
 
 export class CodeEnhancer {
     /**
-     * 自动增强AI生成的代码
+     * 统一增强接口（v3.0 异步版本）
+     * 
+     * 自动选择最佳增强方案：
+     * 1. 如果启用AST增强器且可用 → 使用AST方案（v3.0）
+     * 2. AST失败或未启用 → 降级到正则方案（v2.0）
+     * 
      * @param code AI生成的原始代码
      * @param context 上下文信息
-     * @returns 增强结果
+     * @returns 增强结果（Promise）
      */
-    static enhance(code: string, context: EnhanceContext): EnhanceResult {
+    static async enhance(code: string, context: EnhanceContext): Promise<EnhanceResult> {
+        const flags = getFeatureFlags();
+
+        // 尝试使用AST增强器（v3.0）
+        if (flags.USE_AST_CODE_ENHANCER) {
+            try {
+                const Adapter = await getAdapter();
+                const result = await Adapter.enhance(code, context);
+
+                // 成功使用AST方案
+                if (result.success) {
+                    logger.log('AI代码增强', 'AST增强成功', {
+                        data: {
+                            rulesApplied: result.rulesApplied?.length || 0,
+                            codeLength: result.code.length
+                        }
+                    });
+                    return result;
+                }
+            } catch (error: any) {
+                // AST方案失败，记录日志并降级
+                logger.warn('AI代码增强', 'AST增强失败，降级到正则方案', {
+                    error: error.message
+                });
+            }
+        }
+
+        // 降级到v2.0正则方案（同步）
+        return this.enhanceWithRegex(code, context);
+    }
+
+    /**
+     * v2.0 正则方案（作为降级备份）
+     * 
+     * 保持原有逻辑不变，确保兼容性
+     */
+    private static enhanceWithRegex(code: string, context: EnhanceContext): EnhanceResult {
         const rulesApplied: string[] = [];
         let enhanced = code;
         const originalLength = code.length;
@@ -46,15 +106,8 @@ export class CodeEnhancer {
         }
 
         // 🔴 规则3: 数组访问保护（临时禁用）
-        // TODO: v3.0将使用AST精确识别，避免误伤.index[0]等属性访问
-        // 当前正则方案会错误地将`df.index[0]`替换为`df.((index[0]...))`导致SyntaxError
+        // TODO: v3.0 AST方案已实现精确识别，正则方案永久禁用此规则
         // 参考文档: docs/04-技术专题/02-Prompt库/08-专题-Prompt库AI代码质量提升方案.md §13.1
-        /*
-        if (this.hasArrayAccess(enhanced)) {
-            enhanced = this.wrapArrayAccess(enhanced);
-            rulesApplied.push('array-access-protection');
-        }
-        */
 
         // 规则4: 全局异常捕获
         enhanced = this.wrapTryCatch(enhanced);
@@ -66,14 +119,18 @@ export class CodeEnhancer {
             rulesApplied.push('groupby-enhancement');
         }
 
-        // 日志记录（简化版，避免类型错误）
-        // logger.log('AI服务', '代码增强完成');
+        logger.log('AI代码增强', 'v2.0正则增强完成', {
+            data: {
+                rulesApplied: rulesApplied.length
+            }
+        });
 
         return {
             code: enhanced,
             rulesApplied,
             originalLength,
-            enhancedLength: enhanced.length
+            enhancedLength: enhanced.length,
+            success: true
         };
     }
 
@@ -107,20 +164,6 @@ if missing:
 
 `;
         return validation + code;
-    }
-
-    /**
-     * 规则3: 包装数组访问
-     * @deprecated 临时禁用，等待v3.0 AST方案移除
-     */
-    // @ts-expect-error - 保留以便 v3.0 参考
-    private static wrapArrayAccess(code: string): string {
-        // 将 arr[0] 替换为安全访问
-        // 注意：只替换简单的数字索引访问，不替换切片或列访问
-        return code.replace(
-            /(\w+)\[(\d+)\](?!\s*=)/g,  // 匹配 arr[0] 但不匹配 arr[0] =
-            '($1[$2] if len($1) > $2 else None)'
-        );
     }
 
     /**
@@ -185,14 +228,5 @@ if ${dfName}['${groupCol}'].nunique() < 2:
         }
 
         return Array.from(columns);
-    }
-
-    /**
-     * 辅助：检查代码中是否有数组索引访问
-     * @deprecated 临时未使用，等待v3.0 AST方案移除
-     */
-    // @ts-expect-error - 保留以便 v3.0 参考
-    private static hasArrayAccess(code: string): boolean {
-        return /\w+\[\d+\]/.test(code);
     }
 }

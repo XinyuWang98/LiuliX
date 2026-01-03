@@ -8,6 +8,7 @@ import { LiuliGlass } from '../common/liulix/LiuliGlass';
 import { VirtualDataGridV2 } from '../VirtualDataGridV2';
 import { SmartFileTabBar } from './SmartFileTabBar';
 import { useDataLoader } from './hooks/useDataLoader';
+import './DataViewerV2.css'; // [FIX] Import CSS style
 
 interface DataViewerProps {
     project: Project | null;
@@ -87,31 +88,17 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
 
                 {/* 右侧：数据信息与工具 */}
                 {(dataInfo || duckInfo) && (
-                    <div style={{
-                        display: 'flex',
-                        gap: 'var(--gap-l)',
-                        alignItems: 'center',
-                        marginLeft: 'var(--gap-l)', /* Ensure separation from tabs */
-                        flexShrink: 0,
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-xs)' }}>
-                            <Database size={14} style={{ color: 'var(--text-secondary)' }} />
-                            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+                    <div className="data-viewer-toolbar-right">
+                        <div className="data-viewer-stats-info">
+                            <Database size={14} />
+                            <span>
                                 {(duckInfo?.rowCount || dataInfo?.row_count || 0).toLocaleString()} {t('pagination.rows')}
                             </span>
-                            <span style={{
-                                fontSize: '10px',
-                                background: 'var(--error)',
-                                color: 'white',
-                                padding: '2px 4px',
-                                borderRadius: '4px',
-                                marginLeft: '8px',
-                                fontWeight: 'bold'
-                            }}>
+                            <span className="data-viewer-beta-badge">
                                 V2 BETA
                             </span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-s)' }}>
+                        <div className="data-viewer-controls">
                             <Columns3 size={14} style={{ color: 'var(--text-secondary)' }} />
 
                             {/* 列筛选器按钮 (Swap Order: 1st) */}
@@ -119,19 +106,7 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
                                 <div style={{ position: 'relative' }}>
                                     <button
                                         onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 'var(--gap-xs)',
-                                            padding: 'var(--gap-xs) var(--gap-s)',
-                                            background: 'transparent',
-                                            border: '1px solid var(--border)',
-                                            borderRadius: 'var(--radius-s)',
-                                            color: 'var(--text-secondary)',
-                                            cursor: 'pointer',
-                                            fontSize: 'var(--fs-sm)',
-                                            transition: 'all var(--transition-fast)',
-                                        }}
+                                        className="data-viewer-btn"
                                     >
                                         <span>{t('grid.selectedColumns', {
                                             count: selectedColumns.length,
@@ -262,19 +237,7 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
                                 <button
                                     onClick={() => setShowStats(!showStats)}
                                     title={showStats ? t('grid.clickToCollapse') : t('grid.clickToExpand')}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 'var(--gap-xs)',
-                                        padding: 'var(--gap-xs) var(--gap-s)',
-                                        background: showStats ? 'var(--bg-accent-subtle)' : 'transparent',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: 'var(--radius-s)',
-                                        color: showStats ? 'var(--primary)' : 'var(--text-secondary)',
-                                        cursor: 'pointer',
-                                        fontSize: 'var(--fs-sm)',
-                                        transition: 'all var(--transition-fast)',
-                                    }}
+                                    className={`data-viewer-btn ${showStats ? 'active' : ''}`}
                                 >
                                     <BarChart2 size={14} />
                                     <span>{t('grid.distribution')}</span>

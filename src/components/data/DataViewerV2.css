@@ -19,3 +19,66 @@
     flex-direction: column;
     overflow: hidden;
 }
+
+/* 右侧工具栏区域 */
+.data-viewer-toolbar-right {
+    display: flex;
+    gap: var(--gap-l);
+    align-items: center;
+    margin-left: var(--gap-l);
+    flex-shrink: 0;
+}
+
+.data-viewer-stats-info {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+.data-viewer-beta-badge {
+    font-size: 10px;
+    background: var(--error);
+    color: white;
+    padding: 2px 4px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.data-viewer-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+}
+
+.data-viewer-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-xs) var(--gap-s);
+    background: rgba(255, 255, 255, 0.05);
+    /* Glass Base */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Glass Border */
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: var(--fs-sm);
+    transition: all var(--transition-fast);
+}
+
+.data-viewer-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
+}
+
+.data-viewer-btn.active {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 122, 255, 0.2);
+    backdrop-filter: blur(8px);
+    color: #FFFFFF;
+}

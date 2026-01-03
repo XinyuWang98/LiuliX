@@ -126,7 +126,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
         try {
             // 渲染代码
-            const renderedCode = getRenderedCode(action.promptId, action.params);
+            const renderedCode = await getRenderedCode(action.promptId, action.params);
 
             if (!renderedCode) {
                 throw new Error(`无法渲染模板: ${action.promptId}`);

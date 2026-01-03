@@ -195,10 +195,10 @@ export function useInsightLoaderV2() {
                 if (recommendations.length === 0) {
                     logger.warn('AI服务', '[Router] AI未返回推荐，使用规则层兜底');
                     const fallbackRecs = buildFallbackRecommendations(选中列名, columnTypes);
-                    insightNodes = inflateRecommendations(fallbackRecs as any);
+                    insightNodes = await inflateRecommendations(fallbackRecs as any);
                 } else {
                     logger.log('AI服务', '[Router] 解析成功', { data: { count: recommendations.length } });
-                    insightNodes = inflateRecommendations(recommendations as any);
+                    insightNodes = await inflateRecommendations(recommendations as any);
                 }
             } else {
                 // 旧版 Coder 模式（需要转换为 InsightNode）

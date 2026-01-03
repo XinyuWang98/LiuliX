@@ -48,9 +48,9 @@ export class PyodideEnhancerAdapter {
                 // 动态导入pyodide（避免SSR问题）
                 const { loadPyodide } = await import('pyodide');
 
-                // 加载Pyodide
+                //加载Pyodide
                 this.pyodide = await loadPyodide({
-                    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
+                    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'  // 与主应用worker版本保持一致
                 });
 
                 logger.log('AI服务', 'Pyodide核心加载完成');
@@ -63,7 +63,7 @@ export class PyodideEnhancerAdapter {
                 logger.log('AI服务', 'Pyodide环境初始化完成');
 
             } catch (error: any) {
-                logger.error('AST转换', 'Pyodide初始化失败', error);
+                logger.error('AI代码增强', 'Pyodide初始化失败', error);
                 throw error;
             }
         })();
@@ -93,11 +93,10 @@ import micropip
 await micropip.install('${wheelUrl}')
             `);
 
-        } catch (error: any) {
-            logger.error('AI服务', 'Pyodide初始化失败', error);
+            logger.log('AI代码增强', 'liulix-code-enhancer包安装完成');
 
         } catch (error: any) {
-            logger.error('AST转换', '包安装失败', error);
+            logger.error('AI代码增强', '包安装失败', error);
             throw new Error(`无法安装liulix-code-enhancer: ${error.message}`);
         }
     }
@@ -147,66 +146,67 @@ json.dumps(result)
             const result = JSON.parse(resultJson);
             const duration = performance.now() - startTime;
 
-        } catch (error: any) {
-            logger.error('AI服务', '包安装失败', error);
-            data: {
-                duration: `${duration.toFixed(1)}ms`,
+            // 记录成功日志
+            logger.log('AI代码增强', '代码增强完成', {
+                data: {
+                    duration: `${duration.toFixed(1)}ms`,
                     success: result.success,
-                        rulesApplied: Object.keys(result.stats || {}).length
-            }
-        });
+                    rulesApplied: Object.keys(result.stats || {}).length
+                }
+            });
 
-        return {
-            code: result.code,
-            rulesApplied: Object.keys(result.stats || {}),
-            originalLength: code.length,
-            enhancedLength: result.code.length,
-            stats: result.stats || {},
-            success: result.success,
-            error: result.error
-        };
+            // 返回增强结果
+            return {
+                code: result.code,
+                rulesApplied: Object.keys(result.stats || {}),
+                originalLength: code.length,
+                enhancedLength: result.code.length,
+                stats: result.stats || {},
+                success: result.success,
+                error: result.error
+            };
 
-    } catch(error: any) {
-        const duration = performance.now() - startTime;
-        logger.error('AI服务', '增强失败', {
-            error: error.message,
-            duration: `${duration.toFixed(1)}ms`
-        });
+        } catch (error: any) {
+            const duration = performance.now() - startTime;
+            logger.error('AI代码增强', '代码增强失败', {
+                error: error.message,
+                duration: `${duration.toFixed(1)}ms`
+            });
 
-        // 降级：返回原代码
-        return {
-            code,
-            rulesApplied: [],
-            originalLength: code.length,
-            enhancedLength: code.length,
-            stats: {},
-            success: false,
-            error: error.message
-        };
+            // 降级：返回原代码
+            return {
+                code,
+                rulesApplied: [],
+                originalLength: code.length,
+                enhancedLength: code.length,
+                stats: {},
+                success: false,
+                error: error.message
+            };
+        }
     }
-}
 
     /**
      * 转义代码中的特殊字符
      */
     private static escapeCode(code: string): string {
-    return code
-        .replace(/\\/g, '\\\\')  // 反斜杠
-        .replace(/'''/g, '\\\'\\\'\\\'')  // 三引号
-        .replace(/\n/g, '\\n');  // 换行
-}
+        return code
+            .replace(/\\/g, '\\\\')  // 反斜杠
+            .replace(/'''/g, '\\\'\\\'\\\'')  // 三引号
+            .replace(/\n/g, '\\n');  // 换行
+    }
 
     /**
      * 检查是否已准备就绪
      */
     static isInitialized(): boolean {
-    return this.isReady;
-}
+        return this.isReady;
+    }
 
     /**
      * 获取Pyodide实例（用于调试）
      */
     static getPyodide(): any {
-    return this.pyodide;
-}
+        return this.pyodide;
+    }
 }

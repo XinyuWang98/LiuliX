@@ -142,7 +142,7 @@ except Exception as e:
 
         // ✅ 代码增强：注入防御性逻辑（零Token成本）
         const columnNames = schema.map((row: any) => row.column_name);
-        const enhanceResult = CodeEnhancer.enhance(code, {
+        const enhanceResult = await CodeEnhancer.enhance(code, {
             columns: columnNames,
             dfName: 'df',
             promptType: suggestion.title // 用于场景化增强
@@ -216,7 +216,7 @@ df = pd.DataFrame(json.loads(data_json))
 
     // 3. 代码增强：为viz_code注入防御性逻辑
     const aggColumnNames = aggregatedData.length > 0 ? Object.keys(aggregatedData[0]) : [];
-    const vizEnhanceResult = CodeEnhancer.enhance(viz_code, {
+    const vizEnhanceResult = await CodeEnhancer.enhance(viz_code, {
         columns: aggColumnNames,
         dfName: 'df',
         promptType: 'aggregated_viz'

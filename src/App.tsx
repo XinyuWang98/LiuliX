@@ -76,7 +76,8 @@ function AppContent() {
             } else if (hash === '#/design') {
                 setActiveView('design'); // [NEW] Design System
             } else if (hash === '#/' || hash === '') {
-                setActiveView('dashboard');
+                // 重定向到 V2 页面（废弃旧 dashboard）
+                window.location.hash = '#/v2';
             }
         };
 
@@ -301,13 +302,13 @@ function AppContent() {
             await saveProjects(updatedProjects);
             logger.log('UI', 'Step 7: IndexedDB保存完成');
 
-            logger.log('UI', 'Step 8: 准备调用setSelectedProject');
-            // 4. 更新当前选中项目 (这将触发界面切换到 ExplorationFlow)
+            logger.log('UI', 'Step 8: 准备更新项目并导航到V2页面');
+            // 4. 更新当前选中项目
             setSelectedProject(newProject);
-            logger.log('UI', 'Step 9: setSelectedProject调用完成！！！');
 
-            // 5. 自动展开左侧栏 (可选，增加沉浸感可不展开，但为了让用户看到文件列表，展开较好)
-            setShowLeft(true);
+            // 5. 导航到 V2 页面（新的交互流程）
+            window.location.hash = '#/v2';
+            logger.log('UI', 'Step 9: 导航至 /#/v2 完成');
 
             logger.log('UI', 'Step 10: 全流程完成');
         } catch (err) {
@@ -356,7 +357,8 @@ function AppContent() {
                             <LeftSidebar
                                 onProjectSelect={(project) => {
                                     setSelectedProject(project);
-                                    setActiveView('dashboard');
+                                    // 导航到 V2 页面（废弃旧 dashboard）
+                                    window.location.hash = '#/v2';
                                 }}
                                 onClose={() => setShowLeft(false)}
                             />
