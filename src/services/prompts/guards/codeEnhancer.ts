@@ -45,11 +45,16 @@ export class CodeEnhancer {
             rulesApplied.push('column-validation');
         }
 
-        // 规则3: 数组访问保护
+        // 🔴 规则3: 数组访问保护（临时禁用）
+        // TODO: v3.0将使用AST精确识别，避免误伤.index[0]等属性访问
+        // 当前正则方案会错误地将`df.index[0]`替换为`df.((index[0]...))`导致SyntaxError
+        // 参考文档: docs/04-技术专题/02-Prompt库/08-专题-Prompt库AI代码质量提升方案.md §13.1
+        /*
         if (this.hasArrayAccess(enhanced)) {
             enhanced = this.wrapArrayAccess(enhanced);
             rulesApplied.push('array-access-protection');
         }
+        */
 
         // 规则4: 全局异常捕获
         enhanced = this.wrapTryCatch(enhanced);
@@ -106,7 +111,9 @@ if missing:
 
     /**
      * 规则3: 包装数组访问
+     * @deprecated 临时禁用，等待v3.0 AST方案移除
      */
+    // @ts-expect-error - 保留以便 v3.0 参考
     private static wrapArrayAccess(code: string): string {
         // 将 arr[0] 替换为安全访问
         // 注意：只替换简单的数字索引访问，不替换切片或列访问
@@ -182,7 +189,9 @@ if ${dfName}['${groupCol}'].nunique() < 2:
 
     /**
      * 辅助：检查代码中是否有数组索引访问
+     * @deprecated 临时未使用，等待v3.0 AST方案移除
      */
+    // @ts-expect-error - 保留以便 v3.0 参考
     private static hasArrayAccess(code: string): boolean {
         return /\w+\[\d+\]/.test(code);
     }

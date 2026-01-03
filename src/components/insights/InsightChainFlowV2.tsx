@@ -11,7 +11,7 @@ import { useI18n } from '@/contexts/I18nContext';
 import { logger } from '@/utils/logger';
 import { Loader, Sparkles, RefreshCw } from 'lucide-react';
 import { usePromptExecution } from '@/hooks/usePromptExecution';
-import { InsightTreeNode } from './InsightTreeNode';
+import { InsightCardV2 } from './InsightCardV2';
 import { ActionChip } from './ActionChip';
 import { LocalModelProgress } from './LocalModelProgress';
 import './InsightChainFlow.css';
@@ -198,13 +198,13 @@ export function InsightChainFlowV2({
                     <h4 className="insight-results-title">{t('insightChain.results')}</h4>
 
                     {insightChain.rootCards.map(node => (
-                        <InsightTreeNode
+                        <InsightCardV2
                             key={node.id}
                             node={node}
                             availableColumns={columns}
+                            onToggle={() => handleToggleExpand(node.id)}
                             onDrillDown={executeDrillDown}
                             onCustomAnalysis={executeCustomAnalysis}
-                            onToggleExpand={handleToggleExpand}
                             isExecuting={isExecuting}
                         />
                     ))}

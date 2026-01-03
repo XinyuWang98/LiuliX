@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+recursive-include liulix_enhancer *.py
+recursive-include tests *.py
+prune tests/__pycache__
+prune liulix_enhancer/__pycache__
+global-exclude *.pyc
+global-exclude __pycache__

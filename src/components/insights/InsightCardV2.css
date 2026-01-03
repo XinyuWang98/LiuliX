@@ -1,0 +1,315 @@
+/**
+ * InsightCardV2 样式
+ * 复用design页的优化Header布局和LiuliX视觉规范
+ */
+
+/* ========================================
+   卡片基础样式
+   ======================================== */
+
+.insight-card-v2 {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    animation: fade-in-down 0.3s ease-out;
+    position: relative;
+}
+
+/* ========================================
+   Header 样式
+   ======================================== */
+
+.insight-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+}
+
+.insight-card-v2:hover .insight-card-header {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Header 左侧图标 */
+.card-icon {
+    flex-shrink: 0;
+    color: var(--primary);
+    margin-top: 2px;
+}
+
+/* Header 中间信息区域 */
+.card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+/* 标题行 */
+.card-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+/* 数据上下文行（文件名 + 列名 Liuli胶囊）*/
+.card-context {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.context-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+}
+
+/* 文件名胶囊 - 蓝色系 */
+.context-badge.context-file {
+    color: rgba(10, 132, 255, 0.9);
+    background: rgba(10, 132, 255, 0.08);
+    border-color: rgba(10, 132, 255, 0.2);
+}
+
+/* 列名胶囊 - 紫色系 */
+.context-badge.context-column {
+    color: rgba(147, 51, 234, 0.9);
+    background: rgba(147, 51, 234, 0.08);
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+/* 面包屑路径行 */
+.card-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.breadcrumb-item {
+    color: var(--text-secondary);
+}
+
+.breadcrumb-separator {
+    color: var(--text-tertiary);
+    opacity: 0.5;
+}
+
+/* Header 右侧操作区域 */
+.card-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ========================================
+   Pending 状态样式
+   ======================================== */
+
+.insight-card-v2.is-pending {
+    /* 琥珀色菲涅尔边缘：顶部和左侧更亮 */
+    border: 1px solid rgba(251, 191, 36, 0.1);
+    border-top: 1px solid rgba(251, 191, 36, 0.25);
+    border-left: 1px solid rgba(251, 191, 36, 0.15);
+
+    /* 极淡的琥珀色渐变背景，几乎透明 */
+    background: linear-gradient(165deg, rgba(251, 191, 36, 0.04) 0%, rgba(251, 191, 36, 0.01) 100%);
+
+    /* 强磨砂效果 */
+    backdrop-filter: blur(16px);
+}
+
+.insight-card-v2.is-pending .insight-card-header {
+    background: rgba(251, 191, 36, 0.03);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.08);
+}
+
+.insight-card-v2.is-pending:hover .insight-card-header {
+    background: rgba(251, 191, 36, 0.06);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.12);
+}
+
+.insight-card-v2.is-pending .card-icon {
+    color: rgb(251, 191, 36);
+}
+
+.insight-card-v2.is-pending .card-title {
+    color: var(--text-primary);
+}
+
+/* ========================================
+   Body 样式
+   ======================================== */
+
+.insight-card-body {
+    padding: 16px;
+    border-top: 1px solid var(--glass-border);
+}
+
+/* 图表预览区 */
+.chart-preview-area {
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.chart-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 结论框 */
+.conclusion-box {
+    padding: 12px;
+    background: rgba(10, 132, 255, 0.08);
+    border-left: 3px solid rgba(10, 132, 255, 0.4);
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.conclusion-box strong {
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* ========================================
+   嵌套子卡片样式
+   ======================================== */
+
+.nested-children {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
+}
+
+/* 下钻推荐区域 */
+.drill-down-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
+}
+
+/* ========================================
+   状态样式
+   ======================================== */
+
+/* Loading 覆盖层 */
+.card-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-primary);
+    font-size: 13px;
+    z-index: 10;
+}
+
+/* Spinner */
+.spinner-mini {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error 状态 */
+.card-error {
+    padding: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 3px solid rgba(239, 68, 68, 0.5);
+    border-radius: 4px;
+    color: rgba(239, 68, 68, 0.9);
+    font-size: 13px;
+    margin: 16px;
+}
+
+/* ========================================
+   其他样式
+   ======================================== */
+
+/* 投票按钮 */
+.vote-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.icon-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+/* 展开图标 */
+.toggle-icon {
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+}
+
+/* 淡入动画 */
+@keyframes fade-in-down {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

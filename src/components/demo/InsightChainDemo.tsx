@@ -16,10 +16,9 @@ import {
     ChevronRight,
     BarChart2,
     RefreshCw,
-    Sparkles,
+    Sparkles,  // Header 中使用
     ThumbsUp,
     ThumbsDown,
-    ArrowRight,
     Copy,
     Check,
     FileCode
@@ -40,6 +39,13 @@ interface InsightNodeModel {
     conclusion?: string;
     code?: string;
     columnsUsed?: string[];
+
+    // 数据上下文
+    fileName?: string;      // 分析的文件名
+    columnName?: string;    // 分析的列名
+
+    // 洞察链路径（面包屑）
+    breadcrumbPath?: string[];  // 例如: ['根洞察', '分析缺失值']
 
     // 子节点 (下一级建议)
     children?: InsightNodeModel[];
@@ -73,25 +79,59 @@ correlation = df[['housing_median_age', 'median_house_value']].corr()
 print(correlation)`
 };
 
-const generateChildSuggestions = (parentId: string, depth: number): InsightNodeModel[] => [
-    {
-        id: `${parentId}-child-1`,
-        label: `深入分析: ${depth === 0 ? '收入分布' : '异常值检测'}`,
-        status: 'pending',
-        isRecommended: true
-    },
-    {
-        id: `${parentId}-child-2`,
-        label: `关联分析: ${depth === 0 ? '房龄影响' : '地理位置'}`,
-        status: 'pending',
-        isRecommended: false
-    }
-];
+const generateChildSuggestions = (
+    parentId: string,
+    parentNode: InsightNodeModel,
+    depth: number
+): InsightNodeModel[] => [
+        {
+            id: `${parentId}-child-1`,
+            label: `深入分析: ${depth === 0 ? '收入分布' : '异常值检测'}`,
+            status: 'pending',
+            isRecommended: true,
+            fileName: parentNode.fileName,
+            columnName: parentNode.columnName,
+            breadcrumbPath: [...(parentNode.breadcrumbPath || []), parentNode.title || parentNode.label]
+        },
+        {
+            id: `${parentId}-child-2`,
+            label: `关联分析: ${depth === 0 ? '房龄影响' : '地理位置'}`,
+            status: 'pending',
+            isRecommended: false,
+            fileName: parentNode.fileName,
+            columnName: parentNode.columnName,
+            breadcrumbPath: [...(parentNode.breadcrumbPath || []), parentNode.title || parentNode.label]
+        }
+    ];
 
 const MOCK_INITIAL_ROOTS: InsightNodeModel[] = [
-    { id: 'root-1', label: '分析缺失值分布', status: 'pending', isRecommended: true },
-    { id: 'root-2', label: '检查异常值', status: 'pending', isRecommended: true },
-    { id: 'root-3', label: '数值列概览', status: 'pending', isRecommended: false },
+    {
+        id: 'root-1',
+        label: '分析缺失值分布',
+        status: 'pending',
+        isRecommended: true,
+        fileName: 'california_housing.csv',
+        columnName: 'median_income',
+        breadcrumbPath: []
+    },
+    {
+        id: 'root-2',
+        label: '检查异常值',
+        status: 'pending',
+        isRecommended: true,
+        fileName: 'california_housing.csv',
+        columnName: 'housing_median_age',
+        breadcrumbPath: []
+    },
+    {
+        id: 'root-3',
+        label: '数值列概览',
+        status: 'pending',
+        isRecommended: false,
+        fileName: 'california_housing.csv',
+        columnName: '*',
+        breadcrumbPath: []
+    },
 ];
 
 // ========== 辅助函数：收集所有已解析节点的代码 ==========
@@ -189,53 +229,88 @@ const LiveNotebookPanel: React.FC<{
     );
 };
 
-/** Action Chip - 待点击的树枝 */
-const ActionChipTree: React.FC<{
-    node: InsightNodeModel;
-    onClick: () => void;
-}> = ({ node, onClick }) => (
-    <button
-        className={`action-chip-tree ${node.isRecommended ? 'recommended' : ''}`}
-        onClick={onClick}
-    >
-        {node.isRecommended && <Sparkles size={12} className="ai-icon" />}
-        <span>{node.label}</span>
-        <ArrowRight size={12} className="arrow-icon" />
-    </button>
-);
-
-/** Resolved Card - 展开的果实（不含代码块）*/
+/** Resolved Card - 展开的果实（支持嵌套子卡片）*/
 const InsightCard: React.FC<{
     node: InsightNodeModel;
     depth: number;
     onToggle: () => void;
     isExpanded: boolean;
-    onFocus?: (nodeId: string) => void; // 新增：焦点事件回调
-}> = ({ node, depth, onToggle, isExpanded, onFocus }) => {
+    onFocus?: (nodeId: string) => void; // 焦点事件回调
+    isPending?: boolean; // 标记是否为pending状态
+    children?: React.ReactNode; // 嵌套的子节点
+}> = ({ node, depth: _depth, onToggle, isExpanded, onFocus, isPending = false, children }) => {
     return (
-        <div className="insight-card-v2">
+        <div className={`insight-card-v2 ${isPending ? 'is-pending' : ''} ${children ? 'has-children' : ''}`}>
             {/* Header */}
             <div
                 className="insight-card-header"
                 onClick={() => {
-                    onToggle(); // 保留原有的展开/折叠功能
-                    onFocus?.(node.id); // 触发焦点事件
+                    onToggle(); // 触发加载或展开/折叠
+                    if (!isPending) {
+                        onFocus?.(node.id); // pending状态不触发焦点
+                    }
                 }}
             >
-                <div className="toggle-icon">
-                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                </div>
+                {/* 左侧：卡片图标 */}
                 <div className="card-icon">
                     <BarChart2 size={18} />
                 </div>
-                <div className="card-title">{node.title || node.label}</div>
-                <div className="card-meta">
-                    <span className="depth-badge">D{depth}</span>
+
+                {/* 中间：信息区域 */}
+                <div className="card-info">
+                    {/* 行1：标题 */}
+                    <div className="card-title">{node.title || node.label}</div>
+
+                    {/* 行2：数据上下文（文件名 + 列名）*/}
+                    {(node.fileName || node.columnName) && (
+                        <div className="card-context">
+                            {node.fileName && (
+                                <span className="context-badge context-file">{node.fileName}</span>
+                            )}
+                            {node.columnName && (
+                                <span className="context-badge context-column">{node.columnName}</span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* 行3：面包屑路径 */}
+                    {node.breadcrumbPath && node.breadcrumbPath.length > 0 && (
+                        <div className="card-breadcrumb">
+                            {node.breadcrumbPath.map((item, index) => (
+                                <React.Fragment key={index}>
+                                    <span className="breadcrumb-item">{item}</span>
+                                    {index < node.breadcrumbPath!.length - 1 && (
+                                        <span className="breadcrumb-separator">›</span>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* 右侧：操作按钮区域 */}
+                <div className="card-actions">
+                    {/* 投票按钮 - 仅在resolved状态显示 */}
+                    {!isPending && (
+                        <div className="vote-actions" onClick={(e) => e.stopPropagation()}>
+                            <button className="icon-btn" title="采纳">
+                                <ThumbsUp size={14} />
+                            </button>
+                            <button className="icon-btn" title="忽略">
+                                <ThumbsDown size={14} />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* 展开/折叠图标 */}
+                    <div className="toggle-icon">
+                        {isPending ? null : (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}
+                    </div>
                 </div>
             </div>
 
-            {/* Body */}
-            {isExpanded && (
+            {/* Body - 仅在resolved且展开时显示 */}
+            {!isPending && isExpanded && (
                 <div className="insight-card-body">
                     {/* Chart Area */}
                     <div className="chart-preview-area">
@@ -253,18 +328,18 @@ const InsightCard: React.FC<{
                         {node.conclusion || '数据表明该字段存在显著的长尾分布特征，建议进行对数变换处理。'}
                     </div>
 
-                    {/* Actions */}
-                    <div className="card-actions">
-                        <div className="vote-actions">
-                            <button className="icon-btn" title="采纳"><ThumbsUp size={14} /></button>
-                            <button className="icon-btn" title="忽略"><ThumbsDown size={14} /></button>
+                    {/* 嵌套子卡片区域 */}
+                    {children && (
+                        <div className="nested-children">
+                            {children}
                         </div>
-                    </div>
+                    )}
                 </div>
             )}
         </div>
     );
 };
+
 
 /** Recursive Tree Renderer */
 const RecursiveTree: React.FC<{
@@ -284,60 +359,51 @@ const RecursiveTree: React.FC<{
 
     return (
         <div className="tree-level">
-            {nodes.map((node, index) => {
-                const isLast = index === nodes.length - 1;
+            {nodes.map((node) => (
+                <div key={node.id} className="tree-item-wrapper">
+                    <div className="tree-content">
+                        {/* State 1: Pending - 使用卡片形式，未展开内容 */}
+                        {node.status === 'pending' && (
+                            <InsightCard
+                                node={node}
+                                depth={depth}
+                                isExpanded={false}  // pending状态默认折叠
+                                onToggle={() => onNodeClick(node.id)}  // 点击触发加载
+                                isPending={true}  // 标记为pending状态
+                            />
+                        )}
 
-                return (
-                    <div key={node.id} className={`tree-item-wrapper ${isLast ? 'is-last' : ''}`}>
-                        {/* Tree Lines */}
-                        {depth > 0 && <div className="tree-connector-l" />}
+                        {/* State 2: Loading */}
+                        {node.status === 'loading' && (
+                            <div className="node-loading">
+                                <div className="spinner-mini" />
+                                <span>AI 分析中...</span>
+                            </div>
+                        )}
 
-                        <div className="tree-content">
-                            {/* State 1: Pending (Chip) */}
-                            {node.status === 'pending' && (
-                                <ActionChipTree node={node} onClick={() => onNodeClick(node.id)} />
-                            )}
-
-                            {/* State 2: Loading */}
-                            {node.status === 'loading' && (
-                                <div className="node-loading">
-                                    <div className="spinner-mini" />
-                                    <span>AI 分析中...</span>
-                                </div>
-                            )}
-
-                            {/* State 3: Resolved (Card + Children) */}
-                            {node.status === 'resolved' && (
-                                <div className="node-resolved-group">
-                                    <InsightCard
-                                        node={node}
-                                        depth={depth}
-                                        isExpanded={!expandedIds.has(node.id)}
-                                        onToggle={() => toggleExpand(node.id)}
-                                        onFocus={onCardFocus} // 传递焦点事件
+                        {/* State 3: Resolved - 卡片内嵌套子节点 */}
+                        {node.status === 'resolved' && (
+                            <InsightCard
+                                node={node}
+                                depth={depth}
+                                isExpanded={!expandedIds.has(node.id)}
+                                onToggle={() => toggleExpand(node.id)}
+                                onFocus={onCardFocus}
+                            >
+                                {/* 子节点嵌套在卡片内部 */}
+                                {(!expandedIds.has(node.id)) && node.children && node.children.length > 0 && (
+                                    <RecursiveTree
+                                        nodes={node.children}
+                                        depth={depth + 1}
+                                        onNodeClick={onNodeClick}
+                                        onCardFocus={onCardFocus}
                                     />
-
-                                    {/* Children Container (Next Steps) */}
-                                    {(!expandedIds.has(node.id)) && node.children && node.children.length > 0 && (
-                                        <div className="tree-children-container">
-                                            {/* 垂直树干线：仅当不是最后一个节点时显示 */}
-                                            {!isLast && <div className="tree-trunk-extension" />}
-
-                                            {/* Recursive Render */}
-                                            <RecursiveTree
-                                                nodes={node.children}
-                                                depth={depth + 1}
-                                                onNodeClick={onNodeClick}
-                                                onCardFocus={onCardFocus} // 传递焦点事件
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </InsightCard>
+                        )}
                     </div>
-                );
-            })}
+                </div>
+            ))}
         </div>
     );
 };
@@ -365,7 +431,7 @@ export const InsightChainDemo: React.FC = () => {
                     ...node,
                     status: newStatus,
                     code: isResolve ? mockCode : node.code,
-                    children: isResolve ? generateChildSuggestions(node.id, 0) : node.children
+                    children: isResolve ? generateChildSuggestions(node.id, node, 0) : node.children
                 };
             }
             if (node.children) {

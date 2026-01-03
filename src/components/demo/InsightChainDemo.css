@@ -11,12 +11,12 @@
    CSS Variables - 树形布局常量
    ======================================== */
 :root {
-    --tree-indent-size: 24px;
-    /* 树形缩进宽度 */
-    --tree-connector-gap: 12px;
-    /* 连接线到内容的间距 */
-    --tree-connector-height: 16px;
-    /* L型连接线高度 */
+    --tree-indent-size: 32px;
+    /* 树形缩进宽度（优化：24px → 32px）*/
+    --tree-connector-gap: 16px;
+    /* 连接线到内容的间距（优化：12px → 16px）*/
+    --tree-connector-height: 24px;
+    /* L型连接线高度（优化：16px → 24px）*/
 }
 
 /* ========================================
@@ -93,28 +93,15 @@
     grid-template-columns: 1fr 400px;
     /* 左侧自适应，右侧固定 400px */
     gap: 0;
-    min-height: 500px;
+    /* 移除高度限制，让内容自适应展开 */
 }
 
 .tree-panel {
     padding: 24px;
-    overflow-y: auto;
-    max-height: 600px;
+    /* 移除滚动条，内容自然展开 */
 }
 
-/* 自定义滚动条 */
-.tree-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.tree-panel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-.tree-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
+/* 移除自定义滚动条样式（不再需要） */
 
 /* ========================================
    LIVE NOTEBOOK PANEL (右侧代码面板)
@@ -125,7 +112,7 @@
     flex-direction: column;
     background: rgba(0, 0, 0, 0.3);
     border-left: 1px solid var(--glass-border);
-    overflow: hidden;
+    /* 移除 overflow: hidden，允许内容自然流动 */
 }
 
 .notebook-header {
@@ -166,8 +153,7 @@
 }
 
 .notebook-content {
-    flex: 1;
-    overflow-y: auto;
+    /* 移除独立滚动：依靠外层 split-view-layout 的统一滚动 */
     padding: 16px;
     display: flex;
     flex-direction: column;
@@ -225,69 +211,42 @@
 }
 
 /* ========================================
-   RECURSIVE TREE LAYOUT
+   嵌套卡片方案 - 无连接线
    ======================================== */
 
-/* 每一层的容器 */
+/* 顶层tree结构 */
 .tree-level {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-/* 单个树节点的包装器 */
 .tree-item-wrapper {
-    position: relative;
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
 }
 
 .tree-content {
     flex: 1;
+}
+
+/* 嵌套子卡片容器 */
+.nested-children {
     display: flex;
     flex-direction: column;
-    position: relative;
-}
-
-/* L型连接线 (仅在 depth > 0 时显示) */
-.tree-connector-l {
-    width: var(--tree-indent-size);
-    height: var(--tree-connector-height);
-    border-bottom: 2px solid var(--glass-border);
-    border-left: 2px solid var(--glass-border);
-    border-bottom-left-radius: 8px;
-    margin-right: var(--tree-connector-gap);
-    flex-shrink: 0;
-    align-self: flex-start;
-    margin-top: 12px;
-    /* 修复：正向间距，精确对齐 */
-}
-
-.tree-children-container {
-    position: relative;
-    padding-left: var(--tree-connector-gap);
-    /* 与连接线间距一致 */
+    gap: 12px;
     margin-top: 16px;
-    margin-left: var(--tree-indent-size);
-    /* 与L型线宽度一致 */
+    padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
 }
 
-/* 树干延伸线（垂直连接父卡片到所有子节点）*/
-.tree-trunk-extension {
-    position: absolute;
-    left: 0;
-    top: -16px;
-    /* 向上延伸到父卡片底部 */
-    height: calc(100% + 16px);
-    /* 覆盖整个子节点区域 */
-    width: 2px;
-    background: var(--glass-border);
+/* 嵌套卡片的 tree-level 样式 */
+.nested-children .tree-level {
+    gap: 12px;
 }
 
-/* 最后一个子节点的特殊处理：不显示延伸线 */
-.tree-item-wrapper.is-last .tree-trunk-extension {
-    display: none;
-}
+/* 嵌套层级的 item-wrapper 继承默认样式即可 */
+
 
 /* ========================================
    Specific Components
@@ -368,9 +327,9 @@
 
 .insight-card-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
-    padding: 12px 16px;
+    padding: 16px;
     background: rgba(255, 255, 255, 0.02);
     cursor: pointer;
     border-bottom: 1px solid transparent;
@@ -380,23 +339,125 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
+/* Header 左侧图标 */
 .card-icon {
+    flex-shrink: 0;
     color: var(--primary);
+    margin-top: 2px;
+    /* 微调对齐 */
 }
 
-.card-title {
+/* Header 中间信息区域 */
+.card-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    /* 允许flex收缩 */
+}
+
+/* 标题行 */
+.card-title {
     font-weight: 500;
     font-size: 14px;
     color: var(--text-primary);
+    line-height: 1.4;
 }
 
-.depth-badge {
-    font-size: 10px;
-    padding: 2px 6px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    color: var(--text-dim);
+/* 数据上下文行（文件名 + 列名 Liuli胶囊）*/
+.card-context {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.context-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+}
+
+/* 文件名胶囊 - 蓝色系 */
+.context-badge.context-file {
+    color: rgba(10, 132, 255, 0.9);
+    background: rgba(10, 132, 255, 0.08);
+    border-color: rgba(10, 132, 255, 0.2);
+}
+
+/* 列名胶囊 - 紫色系 */
+.context-badge.context-column {
+    color: rgba(147, 51, 234, 0.9);
+    background: rgba(147, 51, 234, 0.08);
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+/* 面包屑路径行 */
+.card-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.breadcrumb-item {
+    color: var(--text-secondary);
+}
+
+.breadcrumb-separator {
+    color: var(--text-tertiary);
+    opacity: 0.5;
+}
+
+/* Header 右侧操作区域 */
+.card-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ===== Pending 状态卡片样式 ===== */
+.insight-card-v2.is-pending {
+    /* 琥珀色菲涅尔边缘：顶部和左侧更亮 */
+    border: 1px solid rgba(251, 191, 36, 0.1);
+    border-top: 1px solid rgba(251, 191, 36, 0.25);
+    border-left: 1px solid rgba(251, 191, 36, 0.15);
+
+    /* 极淡的琥珀色渐变背景，几乎透明 */
+    background: linear-gradient(165deg, rgba(251, 191, 36, 0.04) 0%, rgba(251, 191, 36, 0.01) 100%);
+
+    /* 强磨砂效果 */
+    backdrop-filter: blur(16px);
+}
+
+.insight-card-v2.is-pending .insight-card-header {
+    background: rgba(251, 191, 36, 0.03);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.08);
+}
+
+.insight-card-v2.is-pending:hover .insight-card-header {
+    background: rgba(251, 191, 36, 0.06);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.12);
+}
+
+.insight-card-v2.is-pending .card-icon {
+    color: rgb(251, 191, 36);
+}
+
+.insight-card-v2.is-pending .card-title {
+    color: var(--text-primary);
 }
 
 .insight-card-body {
@@ -449,21 +510,19 @@
     border-radius: 0 4px 4px 0;
 }
 
-.card-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
+/* 投票按钮 - 移到header右侧 */
 .vote-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
+    margin-left: auto;
+    /* 推到右侧 */
 }
 
 .icon-btn {
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    /* LiuliX 玻璃态 */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
     width: 28px;
     height: 28px;
     display: flex;
@@ -471,12 +530,15 @@
     justify-content: center;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
 }
 
 .icon-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
 }
 
 /* Animations */
