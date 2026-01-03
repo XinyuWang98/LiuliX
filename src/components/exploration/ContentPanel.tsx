@@ -111,6 +111,7 @@ export function ContentPanel({
                             columns={project.files?.[0]?.columns?.map(c => c.name) || []}
                             rowCount={project.files?.[0]?.rowCount || 0}
                             tableName={project.files?.[0]?.tableName}
+                            file={project.files?.[0]}
                             fileName={project.files?.[0]?.originalName || project.files?.[0]?.name}
                             hideTitle={true}
                         />

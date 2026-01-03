@@ -11,6 +11,7 @@
 import { L1Recommendation, InsightNode, DrillDownAction } from '@/types/insightTree';
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
+import { CodeEnhancer } from '@/services/prompts/guards/codeEnhancer';  // v2.0: 代码增强器
 
 // 生成唯一 ID
 function generateId(): string {
@@ -20,12 +21,33 @@ function generateId(): string {
 /**
  * 渲染代码模板
  * 将 {{variable}} 占位符替换为实际值
+ * 模板中占位符无引号,由此函数根据类型添加引号
  */
 export function renderTemplate(template: string, params: Record<string, unknown>): string {
     let result = template;
     for (const [key, value] of Object.entries(params)) {
         const placeholder = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-        result = result.replace(placeholder, String(value));
+
+        // 智能类型转换（模板中无引号,由此函数添加）
+        let replacement: string;
+        if (Array.isArray(value)) {
+            // 数组 → Python list
+            replacement = JSON.stringify(value);  // ["a", "b"] → '["a", "b"]'
+        } else if (typeof value === 'number') {
+            // 数字 → 直接转字符串
+            replacement = String(value);
+        } else if (typeof value === 'boolean') {
+            // 布尔值 → Python True/False  
+            replacement = value ? 'True' : 'False';
+        } else if (value === null || value === undefined) {
+            // 空值 → None
+            replacement = 'None';
+        } else {
+            // 字符串 → 加引号
+            replacement = `'${value}'`;
+        }
+
+        result = result.replace(placeholder, replacement);
     }
     return result;
 }
@@ -71,8 +93,19 @@ export function inflateRecommendation(
     // 3. 渲染代码模板 (如果有)
     let code: string | undefined;
     if (prompt.executionMode === 'TEMPLATE_FILL' && prompt.codeTemplate) {
-        code = renderTemplate(prompt.codeTemplate, rec.params);
-        logger.log('AI服务', `[Inflater] 使用模板模式渲染代码`);
+        const rawCode = renderTemplate(prompt.codeTemplate, rec.params);
+
+        // ✅ v2.0: 自动增强代码（零Token成本）
+        const enhanceResult = CodeEnhancer.enhance(rawCode, {
+            columns: extractColumnsUsed(rec.params),
+            dfName: 'df',
+            promptType: prompt.name
+        });
+
+        code = enhanceResult.code;
+        logger.log('AI服务', `[Inflater] 使用模板模式渲染代码 + 自动增强`, {
+            data: { rulesApplied: enhanceResult.rulesApplied }
+        });
     }
 
     // 4. 构建下钻动作列表
@@ -156,5 +189,21 @@ export function getRenderedCode(promptId: string, params: Record<string, unknown
         return null;
     }
 
-    return renderTemplate(prompt.codeTemplate, params);
+    const rawCode = renderTemplate(prompt.codeTemplate, params);
+
+    // ✅ v2.0: 自动增强代码
+    const enhanceResult = CodeEnhancer.enhance(rawCode, {
+        columns: extractColumnsUsed(params),
+        dfName: 'df',
+        promptType: prompt.name
+    });
+
+    logger.log('AI服务', `[getRenderedCode] 代码增强完成`, {
+        data: {
+            promptId,
+            rulesApplied: enhanceResult.rulesApplied
+        }
+    });
+
+    return enhanceResult.code;
 }

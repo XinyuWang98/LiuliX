@@ -22,6 +22,7 @@ export interface LanguageConfig {
             all: string;
             featureInDev: string;
             collapse: string;  // 新增：收起/折叠
+            verifying?: string; // 验证中...
         };
 
         // 数据统计
@@ -44,6 +45,23 @@ export interface LanguageConfig {
             theme: string;
         };
 
+        // Header (New)
+        header: {
+            inviteCodeTrial: string;
+            freeTrial: string;
+        };
+
+        // Invite Code (New)
+        inviteCode: {
+            title: string;
+            hint: string;
+            placeholder: string;
+            activate: string;
+            emptyError: string;
+            invalidError: string;
+            networkError: string;
+        };
+
         // 侧边栏
         sidebar: {
             collapse: string;
@@ -54,7 +72,21 @@ export interface LanguageConfig {
             askAIPlaceholder: string;
         };
 
-        // 语言选择
+        // 分析状态 (New)
+        analysis: {
+            readyHint: string;
+            waitingForData: string;
+            initializing: string;
+        };
+
+        progress: {
+            generatingPrompt: string;
+            sendingRequest: string;
+            analyzingResponse: string;
+            validating: string;
+            generatingInsight: string;
+            generatingHypothesis: string;
+        };
         language: {
             title: string;
             priority: string;
@@ -190,6 +222,7 @@ export interface LanguageConfig {
             devMode: string;
             devModeDesc: string;
 
+
             // 分析能力包设置
             analysisPackages: string;
             analysisPackagesDesc: string;
@@ -280,6 +313,24 @@ export interface LanguageConfig {
             library: {
                 title: string;
                 description: string;
+            };
+            sidebar: {
+                all: string;
+                cleaning: string;
+                analysis: string;
+            };
+            detail: {
+                infoTab: string;
+                codeTab: string;
+                description: string;
+                tags: string;
+                inputVariables: string;
+                author: string;
+                version: string;
+                updated: string;
+                copyCode: string;
+                tryIt: string;
+                sourceJson: string;
             };
             category: {
                 analysis: string;
@@ -447,6 +498,7 @@ export interface LanguageConfig {
             voiceReportDesc: string;
             pptReport: string;
             pptReportDesc: string;
+            assessment: string;
         };
 
         // 数据清洗
@@ -616,6 +668,9 @@ export interface LanguageConfig {
             loadingHypothesis: string;
             noHypotheses: string;
             noInsights: string;
+            initializing: string;
+            waitingForData: string;
+            readyHint: string;
             generateHypothesis: string;
             customHypothesis: string;
             customPlaceholder: string;
@@ -633,6 +688,7 @@ export interface LanguageConfig {
             or: string;
             analyzing: string;  // 正在执行洞察分析
             results: string;    // 洞察结果标题
+            generatingInsight?: string; // 正在生成洞察
         };
 
         // 森林式下钻交互
@@ -668,6 +724,18 @@ export interface LanguageConfig {
             count: string;
             selectAll: string;
             deselectAll: string;
+            dataType: {
+                setAs: string;
+                integer: string;
+                double: string;
+                string: string;
+                boolean: string;
+                date: string;
+                timestamp: string;
+                modifying: string;
+                success: string;
+                failed: string;
+            };
         };
 
         // 分页器
@@ -707,6 +775,27 @@ export interface LanguageConfig {
                 report: string;
                 chat: string;
             };
+            sections: {
+                projects: string;
+                cleaning: string;
+                insights: string;
+                report: string;
+            };
+            project: {
+                grid: {
+                    title: string;
+                };
+                context: {
+                    rename: string;
+                    delete: string;
+                };
+                card: {
+                    fileCount: string;
+                    filesLabel: string;
+                    nearLimit: string;
+                    uploadNew: string;
+                };
+            };
         };
 
         // 证据池
@@ -718,6 +807,8 @@ export interface LanguageConfig {
             pin: string;
             unpin: string;
             delete: string;
+            adopt: string;
+            adopted: string;
             affectedRows: string;
             rowsChanged: string;
             type: {
@@ -732,6 +823,10 @@ export interface LanguageConfig {
         // 报告生成器
         report: {
             title: string;
+            tabs: {
+                notebook: string;
+                evidence: string;
+            };
             copy: string;
             copied: string;
             download: string;
@@ -744,6 +839,7 @@ export interface LanguageConfig {
             totalRecords: string;
             cleaningOps: string;
             insights: string;
+            evidenceAdopted: string;
             previewHint: string;
             aiAssistant: string;
             evidenceCollected: string;
@@ -826,6 +922,9 @@ export interface LanguageConfig {
                 exportMarkdown: string;
                 needSignFirst: string;
                 colabInstructions: string;
+                downloadHTML: string;
+                successMarkdown: string;
+                successHTML: string;
             };
 
             mode: {
@@ -875,6 +974,67 @@ export interface LanguageConfig {
                 loadingFromCache: string;
                 downloading: string;
                 finish: string;
+            };
+        };
+
+        // 分析能力包
+        packages: {
+            basic: {
+                name: string;
+                sizeEstimate: string;
+                methods: {
+                    distribution: { name: string; desc: string };
+                    correlation: { name: string; desc: string };
+                    trend: { name: string; desc: string };
+                    stats: { name: string; desc: string };
+                    groupby: { name: string; desc: string };
+                    topn: { name: string; desc: string };
+                    missing: { name: string; desc: string };
+                    outlier: { name: string; desc: string };
+                    crosstab: { name: string; desc: string };
+                };
+            };
+            sklearn: {
+                name: string;
+                sizeEstimate: string;
+                methods: {
+                    cluster: { name: string; desc: string };
+                    decisionTree: { name: string; desc: string };
+                };
+            };
+            statsmodels: {
+                name: string;
+                sizeEstimate: string;
+                methods: {
+                    regression: { name: string; desc: string };
+                };
+            };
+            charts: {
+                histogram: string;
+                bar: string;
+                scatter: string;
+                box: string;
+                heatmap: string;
+                line: string;
+                movingAvg: string;
+                statsSummaryBar: string;
+                groupedBar: string;
+                rankingBar: string;
+                missingMatrix: string;
+                scatterAnnotated: string;
+                stacked: string;
+                pcaScatter: string;
+                clusterDist: string;
+                decisionTreeVis: string;
+                coefficientPlot: string;
+                wordcloud: string;
+                wordFreqBar: string;
+                wordFreqTable: string;
+            };
+            fonts: {
+                simhei: string;
+                msgothic: string;
+                malgun: string;
             };
         };
 

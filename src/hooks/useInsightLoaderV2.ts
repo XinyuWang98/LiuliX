@@ -4,6 +4,7 @@
  */
 import { useState, useRef } from 'react';
 import { InsightNode } from '@/types/insightTree';
+import { ProjectFile } from '@/utils/projectUtils';
 import { sampleDataForAI } from '@/utils/sampleData';
 import { DuckDBEngine } from '@/db/duckdbEngine';
 import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/batchInsightGenerator';
@@ -11,7 +12,6 @@ import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/servi
 import { buildRouterPrompt, parseRouterResponse, buildFallbackRecommendations } from '@/services/prompts/routerPrompt';
 import { inflateRecommendations } from '@/services/insights/inflater';
 import { logger } from '../utils/logger';
-import { prepareAIInput } from '@/utils/dataPrivacy';
 import { assessMemoryBeforeExecution } from '@/utils/memoryAssessment';
 import { executeInsightWithMode } from '@/services/skills/modeExecutor';
 import { getFallbackInsights } from '@/utils/fallbackTemplates';
@@ -37,7 +37,7 @@ export function useInsightLoaderV2() {
         columns: string[],
         rowCount: number,
         tableName?: string,
-        currentFile?: any  // 🆕 当前文件对象（用于缓存管理）
+        currentFile?: ProjectFile  // 🆕 当前文件对象（用于缓存管理）
     ): Promise<InsightNode[]> => {
         setIsLoading(true);
         setLoadingStage('progress.generatingPrompt');
@@ -90,12 +90,46 @@ export function useInsightLoaderV2() {
                 采样数据 = sampledData;
             }
 
-            // ========== 步骤2.5：数据脱敏检查 ==========
-            const { mode: privacyMode } = await prepareAIInput(
-                tableName || '',
+
+            // ========== 步骤2.5：数据脱敏（使用统一工具） ==========
+            // 获取列信息用于脱敏
+            let 列信息: any[] = [];
+            let 统计信息: any[] = [];
+            if (tableName) {
+                try {
+                    const engine = DuckDBEngine.getInstance();
+                    const describeResult = await engine.runQuery(`DESCRIBE ${tableName}`);
+                    列信息 = describeResult.map((row: any) => ({
+                        name: row.column_name,
+                        type: row.column_type
+                    }));
+                    // 从采样数据构造基础统计
+                    统计信息 = 列信息.map((col: any) => {
+                        const values = 采样数据.map((row: any) => row[col.name]);
+                        return {
+                            sampleData: values.slice(0, 3)
+                        };
+                    });
+                } catch (e) {
+                    logger.warn('AI洞察', '获取列信息失败，使用空列表');
+                }
+            }
+
+            const { unifiedSanitize } = await import('@/utils/unifiedDataSanitizer');
+            const { privacyMode } = await unifiedSanitize(
+                列信息,
+                统计信息,
                 采样数据,
-                totalRows
+                {
+                    respectUserSettings: true,
+                    intelligentDetection: true,
+                    granularity: 'coarse'  // 洞察使用粗粒度
+                }
             );
+
+            logger.log('数据隐私', `脱敏完成 模式=${privacyMode}`, {
+                data: { columns: 列信息.length, mode: privacyMode }
+            });
 
             // ========== 步骤3：AI生成洞察（双模式） ==========
 
@@ -120,7 +154,7 @@ export function useInsightLoaderV2() {
             if (USE_ROUTER_MODE) {
                 prompt = buildRouterPrompt(
                     选中列名,
-                    privacyMode === 'auto_sanitize' ? [] : 采样数据,
+                    privacyMode === 'sanitized' ? [] : 采样数据,
                     columnTypes
                 );
                 logger.log('AI服务', '[Router] 使用 Router Prompt 模式');
@@ -130,7 +164,7 @@ export function useInsightLoaderV2() {
                     选中列名,
                     采样数据.length,
                     totalRows,
-                    privacyMode === 'auto_sanitize' ? [] : 采样数据,
+                    privacyMode === 'sanitized' ? [] : 采样数据,
                     t
                 );
                 logger.log('AI服务', '[Coder] 使用传统 Coder Prompt 模式');
@@ -219,6 +253,32 @@ export function useInsightLoaderV2() {
                     }
                 }
 
+                // 🆕 方案 B: 列名校验（使用公共工具）
+                const { validateColumnsExist } = await import('@/utils/columnValidator');
+
+                const paramsToValidate: Record<string, unknown> = {};
+                const columnParamKeys = ['column_name', 'col_x', 'col_y', 'date_col', 'value_col', 'group_col'];
+
+                for (const key of columnParamKeys) {
+                    if (node.params?.[key]) {
+                        paramsToValidate[key] = node.params[key];
+                    }
+                }
+
+                const validationResult = validateColumnsExist(paramsToValidate, 有效列名);
+
+                if (!validationResult.valid) {
+                    logger.warn('AI洞察', `跳过无效列名的洞察: ${node.title}`, {
+                        data: { invalidColumns: validationResult.invalidColumns, validColumns: 有效列名 }
+                    });
+                    node.result = {
+                        code: '',
+                        summary: `列名校验失败: 列 ${validationResult.invalidColumns?.join(', ')} 不存在于数据集中`,
+                        columnsUsed: []
+                    };
+                    continue;
+                }
+
                 // 如果节点已有代码，执行它
                 if (node.result?.code) {
                     try {
@@ -246,6 +306,7 @@ export function useInsightLoaderV2() {
                             assessment.mode,
                             tableName || ''
                         );
+
 
                         node.isLoading = false;
 

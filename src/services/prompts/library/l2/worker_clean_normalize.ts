@@ -10,7 +10,14 @@ export const workerCleanNormalizePrompt: UserPrompt = {
     title: '文本标准化',
     description: '标准化文本列格式，包括去除首尾空格、统一大小写、替换特殊字符',
 
-    layer: 'L2_EXECUTION',
+    
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-clean-normalize-v1',
+    packageId: 'basic',
+    requiredPackages: [],
+    outputCharts: ['chart'],
+layer: 'L2_EXECUTION',
 
     dimensions: [
         { category: 'industry', value: 'general', label: '通用' },

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { HistoryItem } from '../types/cleaning.types';
 import './HistoryTab.css';
@@ -26,7 +25,7 @@ export function HistoryTab({ history }: HistoryTabProps) {
         <div className="historyList">
             {history.map(record => {
                 const delta = record.rowCountAfter - record.rowCountBefore;
-                
+
                 return (
                     <div key={record.id} className="historyItem">
                         <span className="historyTime">

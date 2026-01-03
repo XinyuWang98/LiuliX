@@ -10,6 +10,13 @@ export const workerRegressionPrompt: UserPrompt = {
     title: '多元回归分析',
     description: '使用 OLS 回归量化各因素对目标变量的独立影响幅度和显著性',
 
+
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-regression-v1',
+    packageId: 'statsmodels',
+    requiredPackages: ['matplotlib', 'numpy', 'pandas', 'statsmodels'],
+    outputCharts: ['bar', 'line', 'box'],
     layer: 'L2_EXECUTION',
 
     dimensions: [
@@ -32,7 +39,7 @@ import json
 plt.switch_backend('Agg')
 
 # 1. 数据准备
-target_col = '{{target_col}}'
+target_col = {{target_col}}
 feature_cols = {{feature_cols}}
 
 df_clean = df[feature_cols + [target_col]].dropna().copy()

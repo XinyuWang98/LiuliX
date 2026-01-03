@@ -39,16 +39,6 @@ export const LibrarySidebar: React.FC<LibrarySidebarProps> = ({ currentFilter, o
         onFilterChange(newFilter);
     };
 
-    const isCategoryActive = (category: 'all' | 'cleaning' | 'analysis') => {
-        if (category === 'all') {
-            return !currentFilter.tagValue;
-        }
-        if (category === 'cleaning') {
-            return currentFilter.tagValue === 'cleaning';
-        }
-        return false; // analysis logic needs refinement based on actual data structure
-    };
-
     return (
         <aside className="library-sidebar">
             {/* 核心分类 */}

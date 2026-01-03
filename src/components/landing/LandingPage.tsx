@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
-import { Logo } from '@/components/common/Logo/Logo';
 import { UploadCloud, ShieldCheck, BrainCircuit, FileSearch } from 'lucide-react';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
 import './LandingPage.css';

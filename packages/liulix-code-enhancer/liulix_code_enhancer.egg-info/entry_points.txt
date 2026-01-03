@@ -1,0 +1,2 @@
+[console_scripts]
+liulix-enhance = liulix_enhancer.transformer:main

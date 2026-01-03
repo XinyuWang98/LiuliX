@@ -1,5 +1,5 @@
 import { useI18n } from '@contexts/I18nContext';
-import { Settings, Library, User } from 'lucide-react';
+import { Settings, User } from 'lucide-react';
 import { Logo } from '@/components/common/Logo/Logo';
 import { FreeTrialBadge } from '@/components/Header/FreeTrialBadge';
 import '@/components/Header/FreeTrialBadge.css';
@@ -8,7 +8,7 @@ import './NavigationBar.css';
 interface NavigationBarProps {
     onOpenAPISettings?: () => void;
     backendStatus?: 'connected' | 'disconnected' | 'checking';
-    activeView?: 'dashboard' | 'library';
+    activeView?: 'dashboard' | 'library' | 'v2' | 'design';
 }
 
 export function NavigationBar({

@@ -9,6 +9,7 @@ import { DuckDBEngine } from '@/db/duckdbEngine';
 import { pyodideManager } from '@/services/PyodideManager';
 import { ExecutionMode } from '@/utils/memoryAssessment';
 import { InsightSuggestion } from '@/services/prompts/batchInsightGenerator';
+import { CodeEnhancer } from '@/services/prompts/guards/codeEnhancer';
 // import { validatePythonCode, formatValidationResult } from '@/utils/pythonCodeValidator';
 // import { smartFixPythonCode } from '@/utils/pythonCodeSanitizer';
 
@@ -71,6 +72,10 @@ async function executeFullMode(
     mode: ExecutionMode,
     tableName: string  // ✅ 添加tableName参数
 ): Promise<ModeExecutionResult> {
+    if (!tableName) {
+        throw new Error('Table name is required for full mode execution');
+    }
+
     const code = suggestion.full_mode.code;
 
     logger.log('Skills', `执行full_mode代码`, { data: { codeLength: code.length } });
@@ -135,14 +140,23 @@ except Exception as e:
 
 
 
-        // ✅ P1: 验证和自动修复 Python 代码
-        // 注意：不需要解码转义字符！AI 返回的 \\n, \\t 等就是正确的 Python 转义序列
-        // 如果将 \\n 转换为物理换行符（\n），Python 会报 SyntaxError: unterminated string literal
+        // ✅ 代码增强：注入防御性逻辑（零Token成本）
+        const columnNames = schema.map((row: any) => row.column_name);
+        const enhanceResult = CodeEnhancer.enhance(code, {
+            columns: columnNames,
+            dfName: 'df',
+            promptType: suggestion.title // 用于场景化增强
+        });
 
-        // ⚠️ 临时禁用验证器（有误判bug）
-        let finalCode = code;
-        logger.log('Python', '⚠️ 验证器已临时禁用（修复中）');
+        logger.log('AI代码增强', '增强完成', {
+            data: {
+                rulesApplied: enhanceResult.rulesApplied.length,
+                originalLength: enhanceResult.originalLength,
+                enhancedLength: enhanceResult.enhancedLength
+            }
+        });
 
+        const finalCode = enhanceResult.code;
 
         const result = await pyodideManager.runPython(finalCode);
 
@@ -200,8 +214,20 @@ df = pd.DataFrame(json.loads(data_json))
     await pyodideManager.runPython(dataScript);
     logger.log('Skills', '聚合数据已加载到Pyodide');
 
-    // 3. 执行viz_code生成图表
-    const result = await pyodideManager.runPython(viz_code);
+    // 3. 代码增强：为viz_code注入防御性逻辑
+    const aggColumnNames = aggregatedData.length > 0 ? Object.keys(aggregatedData[0]) : [];
+    const vizEnhanceResult = CodeEnhancer.enhance(viz_code, {
+        columns: aggColumnNames,
+        dfName: 'df',
+        promptType: 'aggregated_viz'
+    });
+
+    logger.log('AI代码增强', 'Viz代码增强完成', {
+        data: { rulesApplied: vizEnhanceResult.rulesApplied.length }
+    });
+
+    // 4. 执行增强后的viz_code生成图表
+    const result = await pyodideManager.runPython(vizEnhanceResult.code);
 
 
     // 解析结果

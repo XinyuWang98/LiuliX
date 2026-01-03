@@ -39,6 +39,36 @@ export interface UserPrompt {
     title: string;       // 显示标题, e.g., "数据分布分析器"
     description: string; // 描述，用于 L1 决策时的语义匹配
 
+    // ========== 新增字段 (v2.1架构) ==========
+
+    /**
+     * 语义化别名 (可选)
+     * 用于代码引用、URL友好、向后兼容
+     * 例如: 'worker-distribution-v1'
+     */
+    slug?: string;
+
+    /**
+     * 所需的Python包列表 (核心变更)
+     * 用于能力包依赖管理和自动加载
+     * 例如: ['pandas', 'numpy', 'matplotlib']
+     */
+    requiredPackages?: string[];
+
+    /**
+     * 所属的分析能力包ID
+     * 用于自动生成 analysisPackages 配置
+     * 例如: 'basic' | 'sklearn' | 'statsmodels' | 'nlp'
+     */
+    packageId?: string;
+
+    /**
+     * 输出的图表类型 (可选)
+     * 用于UI展示和能力包方法描述
+     * 例如: ['histogram', 'bar', 'scatter']
+     */
+    outputCharts?: string[];
+
     // 核心架构字段
     layer: PromptLayer;
     dimensions: PromptTag[]; // 四维标签集合

@@ -10,7 +10,14 @@ export const workerCleanTypecastPrompt: UserPrompt = {
     title: '类型转换',
     description: '转换列的数据类型，如字符串转日期、字符串转数值、日期格式化',
 
-    layer: 'L2_EXECUTION',
+    
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-clean-typecast-v1',
+    packageId: 'basic',
+    requiredPackages: [],
+    outputCharts: ['chart'],
+layer: 'L2_EXECUTION',
 
     dimensions: [
         { category: 'industry', value: 'general', label: '通用' },

@@ -1,4 +1,3 @@
-import React from 'react';
 import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
 import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import { LiuliInput } from '@/components/common/liulix/LiuliInput';
@@ -8,6 +7,7 @@ import { AscensionBackground } from '@/components/common/liulix/AscensionBackgro
 import { ProjectSelectionStateDemo } from '@/components/demo/ProjectSelectionStateDemo';
 import { DataCleaningDemo } from '@/components/demo/DataCleaningDemo';
 import { DataCleaningAtomicDemo } from '@/components/demo/DataCleaningAtomicDemo';
+import { InsightChainDemo } from '@/components/demo/InsightChainDemo';
 import { Search, Sparkles, AlertCircle, Check, ArrowRight, Settings } from 'lucide-react';
 import '@/components/common/liulix/liulix.css';
 import './LiuliShowcase.css';
@@ -250,23 +250,18 @@ export const LiuliShowcase = () => {
                         </div>
                     </LiuliGlass>
 
-                    {/* Prototype C: Insight Analysis */}
-                    <LiuliGlass className="layout-container-prototype mt-40">
-                        <div className="layout-header">
-                            <h2 style={{ fontSize: 20, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
-                                <span style={{ color: 'var(--accent)' }}>🧠</span>
-                                Insight Analysis
-                            </h2>
-                            <LiuliButton variant="secondary" size="sm" leftIcon={<Sparkles size={14} />}>New Insight</LiuliButton>
-                        </div>
-
-                        <div style={{ padding: 24, minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12 }}>
-                            <div style={{ textAlign: 'center', opacity: 0.6 }}>
-                                <div style={{ fontSize: 48, marginBottom: 16 }}>🕸️</div>
-                                <div>Insight Chain / Drill Down Area</div>
+                    {/* Prototype C: Insight Analysis (V2 Demo) */}
+                    <div style={{ marginTop: 40 }}>
+                        <div className="section-title" style={{ marginBottom: 32 }}>
+                            洞察分析链 V2 演示 (InsightChainFlow)
+                            <div style={{ fontSize: 14, fontWeight: 'normal', marginTop: 8, opacity: 0.7 }}>
+                                展示 AI 驱动的洞察分析流程：推荐操作 → 执行分析 → 查看结果 → 下钻深入
+                                <br />
+                                新增：玻璃态容器、连接线、结论区高亮、代码块深色模式
                             </div>
                         </div>
-                    </LiuliGlass>
+                        <InsightChainDemo />
+                    </div>
 
                     {/* ========================================================================================== */}
                     {/* [NEW] Project Selection State Demo (Expanded vs Collapsed) */}

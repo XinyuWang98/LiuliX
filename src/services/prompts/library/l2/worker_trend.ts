@@ -10,6 +10,13 @@ export const workerTrendPrompt: UserPrompt = {
     title: '时序趋势分析',
     description: '分析数值随时间的变化趋势，识别周期性、季节性和突变点',
 
+
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-trend-v1',
+    packageId: 'basic',
+    requiredPackages: ['matplotlib', 'numpy', 'pandas', 'scipy'],
+    outputCharts: ['line', 'box'],
     layer: 'L2_EXECUTION',
 
     dimensions: [
@@ -32,8 +39,8 @@ import json
 
 plt.switch_backend('Agg')
 
-date_col = '{{date_col}}'
-value_col = '{{value_col}}'
+date_col = {{date_col}}
+value_col = {{value_col}}
 
 # 准备数据
 df_copy = df.copy()

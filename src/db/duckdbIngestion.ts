@@ -2,7 +2,6 @@ import * as duckdb from '@duckdb/duckdb-wasm';
 import { IngestionOptions, IngestionResult, ColumnMetadata } from '../types/duckdb';
 import { globalT } from '../contexts/I18nContext';
 import { logger } from '../utils/logger';
-import { DuckDBEngine } from './duckdbEngine';
 import { assessMemoryBeforeExecution } from '../utils/memoryAssessment';
 
 /**

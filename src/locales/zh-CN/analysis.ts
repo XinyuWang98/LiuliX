@@ -28,6 +28,21 @@ export const insightChain = {
     generatingInsight: '正在生成洞察分析...',
 };
 
+export const analysis = {
+    readyHint: '分析准备就绪',
+    waitingForData: '正在等待数据...',
+    initializing: '正在初始化分析环境...',
+};
+
+export const progress = {
+    generatingPrompt: '正在构建分析提示词...',
+    sendingRequest: '正在请求 AI 模型...',
+    analyzingResponse: '正在解析 AI 响应...',
+    validating: '正在验证分析代码...',
+    generatingInsight: '正在生成洞察结果...',
+    generatingHypothesis: '正在生成假设...',
+};
+
 // 森林式下钻交互相关翻译
 export const insight = {
     recommendedAction: 'AI 推荐',

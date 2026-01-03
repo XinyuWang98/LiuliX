@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Sparkles, History, CheckCircle2, Play, RefreshCw, X } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
 import { SuggestionsTab } from './SuggestionsTab';
 import { HistoryTab } from './HistoryTab';
-import { CleaningSuggestion } from '../types/cleaning.types';
-import { HistoryItem } from '../types/cleaning.types';
-import { ProjectFile } from '@/types/project';
+import { SimpleSuggestion, HistoryItem, ProjectFile } from '../types/cleaning.types';
 import './BottomPanel.css';
 
 interface BottomPanelProps {
-    suggestions: CleaningSuggestion[];
+    suggestions: SimpleSuggestion[];
     history: HistoryItem[];
     selectedIds: string[];
     ignoredIds: string[];

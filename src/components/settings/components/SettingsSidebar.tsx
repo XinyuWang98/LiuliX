@@ -11,7 +11,7 @@ interface SettingsSidebarProps {
 }
 
 export const SettingsSidebar = ({ activeCategory, onCategoryChange, searchQuery, onSearchChange }: SettingsSidebarProps) => {
-    const { t, language } = useI18n();
+    const { t } = useI18n();
 
     const categories = [
         { id: 'commonly-used', label: t('settings.commonlyUsed'), icon: Settings },

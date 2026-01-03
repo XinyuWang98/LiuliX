@@ -29,10 +29,10 @@ export function ExplorationFlowV2({
         console.log('[ExplorationFlowV2] project变化：', project ? project.name : 'null');
     }, [project]);
 
-    const navigationTree = [
+    const navigationTree: import('./exploration/ExplorationWorkbench').NavSection[] = [
         {
             id: 'project-selection',
-            type: 'section' as const,
+            type: 'section',
             label: '项目选择',
             icon: FolderOpen,
             status: project ? 'completed' : 'current',
@@ -40,7 +40,7 @@ export function ExplorationFlowV2({
         },
         {
             id: 'cleaning',
-            type: 'section' as const,
+            type: 'section',
             label: '数据清洗',
             icon: Database,
             status: project ? 'current' : 'locked',
@@ -48,7 +48,7 @@ export function ExplorationFlowV2({
         },
         {
             id: 'insights',
-            type: 'section' as const,
+            type: 'section',
             label: '洞察分析',
             icon: Lightbulb,
             status: project ? 'current' : 'locked',
@@ -57,7 +57,7 @@ export function ExplorationFlowV2({
         },
         {
             id: 'report',
-            type: 'section' as const,
+            type: 'section',
             label: '分析报告',
             icon: FileText,
             status: adoptedCount > 0 ? 'current' : 'locked',

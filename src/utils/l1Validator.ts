@@ -8,6 +8,7 @@
 import { promptRegistry } from '@/services/promptRegistry';
 import { L1Response, L1Recommendation } from '@/types/insightTree';
 import { logger } from '@/utils/logger';
+import { PROMPT_IDS } from '@/constants/promptIds';  // v2.1: 使用ID常量
 
 /**
  * 验证单个推荐项
@@ -154,9 +155,9 @@ export function generateFallbackRecommendations(
     // 规则1: 检测日期列 → 时序分析
     const dateColumn = columns.find(isDateColumn);
     const numericColumns = columns.filter(isNumericColumn);
-    if (dateColumn && numericColumns.length > 0 && promptRegistry.hasPrompt('worker-trend-v1')) {
+    if (dateColumn && numericColumns.length > 0 && promptRegistry.hasPrompt(PROMPT_IDS.TREND)) {
         recommendations.push({
-            promptId: 'worker-trend-v1',
+            promptId: PROMPT_IDS.TREND,
             params: { date_col: dateColumn, value_col: numericColumns[0] },
             reason: `${dateColumn} 是日期列，建议查看 ${numericColumns[0]} 的时序趋势`
         });
@@ -165,9 +166,9 @@ export function generateFallbackRecommendations(
     // 规则2: 检测离群值 → 异常值分析 (预留 Prompt ID)
     if (columnStats) {
         const outlierColumn = columns.find(col => columnStats[col]?.hasOutliers);
-        if (outlierColumn && promptRegistry.hasPrompt('worker-outlier-v1')) {
+        if (outlierColumn && promptRegistry.hasPrompt(PROMPT_IDS.OUTLIER)) {
             recommendations.push({
-                promptId: 'worker-outlier-v1',
+                promptId: PROMPT_IDS.OUTLIER,
                 params: { column_name: outlierColumn },
                 reason: `${outlierColumn} 存在离群值，建议进行异常值分析`
             });
@@ -178,7 +179,7 @@ export function generateFallbackRecommendations(
     if (numericColumns.length > 0) {
         const targetColumn = numericColumns[0];
         recommendations.push({
-            promptId: 'worker-distribution-v1',
+            promptId: PROMPT_IDS.DISTRIBUTION,
             params: { column_name: targetColumn },
             reason: `${targetColumn} 是数值列，建议查看其分布情况`
         });
@@ -187,7 +188,7 @@ export function generateFallbackRecommendations(
     // 规则4: 两个数值列 → 相关性分析 (已有 Prompt)
     if (numericColumns.length >= 2) {
         recommendations.push({
-            promptId: 'worker-correlation-v1',
+            promptId: PROMPT_IDS.CORRELATION,
             params: { col_x: numericColumns[0], col_y: numericColumns[1] },
             reason: `探索 ${numericColumns[0]} 与 ${numericColumns[1]} 之间的关系`
         });
@@ -195,9 +196,9 @@ export function generateFallbackRecommendations(
 
     // 规则5: 分类列 + 数值列 → 分组对比
     const categoricalColumn = columns.find(isCategoricalColumn);
-    if (categoricalColumn && numericColumns.length > 0 && promptRegistry.hasPrompt('worker-groupby-v1')) {
+    if (categoricalColumn && numericColumns.length > 0 && promptRegistry.hasPrompt(PROMPT_IDS.GROUPBY)) {
         recommendations.push({
-            promptId: 'worker-groupby-v1',
+            promptId: PROMPT_IDS.GROUPBY,
             params: { group_col: categoricalColumn, value_col: numericColumns[0], agg_func: 'mean' },
             reason: `按 ${categoricalColumn} 分组对比 ${numericColumns[0]} 的均值`
         });

@@ -10,6 +10,13 @@ export const workerStatsPrompt: UserPrompt = {
     title: '描述性统计',
     description: '计算数值列的均值、中位数、标准差、最大最小值、四分位数等统计指标',
 
+
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-stats-v1',
+    packageId: 'basic',
+    requiredPackages: ['matplotlib', 'numpy', 'pandas'],
+    outputCharts: ['bar', 'line', 'box'],
     layer: 'L2_EXECUTION',
 
     dimensions: [
@@ -32,7 +39,7 @@ import json
 
 plt.switch_backend('Agg')
 
-column_name = '{{column_name}}'
+column_name = {{column_name}}
 col_data = pd.to_numeric(df[column_name], errors='coerce').dropna()
 
 # 计算统计指标

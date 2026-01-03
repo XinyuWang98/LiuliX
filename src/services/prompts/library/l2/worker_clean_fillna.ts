@@ -10,7 +10,14 @@ export const workerCleanFillnaPrompt: UserPrompt = {
     title: '缺失值填充',
     description: '填充数据集中的缺失值，支持均值、众数、中位数或指定值填充',
 
-    layer: 'L2_EXECUTION',
+    
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-clean-fillna-v1',
+    packageId: 'basic',
+    requiredPackages: [],
+    outputCharts: ['chart'],
+layer: 'L2_EXECUTION',
 
     dimensions: [
         { category: 'industry', value: 'general', label: '通用' },

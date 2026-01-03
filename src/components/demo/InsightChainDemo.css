@@ -1,0 +1,587 @@
+/**
+ * InsightChainDemo.css - Split View Version
+ * 
+ * 核心设计:
+ * 1. 双栏布局 (Split View): 左树 65% + 右码 35%
+ * 2. 左侧：递归树形结构（图表+结论）
+ * 3. 右侧：Live Notebook 面板（整合代码）
+ */
+
+/* ======================================== 
+   CSS Variables - 树形布局常量
+   ======================================== */
+:root {
+    --tree-indent-size: 32px;
+    /* 树形缩进宽度（优化：24px → 32px）*/
+    --tree-connector-gap: 16px;
+    /* 连接线到内容的间距（优化：12px → 16px）*/
+    --tree-connector-height: 24px;
+    /* L型连接线高度（优化：16px → 24px）*/
+}
+
+/* ========================================
+   Global Reset & Containers
+   ======================================== */
+
+.insight-chain-demo-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.insight-chain-v2 {
+    min-height: 600px;
+    background: transparent;
+}
+
+.insight-chain-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.insight-chain-header .title-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.insight-chain-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.title-icon {
+    color: var(--primary);
+}
+
+.refresh-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.demo-hint-text {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    text-align: center;
+}
+
+/* ========================================
+   SPLIT VIEW LAYOUT (核心布局)
+   ======================================== */
+
+.split-view-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    /* 左侧自适应，右侧固定 400px */
+    gap: 0;
+    /* 移除高度限制，让内容自适应展开 */
+}
+
+.tree-panel {
+    padding: 24px;
+    /* 移除滚动条，内容自然展开 */
+}
+
+/* 移除自定义滚动条样式（不再需要） */
+
+/* ========================================
+   LIVE NOTEBOOK PANEL (右侧代码面板)
+   ======================================== */
+
+.live-notebook-panel {
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 1px solid var(--glass-border);
+    /* 移除 overflow: hidden，允许内容自然流动 */
+}
+
+.notebook-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.notebook-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.copy-all-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.copy-all-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.notebook-content {
+    /* 移除独立滚动：依靠外层 split-view-layout 的统一滚动 */
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.notebook-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notebook-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.notebook-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    gap: 12px;
+}
+
+.code-block-item {
+    background: var(--glass-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.code-step-label {
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.code-content {
+    margin: 0;
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: #a5d6ff;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-x: auto;
+}
+
+/* ========================================
+   嵌套卡片方案 - 无连接线
+   ======================================== */
+
+/* 顶层tree结构 */
+.tree-level {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tree-item-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.tree-content {
+    flex: 1;
+}
+
+/* 嵌套子卡片容器 */
+.nested-children {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
+}
+
+/* 嵌套卡片的 tree-level 样式 */
+.nested-children .tree-level {
+    gap: 12px;
+}
+
+/* 嵌套层级的 item-wrapper 继承默认样式即可 */
+
+
+/* ========================================
+   Specific Components
+   ======================================== */
+
+/* 1. Action Chip (树枝) */
+.action-chip-tree {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: left center;
+}
+
+.action-chip-tree:hover {
+    background: rgba(10, 132, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--text-primary);
+    transform: scale(1.02) translateX(4px);
+}
+
+.action-chip-tree.recommended {
+    border-color: rgba(10, 132, 255, 0.3);
+    background: rgba(10, 132, 255, 0.05);
+}
+
+.ai-icon {
+    color: var(--primary);
+}
+
+.arrow-icon {
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin-left: 4px;
+}
+
+.action-chip-tree:hover .arrow-icon {
+    opacity: 1;
+}
+
+/* 2. Loading State */
+.node-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    color: var(--text-tertiary);
+    font-size: 13px;
+}
+
+.spinner-mini {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--glass-border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: simple-spin 1s infinite linear;
+}
+
+/* 3. Insight Card (果实 - 不含代码) */
+.insight-card-v2 {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    /* 充分利用左侧空间 */
+    animation: fade-in-down 0.3s ease-out;
+}
+
+.insight-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+}
+
+.insight-card-v2:hover .insight-card-header {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Header 左侧图标 */
+.card-icon {
+    flex-shrink: 0;
+    color: var(--primary);
+    margin-top: 2px;
+    /* 微调对齐 */
+}
+
+/* Header 中间信息区域 */
+.card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    /* 允许flex收缩 */
+}
+
+/* 标题行 */
+.card-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+/* 数据上下文行（文件名 + 列名 Liuli胶囊）*/
+.card-context {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.context-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+}
+
+/* 文件名胶囊 - 蓝色系 */
+.context-badge.context-file {
+    color: rgba(10, 132, 255, 0.9);
+    background: rgba(10, 132, 255, 0.08);
+    border-color: rgba(10, 132, 255, 0.2);
+}
+
+/* 列名胶囊 - 紫色系 */
+.context-badge.context-column {
+    color: rgba(147, 51, 234, 0.9);
+    background: rgba(147, 51, 234, 0.08);
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+/* 面包屑路径行 */
+.card-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.breadcrumb-item {
+    color: var(--text-secondary);
+}
+
+.breadcrumb-separator {
+    color: var(--text-tertiary);
+    opacity: 0.5;
+}
+
+/* Header 右侧操作区域 */
+.card-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ===== Pending 状态卡片样式 ===== */
+.insight-card-v2.is-pending {
+    /* 琥珀色菲涅尔边缘：顶部和左侧更亮 */
+    border: 1px solid rgba(251, 191, 36, 0.1);
+    border-top: 1px solid rgba(251, 191, 36, 0.25);
+    border-left: 1px solid rgba(251, 191, 36, 0.15);
+
+    /* 极淡的琥珀色渐变背景，几乎透明 */
+    background: linear-gradient(165deg, rgba(251, 191, 36, 0.04) 0%, rgba(251, 191, 36, 0.01) 100%);
+
+    /* 强磨砂效果 */
+    backdrop-filter: blur(16px);
+}
+
+.insight-card-v2.is-pending .insight-card-header {
+    background: rgba(251, 191, 36, 0.03);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.08);
+}
+
+.insight-card-v2.is-pending:hover .insight-card-header {
+    background: rgba(251, 191, 36, 0.06);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.12);
+}
+
+.insight-card-v2.is-pending .card-icon {
+    color: rgb(251, 191, 36);
+}
+
+.insight-card-v2.is-pending .card-title {
+    color: var(--text-primary);
+}
+
+.insight-card-body {
+    padding: 16px;
+    border-top: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.chart-preview-area {
+    height: 120px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--glass-border);
+}
+
+.mock-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 60px;
+    margin-bottom: 8px;
+}
+
+.bar {
+    width: 12px;
+    background: var(--primary);
+    opacity: 0.6;
+    border-radius: 2px 2px 0 0;
+}
+
+.chart-label {
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
+.conclusion-box {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    padding: 12px;
+    background: rgba(10, 132, 255, 0.08);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 4px 4px 0;
+}
+
+/* 投票按钮 - 移到header右侧 */
+.vote-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+    /* 推到右侧 */
+}
+
+.icon-btn {
+    background: rgba(255, 255, 255, 0.03);
+    /* LiuliX 玻璃态 */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
+}
+
+/* Animations */
+@keyframes simple-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fade-in-down {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   Live Notebook 焦点样式（焦点跟踪功能）
+   ======================================== */
+
+/* 焦点代码块高亮 */
+.code-block-item.focused {
+    border-color: var(--primary);
+    background: rgba(10, 132, 255, 0.12);
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.25);
+    transform: scale(1.01);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 非焦点代码块降低亮度 */
+.notebook-content:has(.code-block-item.focused) .code-block-item:not(.focused) {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+/* 焦点代码块的标签高亮 */
+.code-block-item.focused .code-step-label {
+    background: rgba(10, 132, 255, 0.25);
+    color: var(--primary);
+    font-weight: 700;
+}

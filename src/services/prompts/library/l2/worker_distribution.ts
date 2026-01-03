@@ -10,6 +10,12 @@ export const workerDistributionPrompt: UserPrompt = {
     title: '单变量分布分析',
     description: '查看单一变量的数据分布情况（偏态、峰度、异常值）',
 
+    // 能力包配置 (v2.1)
+    slug: 'worker-distribution-v1',
+    packageId: 'basic',
+    requiredPackages: ['pandas', 'numpy', 'matplotlib'],
+    outputCharts: ['histogram', 'bar'],
+
     layer: 'L2_EXECUTION',
 
     // 四维矩阵标签
@@ -33,7 +39,7 @@ import json
 
 plt.switch_backend('Agg')
 
-column_name = '{{column_name}}'
+column_name = {{column_name}}
 col_data = df[column_name]
 
 # 判断数据类型

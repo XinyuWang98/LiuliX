@@ -1,5 +1,4 @@
 import * as duckdb from '@duckdb/duckdb-wasm';
-import { globalT } from '../contexts/I18nContext';
 import { logger } from '../utils/logger';
 import { getTableColumns } from './duckdbQuery';
 

@@ -64,11 +64,7 @@ export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesS
     // checkbox样式使用CSS类 .pkg-checkbox
 
     // 辅助文本样式：使用 CSS 变量，无硬编码
-    const subtleTextStyle = {
-        color: 'var(--text-secondary)',
-        fontSize: '12px',
-        fontWeight: 400
-    };
+
 
     return (
         <>

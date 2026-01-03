@@ -11,6 +11,12 @@ export const explorerGeneralPrompt: UserPrompt = {
   title: '全局数据探索专家',
   description: '分析数据集概况，推荐最值得关注的分析方向，并预测用户可能的下钻路径',
 
+  // 能力包配置 (v2.1)
+  slug: 'explorer-general-v1',
+  packageId: 'basic',  // L1也需要基础包
+  requiredPackages: ['pandas'],  // L1主要做推荐，依赖较少
+  outputCharts: ['report'],  // L1输出推荐报告
+
   layer: 'L1_DECISION',
 
   // 四维矩阵标签

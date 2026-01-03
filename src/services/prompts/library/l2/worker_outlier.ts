@@ -10,7 +10,14 @@ export const workerOutlierPrompt: UserPrompt = {
     title: '异常值检测',
     description: '检测数值列中的异常值/离群点（基于IQR或Z-score方法），识别极端值',
 
-    layer: 'L2_EXECUTION',
+    
+
+    // 能力包配置 (v2.1)
+    slug: 'worker-outlier-v1',
+    packageId: 'basic',
+    requiredPackages: [],
+    outputCharts: ['chart'],
+layer: 'L2_EXECUTION',
 
     dimensions: [
         { category: 'industry', value: 'general', label: '通用' },
