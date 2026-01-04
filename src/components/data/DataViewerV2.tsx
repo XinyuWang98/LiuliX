@@ -68,7 +68,7 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
+            // overflow: 'hidden', // [FIX] Removed to allow dropdown to overflow
         }}>
             {/* 顶栏 */}
             <div className="data-viewer-v2-topbar">
@@ -116,84 +116,29 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
 
                                     {/* 列筛选下拉框 */}
                                     {showColumnSelector && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '110%',
-                                            right: 0,
-                                            background: 'var(--bg-secondary)',
-                                            border: '1px solid var(--border)',
-                                            borderRadius: 'var(--radius-m)',
-                                            boxShadow: 'var(--shadow-lv2)',
-                                            padding: 'var(--gap-s)',
-                                            minWidth: '250px',
-                                            maxHeight: '400px',
-                                            zIndex: 1000,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                        }}>
+                                        <div className="column-selector-dropdown">
                                             {/* 全选/取消全选按钮 - 固定在顶部 */}
-                                            <div style={{
-                                                display: 'flex',
-                                                gap: 'var(--gap-s)',
-                                                marginBottom: 'var(--gap-s)',
-                                                paddingBottom: 'var(--gap-s)',
-                                                borderBottom: '1px solid var(--border)',
-                                                flexShrink: 0,
-                                            }}>
+                                            <div className="column-selector-actions">
                                                 <button
                                                     onClick={() => setSelectedColumns(duckInfo.columns.map((_, idx) => idx))}
-                                                    style={{
-                                                        flex: 1,
-                                                        padding: 'var(--gap-xs) var(--gap-s)',
-                                                        background: 'var(--bg-secondary)',
-                                                        border: '1px solid var(--border)',
-                                                        borderRadius: 'var(--radius-s)',
-                                                        color: 'var(--text-primary)',
-                                                        cursor: 'pointer',
-                                                        fontSize: 'var(--fs-xs)',
-                                                    }}
+                                                    className="column-selector-action-btn"
                                                 >
                                                     {t('grid.selectAll')}
                                                 </button>
                                                 <button
                                                     onClick={() => setSelectedColumns([])}
-                                                    style={{
-                                                        flex: 1,
-                                                        padding: 'var(--gap-xs) var(--gap-s)',
-                                                        background: 'var(--bg-secondary)',
-                                                        border: '1px solid var(--border)',
-                                                        borderRadius: 'var(--radius-s)',
-                                                        color: 'var(--text-primary)',
-                                                        cursor: 'pointer',
-                                                        fontSize: 'var(--fs-xs)',
-                                                    }}
+                                                    className="column-selector-action-btn"
                                                 >
                                                     {t('grid.deselectAll')}
                                                 </button>
                                             </div>
 
                                             {/* 列选择列表 - 可滚动区域 */}
-                                            <div style={{
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                gap: 'var(--gap-xs)',
-                                                overflowY: 'auto',
-                                                maxHeight: '300px',
-                                            }}>
+                                            <div className="column-selector-list">
                                                 {duckInfo.columns.map((col, idx) => (
                                                     <label
                                                         key={idx}
-                                                        style={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: 'var(--gap-s)',
-                                                            padding: 'var(--gap-xs)',
-                                                            borderRadius: 'var(--radius-s)',
-                                                            cursor: 'pointer',
-                                                            transition: 'background var(--transition-fast)',
-                                                        }}
-                                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
-                                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                        className="column-selector-item"
                                                     >
                                                         <input
                                                             type="checkbox"
@@ -205,19 +150,12 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
                                                                     setSelectedColumns([...selectedColumns, idx].sort((a, b) => a - b));
                                                                 }
                                                             }}
-                                                            style={{ cursor: 'pointer' }}
+                                                            className="column-selector-checkbox"
                                                         />
-                                                        <span style={{
-                                                            fontSize: 'var(--fs-sm)',
-                                                            color: 'var(--text-primary)',
-                                                        }}>
+                                                        <span className="column-selector-col-name">
                                                             {col.name}
                                                         </span>
-                                                        <span style={{
-                                                            marginLeft: 'auto',
-                                                            fontSize: 'var(--fs-xxs)',
-                                                            color: 'var(--text-tertiary)',
-                                                        }}>
+                                                        <span className="column-selector-col-type">
                                                             {col.type}
                                                         </span>
                                                     </label>

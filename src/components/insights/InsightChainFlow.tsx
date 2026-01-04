@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { InsightNode as InsightNodeType } from '@/types/insightTree';
 import { DrillDownAction } from '@/types/insightTree';
 import { ForestExplorer } from './forest/ForestExplorer';
+import { LiveNotebookPanel } from './LiveNotebookPanel';
 import { logger } from '../../utils/logger';
 import { Loader } from 'lucide-react';
 import { useInsightLoaderV2 } from '@/hooks/useInsightLoaderV2';
@@ -26,9 +27,10 @@ interface InsightChainFlowProps {
         status?: string;
     };
     hideTitle?: boolean;
+    showNotebook?: boolean; // 外部控制 Notebook 显示/隐藏
 }
 
-export function InsightChainFlow({ columns, rowCount, tableName, file, insightCache, hideTitle = false }: InsightChainFlowProps) {
+export function InsightChainFlow({ columns, rowCount, tableName, file, insightCache, hideTitle = false, showNotebook: showNotebookProp }: InsightChainFlowProps) {
     const { t } = useI18n();
 
     // 使用 InsightNode 状态
@@ -80,6 +82,103 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
     const showInitializing = isInitializing && insightNodes.length === 0;
     const showEmpty = !isLoading && !isInitializing && insightNodes.length === 0;
+
+    // 🆕 焦点跟踪状态
+    const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
+
+    // 🆕 Live Notebook 显示/隐藏状态
+    // 优先使用外部 prop，否则使用内部状态和 localStorage
+    const [internalShowNotebook, setInternalShowNotebook] = useState(() =>
+        localStorage.getItem('insightFlow.showNotebook') !== 'false'
+    );
+    const showNotebook = showNotebookProp !== undefined ? showNotebookProp : internalShowNotebook;
+    const setShowNotebook = setInternalShowNotebook;
+
+    // 🆕 Notebook 宽度状态 (默认 50%)
+    const [notebookWidthPercent, setNotebookWidthPercent] = useState(() => {
+        const saved = localStorage.getItem('insightFlow.notebookWidth');
+        return saved ? parseFloat(saved) : 50; // 默认 1:1 布局
+    });
+
+    // 🆕 拖拽状态
+    const [isResizing, setIsResizing] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // 保存用户偏好到 localStorage
+    useEffect(() => {
+        localStorage.setItem('insightFlow.showNotebook', showNotebook.toString());
+    }, [showNotebook]);
+
+    useEffect(() => {
+        localStorage.setItem('insightFlow.notebookWidth', notebookWidthPercent.toString());
+    }, [notebookWidthPercent]);
+
+    // 🆕 拖拽处理逻辑
+    const handleResizeStart = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsResizing(true);
+        document.body.style.cursor = 'ew-resize';
+        document.body.style.userSelect = 'none';
+    }, []);
+
+    const handleResizeEnd = useCallback(() => {
+        setIsResizing(false);
+        document.body.style.cursor = 'default';
+        document.body.style.userSelect = '';
+    }, []);
+
+    const handleResize = useCallback((e: MouseEvent) => {
+        if (!isResizing || !containerRef.current) return;
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const containerWidth = containerRect.width;
+        const offsetX = e.clientX - containerRect.left;
+
+        // 计算右侧 Notebook 的宽度百分比
+        const newPercent = ((containerWidth - offsetX) / containerWidth) * 100;
+        // 限制范围: 25% ~ 75%
+        const clampedPercent = Math.max(25, Math.min(75, newPercent));
+        setNotebookWidthPercent(clampedPercent);
+    }, [isResizing]);
+
+    // 全局事件监听
+    useEffect(() => {
+        if (isResizing) {
+            window.addEventListener('mousemove', handleResize);
+            window.addEventListener('mouseup', handleResizeEnd);
+        }
+        return () => {
+            window.removeEventListener('mousemove', handleResize);
+            window.removeEventListener('mouseup', handleResizeEnd);
+        };
+    }, [isResizing, handleResize, handleResizeEnd]);
+
+    // 🆕 收集所有已解析节点的代码
+    const resolvedCodes = useMemo(() => {
+        const collectResolvedCodes = (nodes: InsightNodeType[]): Array<{ id: string; title: string; code: string }> => {
+            const results: Array<{ id: string; title: string; code: string }> = [];
+
+            const traverse = (nodeList: InsightNodeType[]) => {
+                for (const node of nodeList) {
+                    // 检查节点是否已解析且有代码
+                    if (!node.isLoading && node.result?.code) {
+                        results.push({
+                            id: node.id,
+                            title: node.title,
+                            code: node.result.code
+                        });
+                    }
+                    if (node.children && node.children.length > 0) {
+                        traverse(node.children);
+                    }
+                }
+            };
+
+            traverse(nodes);
+            return results;
+        };
+
+        return collectResolvedCodes(insightNodes);
+    }, [insightNodes]);
 
     // 🆕 下钻处理逻辑
     const handleDrillDown = async (
@@ -178,6 +277,9 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         }
 
         setInsightNodes([...insightNodes]);
+
+        // 🆕 自动设置焦点到新解析的节点
+        setFocusedNodeId(childNode.id);
     };
 
     // 展开/折叠处理
@@ -208,10 +310,13 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
     return (
         <div className="insight-chain-flow">
             {!hideTitle && (
-                <h3 className="insight-chain-title">
-                    {t('insightChain.title')}
-                </h3>
+                <div className="insight-chain-header">
+                    <h3 className="insight-chain-title">
+                        {t('insightChain.title')}
+                    </h3>
+                </div>
             )}
+
 
             {/* 加载状态 + 执行进度 (覆盖 Initializing 阶段) */}
             {(isLoading || showInitializing) && (
@@ -262,13 +367,48 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
             {/* 🆕 Forest Explorer (Dark Forest Theme) */}
             {!isLoading && insightNodes.length > 0 && (
-                <ForestExplorer
-                    nodes={insightNodes.filter(node => !node.error)}
-                    columns={columns}
-                    onDrillDown={handleDrillDown}
-                    onToggleExpand={handleToggleExpand}
-                    onCustomAnalysis={handleCustomAnalysis}
-                />
+                <div
+                    ref={containerRef}
+                    className={`insight-split-view ${isResizing ? 'resizing' : ''}`}
+                >
+                    {/* 左侧：洞察树 */}
+                    <div
+                        className="tree-panel"
+                        style={{ width: showNotebook ? `${100 - notebookWidthPercent}%` : '100%' }}
+                    >
+                        <ForestExplorer
+                            nodes={insightNodes.filter(node => !node.error)}
+                            columns={columns}
+                            onDrillDown={handleDrillDown}
+                            onToggleExpand={handleToggleExpand}
+                            onCustomAnalysis={handleCustomAnalysis}
+                        />
+                    </div>
+
+                    {/* 拖拽手柄 */}
+                    {showNotebook && (
+                        <div
+                            className={`notebook-resize-handle ${isResizing ? 'active' : ''}`}
+                            onMouseDown={handleResizeStart}
+                            title="拖拽调整宽度"
+                        >
+                            <div className="resize-indicator" />
+                        </div>
+                    )}
+
+                    {/* 右侧：Live Notebook */}
+                    {showNotebook && (
+                        <div
+                            className="notebook-panel"
+                            style={{ width: `${notebookWidthPercent}%` }}
+                        >
+                            <LiveNotebookPanel
+                                codeBlocks={resolvedCodes}
+                                focusedId={focusedNodeId}
+                            />
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     );

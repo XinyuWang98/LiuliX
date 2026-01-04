@@ -1,0 +1,139 @@
+/**
+ * LiveNotebookPanel.css
+ * Live Notebook 代码面板样式
+ * 从 InsightChainDemo.css 提取并优化
+ */
+
+/* ========================================
+   LIVE NOTEBOOK PANEL (右侧代码面板)
+   ======================================== */
+
+.live-notebook-panel {
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 1px solid var(--glass-border);
+    height: 100%;
+}
+
+.notebook-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--glass-border);
+    flex-shrink: 0;
+}
+
+.notebook-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.copy-all-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.copy-all-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.notebook-content {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+}
+
+.notebook-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notebook-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.notebook-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    gap: 12px;
+}
+
+.code-block-item {
+    background: var(--glass-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.code-step-label {
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.code-content {
+    margin: 0;
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: #a5d6ff;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-x: auto;
+}
+
+/* ========================================
+   Live Notebook 焦点样式（焦点跟踪功能）
+   ======================================== */
+
+/* 焦点代码块高亮 */
+.code-block-item.focused {
+    border-color: var(--primary);
+    background: rgba(10, 132, 255, 0.12);
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.25);
+    transform: scale(1.01);
+}
+
+/* 非焦点代码块降低亮度 */
+.notebook-content:has(.code-block-item.focused) .code-block-item:not(.focused) {
+    opacity: 0.5;
+}
+
+/* 焦点代码块的标签高亮 */
+.code-block-item.focused .code-step-label {
+    background: rgba(10, 132, 255, 0.25);
+    color: var(--primary);
+    font-weight: 700;
+}

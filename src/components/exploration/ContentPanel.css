@@ -107,12 +107,46 @@
     }
 }
 
+/* Section Header - flex 布局 */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--gap-m);
+}
 
 .section-title {
     font-size: var(--fs-xl);
     font-weight: var(--fw-bold);
     color: var(--text-primary);
     margin: 0;
+}
+
+/* Notebook 切换按钮 */
+.notebook-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+
+    padding: var(--gap-xs) var(--gap-s);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+}
+
+.notebook-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+.notebook-toggle-btn span {
+    white-space: nowrap;
 }
 
 .evidence-badge {

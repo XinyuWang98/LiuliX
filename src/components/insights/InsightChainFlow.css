@@ -2,9 +2,24 @@
     padding: var(--gap-m);
 }
 
+/* 标题栏：flex 布局，按钮居右 */
+.insight-chain-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--gap-m);
+}
+
 .insight-chain-title {
     color: var(--text-primary);
-    margin-bottom: var(--gap-m);
+    margin: 0;
+}
+
+/* Notebook 控制区域（独立于标题） */
+.notebook-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--gap-s);
 }
 
 .insight-loading-container {
@@ -97,4 +112,131 @@
 .insight-tree-node:hover {
     border-color: var(--primary);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================
+   双栏布局 (Split View Layout)
+   ======================================== */
+
+.insight-split-view {
+    display: flex;
+    flex-direction: row;
+    /* 关键：确保水平排列 */
+    position: relative;
+    flex: 1;
+    overflow: visible;
+    /* 允许内容溢出以便下钻卡片可见 */
+    min-height: 400px;
+    /* 最小高度确保可见性 */
+}
+
+/* 拖拽时禁用指针事件（防止 iframe 等干扰） */
+.insight-split-view.resizing {
+    cursor: ew-resize;
+}
+
+.insight-split-view.resizing * {
+    pointer-events: none;
+}
+
+.insight-split-view.resizing .notebook-resize-handle {
+    pointer-events: auto;
+}
+
+/* 左侧洞察树面板 */
+.tree-panel {
+    flex-shrink: 0;
+    padding: var(--gap-m);
+    overflow-y: auto;
+    transition: width 0.2s ease;
+    /* 移除固定高度，允许内容自展开 */
+}
+
+.insight-split-view.resizing .tree-panel {
+    transition: none;
+}
+
+.tree-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tree-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+/* 拖拽手柄 */
+.notebook-resize-handle {
+    width: 6px;
+    background: transparent;
+    cursor: ew-resize;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s;
+    z-index: 10;
+}
+
+.notebook-resize-handle:hover,
+.notebook-resize-handle.active {
+    background: var(--primary);
+}
+
+.resize-indicator {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    transition: all 0.2s;
+}
+
+.notebook-resize-handle:hover .resize-indicator,
+.notebook-resize-handle.active .resize-indicator {
+    background: var(--text-primary);
+    height: 60px;
+}
+
+/* Notebook 面板容器 */
+.notebook-panel {
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 0.2s ease;
+    height: 100%;
+    /* 填满高度 */
+    display: flex;
+    /* 允许子元素填满 */
+}
+
+.insight-split-view.resizing .notebook-panel {
+    transition: none;
+}
+
+/* 显示/隐藏切换按钮 */
+.notebook-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+
+    padding: var(--gap-xs) var(--gap-s);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+}
+
+.notebook-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+.notebook-toggle-btn span {
+    white-space: nowrap;
 }

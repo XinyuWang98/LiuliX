@@ -1,0 +1,16 @@
+{
+  "duration_seconds": 1005,
+  "sample_count": 1005,
+  "valid_sample_count": 1005,
+  "cpu": {
+    "avg": 38.44,
+    "max": 89.77,
+    "min": 13.44
+  },
+  "memory": {
+    "avg_percent": 12.35,
+    "max_percent": 16.15,
+    "avg_used_gb": 2.96,
+    "max_used_gb": 3.88
+  }
+}

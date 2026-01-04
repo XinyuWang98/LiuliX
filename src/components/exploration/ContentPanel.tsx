@@ -8,6 +8,7 @@ import { ProjectCardGrid } from './ProjectCardGrid';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
 import { Project } from '@/utils/projectUtils';
 import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
+import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 import './ContentPanel.css';
 
 interface ContentPanelProps {
@@ -35,6 +36,17 @@ export function ContentPanel({
 
     // 🆕 Active File Management - 支持多文件项目的洞察刷新
     const [activeFileId, setActiveFileId] = useState<string | null>(null);
+
+    // 🆕 Notebook 显示/隐藏状态（从 localStorage 读取）
+    const [showNotebook, setShowNotebook] = useState(() => {
+        const saved = localStorage.getItem('insightFlow.showNotebook');
+        return saved !== null ? saved === 'true' : true;
+    });
+
+    // 持久化 showNotebook 状态
+    useEffect(() => {
+        localStorage.setItem('insightFlow.showNotebook', String(showNotebook));
+    }, [showNotebook]);
 
     // 🆕 当project.files变化时，自动选择第一个文件（如果当前没有选中文件）
     useEffect(() => {
@@ -127,6 +139,14 @@ export function ContentPanel({
                         <LiuliGlass className="content-module-container"> {/* Added Container */}
                             <div className="section-header">
                                 <h2 className="section-title">{t('exploration.sections.insights')}</h2>
+                                {/* Notebook 切换按钮 */}
+                                <button
+                                    className="notebook-toggle-btn"
+                                    onClick={() => setShowNotebook(!showNotebook)}
+                                >
+                                    {showNotebook ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
+                                    <span>{showNotebook ? '收起 Notebook' : '展开 Notebook'}</span>
+                                </button>
                             </div>
                             <InsightChainFlow
                                 columns={activeFile.columns?.map(c => c.name) || []}
@@ -135,6 +155,7 @@ export function ContentPanel({
                                 file={activeFile}
                                 fileName={activeFile.originalName || activeFile.name}
                                 hideTitle={true}
+                                showNotebook={showNotebook}
                             />
                         </LiuliGlass>
                     </div>
