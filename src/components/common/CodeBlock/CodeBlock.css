@@ -28,6 +28,13 @@
     /* 长单词强制换行 */
 }
 
+/* liuli-code-block 统一字号（覆盖上面的 font-size-sm） */
+.code-block pre.language-sql,
+.code-block pre.language-python {
+    font-size: var(--fs-xs);
+    /* 12px - 与 liulix.css 保持一致 */
+}
+
 .code-block code {
     font-family: inherit;
     background: transparent;

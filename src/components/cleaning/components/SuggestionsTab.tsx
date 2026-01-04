@@ -16,7 +16,9 @@ interface SuggestionsTabProps {
     aiGenerated: boolean;
     error: string | null;
     activeFile?: ProjectFile;
+    expandedSqlIds?: string[];
     onToggleSugg: (id: string) => void;
+    onToggleSql?: (id: string) => void;
 }
 
 /**
@@ -32,7 +34,9 @@ export function SuggestionsTab({
     aiGenerated,
     error,
     activeFile,
-    onToggleSugg
+    expandedSqlIds = [],
+    onToggleSugg,
+    onToggleSql
 }: SuggestionsTabProps) {
     const { t } = useI18n();
     const [activeTab, setActiveTab] = useState<string | null>(null);
@@ -84,7 +88,9 @@ export function SuggestionsTab({
                                 suggestion={suggestion}
                                 isSelected={selectedIds.includes(suggestion.id)}
                                 isIgnored={ignoredIds.includes(suggestion.id)}
+                                isSqlExpanded={expandedSqlIds.includes(suggestion.id)}
                                 onToggle={onToggleSugg}
+                                onToggleSql={onToggleSql}
                                 fileName={activeFile?.name}
                             />
                         ))}

@@ -10,52 +10,37 @@
     overflow: hidden;
 }
 
-/* 标签页导航头部 */
+/* 标签页导航头部 - 布局容器 */
 .bottomModuleHeader {
     display: flex;
     align-items: center;
     gap: var(--gap-s);
     padding: var(--gap-m);
     border-bottom: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.bottomModuleTab {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-s);
-    padding: var(--gap-s) var(--gap-m);
     background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-m);
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    /* 移除硬编码的灰色背景 */
 }
 
-.bottomModuleTab:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
-}
-
-.bottomModuleTab.active {
+/* 标签页按钮 active 状态 - 扩展 liuli-button */
+.liuli-button.bottomModuleTab.active {
     background: var(--text-accent);
     color: var(--liuli-bg);
     border-color: var(--text-accent);
 }
 
-.bottomModuleTab .tabBadge {
+/* Badge 徽章 - 使用 CSS 变量 */
+.tabBadge {
     padding: 2px var(--gap-s);
     background: rgba(0, 0, 0, 0.3);
     border-radius: var(--radius-m);
     font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    font-feature-settings: 'tnum';
+    /* 等宽数字特性 */
 }
 
-/* 操作按钮区域 */
+/* 操作按钮区域 - 布局容器 */
 .bottomModuleActions {
     display: flex;
     align-items: center;
@@ -63,114 +48,27 @@
     margin-left: auto;
 }
 
-.btnPanelAction {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: var(--glass-surface);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-m);
-    color: var(--text-secondary);
-    font-size: var(--fs-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btnPanelAction:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--glass-border-highlight);
-    color: var(--text-primary);
-}
-
-.btnPanelAction:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.btnPanelAction.btnApply {
-    background: var(--text-accent);
-    color: var(--liuli-bg);
-    border-color: var(--text-accent);
-    font-weight: 600;
-}
-
-.btnPanelAction.btnApply:hover:not(:disabled) {
-    background: #00d9e3;
-    box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
-}
-
-.btnPanelAction.btnIgnore {
-    border-color: rgba(255, 59, 48, 0.3);
-    color: #ff3b30;
-}
-
-.btnPanelAction.btnIgnore:hover:not(:disabled) {
-    background: rgba(255, 59, 48, 0.15);
-    border-color: #ff3b30;
-}
-
-.btnPanelAction.btnReset {
-    border-color: rgba(255, 149, 0, 0.3);
-    color: #ff9500;
-}
-
-.btnPanelAction.btnReset:hover:not(:disabled) {
-    background: rgba(255, 149, 0, 0.15);
-    border-color: #ff9500;
-}
-
-.btnPanelAction.aiGenerateBtn,
-.btnPanelAction.aiRefreshBtn {
+/* AI 按钮特殊渐变 - 保留视觉效果 */
+.liuli-button.aiGenerateBtn,
+.liuli-button.aiRefreshBtn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: var(--text-primary);
     border-color: #667eea;
-    font-weight: 600;
 }
 
-.btnPanelAction.aiGenerateBtn:hover:not(:disabled),
-.btnPanelAction.aiRefreshBtn:hover:not(:disabled) {
+.liuli-button.aiGenerateBtn:hover:not(:disabled),
+.liuli-button.aiRefreshBtn:hover:not(:disabled) {
     box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
 }
 
-/* 旋转动画 */
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.spin {
-    animation: spin 1s linear infinite;
-}
-
-/* 内容区域 - 高度自适应，移除滚动条 */
+/* 内容区域 - 高度自适应 */
 .bottomModuleContent {
     min-height: auto;
-    /* 不设置最大高度，让其自适应 */
     max-height: none;
     overflow-y: visible;
 }
 
-/* 移除滚动条样式（不再需要） */
-/* .bottomModuleContent::-webkit-scrollbar {
-    width: 8px;
+/* 禁用按钮样式增强 - 确保在深色背景下可见 */
+.liuli-button:disabled {
+    opacity: 0.6;
+    /* 从默认的 0.5 提高到 0.6 */
 }
-
-.bottomModuleContent::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.bottomModuleContent::-webkit-scrollbar-thumb {
-    background: var(--glass-border);
-    border-radius: 4px;
-}
-
-.bottomModuleContent::-webkit-scrollbar-thumb:hover {
-    background: var(--glass-border-highlight);
-} */

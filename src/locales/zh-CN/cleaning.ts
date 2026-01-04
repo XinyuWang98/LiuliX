@@ -16,6 +16,8 @@ export const cleaning = {
     intentDropEmpty: '删除空行',
     collapse: '收起',
     expandMore: '展开更多',
+    expandSql: '展开 SQL',
+    collapseSql: '收起 SQL',
     applySelected: '一键应用 ({count})',
     analyzing: '正在分析数据特征...',
     noSuggestions: '数据质量良好，暂无建议',

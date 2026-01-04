@@ -8,6 +8,7 @@ interface ForestExplorerProps {
     onDrillDown: (parentNode: InsightNode, action: DrillDownAction) => void;
     onToggleExpand: (nodeId: string) => void;
     onCustomAnalysis: (promptId: string, params: Record<string, unknown>) => void;
+    onFocus: (nodeId: string) => void;
 }
 
 /**
@@ -18,7 +19,8 @@ export const ForestExplorer: React.FC<ForestExplorerProps> = ({
     nodes,
     columns,
     onDrillDown,
-    onToggleExpand
+    onToggleExpand,
+    onFocus
 }) => {
     return (
         <div className="insight-results-container">
@@ -30,6 +32,7 @@ export const ForestExplorer: React.FC<ForestExplorerProps> = ({
                     onToggle={onToggleExpand}
                     onDrillDown={onDrillDown}
                     availableColumns={columns}
+                    onFocus={onFocus}
                 />
             ))}
         </div>

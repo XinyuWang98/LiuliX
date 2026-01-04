@@ -17,25 +17,30 @@ interface NumericStatsPanelProps {
 
 /**
  * 智能数值格式化
- * 针对大数值使用紧凑格式或科学计数法
+ * 用户友好的数值显示（避免科学计数法）
  */
 const formatSmartNumber = (num: number): string => {
     if (num === null || num === undefined || isNaN(num)) return '-';
 
     const absNum = Math.abs(num);
 
-    // 极大数值使用科学计数法 (e.g., 1.23e+12)
-    if (absNum >= 1e12 || (absNum > 0 && absNum < 1e-4)) {
-        return num.toExponential(3);
+    // 极小数值（接近0）直接显示为 ≈0
+    if (absNum > 0 && absNum < 1e-6) {
+        return '≈0';
     }
 
-    // 大数值使用单位缩写 (e.g., 1.25B)
+    // 非常小的数值保留6位小数
+    if (absNum > 0 && absNum < 0.01) {
+        return num.toFixed(6);
+    }
+
+    // 大数值使用单位缩写 (e.g., 1.25B, 1.25M, 1.25K)
     if (absNum >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
     if (absNum >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
     if (absNum >= 1e3) return `${(num / 1e3).toFixed(2)}K`;
 
     // 整数显示原值
-    if (Number.isInteger(num)) return num.toString();
+    if (Number.isInteger(num)) return num.toLocaleString();
 
     // 小数保留2位
     return num.toFixed(2);

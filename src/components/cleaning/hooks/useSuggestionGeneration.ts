@@ -17,6 +17,9 @@ import {
     isCacheFresh
 } from '../utils/suggestionFilters';
 
+// 调试日志：检查 suggestionFilters 导入
+console.log('[DEBUG] useSuggestionGeneration imports:', { mergeSuggestions, filterDuplicateAISuggestions });
+
 /**
  * 建议生成Hook
  * 职责：状态管理、触发生成、缓存管理

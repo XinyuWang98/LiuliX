@@ -16,6 +16,8 @@
     max-width: 100%;
     animation: fade-in-down 0.3s ease-out;
     position: relative;
+    backdrop-filter: blur(16px);
+    /* 确保玻璃态模糊 */
 }
 
 /* ========================================
@@ -28,8 +30,11 @@
     gap: 12px;
     padding: 16px;
     background: rgba(255, 255, 255, 0.02);
+    /* 保持微弱背景以增强可点击感 */
     cursor: pointer;
     border-bottom: 1px solid transparent;
+    /* 预留边框位置避免跳动 */
+    transition: background-color 0.2s ease;
 }
 
 .insight-card-v2:hover .insight-card-header {
@@ -82,16 +87,18 @@
     pointer-events: none;
 }
 
-/* 文件名胶囊 - 蓝色系 */
+/* 文件名胶囊 - 蓝色系变量化 */
 .context-badge.context-file {
-    color: rgba(10, 132, 255, 0.9);
+    color: var(--primary);
     background: rgba(10, 132, 255, 0.08);
+    /* TODO: 考虑提取为语义变量 var(--bg-info-dim) */
     border-color: rgba(10, 132, 255, 0.2);
 }
 
-/* 列名胶囊 - 紫色系 */
+/* 列名胶囊 - 紫色系变量化 */
 .context-badge.context-column {
-    color: rgba(147, 51, 234, 0.9);
+    color: #9333ea;
+    /* TODO: 添加到 variables.css 作为 var(--purple-500) 或类似 */
     background: rgba(147, 51, 234, 0.08);
     border-color: rgba(147, 51, 234, 0.2);
 }
@@ -152,6 +159,7 @@
 
 .insight-card-v2.is-pending .card-icon {
     color: rgb(251, 191, 36);
+    /* LiuliX Gold/Warning color */
 }
 
 .insight-card-v2.is-pending .card-title {
@@ -185,7 +193,7 @@
 .conclusion-box {
     padding: 12px;
     background: rgba(10, 132, 255, 0.08);
-    border-left: 3px solid rgba(10, 132, 255, 0.4);
+    border-left: 3px solid var(--primary);
     border-radius: 4px;
     font-size: 13px;
     line-height: 1.6;
@@ -280,6 +288,7 @@
 
 .icon-btn {
     background: rgba(255, 255, 255, 0.05);
+    /* TODO: var(--bg-button-icon) */
     border: 1px solid var(--glass-border);
     border-radius: 6px;
     padding: 4px 8px;

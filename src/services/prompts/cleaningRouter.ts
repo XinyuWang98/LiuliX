@@ -41,6 +41,12 @@ export class CleaningRouter {
         try {
             // Step 1: 构建Router Prompt
             const prompt = this.buildRouterPrompt(columns, stats);
+            // 🐛 DEBUG: 打印构建的Prompt
+            logger.log('AI清洗', 'Router Prompt构建详情', {
+                data: {
+                    promptLength: prompt.length
+                }
+            });
             logger.log('AI清洗', 'Router Prompt构建完成', {
                 data: `${prompt.length}字符`
             });
@@ -82,11 +88,32 @@ export class CleaningRouter {
      */
     private buildRouterPrompt(columns: any[], stats: any[]): string {
         // 获取所有清洗模板
-        const templates = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
-            .filter(p => p.id.startsWith('cleaner-')); // 只取清洗模板
+        let templates = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
+            .filter(p => p.id.startsWith('cleaner-'));
+
+        // 🛡️ 防御性编程：如果未找到模板，尝试重新注册种子模板
+        if (templates.length === 0) {
+            logger.warn('AI清洗', '未找到清洗模板，尝试重新注册种子模板');
+            promptRegistry.registerBatch(SEED_CLEANING_PROMPTS);
+            templates = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
+                .filter(p => p.id.startsWith('cleaner-'));
+        }
+
+        // 再次检查
+        if (templates.length === 0) {
+            logger.error('AI清洗', 'CRITICAL: 重新注册后仍未找到清洗模板');
+            return ''; // Early exit or handle gracefully
+        }
 
         // 构建模板清单
-        const templateList = templates.map(t => {
+        const sortedTemplates = templates.sort((a, b) => a.id.localeCompare(b.id));
+
+        // 🐛 DEBUG: 打印可用模板列表
+        logger.log('AI清洗', '可用的Router模板', {
+            data: sortedTemplates.map(t => t.id)
+        });
+
+        const templateList = sortedTemplates.map(t => {
             const params = t.inputVariables.length > 0
                 ? `(参数: ${t.inputVariables.join(', ')})`
                 : '(无参数)';

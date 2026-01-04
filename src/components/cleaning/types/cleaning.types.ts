@@ -26,6 +26,9 @@ export interface HistoryItem {
     action: string;
     rowCountBefore: number;
     rowCountAfter: number;
+    // P2: 前端展示增强字段
+    actionType?: string; // 用于匹配图标
+    source?: 'ai' | 'rule'; // 用于显示来源标签
 }
 
 /**

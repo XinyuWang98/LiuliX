@@ -215,6 +215,8 @@ export const enUS: LanguageConfig = {
             cleaningSuggestions: 'Cleaning Suggestions',
             collapse: 'Collapse',
             expandMore: 'Expand More',
+            expandSql: 'Expand SQL',
+            collapseSql: 'Collapse SQL',
             applySelected: 'Apply Selected',
             analyzing: 'Analyzing Data...',
             noSuggestions: 'No suggestions yet',

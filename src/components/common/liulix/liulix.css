@@ -286,6 +286,7 @@
 .liuli-input.error:focus {
     box-shadow: 0 0 0 2px rgba(255, 69, 58, 0.2);
 }
+
 /* =========================================
    4. Section Title (模块标题)
    ========================================= */
@@ -326,4 +327,54 @@
 
 .liuli-glass.padding-xlarge {
     padding: 32px;
+}
+
+/* =========================================
+   6. 代码块统一样式 (Code Block)
+   ========================================= */
+.liuli-code-block {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    /* 12px */
+    line-height: 1.6;
+    color: #a5d6ff;
+    /* 青色代码文本 */
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-s);
+    padding: 12px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* 代码块内的 pre 标签（兼容 Prism.js） */
+.liuli-code-block pre {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+/* 代码块内的 code 标签 */
+.liuli-code-block code {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+/* 滚动条样式 */
+.liuli-code-block::-webkit-scrollbar {
+    height: 6px;
+}
+
+.liuli-code-block::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.liuli-code-block::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
 }

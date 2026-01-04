@@ -18,6 +18,8 @@ export interface ForestNodeProps {
     onDrillDown: (node: InsightNode, action: DrillDownAction) => void;
     /** 可用列名 (用于传给 InsightCard) */
     availableColumns: string[];
+    /** 焦点处理 */
+    onFocus?: (nodeId: string) => void;
 }
 
 /**

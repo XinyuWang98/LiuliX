@@ -37,16 +37,6 @@
     color: var(--text-secondary);
 }
 
-.data-viewer-beta-badge {
-    font-size: 10px;
-    background: var(--error);
-    color: white;
-    padding: 2px 4px;
-    border-radius: 4px;
-    margin-left: 8px;
-    font-weight: bold;
-}
-
 .data-viewer-controls {
     display: flex;
     align-items: center;
@@ -91,17 +81,21 @@
     min-width: 250px;
     max-height: 400px;
 
-    /* 高对比度背景 + 毛玻璃效果 */
-    background: rgba(20, 22, 28, 0.92);
+    /* 极高对比度背景 + 强化毛玻璃效果 */
+    background: rgba(10, 12, 18, 0.98);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
 
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    /* 强化边框光晕 */
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: var(--radius-m);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6),
-        0 0 1px rgba(255, 255, 255, 0.1) inset;
+    /* 多重阴影：外阴影 + 内光晕 + 蓝色辉光 */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8),
+        0 0 2px rgba(255, 255, 255, 0.3) inset,
+        0 0 20px rgba(0, 122, 255, 0.15);
     padding: var(--gap-s);
-    z-index: 1000;
+    /* 提升层级，高于统计面板 */
+    z-index: 9999;
     display: flex;
     flex-direction: column;
 }
@@ -119,10 +113,13 @@
 .column-selector-action-btn {
     flex: 1;
     padding: var(--gap-xs) var(--gap-s);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* 增强按钮背景对比度 */
+    background: rgba(255, 255, 255, 0.12);
+    /* 增强边框可见性 */
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: var(--radius-s);
-    color: rgba(255, 255, 255, 0.95);
+    /* 使用纯白文字 */
+    color: #FFFFFF;
     cursor: pointer;
     font-size: var(--fs-xs);
     transition: all var(--transition-fast);
@@ -130,8 +127,10 @@
 }
 
 .column-selector-action-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.35);
+    /* 悬停时大幅提升背景亮度 */
+    background: rgba(255, 255, 255, 0.25);
+    /* 悬停时增加主题色高光 */
+    border-color: rgba(0, 122, 255, 0.6);
     color: #FFFFFF;
 }
 
@@ -168,13 +167,15 @@
 
 .column-selector-col-name {
     font-size: var(--fs-sm);
-    color: var(--text-primary);
+    /* 使用纯白确保最佳可读性 */
+    color: #FFFFFF;
+    font-weight: 500;
 }
 
 .column-selector-col-type {
     margin-left: auto;
     font-size: var(--fs-xxs);
-    /* 增强对比度：从 rgb(72,72,74) 调整为半透明白色 */
-    color: rgba(255, 255, 255, 0.5);
+    /* 提升透明度从 0.5 → 0.65 */
+    color: rgba(255, 255, 255, 0.65);
     font-weight: 500;
 }

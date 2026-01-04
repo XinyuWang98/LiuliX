@@ -382,6 +382,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                             onDrillDown={handleDrillDown}
                             onToggleExpand={handleToggleExpand}
                             onCustomAnalysis={handleCustomAnalysis}
+                            onFocus={setFocusedNodeId}
                         />
                     </div>
 

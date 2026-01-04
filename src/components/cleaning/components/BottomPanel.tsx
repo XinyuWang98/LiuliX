@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { Sparkles, History, CheckCircle2, Play, RefreshCw, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sparkles, History, CheckCircle2, Play, RefreshCw, X, Code2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import { SuggestionsTab } from './SuggestionsTab';
 import { HistoryTab } from './HistoryTab';
 import { SimpleSuggestion, HistoryItem, ProjectFile } from '../types/cleaning.types';
@@ -18,8 +20,11 @@ interface BottomPanelProps {
     aiGenerated: boolean;
     error: string | null;
     activeFile?: ProjectFile;
+    expandedSqlIds?: string[];
     onToggleSugg: (id: string) => void;
     onToggleSelectAll: () => void;
+    onToggleAllSql?: () => void;
+    onToggleSql?: (id: string) => void;
     onApply: () => void;
     onIgnore: () => void;
     onRefreshAI: () => void;
@@ -42,8 +47,11 @@ export function BottomPanel({
     aiGenerated,
     error,
     activeFile,
+    expandedSqlIds = [],
     onToggleSugg,
     onToggleSelectAll,
+    onToggleAllSql,
+    onToggleSql,
     onApply,
     onIgnore,
     onRefreshAI,
@@ -56,68 +64,115 @@ export function BottomPanel({
         <div className="cleanerBottomModule">
             {/* 标签页导航 */}
             <div className="bottomModuleHeader">
-                <button
+                <LiuliButton
+                    variant="ghost"
+                    size="sm"
                     className={`bottomModuleTab ${bottomPanelTab === 'suggestions' ? 'active' : ''}`}
                     onClick={() => setBottomPanelTab('suggestions')}
+                    leftIcon={<Sparkles size={16} />}
                 >
-                    <Sparkles size={16} />
                     {t('cleaning.cleaningSuggestions')}
                     {suggestions.length > 0 && <span className="tabBadge">{suggestions.length}</span>}
-                </button>
-                <button
+                </LiuliButton>
+                <LiuliButton
+                    variant="ghost"
+                    size="sm"
                     className={`bottomModuleTab ${bottomPanelTab === 'history' ? 'active' : ''}`}
                     onClick={() => setBottomPanelTab('history')}
+                    leftIcon={<History size={16} />}
                 >
-                    <History size={16} />
                     {t('cleaning.history')}
                     {history.length > 0 && <span className="tabBadge">{history.length}</span>}
-                </button>
+                </LiuliButton>
 
                 {/* 全局操作按钮区域 */}
                 <div className="bottomModuleActions">
                     {bottomPanelTab === 'suggestions' && suggestions.length > 0 && (
                         <>
-                            <button className="btnPanelAction" onClick={onToggleSelectAll} disabled={loading}>
-                                <CheckCircle2 size={14} />
+                            {/* 全局SQL展开/收起按钮 */}
+                            {onToggleAllSql && suggestions.some(s => s.sql) && (
+                                <LiuliButton
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={onToggleAllSql}
+                                    disabled={loading}
+                                    title={expandedSqlIds.length > 0 && expandedSqlIds.length === suggestions.filter(s => s.sql).length ? t('cleaning.collapseSql') : t('cleaning.expandSql')}
+                                    leftIcon={<Code2 size={14} />}
+                                >
+                                    {expandedSqlIds.length > 0 && expandedSqlIds.length === suggestions.filter(s => s.sql).length ? (
+                                        <>
+                                            <span>{t('cleaning.collapseSql')}</span>
+                                            <ChevronDown size={14} />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>{t('cleaning.expandSql')}</span>
+                                            <ChevronRight size={14} />
+                                        </>
+                                    )}
+                                </LiuliButton>
+                            )}
+
+                            <LiuliButton
+                                variant="secondary"
+                                size="sm"
+                                onClick={onToggleSelectAll}
+                                disabled={loading}
+                                leftIcon={<CheckCircle2 size={14} />}
+                            >
                                 {selectedIds.length === suggestions.filter(s => !ignoredIds.includes(s.id)).length
                                     ? t('cleaning.deselectAll')
                                     : t('cleaning.selectAll')}
-                            </button>
-                            <button
-                                className="btnPanelAction btnApply"
+                            </LiuliButton>
+                            <LiuliButton
+                                variant="primary"
+                                size="sm"
+                                className="btnApply"
                                 onClick={onApply}
                                 disabled={loading || selectedIds.length === 0}
+                                isLoading={loading}
+                                leftIcon={!loading && <Play size={14} />}
                             >
-                                {loading ? <RefreshCw className="spin" size={14} /> : <Play size={14} />}
                                 {t('cleaning.applySelected', { count: selectedIds.length })}
-                            </button>
-                            <button
-                                className="btnPanelAction btnIgnore"
+                            </LiuliButton>
+                            <LiuliButton
+                                variant="danger"
+                                size="sm"
                                 onClick={onIgnore}
                                 disabled={loading || selectedIds.length === 0}
+                                leftIcon={<X size={14} />}
                             >
-                                <X size={14} />
                                 {t('cleaning.ignore')}
-                            </button>
+                            </LiuliButton>
                         </>
                     )}
                     {bottomPanelTab === 'history' && history.length > 0 && (
-                        <button className="btnPanelAction btnReset" onClick={onReset} disabled={loading}>
-                            <RefreshCw size={14} />
+                        <LiuliButton
+                            variant="secondary"
+                            size="sm"
+                            className="btnReset"
+                            onClick={onReset}
+                            disabled={loading}
+                            leftIcon={<RefreshCw size={14} />}
+                        >
                             {t('cleaning.resetAll')}
-                        </button>
+                        </LiuliButton>
                     )}
                     {bottomPanelTab === 'suggestions' && (
-                        <button
-                            className={`btnPanelAction ${hasAISuggestions ? 'aiRefreshBtn' : 'aiGenerateBtn'}`}
+                        <LiuliButton
+                            variant="primary"
+                            size="sm"
+                            className={hasAISuggestions ? 'aiRefreshBtn' : 'aiGenerateBtn'}
                             onClick={onRefreshAI}
                             disabled={loading}
                             title={hasAISuggestions ? t('cleaning.refreshAI') : t('cleaning.generateAI')}
+                            isLoading={loading}
+                            leftIcon={!loading && (hasAISuggestions ? <RefreshCw size={14} /> : <Sparkles size={14} />)}
                         >
-                            {loading ? <RefreshCw className="spin" size={14} /> : (hasAISuggestions ? <RefreshCw size={14} /> : <Sparkles size={14} />)}
                             {hasAISuggestions ? t('cleaning.refreshAI') : t('cleaning.generateAI')}
-                        </button>
+                        </LiuliButton>
                     )}
+
                 </div>
             </div>
 
@@ -133,7 +188,9 @@ export function BottomPanel({
                         aiGenerated={aiGenerated}
                         error={error}
                         activeFile={activeFile}
+                        expandedSqlIds={expandedSqlIds}
                         onToggleSugg={onToggleSugg}
+                        onToggleSql={onToggleSql}
                     />
                 ) : (
                     <HistoryTab history={history} />
@@ -142,3 +199,4 @@ export function BottomPanel({
         </div>
     );
 }
+

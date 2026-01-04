@@ -4,58 +4,177 @@
     display: flex;
     flex-direction: column;
     gap: var(--gap-s);
-    padding: var(--gap-m);
+    padding: 0 var(--gap-m) var(--gap-m);
+    /* 上方由Header负责padding */
+    height: 100%;
+    overflow-y: auto;
 }
 
 .historyItem {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* 顶部对齐 */
     gap: var(--gap-m);
-    padding: var(--gap-s) var(--gap-m);
+    padding: 12px;
     background: var(--glass-surface);
+    /* 玻璃态背景 */
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-m);
-    font-size: var(--fs-sm);
-    color: var(--text-secondary);
     transition: all 0.2s ease;
+    backdrop-filter: blur(var(--blur-medium));
+    /* 确保毛玻璃效果 */
 }
 
 .historyItem:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
+    /* 略微提亮 */
     border-color: var(--glass-border-highlight);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lv1);
+}
+
+/* 1. 左侧图标 */
+.historyIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    margin-top: 2px;
+    /* 视觉微调对齐 */
+}
+
+.historyItem:hover .historyIconWrapper {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+/* 图标颜色变体 */
+.icon-fill {
+    color: var(--warning);
+}
+
+.icon-delete {
+    color: var(--error);
+}
+
+.icon-type {
+    color: var(--info);
+}
+
+.icon-ai {
+    color: var(--text-accent);
+}
+
+.icon-default {
+    color: var(--text-secondary);
+}
+
+/* 2. 中间内容区域 */
+.historyContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    /* 防止文本溢出 */
+}
+
+.historyHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
 }
 
 .historyTime {
-    color: var(--text-dim);
+    color: var(--text-tertiary);
     font-family: var(--font-mono);
-    font-size: 12px;
-    flex-shrink: 0;
+    font-size: 11px;
+    line-height: 1;
+}
+
+.sourceTag {
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.sourceTag.ai {
+    background: rgba(0, 242, 254, 0.1);
+    color: var(--text-accent);
+    border: 1px solid rgba(0, 242, 254, 0.2);
 }
 
 .historyAction {
     color: var(--text-primary);
-    flex: 1;
+    font-size: 13px;
+    line-height: 1.4;
+    word-break: break-all;
+}
+
+/* 列名高亮 */
+.highlightColumn {
+    font-family: var(--font-mono);
+    color: var(--text-accent);
+    background: rgba(0, 242, 254, 0.1);
+    padding: 0 4px;
+    border-radius: 4px;
+    margin: 0 2px;
+    font-size: 0.9em;
+}
+
+/* 3. 右侧数据变化 */
+.historyMeta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .deltaTag {
-    padding: 4px var(--gap-s);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
     border-radius: var(--radius-m);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
     font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 500;
-    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--text-secondary);
 }
 
-.deltaTag.negative {
-    background: rgba(255, 59, 48, 0.15);
-    color: #ff3b30;
+.deltaTag .arrow {
+    color: var(--text-tertiary);
+    font-size: 10px;
 }
 
-.deltaTag.positive {
-    background: rgba(52, 199, 89, 0.15);
-    color: #34c759;
+.deltaTag .delta-value {
+    margin-left: 4px;
+    font-weight: 600;
 }
 
+.deltaTag.negative .delta-value {
+    color: var(--error);
+}
+
+.deltaTag.positive .delta-value {
+    color: var(--success);
+}
+
+.deltaTag.neutral .delta-value {
+    color: var(--text-tertiary);
+}
+
+/* 空状态 */
 .historyEmpty {
     display: flex;
     align-items: center;

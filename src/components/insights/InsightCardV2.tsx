@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { BarChart2, ChevronDown, ChevronRight, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useI18n } from '@/contexts/I18nContext';
 import { InsightNode, DrillDownAction, MAX_DRILL_DEPTH } from '@/types/insightTree';
 import { DrillDownArea } from './DrillDownArea';
 import './InsightCardV2.css';
@@ -29,6 +30,8 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
     onCustomAnalysis,
     isExecuting = false
 }) => {
+    const { t } = useI18n();
+
     // 状态判断
     const isPending = !node.result || node.isLoading; // 有result且非loading才算完成
     const isExpanded = node.isExpanded;
@@ -95,10 +98,10 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                     {/* 投票按钮 - 仅在completed状态显示 */}
                     {!isPending && (
                         <div className="vote-actions" onClick={(e) => e.stopPropagation()}>
-                            <button className="icon-btn" title="采纳">
+                            <button className="icon-btn" title={t('insightChain.adopt')}>
                                 <ThumbsUp size={14} />
                             </button>
-                            <button className="icon-btn" title="忽略">
+                            <button className="icon-btn" title={t('insightChain.ignore')}>
                                 <ThumbsDown size={14} />
                             </button>
                         </div>
@@ -128,7 +131,7 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                     {/* AI结论 */}
                     {node.result?.summary && (
                         <div className="conclusion-box">
-                            <strong>AI 结论：</strong>
+                            <strong>{t('insightChain.conclusion')}：</strong>
                             {node.result.summary}
                         </div>
                     )}
@@ -172,7 +175,7 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
             {isLoading && (
                 <div className="card-loading-overlay">
                     <div className="spinner-mini" />
-                    <span>AI 分析中...</span>
+                    <span>{t('insightChain.analyzing')}</span>
                 </div>
             )}
 

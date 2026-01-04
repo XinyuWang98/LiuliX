@@ -303,8 +303,8 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
                                     {/* Type Icon + Name (对齐 Design 页面) */}
                                     <div className="column-type">
                                         <span style={{ marginRight: '4px', fontWeight: 'bold' }}>{getTypeIcon(stat?.type || col.type)}</span>
-                                        <span style={{ textTransform: 'lowercase', opacity: 0.7, fontSize: '11px' }}>
-                                            {isNumericType ? 'numeric' : 'text'}
+                                        <span style={{ textTransform: 'uppercase', opacity: 0.7, fontSize: '11px' }}>
+                                            {(stat?.type || col.type).toLowerCase()}
                                         </span>
                                     </div>
                                 </div>

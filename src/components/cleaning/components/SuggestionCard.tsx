@@ -12,7 +12,9 @@ interface SuggestionCardProps {
     suggestion: SimpleSuggestion;
     isSelected: boolean;
     isIgnored?: boolean; // 是否被忽略
+    isSqlExpanded?: boolean; // 外部控制的展开状态
     onToggle: (id: string) => void;
+    onToggleSql?: (id: string) => void; // SQL切换回调
     fileName?: string;  // CSV文件名，用于SQL显示
 }
 
@@ -21,10 +23,9 @@ interface SuggestionCardProps {
  * 格式：【PROMPT/AI】操作描述 推荐度XX%
  * 点击高亮选中，支持多选，选中后直接在卡片内展开详情
  */
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, isIgnored, onToggle, fileName }) => {
+export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, isIgnored, isSqlExpanded = false, onToggle, onToggleSql, fileName }) => {
     const { t } = useI18n();
     const { addRecord, records } = useEvidence();
-    const [isSqlExpanded, setIsSqlExpanded] = useState(false);
 
 
     // 检查是否已采纳
@@ -49,7 +50,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
     };
 
     // ✅ 判断来源：优先使用source字段，回退到id前缀判断（向后兼容）
-    const isFromRouter = suggestion.source === 'router' || (!suggestion.source && suggestion.id.startsWith('router-'));
+    const isFromRouter = suggestion.source === 'router' || suggestion.id.startsWith('cleaner-') || suggestion.id.startsWith('router-');
     const isFromAI = suggestion.source === 'ai' || (!suggestion.source && suggestion.id.startsWith('ai_'));
 
     // 置信度百分比
@@ -74,7 +75,9 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
 
     const toggleSql = (e: React.MouseEvent) => {
         e.stopPropagation();
-        setIsSqlExpanded(!isSqlExpanded);
+        if (onToggleSql) {
+            onToggleSql(suggestion.id);
+        }
     };
 
     // 格式化SQL展示：用CSV文件名替换DuckDB表名
@@ -111,7 +114,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
             className={`suggestionCard ${isSelected ? 'selected' : ''} ${isIgnored ? 'ignored' : ''} ${isFromAI ? 'card-ai' : 'card-prompt'}`}
             onClick={() => onToggle(suggestion.id)}
         >
-            {/* 1. 头部：来源标签 + 标题 + 置信度 */}
+            {/* 1. 头部：来源标签 + 标题 + 推荐度 */}
             <div className="cardHeader">
                 <div className="headerLeft">
                     {/* 图标容器 */}
@@ -120,20 +123,22 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
                     </div>
 
                     <div className="titleGroup">
-                        <span className={`sourceLabel ${isFromAI ? 'ai' : 'prompt'}`}>
-                            {isFromAI ? 'AI' : 'PROMPT'}
-                        </span>
+                        <div className="titleRow">
+                            <span className={`sourceLabel ${isFromAI ? 'ai' : 'prompt'}`}>
+                                {isFromAI ? 'AI' : 'PROMPT'}
+                            </span>
+                            <span
+                                className="confidenceText"
+                                style={{ color: getConfidenceColor(suggestion.confidence) }}
+                            >
+                                {t('cleaning.recommendPercent', { percent: confidencePercent })}
+                            </span>
+                        </div>
                         <span className="suggestionTitle" title={suggestion.label}>
                             {suggestion.label}
                         </span>
                     </div>
                 </div>
-                <span
-                    className="confidenceText"
-                    style={{ color: getConfidenceColor(suggestion.confidence) }}
-                >
-                    {t('cleaning.recommendPercent', { percent: confidencePercent })}
-                </span>
             </div>
 
             {/* 2. 中部：详细说明 + SQL代码 */}
@@ -148,21 +153,11 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
                             language="sql"
                             formatted={true}
                             copyable={false}
-                            className="suggestion-code-block"
+                            className="liuli-code-block"
                         />
                     </div>
                 )}
             </div>
-
-            {/* 3. 底部：SQL 操作栏 (Always at bottom) */}
-            {suggestion.sql && (
-                <div className="sqlFooter" onClick={toggleSql}>
-                    <div className="sqlToggle">
-                        {isSqlExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                        <span className="sqlLabel">EXECUTE SQL</span>
-                    </div>
-                </div>
-            )}
 
             {/* 4. 采纳按钮 */}
             <div className="adoptBtn-container">

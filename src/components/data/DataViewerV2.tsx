@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Project } from '@utils/projectUtils';
 import { useI18n } from '@contexts/I18nContext';
 import { ParsedFileData } from '@utils/fileParser';
@@ -8,6 +9,7 @@ import { LiuliGlass } from '../common/liulix/LiuliGlass';
 import { VirtualDataGridV2 } from '../VirtualDataGridV2';
 import { SmartFileTabBar } from './SmartFileTabBar';
 import { useDataLoader } from './hooks/useDataLoader';
+import { ColumnSelectorButton } from './ColumnSelectorButton';
 import './DataViewerV2.css'; // [FIX] Import CSS style
 
 interface DataViewerProps {
@@ -28,7 +30,6 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
 
     // 列筛选器状态
     const [selectedColumns, setSelectedColumns] = useState<number[]>([]);
-    const [showColumnSelector, setShowColumnSelector] = useState(false);
 
     // 详细统计信息显示状态（默认展开以对齐 Design 页面）
     const [showStats, setShowStats] = useState(true);
@@ -94,76 +95,18 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
                             <span>
                                 {(duckInfo?.rowCount || dataInfo?.row_count || 0).toLocaleString()} {t('pagination.rows')}
                             </span>
-                            <span className="data-viewer-beta-badge">
-                                V2 BETA
-                            </span>
                         </div>
                         <div className="data-viewer-controls">
                             <Columns3 size={14} style={{ color: 'var(--text-secondary)' }} />
 
                             {/* 列筛选器按钮 (Swap Order: 1st) */}
                             {useDuckDB && duckInfo ? (
-                                <div style={{ position: 'relative' }}>
-                                    <button
-                                        onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                        className="data-viewer-btn"
-                                    >
-                                        <span>{t('grid.selectedColumns', {
-                                            count: selectedColumns.length,
-                                            total: duckInfo.columns.length
-                                        })}</span>
-                                    </button>
-
-                                    {/* 列筛选下拉框 */}
-                                    {showColumnSelector && (
-                                        <div className="column-selector-dropdown">
-                                            {/* 全选/取消全选按钮 - 固定在顶部 */}
-                                            <div className="column-selector-actions">
-                                                <button
-                                                    onClick={() => setSelectedColumns(duckInfo.columns.map((_, idx) => idx))}
-                                                    className="column-selector-action-btn"
-                                                >
-                                                    {t('grid.selectAll')}
-                                                </button>
-                                                <button
-                                                    onClick={() => setSelectedColumns([])}
-                                                    className="column-selector-action-btn"
-                                                >
-                                                    {t('grid.deselectAll')}
-                                                </button>
-                                            </div>
-
-                                            {/* 列选择列表 - 可滚动区域 */}
-                                            <div className="column-selector-list">
-                                                {duckInfo.columns.map((col, idx) => (
-                                                    <label
-                                                        key={idx}
-                                                        className="column-selector-item"
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedColumns.includes(idx)}
-                                                            onChange={() => {
-                                                                if (selectedColumns.includes(idx)) {
-                                                                    setSelectedColumns(selectedColumns.filter(i => i !== idx));
-                                                                } else {
-                                                                    setSelectedColumns([...selectedColumns, idx].sort((a, b) => a - b));
-                                                                }
-                                                            }}
-                                                            className="column-selector-checkbox"
-                                                        />
-                                                        <span className="column-selector-col-name">
-                                                            {col.name}
-                                                        </span>
-                                                        <span className="column-selector-col-type">
-                                                            {col.type}
-                                                        </span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                <ColumnSelectorButton
+                                    selectedColumns={selectedColumns}
+                                    totalColumns={duckInfo.columns.length}
+                                    columns={duckInfo.columns}
+                                    onSelectionChange={setSelectedColumns}
+                                />
                             ) : (
                                 <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
                                     {(duckInfo ? duckInfo.columns.length : dataInfo?.column_count || 0)} 列

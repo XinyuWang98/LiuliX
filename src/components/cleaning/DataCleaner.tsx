@@ -18,6 +18,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [ignoredIds, setIgnoredIds] = useState<string[]>([]); // 忽略的建议ID列表
     const [refreshKey, setRefreshKey] = useState(0);
+    const [expandedSqlIds, setExpandedSqlIds] = useState<string[]>([]); // 展开SQL的建议ID列表
 
     const activeFile = project.files.find(f => f.id === activeFileId);
 
@@ -122,6 +123,29 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
         setRefreshKey(prev => prev + 1);
     };
 
+    // 切换单个SQL展开状态
+    const toggleSql = (id: string) => {
+        setExpandedSqlIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        );
+    };
+
+    // 切换全局SQL展开状态
+    const toggleAllSql = () => {
+        // 过滤掉没有SQL的建议
+        const suggestionsWithSql = suggestions.filter(s => s.sql);
+        const allIds = suggestionsWithSql.map(s => s.id);
+
+        // 如果当前展开数量等于总可展开数量，则全部收起；否则全部展开
+        const isAllExpanded = expandedSqlIds.length === allIds.length && allIds.length > 0;
+
+        if (isAllExpanded) {
+            setExpandedSqlIds([]);
+        } else {
+            setExpandedSqlIds(allIds);
+        }
+    };
+
     return (
         <div className="cleanerContainer">
             {/* 1. 数据表格 (Top - Order revised as requested) */}
@@ -148,12 +172,15 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                 aiGenerated={aiGenerated}
                 error={error}
                 activeFile={activeFile}
+                expandedSqlIds={expandedSqlIds}
                 onToggleSugg={toggleSugg}
                 onToggleSelectAll={toggleSelectAll}
                 onApply={handleApply}
                 onIgnore={handleIgnore}
                 onRefreshAI={refreshAISuggestions}
                 onReset={confirmReset}
+                onToggleAllSql={toggleAllSql}
+                onToggleSql={toggleSql}
             />
 
             {/* 重置确认对话框 */}

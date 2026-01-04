@@ -26,12 +26,18 @@ export function useCleaningExecution(
 
     /**
      * 应用选中的清洗建议
+     * P0 修复：支持部分成功记录，即使某些SQL失败也不影响其他
+     * P1 修复：针对数值列自动修正AI填充的字符串'null'
      */
     const handleApply = async (selectedSuggestions: SimpleSuggestion[]) => {
         if (selectedSuggestions.length === 0) return;
 
         setLoading(true);
         logger.group('清洗执行', `⚙️ 应用 ${selectedSuggestions.length} 条建议`);
+
+        // P0：追踪成功和失败
+        const successList: SimpleSuggestion[] = [];
+        const failureList: { sugg: SimpleSuggestion; error: string }[] = [];
 
         try {
             const engine = DuckDBEngine.getInstance();
@@ -68,37 +74,90 @@ export function useCleaningExecution(
             // 🆕 设置当前表名供Skills使用
             skillsDispatcher.setCurrentTable(tableName);
 
-            // 依次执行所有清洗操作（通过Skills统一入口）
+            // P0：逐条执行，独立错误处理
             for (const sugg of selectedSuggestions) {
-                // ✅ P0修复：优先使用AI生成的SQL（经过Dry-Run校验的），否则回退到本地模板
-                let sqlTemplate = sugg.sql;
-                if (!sqlTemplate) {
-                    logger.warn('清洗执行', `建议${sugg.id}缺失SQL，回退到本地模板构建`);
-                    sqlTemplate = buildCleaningSQL(sugg);
-                }
+                try {
+                    // ✅ 优先使用AI生成的SQL（经过Dry-Run校验的），否则回退到本地模板
+                    let sqlTemplate = sugg.sql;
+                    if (!sqlTemplate) {
+                        logger.warn('清洗执行', `建议${sugg.id}缺失SQL，回退到本地模板构建`);
+                        sqlTemplate = buildCleaningSQL(sugg);
+                    }
 
-                const sql = sqlTemplate.replace(/__TABLE_NAME__/g, tableName);
+                    // P1：针对数值列的'null'字符串修正
+                    if (sugg.actionType === 'fillMissing' && sugg.column) {
+                        const column = columnsBefore.find((c: any) => c.name === sugg.column);
 
-                // ✅ 通过Skills执行SQL清洗
-                const result = await skillsDispatcher.execute('sys_run_sql', {
-                    sql,
-                    permission: 'CLEANING'
-                });
+                        if (column && /DOUBLE|INT|FLOAT|DECIMAL|NUMERIC/i.test(column.type)) {
+                            // 数值列：将字符串 'null' 替换为 NULL
+                            sqlTemplate = sqlTemplate
+                                .replace(/=\s*'null'/gi, '= NULL')
+                                .replace(/=\s*"null"/gi, '= NULL');
 
-                if (!result.success) {
-                    throw new Error(result.error || '清洗SQL执行失败');
+                            logger.log('清洗执行', `数值列修正: ${sugg.column} (${column.type})`, {
+                                data: { before: "SET = 'null'", after: "SET = NULL" }
+                            });
+                        }
+                    }
+
+                    const sql = sqlTemplate.replace(/__TABLE_NAME__/g, tableName);
+
+                    // ✅ 通过Skills执行SQL清洗
+                    const result = await skillsDispatcher.execute('sys_run_sql', {
+                        sql,
+                        permission: 'CLEANING'
+                    });
+
+                    if (result.success) {
+                        successList.push(sugg);
+                        logger.log('清洗执行', `✅ 建议 ${sugg.id} 执行成功`);
+
+                        // P0：成功即记录历史（不等待全部完成）
+                        const actionText = renderActionText(sugg, rowCountBefore, rowCountBefore);
+
+                        if (addHistoryItem) {
+                            addHistoryItem({
+                                action: actionText,
+                                rowCountBefore,
+                                rowCountAfter: rowCountBefore // 列操作不影响行数
+                            });
+                        }
+
+                        if (addRecord) {
+                            addRecord({
+                                type: 'cleaning',
+                                title: actionText,
+                                description: sugg.reason,
+                                sql: sql,
+                                beforeCount: rowCountBefore,
+                                afterCount: rowCountBefore,
+                                affectedRows: sugg.column ? 1 : undefined,
+                                tags: [
+                                    sugg.id.startsWith('ai_') ? t('cleaning.tagAISuggestion') : t('cleaning.tagRuleSuggestion'),
+                                    sugg.action === 'dedup' ? t('cleaning.tagDedup') : (sugg.action === 'fill' ? t('cleaning.tagFillMissing') : t('cleaning.tagDropColumn'))
+                                ],
+                                metadata: {
+                                    suggestionId: sugg.id,
+                                    column: sugg.column,
+                                    action: sugg.action,
+                                    confidence: sugg.confidence,
+                                }
+                            });
+                        }
+                    } else {
+                        failureList.push({ sugg, error: result.error || '未知错误' });
+                        logger.warn('清洗执行', `❌ 建议 ${sugg.id} 执行失败`, { error: result.error });
+                    }
+                } catch (error) {
+                    // 单条建议失败不影响其他
+                    const errorMsg = error instanceof Error ? error.message : String(error);
+                    failureList.push({ sugg, error: errorMsg });
+                    logger.error('清洗执行', `❌ 建议 ${sugg.id} 抛出异常`, { error });
                 }
             }
 
-            logger.log('清洗执行', `SQL执行完成`, { count: selectedSuggestions.length });
-
             // 执行后重新查询列数
             const columnsAfter = await engine.getTableColumns(tableName);
-            const rowCountAfter = rowCountBefore; // 列操作不影响行数
-
-            // 计算变化
-            const rowDiff = rowCountBefore - rowCountAfter;
-            const colDiff = columnsBefore.length - columnsAfter.length;
 
             // 更新project状态
             if (onProjectUpdate) {
@@ -108,7 +167,7 @@ export function useCleaningExecution(
                             ...f,
                             data: {
                                 ...f.data,
-                                rowCount: rowCountAfter,
+                                rowCount: rowCountBefore,
                                 columnCount: columnsAfter.length,
                                 columns: columnsAfter.map((c: any) => c.name)
                             }
@@ -123,41 +182,6 @@ export function useCleaningExecution(
                 });
             }
 
-            // 记录历史 && 证据池
-            for (const sugg of selectedSuggestions) {
-                const actionText = renderActionText(sugg, rowCountBefore, rowCountAfter);
-
-                if (addHistoryItem) {
-                    addHistoryItem({
-                        action: actionText,
-                        rowCountBefore,
-                        rowCountAfter
-                    });
-                }
-
-                if (addRecord) {
-                    addRecord({
-                        type: 'cleaning',
-                        title: actionText,
-                        description: sugg.reason,
-                        sql: (sugg.sql || buildCleaningSQL(sugg)).replace(/__TABLE_NAME__/g, tableName),
-                        beforeCount: rowCountBefore,
-                        afterCount: rowCountAfter,
-                        affectedRows: sugg.action === 'dedup' ? rowDiff : (sugg.column ? colDiff : undefined),
-                        tags: [
-                            sugg.id.startsWith('ai_') ? t('cleaning.tagAISuggestion') : t('cleaning.tagRuleSuggestion'),
-                            sugg.action === 'dedup' ? t('cleaning.tagDedup') : (sugg.action === 'fill' ? t('cleaning.tagFillMissing') : t('cleaning.tagDropColumn'))
-                        ],
-                        metadata: {
-                            suggestionId: sugg.id,
-                            column: sugg.column,
-                            action: sugg.action,
-                            confidence: sugg.confidence,
-                        }
-                    });
-                }
-            }
-
             // 更新文件元数据
             if (activeFile && onProjectUpdate) {
                 try {
@@ -168,7 +192,7 @@ export function useCleaningExecution(
                             ...activeFile.data,
                             columns: updatedColumns.map((c: any) => c.name),
                             columnCount: updatedColumns.length,
-                            rowCount: rowCountAfter,
+                            rowCount: rowCountBefore,
                             tableName: tableName,
                             lastModified: Date.now()
                         },
@@ -177,10 +201,9 @@ export function useCleaningExecution(
                             ...activeFile.analysisCache,
                             insight: {
                                 ...activeFile.analysisCache?.insight,
-                                // 保留现有假设但标记为过期，需要重新生成
                                 hypotheses: activeFile.analysisCache?.insight?.hypotheses || [],
                                 status: 'pending' as const,
-                                isStale: true, // ✨ 关键：标记洞察缓存过期
+                                isStale: true,
                             }
                         }
                     };
@@ -194,21 +217,38 @@ export function useCleaningExecution(
 
                     console.log('✅ 数据清洗完成，洞察缓存已失效，等待后台刷新');
                 } catch (err) {
-
+                    // 元数据更新失败不影响主流程
+                    logger.warn('清洗执行', '元数据更新失败', { error: err });
                 }
             }
 
+            // P0：反馈结果
             logger.log('清洗执行', `✅ 完成`, {
                 data: {
-                    before: rowCountBefore,
-                    after: rowCountAfter,
-                    delta: rowCountAfter - rowCountBefore
+                    total: selectedSuggestions.length,
+                    success: successList.length,
+                    failure: failureList.length
                 }
             });
             logger.groupEnd();
+
+            // P0：失败反馈UI
+            if (failureList.length > 0) {
+                const errorMsg = `${failureList.length} 条建议执行失败：\n${failureList.map(f => `• ${f.sugg.actionType || f.sugg.action}: ${f.error}`).join('\n')}`;
+                alert(errorMsg);
+                logger.error('清洗执行', '部分建议失败', {
+                    failures: failureList.map(f => ({ id: f.sugg.id, error: f.error }))
+                });
+            }
+
+            if (successList.length > 0) {
+                logger.log('清洗执行', `✅ ${successList.length} 条建议成功应用`);
+            }
+
         } catch (err) {
+            // 仅全局错误（如找不到表）会到这里
             logger.groupEnd();
-            logger.error('清洗执行', '应用建议失败', err);
+            logger.error('清洗执行', '应用建议失败（全局错误）', err);
             alert(`应用清洗建议失败: ${err instanceof Error ? err.message : String(err)}`);
         } finally {
             setLoading(false);

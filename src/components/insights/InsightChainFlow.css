@@ -85,6 +85,9 @@
 
 .insight-results-container {
     margin-top: var(--gap-l);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
 }
 
 .insight-results-title {

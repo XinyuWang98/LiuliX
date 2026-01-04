@@ -67,11 +67,13 @@
 
 .headerLeft {
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
+    align-items: center;
+    gap: var(--gap-s);
     flex: 1;
     overflow: hidden;
 }
+
+/* 头部右侧：已移除 */
 
 /* 图标容器 */
 .iconContainer {
@@ -111,12 +113,19 @@
 .titleGroup {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--gap-xxs);
+    /* 极小垂直间距 */
     overflow: hidden;
 }
 
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+}
+
 .sourceLabel {
-    font-size: 10px;
+    font-size: var(--fs-xxs);
     font-weight: 700;
     letter-spacing: 0.5px;
     color: var(--text-tertiary);
@@ -152,23 +161,23 @@
 /* ... existing hover title ... */
 
 .confidenceText {
-    font-size: 11px;
+    font-size: var(--fs-xxs);
     font-weight: 500;
-    padding: 2px 6px;
+    padding: var(--gap-xxs) var(--gap-xs);
     background: rgba(255, 255, 255, 0.05);
     /* 微弱背景 */
     border-radius: 4px;
     flex-shrink: 0;
+    line-height: normal;
 }
 
 /* 3. 详情内容 (Detail) */
 .detailContent {
-    padding: 0 var(--gap-m) 12px;
-    padding-left: 50px;
-    /* 对齐标题，留出图标空间 */
+    padding: 0 var(--gap-m) var(--gap-m);
+    /* 移除硬编码左内边距，由子元素各自控制 */
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--gap-s);
     flex: 1;
     justify-content: space-between;
 }
@@ -176,64 +185,23 @@
 .reasonText {
     font-size: var(--fs-sm);
     color: var(--text-secondary);
-    /* 增加对比度 */
     line-height: 1.5;
     word-break: break-word;
     flex: 1;
 }
 
-/* 4. SQL 区域 */
-
-/* The Footer contains the toggle and copy button, always at the bottom */
-.sqlFooter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.03);
-    border-top: 1px solid var(--border-light);
-    transition: background var(--transition-s);
-    margin-top: auto;
-    /* Just in case, though flex:1 in detailContent handles it */
-}
-
-.sqlFooter:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.sqlToggle {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-tertiary);
-}
-
-.sqlLabel {
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-/* The Body is now inside detailContent */
+/* 4. SQL 代码块 */
 .sqlBody {
     position: relative;
-    padding: 10px;
+    padding: var(--gap-s);
     background: rgba(0, 0, 0, 0.3);
     border-radius: var(--radius-s);
     border: 1px solid var(--border-light);
-
-    /* Allow full expansion (No scrollbars) */
     height: auto;
     overflow: visible;
-
-    /* Grow to fill the card height (Consistent Height) */
     flex: 1;
     display: flex;
-    /* To handle code block sizing */
-
-    margin-top: 4px;
-    /* Space from reason text */
+    margin-top: var(--gap-xs);
 }
 
 .sqlCode {

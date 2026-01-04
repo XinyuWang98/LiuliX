@@ -71,7 +71,7 @@ export function LiveNotebookPanel({ codeBlocks, focusedId }: LiveNotebookPanelPr
                                 <div className="code-step-label">
                                     Step {index + 1}: {block.title}
                                 </div>
-                                <pre className="code-content">{block.code}</pre>
+                                <pre className="liuli-code-block">{block.code}</pre>
                             </div>
                         );
                     })
