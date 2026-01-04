@@ -31,7 +31,7 @@ export interface CleaningServiceConfig {
  */
 const DEFAULT_CONFIG: CleaningServiceConfig = {
     enableRouter: true,
-    enableAIGeneration: true,
+    enableAIGeneration: false,  // ✅ 禁用AI生成式（仅使用Router模式）
     minSuggestions: 1,
     parallelMode: false  // 默认串行
 };

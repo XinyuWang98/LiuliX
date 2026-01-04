@@ -17,6 +17,7 @@ interface ContentPanelProps {
     onProjectUpdate: (project: Project) => void;
     cleaningTrigger: number;
     onFilesUploaded?: (files: any[], sampledFlags: boolean[]) => void;
+    onInsightAdopt?: () => void; // 🆕
 }
 
 export function ContentPanel({
@@ -24,7 +25,8 @@ export function ContentPanel({
     project,
     onProjectUpdate,
     cleaningTrigger,
-    onFilesUploaded
+    onFilesUploaded,
+    onInsightAdopt // 🆕
 }: ContentPanelProps) {
     const { t } = useI18n();
     const { records: evidenceRecords } = useEvidence();
@@ -37,10 +39,10 @@ export function ContentPanel({
     // 🆕 Active File Management - 支持多文件项目的洞察刷新
     const [activeFileId, setActiveFileId] = useState<string | null>(null);
 
-    // 🆕 Notebook 显示/隐藏状态（从 localStorage 读取）
+    // 🆕 Notebook 显示/隐藏状态（从 localStorage 读取，默认隐藏）
     const [showNotebook, setShowNotebook] = useState(() => {
         const saved = localStorage.getItem('insightFlow.showNotebook');
-        return saved !== null ? saved === 'true' : true;
+        return saved === 'true'; // 只有明确为 'true' 时才显示，否则默认隐藏
     });
 
     // 持久化 showNotebook 状态
@@ -156,6 +158,7 @@ export function ContentPanel({
                                 fileName={activeFile.originalName || activeFile.name}
                                 hideTitle={true}
                                 showNotebook={showNotebook}
+                                onInsightAdopt={onInsightAdopt} // 🆕
                             />
                         </LiuliGlass>
                     </div>
@@ -165,13 +168,15 @@ export function ContentPanel({
             {/* 分析报告 Section */}
             {project && evidenceRecords.length > 0 && (
                 <div ref={reportRef} id="report" className="content-section">
-                    <div className="section-header">
-                        <h2 className="section-title">{t('exploration.sections.report')}</h2>
-                        <span className="evidence-badge">
-                            {t('report.evidenceAdopted', { count: evidenceRecords.length })}
-                        </span>
-                    </div>
-                    <ReportGenerator />
+                    <LiuliGlass className="content-module-container">
+                        <div className="section-header">
+                            <h2 className="section-title">{t('exploration.sections.report')}</h2>
+                            <span className="evidence-badge">
+                                {t('report.evidenceAdopted', { count: evidenceRecords.length })}
+                            </span>
+                        </div>
+                        <ReportGenerator />
+                    </LiuliGlass>
                 </div>
             )}
 

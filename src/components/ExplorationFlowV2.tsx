@@ -4,6 +4,7 @@ import { NavigationPanel } from './exploration/NavigationPanel';
 import { ContentPanel } from './exploration/ContentPanel';
 import { Project } from '@/utils/projectUtils';
 import { FolderOpen, Database, Lightbulb, FileText } from 'lucide-react';
+import { logger } from '@/utils/logger';
 import './ExplorationFlowV2.css';
 
 interface ExplorationFlowV2Props {
@@ -22,12 +23,24 @@ export function ExplorationFlowV2({
     const [selectedItemId, setSelectedItemId] = useState('project-selection');
 
     const insightCount = 3;
-    const adoptedCount = 0;
+    const [adoptedCount, setAdoptedCount] = useState(0); // 🆕 状态化，而非硬编码
 
     // 监听project变化，输出调试日志
     useEffect(() => {
-        console.log('[ExplorationFlowV2] project变化：', project ? project.name : 'null');
+        if (project) {
+            logger.log('UI', 'ExplorationFlowV2 project update', { data: { name: project.name } });
+        }
     }, [project]);
+
+    // 🆕 处理洞察采纳
+    const handleInsightAdopt = () => {
+        setAdoptedCount(prev => prev + 1);
+        logger.log('UI', '洞察被采纳，自动跳转至报告', { count: adoptedCount + 1 });
+
+        // 自动跳转到分析报告 (解锁并激活)
+        // 使用 setTimeout 确保状态更新后执行跳转，或者直接依赖 adoptedCount 的 effect
+        setSelectedItemId('report');
+    };
 
     const navigationTree: import('./exploration/ExplorationWorkbench').NavSection[] = [
         {
@@ -60,7 +73,8 @@ export function ExplorationFlowV2({
             type: 'section',
             label: '分析报告',
             icon: FileText,
-            status: adoptedCount > 0 ? 'current' : 'locked',
+            // 只要有采纳记录或者当前被选中，就视为可用
+            status: (adoptedCount > 0 || selectedItemId === 'report') ? 'current' : 'locked',
             adoptedCount: adoptedCount,
             children: []
         }
@@ -81,6 +95,7 @@ export function ExplorationFlowV2({
                     onProjectUpdate={onProjectUpdate}
                     cleaningTrigger={cleaningTrigger}
                     onFilesUploaded={onFilesUploaded}
+                    onInsightAdopt={handleInsightAdopt} // 🆕
                 />
             </div>
         </div>

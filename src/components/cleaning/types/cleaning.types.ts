@@ -59,6 +59,7 @@ export interface SimpleSuggestion {
     dryRunStatus?: 'pending' | 'success' | 'failed';
     sql?: string; // AI生成的SQL语句
     source?: 'router' | 'ai'; // ✅ 新增：来源标识（router=Prompt模板, ai=AI生成）
+    actionType?: string; // 用于匹配图标
 }
 
 /**

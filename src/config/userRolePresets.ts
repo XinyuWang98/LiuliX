@@ -18,8 +18,8 @@ export const USER_ROLE_PRESETS: Record<UserRole, UserRoleConfig> = {
 
         // 数据清洗配置
         cleaning: {
-            enableRouter: true,        // ✅ 开启Router，与AI并行执行
-            enableAI: true,            // ✅ 开启AI，并行深度分析
+            enableRouter: true,        // ✅ 开启Router快速模板
+            enableAI: false,           // ✅ 禁用AI生成式（改用纯Router模式）
             minSuggestions: 5,         // 需要更多选择
             showSQL: true,             // P1: 显示SQL代码
             enableSQLEdit: true,       // P1: 允许编辑SQL
@@ -50,7 +50,7 @@ export const USER_ROLE_PRESETS: Record<UserRole, UserRoleConfig> = {
         // 数据清洗配置
         cleaning: {
             enableRouter: true,        // 使用Router快速标准化
-            enableAI: true,            // AI兜底
+            enableAI: false,           // ✅ 禁用AI生成式（改用纯Router模式）
             minSuggestions: 3,         // 基础建议数量
             showSQL: false,            // P1: 隐藏SQL代码
             enableSQLEdit: false,      // P1: 不允许编辑SQL

@@ -6,6 +6,7 @@
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import type { CleaningSuggestion } from '@/services/aiService';
+import { SEED_CLEANING_PROMPTS } from './seedCleaningPrompts';
 
 /**
  * Router响应接口

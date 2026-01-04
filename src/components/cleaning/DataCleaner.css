@@ -11,9 +11,7 @@
     /* Changed to 0 to manage spacing via sub-elements */
     padding: 0;
     /* Remove padding to allow full-width headers if needed */
-    background-color: transparent
-        /* 改为透明，由外层 LiuliGlass 提供玻璃态 */
-    ;
+    /* LiuliGlass will handle background/border */
     overflow: hidden;
 }
 
@@ -23,10 +21,33 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    background-color: transparent
-        /* 改为透明，由外层 LiuliGlass 提供玻璃态 */
-    ;
-    /* padding-left: var(--gap-xs); // Removed to avoid double padding if DataViewer has it */
+    background-color: transparent;
+    /* 给 GridWrapper 增加内边距，使内部的 Topbar 和 Grid 不贴边，增加呼吸感 */
+    padding: var(--gap-xs) var(--gap-xs) 0 var(--gap-xs);
+}
+
+/* ==================== 统一容器覆盖样式 (Merge DataViewer & BottomPanel) ==================== */
+/* 1. 移除 DataViewer 内部的 Glass 效果，使其融入主容器 */
+.cleanerGridWrapper .virtual-grid-glass-wrapper {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    /* 移除所有圆角和边框，使其填满空间 */
+}
+
+/* 2. 调整 DataViewer 顶栏以匹配扁平化风格 */
+.cleanerGridWrapper .data-viewer-v2-topbar {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius-l) var(--radius-l) 0 0;
+    /* 顶栏保持顶部圆角 */
+}
+
+/* 3. 调整 DataViewer 内部表格容器 */
+.cleanerGridWrapper .virtualGridContainer {
+    border: none !important;
+    border-radius: 0 !important;
 }
 
 /* ==================== 2. 搴曢儴缁煎悎闈㈡澘 (Integrated) ==================== */
@@ -42,7 +63,12 @@
     background-color: transparent
         /* 改为透明，由外层 LiuliGlass 提供玻璃态 */
     ;
+    /* 分隔线：仅保留顶部细线，衔接 Grid */
     border-top: 1px solid var(--border);
+    margin-top: -1px;
+    /* 负边距重叠，避免双重边框 */
+    z-index: 1;
+    /* 确保分割线可见 */
     overflow: hidden;
     transition: flex-basis 0.3s ease;
 }

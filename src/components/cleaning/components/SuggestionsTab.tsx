@@ -1,10 +1,8 @@
-import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
 import { SuggestionCard } from './SuggestionCard';
 import { AILoading } from '@/components/common/AILoading';
-import { SimpleSuggestion, ProjectFile, SuggestionCategory, ICON_SIZE_LARGE, CATEGORY_META } from '../types/cleaning.types';
-import { groupByCategory } from '../utils/suggestionUtils';
+import { SimpleSuggestion, ProjectFile, ICON_SIZE_LARGE } from '../types/cleaning.types';
 import './SuggestionsTab.css';
 
 interface SuggestionsTabProps {
@@ -39,7 +37,6 @@ export function SuggestionsTab({
     onToggleSql
 }: SuggestionsTabProps) {
     const { t } = useI18n();
-    const [activeTab, setActiveTab] = useState<string | null>(null);
 
     // 优先级 1: 加载状态 (AI生成)
     if (loading) {
@@ -48,54 +45,23 @@ export function SuggestionsTab({
 
     // 优先级 2: 显示建议列表
     if (suggestions.length > 0) {
-        const grouped = groupByCategory(suggestions);
-        const currentCategory = activeTab || grouped[0]?.[0];
-        const currentItems = grouped.find(([c]) => c === currentCategory)?.[1] || [];
-
         return (
             <div className="suggestionsTabContent">
-                {/* 分类标签导航 */}
-                <div className="suggestionTabs">
-                    {grouped.map(([category, items]) => {
-                        const isAICategory = items.some(s => s.id.startsWith('ai_'));
-                        const meta = isAICategory
-                            ? { icon: <Sparkles size={14} />, color: 'var(--accent)', nameKey: 'cleaning.aiSuggestions' }
-                            : (CATEGORY_META[category as SuggestionCategory] || { icon: '?', color: '#888', nameKey: 'cleaning.unknownAction' });
-                        const isActive = category === currentCategory;
-
-                        return (
-                            <button
-                                key={category}
-                                className={`tabItem ${isActive ? 'active' : ''} ${isAICategory ? 'ai-tab' : ''}`}
-                                onClick={() => setActiveTab(category)}
-                            >
-                                <span className="tabIcon">{meta.icon}</span>
-                                <span className="tabName">
-                                    {isAICategory ? t('cleaning.aiSuggestions') : t(meta.nameKey as any)}
-                                </span>
-                                <span className="tabCount">({items.length})</span>
-                            </button>
-                        );
-                    })}
+                {/* 建议卡片列表（移除分类标签页，直接显示所有PROMPT建议） */}
+                <div className="cardRow">
+                    {suggestions.map(suggestion => (
+                        <SuggestionCard
+                            key={suggestion.id}
+                            suggestion={suggestion}
+                            isSelected={selectedIds.includes(suggestion.id)}
+                            isIgnored={ignoredIds.includes(suggestion.id)}
+                            isSqlExpanded={expandedSqlIds.includes(suggestion.id)}
+                            onToggle={onToggleSugg}
+                            onToggleSql={onToggleSql}
+                            fileName={activeFile?.name}
+                        />
+                    ))}
                 </div>
-
-                {/* 建议卡片列表 */}
-                {currentItems.length > 0 && (
-                    <div className="cardRow">
-                        {currentItems.map(suggestion => (
-                            <SuggestionCard
-                                key={suggestion.id}
-                                suggestion={suggestion}
-                                isSelected={selectedIds.includes(suggestion.id)}
-                                isIgnored={ignoredIds.includes(suggestion.id)}
-                                isSqlExpanded={expandedSqlIds.includes(suggestion.id)}
-                                onToggle={onToggleSugg}
-                                onToggleSql={onToggleSql}
-                                fileName={activeFile?.name}
-                            />
-                        ))}
-                    </div>
-                )}
             </div>
         );
     }
@@ -104,8 +70,8 @@ export function SuggestionsTab({
     if (error) {
         return (
             <div className="aiEmpty">
-                <span style={{ fontSize: '32px' }}>⚠️</span>
-                <div className="emptyText" style={{ color: 'var(--warning)' }}>
+                <span className="warning-icon">⚠️</span>
+                <div className="emptyText warning-text">
                     {t('cleaning.serviceUnavailable')}
                 </div>
             </div>
@@ -115,7 +81,7 @@ export function SuggestionsTab({
     if (aiGenerated) {
         return (
             <div className="aiEmpty">
-                <Sparkles size={ICON_SIZE_LARGE} style={{ color: 'var(--primary)' }} />
+                <Sparkles size={ICON_SIZE_LARGE} className="primary-icon" />
                 <div className="emptyText">{t('cleaning.dataGood')}</div>
             </div>
         );
@@ -125,10 +91,10 @@ export function SuggestionsTab({
     return (
         <div className="aiEmpty state-initial">
             <div className="emptyIconWrapper">
-                <Sparkles size={24} style={{ color: 'var(--primary)' }} />
+                <Sparkles size={24} className="primary-icon" />
             </div>
             <div className="emptyText">
-                {t('cleaning.tryAI') || '暂无规则建议，试试让 AI 深度分析？'}
+                {t('cleaning.tryAI')}
             </div>
         </div>
     );

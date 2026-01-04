@@ -30,33 +30,7 @@ const 列宽基础偏移 = 60; // 列宽计算的基础偏移量
 const 序号列宽度 = 60; // 序号列固定宽度（px）
 const 最大文本长度 = 100; // 单元格文本最大长度
 
-/**
- * 获取类型图标化显示（对齐 Design 页面）
- */
-const getTypeIcon = (dbType: string): string => {
-    const typeUpper = dbType.toUpperCase();
 
-    // 数值型
-    if (typeUpper.includes('INT') || typeUpper.includes('DOUBLE') ||
-        typeUpper.includes('DECIMAL') || typeUpper.includes('FLOAT') ||
-        typeUpper.includes('NUMBER') || typeUpper.includes('NUMERIC')) {
-        return '123';
-    }
-
-    // 文本型
-    if (typeUpper.includes('VARCHAR') || typeUpper.includes('TEXT') ||
-        typeUpper.includes('STRING') || typeUpper.includes('CHAR')) {
-        return 'Txt';
-    }
-
-    // 布尔型
-    if (typeUpper.includes('BOOL')) {
-        return 'T/F';
-    }
-
-    // 默认返回 Txt
-    return 'Txt';
-};
 
 /**
  * 格式化单元格值（类型感知）
@@ -164,7 +138,7 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
         return () => observer.disconnect();
     }, []);
 
-    // 计算列宽逻辑 - 优化 bonusWidth 分配策略
+    // 计算列宽逻辑 - 优化 bonusWidth 分配策略 (窄列分配 + 上限控制)
     useEffect(() => {
         if (containerWidth === 0 || visibleColumns.length === 0) return;
 
@@ -184,7 +158,10 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
             // 只给窄列分配 bonusWidth
             const narrowColumnCount = baseWidths.filter(w => w < 窄列阈值).length;
             if (narrowColumnCount > 0) {
-                setBonusWidth(Math.floor(extra / narrowColumnCount));
+                // 每列最多增加 200px
+                const maxBonus = 200;
+                const calculatedBonus = Math.floor(extra / narrowColumnCount);
+                setBonusWidth(Math.min(calculatedBonus, maxBonus));
             } else {
                 setBonusWidth(0);
             }
@@ -197,7 +174,7 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
         const nameLength = col.name.length;
         const baseWidth = Math.max(最小列宽, Math.min(最大列宽, nameLength * 列名字符宽度系数 + 列宽基础偏移));
 
-        const 窄列阈值 = 180; // 与 useEffect 中保持一致
+        const 窄列阈值 = 180;
         // 只有窄列才分配 bonusWidth
         if (baseWidth < 窄列阈值) {
             return baseWidth + bonusWidth;
@@ -301,8 +278,8 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
                                     <span title={col.name} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{col.name}</span>
 
                                     {/* Type Icon + Name (对齐 Design 页面) */}
+                                    {/* Type Icon + Name (对齐 Design 页面) - 图标已移除 */}
                                     <div className="column-type">
-                                        <span style={{ marginRight: '4px', fontWeight: 'bold' }}>{getTypeIcon(stat?.type || col.type)}</span>
                                         <span style={{ textTransform: 'uppercase', opacity: 0.7, fontSize: '11px' }}>
                                             {(stat?.type || col.type).toLowerCase()}
                                         </span>

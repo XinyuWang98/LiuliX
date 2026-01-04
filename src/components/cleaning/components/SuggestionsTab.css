@@ -42,8 +42,8 @@
 }
 
 .suggestionTabs .tabItem.ai-tab.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-active) 100%);
+    border-color: var(--primary);
 }
 
 .suggestionTabs .tabIcon {
@@ -59,9 +59,10 @@
 /* 建议卡片列表 */
 .cardRow {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 480px));
     gap: var(--gap-m);
     padding: 0 var(--gap-m) var(--gap-m);
+    justify-content: start;
 }
 
 /* 空状态样式 */
@@ -95,4 +96,16 @@
     font-size: var(--fs-base);
     text-align: center;
     max-width: 400px;
+}
+
+.aiEmpty .warning-icon {
+    font-size: 32px;
+}
+
+.aiEmpty .warning-text {
+    color: var(--warning);
+}
+
+.aiEmpty .primary-icon {
+    color: var(--primary);
 }

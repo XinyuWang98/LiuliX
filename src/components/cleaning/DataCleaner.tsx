@@ -3,6 +3,7 @@
 import { BottomPanel } from './components/BottomPanel';
 import { useI18n } from '../../contexts/I18nContext';
 import { DataViewerV2 as DataViewer } from '../data/DataViewerV2'; // 替换为 V2 组件但保留别名以减少改动
+import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
 import {
     DataCleanerProps,
 } from './types/cleaning.types';
@@ -147,7 +148,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
     };
 
     return (
-        <div className="cleanerContainer">
+        <LiuliGlass className="cleanerContainer" intensity="light">
             {/* 1. 数据表格 (Top - Order revised as requested) */}
             <div className="cleanerGridWrapper">
                 <DataViewer
@@ -156,6 +157,7 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                     activeFileId={activeFileId || undefined}
                     onProjectUpdate={onProjectUpdate}
                     onFileChange={setActiveFileId}
+                    embedded={true}
                 />
             </div>
 
@@ -196,6 +198,6 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
                     </div>
                 </div>
             )}
-        </div>
+        </LiuliGlass>
     );
 };

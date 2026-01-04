@@ -3,10 +3,11 @@
 .cleanerBottomModule {
     display: flex;
     flex-direction: column;
-    background: var(--glass-surface);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-l);
-    backdrop-filter: blur(var(--blur-medium));
+    /* 移除背景和边框，由 DataCleaner.css 统一控制实现无缝融合 */
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    backdrop-filter: none;
     overflow: hidden;
 }
 
@@ -51,13 +52,13 @@
 /* AI 按钮特殊渐变 - 保留视觉效果 */
 .liuli-button.aiGenerateBtn,
 .liuli-button.aiRefreshBtn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-active) 100%);
+    border-color: var(--primary);
 }
 
 .liuli-button.aiGenerateBtn:hover:not(:disabled),
 .liuli-button.aiRefreshBtn:hover:not(:disabled) {
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.4);
 }
 
 /* 内容区域 - 高度自适应 */

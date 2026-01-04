@@ -20,6 +20,8 @@ export interface ForestNodeProps {
     availableColumns: string[];
     /** 焦点处理 */
     onFocus?: (nodeId: string) => void;
+    /** 采纳回调 */
+    onAdopt?: () => void;
 }
 
 /**

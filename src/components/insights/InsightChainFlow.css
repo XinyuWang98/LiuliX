@@ -207,10 +207,9 @@
     flex-shrink: 0;
     overflow: hidden;
     transition: width 0.2s ease;
-    height: 100%;
-    /* 填满高度 */
     display: flex;
-    /* 允许子元素填满 */
+    /* flex容器，子元素填满 */
+    height: 100%;
 }
 
 .insight-split-view.resizing .notebook-panel {

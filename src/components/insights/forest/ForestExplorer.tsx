@@ -9,6 +9,7 @@ interface ForestExplorerProps {
     onToggleExpand: (nodeId: string) => void;
     onCustomAnalysis: (promptId: string, params: Record<string, unknown>) => void;
     onFocus: (nodeId: string) => void;
+    onAdopt?: () => void; // 🆕
 }
 
 /**
@@ -20,7 +21,8 @@ export const ForestExplorer: React.FC<ForestExplorerProps> = ({
     columns,
     onDrillDown,
     onToggleExpand,
-    onFocus
+    onFocus,
+    onAdopt // 🆕
 }) => {
     return (
         <div className="insight-results-container">
@@ -33,6 +35,7 @@ export const ForestExplorer: React.FC<ForestExplorerProps> = ({
                     onDrillDown={onDrillDown}
                     availableColumns={columns}
                     onFocus={onFocus}
+                    onAdopt={onAdopt} // 🆕
                 />
             ))}
         </div>

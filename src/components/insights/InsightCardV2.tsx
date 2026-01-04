@@ -4,9 +4,10 @@
  * 适配v2页的InsightNode数据类型
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart2, ChevronDown, ChevronRight, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
+import { useEvidence } from '@/contexts/EvidenceContext';
 import { InsightNode, DrillDownAction, MAX_DRILL_DEPTH } from '@/types/insightTree';
 import { DrillDownArea } from './DrillDownArea';
 import './InsightCardV2.css';
@@ -19,6 +20,7 @@ interface InsightCardV2Props {
     onDrillDown: (node: InsightNode, action: DrillDownAction) => void;
     onCustomAnalysis: (promptId: string, params: Record<string, unknown>) => void;
     isExecuting?: boolean;
+    onAdopt?: () => void; // 🆕 采纳回调
 }
 
 export const InsightCardV2: React.FC<InsightCardV2Props> = ({
@@ -28,9 +30,44 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
     onFocus,
     onDrillDown,
     onCustomAnalysis,
-    isExecuting = false
+    isExecuting = false,
+    onAdopt // 🆕
 }) => {
     const { t } = useI18n();
+    const { addRecord } = useEvidence();
+
+    // 采纳/忽略状态
+    const [isAdopted, setIsAdopted] = useState(false);
+    const [isIgnored, setIsIgnored] = useState(false);
+
+    // 采纳洞察到证据池
+    const handleAdopt = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!node.result) return;
+
+        addRecord({
+            type: 'insightChain',
+            title: node.title,
+            description: node.result.summary || '',
+            chartBase64: node.result.image,
+            metadata: {
+                nodeId: node.id,
+                depth: node.depth,
+                code: node.result.code,
+                columnsUsed: node.columnsUsed,
+            },
+        });
+        setIsAdopted(true);
+        setIsIgnored(false);
+        onAdopt?.(); // 🆕 触发回调
+    };
+
+    // 忽略洞察
+    const handleIgnore = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsIgnored(true);
+        setIsAdopted(false);
+    };
 
     // 状态判断
     const isPending = !node.result || node.isLoading; // 有result且非loading才算完成
@@ -51,7 +88,8 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                 className="insight-card-header"
                 onClick={() => {
                     onToggle(node.id);
-                    if (!isPending) {
+                    // 点击已完成的卡片时，聚焦并显示 Notebook
+                    if (!isPending && node.result) {
                         onFocus?.(node.id);
                     }
                 }}
@@ -97,11 +135,21 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                 <div className="card-actions">
                     {/* 投票按钮 - 仅在completed状态显示 */}
                     {!isPending && (
-                        <div className="vote-actions" onClick={(e) => e.stopPropagation()}>
-                            <button className="icon-btn" title={t('insightChain.adopt')}>
+                        <div className="vote-actions">
+                            <button
+                                className={`icon-btn ${isAdopted ? 'icon-btn-active' : ''}`}
+                                onClick={handleAdopt}
+                                disabled={isAdopted || isIgnored}
+                                title={isAdopted ? t('insightChain.adopted') : t('insightChain.adopt')}
+                            >
                                 <ThumbsUp size={14} />
                             </button>
-                            <button className="icon-btn" title={t('insightChain.ignore')}>
+                            <button
+                                className={`icon-btn ${isIgnored ? 'icon-btn-active' : ''}`}
+                                onClick={handleIgnore}
+                                disabled={isAdopted || isIgnored}
+                                title={isIgnored ? t('insightChain.ignored') : t('insightChain.ignore')}
+                            >
                                 <ThumbsDown size={14} />
                             </button>
                         </div>
@@ -121,7 +169,7 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                     {node.result?.image && (
                         <div className="chart-preview-area">
                             <img
-                                src={`data:image/png;base64,${node.result.image}`}
+                                src={node.result.image}
                                 alt={node.title}
                                 className="chart-image"
                             />
@@ -164,6 +212,7 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                                     onDrillDown={onDrillDown}
                                     onCustomAnalysis={onCustomAnalysis}
                                     isExecuting={isExecuting}
+                                    onAdopt={onAdopt} // 🆕
                                 />
                             ))}
                         </div>

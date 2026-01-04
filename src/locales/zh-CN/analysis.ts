@@ -78,7 +78,7 @@ export const exploration = {
     },
     blocks: {
         upload: '数据清洗',
-        cleaning: '数据清洗建议',
+        cleaning: '清洗方案', // 保持与 cleaning.ts 一致
         hypothesis: '分析假设生成',
         insights: '洞察分析',
         report: '分析报告',
@@ -86,7 +86,7 @@ export const exploration = {
     },
     sections: {
         projects: '项目选择',
-        cleaning: '数据清洗建议',
+        cleaning: '数据清洗', // Section Title: Just "Cleaning"
         insights: '洞察分析',
         report: '分析报告',
     },

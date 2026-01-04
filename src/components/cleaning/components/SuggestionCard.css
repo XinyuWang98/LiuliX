@@ -252,3 +252,35 @@
 .adoptBtn:disabled {
     opacity: 0.6;
 }
+
+/* 语义化图标背景色 - 使用全局变量与 color-mix 确保合规 */
+.bg-danger {
+    background: color-mix(in srgb, var(--color-quality-critical), transparent 90%);
+    color: var(--color-quality-critical);
+    border: 1px solid color-mix(in srgb, var(--color-quality-critical), transparent 80%);
+}
+
+.bg-warning {
+    background: color-mix(in srgb, var(--color-quality-warning), transparent 90%);
+    color: var(--color-quality-warning);
+    border: 1px solid color-mix(in srgb, var(--color-quality-warning), transparent 80%);
+}
+
+.bg-info {
+    background: color-mix(in srgb, var(--info), transparent 90%);
+    color: var(--info);
+    border: 1px solid color-mix(in srgb, var(--info), transparent 80%);
+}
+
+.bg-accent {
+    /* 主要强调色 */
+    background: color-mix(in srgb, var(--primary), transparent 90%);
+    color: var(--primary);
+    border: 1px solid color-mix(in srgb, var(--primary), transparent 80%);
+}
+
+/* 确保图标本身不填充颜色（如果是 Lucide 图标） */
+.iconContainer svg {
+    /* stroke: currentColor; 默认就是 current color */
+    fill: none;
+}

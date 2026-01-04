@@ -179,14 +179,21 @@
 .chart-preview-area {
     margin-bottom: 16px;
     border-radius: 8px;
+    background: #ffffff;
+    width: 100%;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
 }
 
 .chart-image {
-    width: 100%;
-    height: auto;
     display: block;
+    max-width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
 }
 
 /* 结论框 */
@@ -301,6 +308,24 @@
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
     border-color: var(--primary);
+}
+
+/* 按钮激活状态（已采纳/已忽略）*/
+.icon-btn-active {
+    background: rgba(10, 132, 255, 0.15);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.icon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.icon-btn:disabled:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--glass-border);
+    color: var(--text-tertiary);
 }
 
 /* 展开图标 */

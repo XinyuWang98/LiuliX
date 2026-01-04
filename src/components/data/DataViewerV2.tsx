@@ -18,6 +18,7 @@ interface DataViewerProps {
     activeFileId?: string; // 从外部接收当前激活的文件ID
     onProjectUpdate?: (project: Project) => void;
     onFileChange?: (fileId: string) => void;
+    embedded?: boolean; // 🆕 嵌入模式（去除内部边框和阴影）
     children?: React.ReactNode;
 }
 
@@ -25,7 +26,7 @@ interface DataViewerProps {
  * 数据查看器组件 - Kaggle 风格 (V2 Updated)
  * 智能路由：小文件走 Pyodide + DataTable，大文件/CSV 走 DuckDB + VirtualDataGridV2
  */
-export function DataViewerV2({ project, activeFileId: externalActiveFileId, onProjectUpdate, onFileChange, children }: DataViewerProps) {
+export function DataViewerV2({ project, activeFileId: externalActiveFileId, onProjectUpdate, onFileChange, embedded = false, children }: DataViewerProps) {
     const { t } = useI18n();
 
     // 列筛选器状态
@@ -64,6 +65,20 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
         }
     }, [duckInfo]);
 
+    // 嵌入模式样式覆盖
+    const topBarStyle = embedded ? {
+        background: 'rgba(255, 255, 255, 0.02)',
+        borderBottom: '1px solid var(--border)',
+        borderRadius: 'var(--radius-l) var(--radius-l) 0 0'
+    } : {};
+
+    const glassWrapperStyle = embedded ? {
+        background: 'transparent',
+        border: 'none',
+        boxShadow: 'none',
+        borderRadius: '0'
+    } : {};
+
     return (
         <div style={{
             flex: 1,
@@ -72,7 +87,7 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
             // overflow: 'hidden', // [FIX] Removed to allow dropdown to overflow
         }}>
             {/* 顶栏 */}
-            <div className="data-viewer-v2-topbar">
+            <div className={`data-viewer-v2-topbar ${embedded ? 'embedded' : ''}`} style={topBarStyle}>
                 {/* 左侧：文件切换 Tabs */}
                 {project && (
                     <SmartFileTabBar
@@ -168,7 +183,11 @@ export function DataViewerV2({ project, activeFileId: externalActiveFileId, onPr
                     </div>
                 ) : (useDuckDB && duckInfo) ? (
                     /* DuckDB 虚拟表格 V2 - 使用 LiuliGlass 组件 */
-                    <LiuliGlass intensity="medium" className="virtual-grid-glass-wrapper">
+                    <LiuliGlass
+                        intensity="medium"
+                        className={`virtual-grid-glass-wrapper ${embedded ? 'embedded' : ''}`}
+                        style={glassWrapperStyle}
+                    >
                         <VirtualDataGridV2
                             tableName={duckInfo.tableName}
                             rowCount={duckInfo.rowCount}

@@ -1,10 +1,10 @@
 // 建议卡片组件 - 简洁版 (In-Place Expansion Mode)
 
-import React, { useState } from 'react';
+import React from 'react';
 import { SimpleSuggestion } from '../types/cleaning.types';
 import { useI18n } from '../../../contexts/I18nContext';
 import { useEvidence } from '../../../contexts/EvidenceContext';
-import { ChevronDown, ChevronRight, Sparkles, Trash2, Eraser, FileX, Calculator, Wand2, CheckCircle } from 'lucide-react';
+import { Sparkles, Trash2, Eraser, FileX, Calculator, Wand2, CheckCircle } from 'lucide-react';
 import { CodeBlock } from '@/components/common/CodeBlock';
 import './SuggestionCard.css';
 
@@ -23,7 +23,7 @@ interface SuggestionCardProps {
  * 格式：【PROMPT/AI】操作描述 推荐度XX%
  * 点击高亮选中，支持多选，选中后直接在卡片内展开详情
  */
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, isIgnored, isSqlExpanded = false, onToggle, onToggleSql, fileName }) => {
+export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSelected, isIgnored, isSqlExpanded = false, onToggle, fileName }) => {
     const { t } = useI18n();
     const { addRecord, records } = useEvidence();
 
@@ -57,27 +57,37 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
     const confidencePercent = Math.round(suggestion.confidence * 100);
 
     // 根据来源和内容判断图标
+    // 根据来源和内容判断图标
     const getIcon = () => {
-        // AI生成用sparkles图标
+        // AI生成用sparkles图标 (优先级最高，因为AI建议通常比较特殊)
         if (isFromAI) return <Sparkles size={16} className="icon-ai" />;
-        // Router/Prompt模板用wand图标
-        if (isFromRouter) return <Wand2 size={16} className="icon-prompt" />;
 
-        // 根据标签内容判断
+        // 优先根据标签内容判断语义化图标
         const labelLower = suggestion.label.toLowerCase();
         if (labelLower.includes('删除') || labelLower.includes('drop')) return <Trash2 size={16} className="icon-delete" />;
         if (labelLower.includes('去重') || labelLower.includes('duplicate')) return <FileX size={16} className="icon-dedup" />;
         if (labelLower.includes('填充') || labelLower.includes('fill')) return <Eraser size={16} className="icon-fill" />;
         if (labelLower.includes('标准化') || labelLower.includes('normalize')) return <Calculator size={16} className="icon-calc" />;
+        if (labelLower.includes('转换') || labelLower.includes('convert')) return <Wand2 size={16} className="icon-prompt" />;
+
+        // Router/Prompt模板默认用wand图标
+        if (isFromRouter) return <Wand2 size={16} className="icon-prompt" />;
 
         return <Sparkles size={16} className="icon-default" />;
     };
 
-    const toggleSql = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (onToggleSql) {
-            onToggleSql(suggestion.id);
-        }
+    // 获取图标类型对应的背景样式类
+    const getIconType = () => {
+        if (isFromAI) return 'bg-ai';
+
+        const labelLower = suggestion.label.toLowerCase();
+        if (labelLower.includes('删除') || labelLower.includes('drop')) return 'bg-danger';
+        if (labelLower.includes('去重') || labelLower.includes('duplicate')) return 'bg-warning';
+        if (labelLower.includes('填充') || labelLower.includes('fill')) return 'bg-info'; // 蓝色
+        if (labelLower.includes('标准化') || labelLower.includes('normalize')) return 'bg-accent'; // 紫色/强调色
+
+        if (isFromRouter) return 'bg-prompt';
+        return 'bg-prompt';
     };
 
     // 格式化SQL展示：用CSV文件名替换DuckDB表名
@@ -98,7 +108,9 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
         }
 
         // 添加提示注释
-        return `-- 注意：执行前请将 ${fileName || 'your_table.csv'} 替换为实际表名\n${sql}`;
+        // Note: Using a localized string for the SQL comment
+        const warningText = t('cleaning.sqlWarning', { fileName: fileName || 'your_table.csv' });
+        return `-- ${warningText}\n${sql}`;
     })();
 
 
@@ -118,7 +130,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
             <div className="cardHeader">
                 <div className="headerLeft">
                     {/* 图标容器 */}
-                    <div className={`iconContainer ${isFromAI ? 'bg-ai' : 'bg-prompt'}`}>
+                    <div className={`iconContainer ${getIconType()}`}>
                         {getIcon()}
                     </div>
 

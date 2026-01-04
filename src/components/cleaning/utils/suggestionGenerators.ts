@@ -205,7 +205,8 @@ export async function triggerAISuggestionGeneration(
                 column: s.column,
                 sql: s.sql,
                 expectedImpact: s.expectedImpact,
-                dryRunStatus: s.dryRunStatus
+                dryRunStatus: s.dryRunStatus,
+                source: s.source  // ✅ 关键修复：保留来源标识（router/ai）
             }));
         }
 

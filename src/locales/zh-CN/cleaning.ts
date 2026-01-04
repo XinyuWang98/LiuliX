@@ -109,10 +109,10 @@ export const cleaning = {
     suggRemoveDuplicates: '删除重复行',
     tagAISuggestion: 'AI',
     recommendPercent: '推荐度{percent}%',
-    aiSuggestions: 'AI 建议',
-    cleaningSuggestions: '清洗建议',
-    generateAI: '生成AI建议',
-    refreshAI: '刷新AI建议',
+    aiSuggestions: 'AI 建议',  // 已废弃，保留兼容
+    cleaningSuggestions: '清洗方案',
+    generateAI: '生成清洗方案',
+    refreshAI: '刷新方案',
     suggDropColumnSimple: '{col}',
     suggFillZero: '填充 "{col}" 为 0',
     suggFillUnknown: '填充 "{col}" 为 "Unknown"',
@@ -129,5 +129,6 @@ export const cleaning = {
     aiProgressValidating: '正在验证 SQL 安全性...',
     aiProgressFinalizing: '正在生成最终报告...',
     processing: '正在处理...',
+    sqlWarning: '注意：执行前请将 {fileName} 替换为实际表名',
     // End of cleaning translations
 };

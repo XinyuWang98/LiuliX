@@ -12,7 +12,8 @@ export const ForestNode: React.FC<ForestNodeProps> = ({
     onToggle,
     onDrillDown,
     availableColumns,
-    onFocus
+    onFocus,
+    onAdopt // 🆕
 }) => {
     // 自定义分析处理（ForestNode不需要此功能，传空函数）
     const handleCustomAnalysis = () => {
@@ -28,6 +29,7 @@ export const ForestNode: React.FC<ForestNodeProps> = ({
             onCustomAnalysis={handleCustomAnalysis}
             isExecuting={false}
             onFocus={onFocus}
+            onAdopt={onAdopt} // 🆕
         />
     );
 };

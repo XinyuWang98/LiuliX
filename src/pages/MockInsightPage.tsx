@@ -107,6 +107,7 @@ export function MockInsightPage() {
                             setMockNode(p => ({ ...p, isExpanded: !p.isExpanded }));
                         }
                     }}
+                    onFocus={(nodeId) => logger.log('UI', 'Focus:', { data: nodeId })}
                 />
             </div>
 

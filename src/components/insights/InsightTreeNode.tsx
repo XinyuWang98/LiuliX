@@ -137,7 +137,7 @@ export function InsightTreeNode({
                             {node.result.image && (
                                 <div className="insight-node-row-viz">
                                     <img
-                                        src={`data:image/png;base64,${node.result.image}`}
+                                        src={node.result.image}
                                         alt={node.title}
                                         className="insight-chart-thumbnail"
                                     />

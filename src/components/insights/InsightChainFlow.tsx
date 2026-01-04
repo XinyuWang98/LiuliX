@@ -28,9 +28,10 @@ interface InsightChainFlowProps {
     };
     hideTitle?: boolean;
     showNotebook?: boolean; // 外部控制 Notebook 显示/隐藏
+    onInsightAdopt?: () => void; // 🆕
 }
 
-export function InsightChainFlow({ columns, rowCount, tableName, file, insightCache, hideTitle = false, showNotebook: showNotebookProp }: InsightChainFlowProps) {
+export function InsightChainFlow({ columns, rowCount, tableName, file, insightCache, hideTitle = false, showNotebook: showNotebookProp, onInsightAdopt }: InsightChainFlowProps) {
     const { t } = useI18n();
 
     // 使用 InsightNode 状态
@@ -88,8 +89,9 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
     // 🆕 Live Notebook 显示/隐藏状态
     // 优先使用外部 prop，否则使用内部状态和 localStorage
+    // 默认隐藏，只在用户点击卡片后显示
     const [internalShowNotebook, setInternalShowNotebook] = useState(() =>
-        localStorage.getItem('insightFlow.showNotebook') !== 'false'
+        localStorage.getItem('insightFlow.showNotebook') === 'true' // 严格检查为 'true' 才显示
     );
     const showNotebook = showNotebookProp !== undefined ? showNotebookProp : internalShowNotebook;
     const setShowNotebook = setInternalShowNotebook;
@@ -278,8 +280,9 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
         setInsightNodes([...insightNodes]);
 
-        // 🆕 自动设置焦点到新解析的节点
+        // 🆕 自动设置焦点到新解析的节点，并显示 Notebook
         setFocusedNodeId(childNode.id);
+        setShowNotebook(true); // 自动展开 Notebook面板
     };
 
     // 展开/折叠处理
@@ -383,6 +386,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                             onToggleExpand={handleToggleExpand}
                             onCustomAnalysis={handleCustomAnalysis}
                             onFocus={setFocusedNodeId}
+                            onAdopt={onInsightAdopt} // 🆕
                         />
                     </div>
 
