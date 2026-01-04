@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Sparkles, History, CheckCircle2, Play, RefreshCw, X, Code2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
-import { useTheme } from '@/contexts/ThemeContext';
+
 import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import { SuggestionsTab } from './SuggestionsTab';
 import { HistoryTab } from './HistoryTab';

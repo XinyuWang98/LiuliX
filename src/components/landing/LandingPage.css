@@ -126,6 +126,24 @@
     border-radius: 50% 50% 0 0;
 }
 
+/* Hero Logo - 标题上方的品牌展示 */
+.hero-logo {
+    margin-bottom: var(--gap-xl, 40px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 在 Hero 区域放大 Logo 图标 */
+.hero-logo .logo-icon-wrapper {
+    width: 96px;
+    height: 96px;
+}
+
+.hero-logo .logo-text {
+    font-size: 48px;
+}
+
 /* Slogan: 沐浴在光中的文字 */
 .hero-slogan {
     font-size: 72px;

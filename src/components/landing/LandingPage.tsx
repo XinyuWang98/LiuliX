@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { UploadCloud, ShieldCheck, BrainCircuit, FileSearch } from 'lucide-react';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
+import { Logo } from '@/components/common/Logo/Logo';
 import './LandingPage.css';
 import '@/components/exploration/EmptyStateWelcome.css';
 
@@ -24,6 +25,11 @@ export function LandingPage({ onFilesUploaded }: LandingPageProps) {
             {/* Main Content */}
             <main className="landing-content">
                 <div className="hero-section">
+                    {/* 品牌 Logo - 添加到标题上方 */}
+                    <div className="hero-logo">
+                        <Logo layout="horizontal" size="xl" showText={true} />
+                    </div>
+
                     <h1 className="hero-slogan">
                         {t('welcome.heroTitle')}
                     </h1>

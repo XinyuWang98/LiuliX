@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useEffect } from 'react';
 import { Project } from '@utils/projectUtils';
 import { useI18n } from '@contexts/I18nContext';
 import { ParsedFileData } from '@utils/fileParser';

@@ -54,7 +54,7 @@ function LoadingScreen({ progress, message }: LoadingScreenProps) {
 function AppContent() {
     const { t } = useI18n();
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'v2' | 'design'>('dashboard');
+    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'v2' | 'design' | 'welcome'>('v2');
     const [cleaningTrigger, setCleaningTrigger] = useState(0); // 用于触发数据清洗建议生成
     const [isPyodideReady, setIsPyodideReady] = useState(false);
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
@@ -71,6 +71,8 @@ function AppContent() {
             const hash = window.location.hash;
             if (hash === '#/prompts') {
                 setActiveView('library');
+            } else if (hash === '#/welcome') {
+                setActiveView('welcome');
             } else if (hash === '#/v2') {
                 setActiveView('v2' as any); // V2预览页面
             } else if (hash === '#/design') {
@@ -78,6 +80,7 @@ function AppContent() {
             } else if (hash === '#/' || hash === '') {
                 // 重定向到 V2 页面（废弃旧 dashboard）
                 window.location.hash = '#/v2';
+                setActiveView('v2'); // 立即更新状态，防止闪烁
             }
         };
 
@@ -322,11 +325,14 @@ function AppContent() {
 
     return (
         <div className={`app-container ${(isLeftResizing || isRightResizing) ? 'resizing' : ''}`}>
-            <NavigationBar
-                onOpenAPISettings={() => setShowAPISettings(true)}
-                backendStatus={backendStatus}
-                activeView={activeView}
-            />
+            {/* V2 页面不显示顶部导航栏 */}
+            {activeView !== 'v2' && (
+                <NavigationBar
+                    onOpenAPISettings={() => setShowAPISettings(true)}
+                    backendStatus={backendStatus}
+                    activeView={activeView}
+                />
+            )}
 
             {activeView === 'library' ? (
                 <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -335,14 +341,23 @@ function AppContent() {
                         onNavigate={setActiveView}
                     />
                 </div>
+            ) : activeView === 'welcome' ? (
+                /* [NEW] 独立欢迎页 */
+                <LandingPage onFilesUploaded={handleWelcomeUpload} />
             ) : activeView === 'v2' ? (
-                /* V2预览页面：全屏显示 */
-                <ExplorationFlowV2
-                    project={selectedProject}
-                    onProjectUpdate={setSelectedProject}
-                    cleaningTrigger={cleaningTrigger}
-                    onFilesUploaded={handleWelcomeUpload}
-                />
+                /* V2预览页面：全屏显示 (若无项目则显示落地页) */
+                selectedProject ? (
+                    <ExplorationFlowV2
+                        project={selectedProject}
+                        onProjectUpdate={setSelectedProject}
+                        cleaningTrigger={cleaningTrigger}
+                        onFilesUploaded={handleWelcomeUpload}
+                        backendStatus={backendStatus}
+                        onOpenAPISettings={() => setShowAPISettings(true)}
+                    />
+                ) : (
+                    <LandingPage onFilesUploaded={handleWelcomeUpload} />
+                )
             ) : activeView === 'design' ? (
                 /* [NEW] Design System Showcase */
                 <LiuliShowcase />

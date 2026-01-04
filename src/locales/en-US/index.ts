@@ -4,6 +4,7 @@ import { LanguageConfig } from '@/types/i18n';
 import { prompt } from './prompt';
 import { settings } from './settings';
 import welcome from './welcome';
+import { workbench } from './workbench';
 
 // Temporarily import from old file structure
 // Will be split into modules in next refactor
@@ -770,5 +771,6 @@ export const enUS: LanguageConfig = {
             keepCurrent: 'Keep Current',
             redetect: 'Redetect',
         },
+        workbench,
     },
 };

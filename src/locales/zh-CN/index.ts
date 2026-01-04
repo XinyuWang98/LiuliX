@@ -14,6 +14,7 @@ import { aiCost, aiRetry, cache, localModel, config } from './ai';
 
 import { errors } from './errors';
 import { packages } from './packages';
+import { workbench } from './workbench';
 
 export const zhCN: LanguageConfig = {
     code: 'zh-CN',
@@ -54,5 +55,6 @@ export const zhCN: LanguageConfig = {
         analysis,
         progress,
         packages,
+        workbench,
     },
 };

@@ -1,6 +1,6 @@
 import { useI18n } from '@/contexts/I18nContext';
 import { HistoryItem } from '../types/cleaning.types';
-import { Droplets, Trash2, FileCheck, Wand2, Sparkles, AlertCircle } from 'lucide-react';
+import { Droplets, Trash2, FileCheck, Wand2, Sparkles } from 'lucide-react';
 import './HistoryTab.css';
 
 interface HistoryTabProps {

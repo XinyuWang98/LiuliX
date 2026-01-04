@@ -521,6 +521,8 @@ export interface LanguageConfig {
             cleaningSuggestions: string;
             collapse: string;
             expandMore: string;
+            expandSql: string;
+            collapseSql: string;
             applySelected: string;
             analyzing: string;
             noSuggestions: string;

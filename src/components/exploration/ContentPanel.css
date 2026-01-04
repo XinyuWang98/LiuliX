@@ -9,8 +9,10 @@
     flex-direction: column;
     gap: var(--gap-l);
     /* 从 xxl 减小到 l（section 间距） */
-    padding: var(--gap-s);
-    /* 从 m 减小到 s（左右间距更紧凑） */
+    padding: 0 var(--gap-s) var(--gap-s) var(--gap-s);
+    /* 顶部无padding，左右底部有padding */
+    margin: var(--gap-s);
+    margin-left: 0;
     scroll-behavior: smooth;
 }
 
