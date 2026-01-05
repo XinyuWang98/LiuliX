@@ -35,9 +35,10 @@ export const USER_ROLE_PRESETS: Record<UserRole, UserRoleConfig> = {
             chartStyle: 'minimal',     // P2: 简洁图表风格
         },
 
-        // 分析报告配置（P2阶段）
+        // 分析报告配置
         reports: {
             template: 'technical',
+            showNotebook: true,            // 显示 Notebook 代码
             includeCodeAppendix: true,
             exportFormats: ['pdf', 'markdown', 'jupyter'],
         },
@@ -66,9 +67,10 @@ export const USER_ROLE_PRESETS: Record<UserRole, UserRoleConfig> = {
             chartStyle: 'business',    // P2: 商务图表风格
         },
 
-        // 分析报告配置（P2阶段）
+        // 分析报告配置
         reports: {
             template: 'business',
+            showNotebook: false,           // 默认隐藏 Notebook 代码
             includeCodeAppendix: false,
             exportFormats: ['pdf', 'pptx'],
         },
@@ -93,17 +95,26 @@ export function applyRolePreset(role: UserRole): void {
     localStorage.setItem('cleaning_router', String(config.cleaning.enableRouter));
     localStorage.setItem('cleaning_ai', String(config.cleaning.enableAI));
     localStorage.setItem('min_suggestions', String(config.cleaning.minSuggestions));
+    localStorage.setItem('cleaning_show_sql', String(config.cleaning.showSQL));
 
     // === 洞察分析配置 ===
     localStorage.setItem('analysis_max_columns', String(config.insights.maxColumns));
     localStorage.setItem('analysis_timeout', String(config.insights.timeout));
     localStorage.setItem('analysis_sampling_rows', String(config.insights.samplingRows));
+    localStorage.setItem('insights_show_code', String(config.insights.showCode));
+
+    // === 分析报告配置 ===
+    if (config.reports?.showNotebook !== undefined) {
+        localStorage.setItem('reports_show_notebook', String(config.reports.showNotebook));
+    }
 
     // === 保存角色标识 ===
     localStorage.setItem('user_role', role);
 
-    // P1/P2阶段配置暂不写入（功能未实现）
-    // showSQL, enableSQLEdit, showCode等将在后续阶段实现
+    // 🔄 清除用户手动覆盖记录（角色切换时重置为默认值）
+    localStorage.removeItem('cleaning_sql_expanded_manual');
+    localStorage.removeItem('insights_notebook_manual');
+    localStorage.removeItem('reports_notebook_manual');
 }
 
 /**

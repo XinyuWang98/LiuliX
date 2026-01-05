@@ -141,3 +141,10 @@
     color: var(--text-secondary);
     line-height: var(--line-height);
 }
+
+/* Deprecated Notice */
+.deprecated-notice {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-tertiary);
+}

@@ -69,6 +69,8 @@ export const exploration = {
     actions: {
         collapse: '收起',
         expand: '展开',
+        collapseNotebook: '收起 Notebook',
+        expandNotebook: '展开 Notebook',
         pin: '置顶',
         unpin: '取消置顶',
         quote: '引用',

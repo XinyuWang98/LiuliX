@@ -1,0 +1,127 @@
+/**
+ * ReportWorkbench.css
+ * 沉浸式写作工作台样式
+ */
+
+.report-workbench {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* 高度由内容撑开，不再强制 100% 以避免双重滚动条 */
+    /* min-height: 600px; */
+    background: var(--glass-surface);
+    border-radius: var(--radius-l);
+    backdrop-filter: blur(var(--blur-medium));
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+    /* 内部滚动 */
+}
+
+/* 顶部工具栏 (Sticky) */
+.rw-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--gap-m) var(--gap-l);
+    background: rgba(255, 255, 255, 0.8);
+    /* 浅色背景增强可读性 */
+    border-bottom: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--blur-large));
+}
+
+.rw-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+}
+
+.rw-title {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.rw-status-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+}
+
+.rw-header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+}
+
+.rw-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    padding: var(--gap-s) var(--gap-m);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    background: var(--glass-surface);
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    transition: all var(--transition-s) ease;
+}
+
+.rw-action-btn:hover {
+    background: var(--glass-hover);
+    transform: translateY(-1px);
+}
+
+.rw-action-btn.primary {
+    background: var(--primary);
+    color: var(--text-on-primary);
+    border-color: var(--primary);
+}
+
+.rw-action-btn.primary:hover {
+    opacity: 0.9;
+}
+
+/* 证据托盘容器 (位于工具栏下方) */
+.rw-tray-container {
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.02);
+    /* 微弱深色背景区分 */
+}
+
+/* 报告编辑区 */
+.rw-editor-area {
+    padding: var(--gap-xl);
+    /* 给予底部一定的空间，避免被最后的内容截断 */
+    padding-bottom: 60px;
+}
+
+/* Empty State */
+.rw-empty-state {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* Utilities */
+.rw-separator {
+    width: 1px;
+    height: 20px;
+    background: var(--glass-border);
+    margin: 0 4px;
+}
+
+.rw-text-faded {
+    opacity: 0.3;
+}
+
+.rw-text-success {
+    color: var(--success);
+}

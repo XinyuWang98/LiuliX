@@ -4,6 +4,7 @@ import { BottomPanel } from './components/BottomPanel';
 import { useI18n } from '../../contexts/I18nContext';
 import { DataViewerV2 as DataViewer } from '../data/DataViewerV2'; // 替换为 V2 组件但保留别名以减少改动
 import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
+import { getCurrentRoleConfig } from '@/config/userRolePresets';
 import {
     DataCleanerProps,
 } from './types/cleaning.types';
@@ -15,11 +16,32 @@ import './DataCleaner.css';
 
 export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigger, onProjectUpdate, aiSuggestions }) => {
     const { t } = useI18n();
+    const roleConfig = getCurrentRoleConfig();
+
     const [activeFileId, setActiveFileId] = useState<string | null>(project.files[0]?.id || null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [ignoredIds, setIgnoredIds] = useState<string[]>([]); // 忽略的建议ID列表
     const [refreshKey, setRefreshKey] = useState(0);
-    const [expandedSqlIds, setExpandedSqlIds] = useState<string[]>([]); // 展开SQL的建议ID列表
+
+    // 从角色配置初始化SQL展开状态
+    const [expandedSqlIds, setExpandedSqlIds] = useState<string[]>(() => {
+        // 优先使用用户手动设置（localStorage）
+        const userPreference = localStorage.getItem('cleaning_sql_expanded_manual');
+        if (userPreference !== null) {
+            try {
+                return JSON.parse(userPreference);
+            } catch {
+                return [];
+            }
+        }
+
+        // 否则使用角色配置
+        const showSQL = localStorage.getItem('cleaning_show_sql');
+        const shouldExpand = showSQL === 'true' || (showSQL === null && roleConfig.cleaning.showSQL);
+
+        // 如果角色配置为展开，返回标记（稍后sync到实际建议）；否则返回空数组
+        return shouldExpand ? ['__EXPAND_ALL__'] : [];
+    });
 
     const activeFile = project.files.find(f => f.id === activeFileId);
 
@@ -53,6 +75,14 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
         onProjectUpdate,
         project
     );
+
+    // 🆕 建议加载完成后，根据角色配置自动展开SQL
+    useEffect(() => {
+        if (suggestions.length > 0 && expandedSqlIds.includes('__EXPAND_ALL__')) {
+            const suggestionsWithSql = suggestions.filter(s => s.sql);
+            setExpandedSqlIds(suggestionsWithSql.map(s => s.id));
+        }
+    }, [suggestions]);
 
     // 使用历史记录Hook
     const { history, addHistoryItem, clearHistory } = useCleaningHistory();
@@ -124,11 +154,14 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
         setRefreshKey(prev => prev + 1);
     };
 
-    // 切换单个SQL展开状态
+    // 切换单个SQL展开状态（用户手动操作）
     const toggleSql = (id: string) => {
-        setExpandedSqlIds(prev =>
-            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-        );
+        const newIds = expandedSqlIds.includes(id)
+            ? expandedSqlIds.filter(x => x !== id)
+            : [...expandedSqlIds, id];
+        setExpandedSqlIds(newIds);
+        // 🆕 保存用户手动偏好
+        localStorage.setItem('cleaning_sql_expanded_manual', JSON.stringify(newIds));
     };
 
     // 切换全局SQL展开状态
@@ -140,11 +173,10 @@ export const DataCleaner: React.FC<DataCleanerProps> = ({ project, cleaningTrigg
         // 如果当前展开数量等于总可展开数量，则全部收起；否则全部展开
         const isAllExpanded = expandedSqlIds.length === allIds.length && allIds.length > 0;
 
-        if (isAllExpanded) {
-            setExpandedSqlIds([]);
-        } else {
-            setExpandedSqlIds(allIds);
-        }
+        const newIds = isAllExpanded ? [] : allIds;
+        setExpandedSqlIds(newIds);
+        // 🆕 保存用户手动偏好
+        localStorage.setItem('cleaning_sql_expanded_manual', JSON.stringify(newIds));
     };
 
     return (

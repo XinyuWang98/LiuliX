@@ -36,8 +36,10 @@
 }
 
 .insight-node__chart canvas {
-    max-height: 300px;
-    width: 100% !important;
+    width: var(--img-chart-width) !important;
+    max-height: var(--img-chart-max-height-card);
+    min-height: var(--img-chart-min-height);
+    object-fit: var(--img-chart-object-fit);
 }
 
 /* 表格降级样式 */

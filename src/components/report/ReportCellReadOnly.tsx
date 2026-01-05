@@ -12,6 +12,7 @@ import { Copy, Check, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { ReportCell, AuditStatus } from '@/types/report';
 import { useI18n } from '@/contexts/I18nContext';
 import { logger } from '@/utils/logger';
+import { ChartImage } from '../insights/ChartImage';
 import './ReportCellReadOnly.css';
 
 interface ReportCellReadOnlyProps {
@@ -129,9 +130,13 @@ export function ReportCellReadOnly({
                     )}
 
                     {cell.output.chartImage && (
-                        <div className="output-chart">
-                            <img src={cell.output.chartImage} alt="Chart" />
-                        </div>
+                        <ChartImage
+                            src={cell.output.chartImage}
+                            alt="Chart"
+                            variant="report"
+                            clickable={true}
+                            downloadable={true}
+                        />
                     )}
 
                     {cell.output.summary && (

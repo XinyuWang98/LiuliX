@@ -183,20 +183,23 @@
 }
 
 .insight-chart-thumbnail {
-    max-width: 100%;
-    max-height: 280px;
+    width: var(--img-chart-width);
+    height: auto;
+    min-height: var(--img-chart-min-height);
+    max-height: var(--img-chart-max-height-card);
+    object-fit: var(--img-chart-object-fit);
+    object-position: var(--img-chart-object-position);
     border-radius: var(--radius-m);
     border: 1px solid var(--border-light);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: zoom-in;
-    background-color: #fff;
-    /* 图表通常是白底 */
+    transition: var(--img-chart-transition);
+    cursor: var(--img-chart-cursor);
+    background-color: var(--img-chart-bg);
 }
 
 .insight-chart-thumbnail:hover {
-    transform: scale(1.02);
-    box-shadow: var(--shadow-lv2);
-    border-color: var(--primary);
+    transform: scale(var(--img-chart-hover-scale));
+    box-shadow: var(--img-chart-hover-shadow);
+    border-color: var(--img-chart-hover-border);
 }
 
 

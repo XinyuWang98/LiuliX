@@ -11,6 +11,7 @@ import { useInsightRefresh } from '@/hooks/useInsightRefresh';
 import { getRenderedCode } from '@/services/insights/inflater';
 import { executeInsightWithMode } from '@/services/skills/modeExecutor';
 import { ProjectFile } from '@/utils/projectUtils';
+import { getCurrentRoleConfig } from '@/config/userRolePresets';
 import './InsightChainFlow.css';
 
 const INIT_DELAY_MS = 800;
@@ -33,6 +34,7 @@ interface InsightChainFlowProps {
 
 export function InsightChainFlow({ columns, rowCount, tableName, file, insightCache, hideTitle = false, showNotebook: showNotebookProp, onInsightAdopt }: InsightChainFlowProps) {
     const { t } = useI18n();
+    const roleConfig = getCurrentRoleConfig();
 
     // 使用 InsightNode 状态
     const [insightNodes, setInsightNodes] = useState<InsightNodeType[]>([]);
@@ -91,13 +93,27 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
     const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(new Set());
 
     // 🆕 Live Notebook 显示/隐藏状态
-    // 优先使用外部 prop，否则使用内部状态和 localStorage
-    // 默认隐藏，只在用户点击卡片后显示
-    const [internalShowNotebook, setInternalShowNotebook] = useState(() =>
-        localStorage.getItem('insightFlow.showNotebook') === 'true' // 严格检查为 'true' 才显示
-    );
+    // 优先级：外部 prop > 用户手动设置 > 角色配置
+    const [internalShowNotebook, setInternalShowNotebook] = useState(() => {
+        // 如果有外部 prop，使用外部值
+        if (showNotebookProp !== undefined) return showNotebookProp;
+
+        // 优先使用用户手动设置
+        const userPreference = localStorage.getItem('insights_notebook_manual');
+        if (userPreference !== null) {
+            return userPreference === 'true';
+        }
+
+        // 否则使用角色配置
+        const showCode = localStorage.getItem('insights_show_code');
+        return showCode === 'true' || (showCode === null && roleConfig.insights.showCode);
+    });
     const showNotebook = showNotebookProp !== undefined ? showNotebookProp : internalShowNotebook;
-    const setShowNotebook = setInternalShowNotebook;
+    const setShowNotebook = (value: boolean) => {
+        setInternalShowNotebook(value);
+        // 🆕 保存用户手动偏好
+        localStorage.setItem('insights_notebook_manual', String(value));
+    };
 
     // 🆕 Notebook 宽度状态 (默认 50%)
     const [notebookWidthPercent, setNotebookWidthPercent] = useState(() => {
@@ -182,8 +198,22 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
             return results;
         };
 
-        return collectResolvedCodes(insightNodes);
+        const codes = collectResolvedCodes(insightNodes);
+        return codes;
     }, [insightNodes]);
+
+    // 🆕 日志：监控 resolvedCodes 更新
+    useEffect(() => {
+        if (resolvedCodes.length > 0) {
+            logger.log('UI', 'Live Notebook代码块更新', {
+                data: {
+                    total: resolvedCodes.length,
+                    ids: resolvedCodes.map(c => c.id),
+                    titles: resolvedCodes.map(c => c.title)
+                }
+            });
+        }
+    }, [resolvedCodes]);
 
     // 🆕 下钻处理逻辑
     const handleDrillDown = async (
@@ -266,6 +296,8 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                     imageLength: execResult.data?.image?.length || 0,
                     hasSummary: !!execResult.data?.summary,
                     summaryLength: execResult.data?.summary?.length || 0,
+                    hasCode: !!renderedCode,
+                    codeLength: renderedCode?.length || 0,
                     error: execResult.error
                 }
             });
@@ -320,7 +352,9 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         if (!targetNode) return;
 
         // 如果是展开操作（当前是折叠状态，要展开）
-        const willExpand = !targetNode.isExpanded;
+        // 使用类型守卫确保 TypeScript 正确推断类型
+        const currentNode: InsightNodeType = targetNode;
+        const willExpand = !currentNode.isExpanded;
 
         if (willExpand && targetDepth === 0) {
             // 🆕 手风琴逻辑：如果是顶层节点（父洞察卡片），收起所有其他顶层节点
@@ -338,7 +372,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         }
 
         // 切换目标节点的展开状态
-        targetNode.isExpanded = !targetNode.isExpanded;
+        currentNode.isExpanded = !currentNode.isExpanded;
 
         // 同步更新展开状态到 Notebook
         setExpandedNodeIds(prev => {
@@ -348,6 +382,17 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
             } else {
                 newSet.delete(nodeId);
             }
+
+            // 🆕 日志：展开状态更新
+            logger.log('UI', '展开状态已更新', {
+                data: {
+                    nodeId,
+                    isExpanded: targetNode!.isExpanded,
+                    expandedCount: newSet.size,
+                    expandedIds: Array.from(newSet)
+                }
+            });
+
             return newSet;
         });
 

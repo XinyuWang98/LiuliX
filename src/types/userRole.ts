@@ -26,9 +26,8 @@ export interface UserRoleConfig {
         /** 最少建议数量 */
         minSuggestions: number;
 
-        // P1阶段配置
-        /** 是否显示SQL代码 */
-        showSQL?: boolean;
+        /** 是否默认显示SQL代码 */
+        showSQL: boolean;
         /** 是否允许编辑SQL */
         enableSQLEdit?: boolean;
     };
@@ -42,9 +41,8 @@ export interface UserRoleConfig {
         /** 采样行数 */
         samplingRows: number;
 
-        // P1阶段配置
-        /** 是否显示Python代码 */
-        showCode?: boolean;
+        /** 是否默认显示Live Notebook */
+        showCode: boolean;
 
         // P2阶段配置
         /** 是否允许编辑代码 */
@@ -53,10 +51,12 @@ export interface UserRoleConfig {
         chartStyle?: 'minimal' | 'business';
     };
 
-    /** 分析报告配置（P2阶段） */
+    /** 分析报告配置 */
     reports?: {
         /** 报告模板类型 */
         template?: 'technical' | 'business';
+        /** 是否默认显示Notebook代码 */
+        showNotebook?: boolean;
         /** 是否包含代码附录 */
         includeCodeAppendix?: boolean;
         /** 导出格式 */

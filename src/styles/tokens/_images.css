@@ -1,0 +1,156 @@
+/**
+ * LiuliX 图片尺寸规范
+ * 所有洞察图表、可视化图片必须使用这些变量
+ */
+
+:root {
+    /* ========================================
+     图片尺寸变量
+     ======================================== */
+
+    /* 最小高度 - 确保图表可读性 */
+    --img-chart-min-height: 120px;
+
+    /* 最大高度 - 卡片场景（洞察卡片、树节点缩略图） */
+    --img-chart-max-height-card: 400px;
+
+    /* 最大高度 - 报告详情场景（分析报告中的图表） */
+    --img-chart-max-height-report: 600px;
+
+    /* 图片宽度 - 始终占满容器 */
+    --img-chart-width: 100%;
+
+    /* ========================================
+     图片样式变量
+     ======================================== */
+
+    /* 圆角 */
+    --img-chart-radius: var(--radius-m);
+
+    /* 边框 */
+    --img-chart-border: 1px solid var(--border-light);
+
+    /* 背景色 - 图表通常为白底 */
+    --img-chart-bg: #ffffff;
+
+    /* 对象填充模式 - 保持比例不裁剪 */
+    --img-chart-object-fit: contain;
+
+    /* 对象对齐位置 */
+    --img-chart-object-position: center;
+
+    /* ========================================
+     交互状态变量
+     ======================================== */
+
+    /* 悬停缩放比例 */
+    --img-chart-hover-scale: 1.02;
+
+    /* 悬停阴影 */
+    --img-chart-hover-shadow: var(--shadow-lv2);
+
+    /* 悬停边框颜色 */
+    --img-chart-hover-border: var(--primary);
+
+    /* 过渡动画 */
+    --img-chart-transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    /* 游标样式 */
+    --img-chart-cursor: zoom-in;
+    --img-chart-cursor-disabled: default;
+
+    /* ========================================
+     容器间距变量
+     ======================================== */
+
+    /* 图片区域底部间距 */
+    --img-chart-margin-bottom: var(--gap-m);
+
+    /* 容器内边距 */
+    --img-chart-padding: 0;
+
+    /* 容器对齐方式 */
+    --img-chart-container-align: center;
+
+    /* ========================================
+     阴影层次
+     ======================================== */
+
+    /* 默认阴影 */
+    --img-chart-shadow-default: var(--shadow-lv1);
+
+    /* 悬停阴影（与上面重复，保持一致性） */
+    --img-chart-shadow-hover: var(--shadow-lv2);
+
+    /* 聚焦阴影 */
+    --img-chart-shadow-focus: 0 0 0 3px rgba(10, 132, 255, 0.3);
+
+    /* ========================================
+     加载状态变量
+     ======================================== */
+
+    /* 骨架屏背景渐变 */
+    --img-chart-loading-bg: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 25%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 75%);
+
+    /* 骨架屏最小高度 */
+    --img-chart-loading-min-height: var(--img-chart-min-height);
+
+    /* 骨架屏动画时长 */
+    --img-chart-skeleton-duration: 1.5s;
+
+    /* ========================================
+     错误状态变量
+     ======================================== */
+
+    /* 加载失败背景 */
+    --img-chart-error-bg: rgba(239, 68, 68, 0.1);
+
+    /* 加载失败边框 */
+    --img-chart-error-border: 1px dashed var(--error);
+
+    /* 加载失败文字颜色 */
+    --img-chart-error-text-color: var(--text-tertiary);
+
+    /* 加载失败图标大小 */
+    --img-chart-error-icon-size: 48px;
+
+    /* ========================================
+     响应式尺寸变体（移动端适配）
+     ======================================== */
+
+    /* 移动端最大高度 */
+    --img-chart-max-height-mobile: 300px;
+
+    /* 平板最大高度 */
+    --img-chart-max-height-tablet: 400px;
+
+    /* 桌面端最大高度 */
+    --img-chart-max-height-desktop: 600px;
+
+    /* ========================================
+     缩略图场景变体
+     ======================================== */
+
+    /* 缩略图最大尺寸 */
+    --img-chart-thumbnail-max-width: 200px;
+    --img-chart-thumbnail-max-height: 150px;
+    --img-chart-thumbnail-radius: var(--radius-s);
+
+    /* 全屏预览场景 */
+    --img-chart-fullscreen-max-height: 90vh;
+    --img-chart-fullscreen-max-width: 90vw;
+}
+
+/* ========================================
+   响应式媒体查询
+   ======================================== */
+
+@media (max-width: 768px) {
+    :root {
+        /* 移动端使用更小的图片高度 */
+        --img-chart-max-height-card: var(--img-chart-max-height-mobile);
+    }
+}

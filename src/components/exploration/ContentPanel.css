@@ -1,4 +1,14 @@
 /* ========== 内容面板V2样式 ========== */
+.content-panel-v2 .hidden {
+    display: none;
+}
+
+.section-header-hidden {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
 .content-panel-v2 {
     flex: 1;
     min-width: 0;

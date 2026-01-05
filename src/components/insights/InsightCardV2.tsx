@@ -10,7 +10,7 @@ import { useI18n } from '@/contexts/I18nContext';
 import { useEvidence } from '@/contexts/EvidenceContext';
 import { InsightNode, DrillDownAction, MAX_DRILL_DEPTH } from '@/types/insightTree';
 import { DrillDownArea } from './DrillDownArea';
-import { formatChartBase64 } from '@/utils/imageUtils';
+import { ChartImage } from './ChartImage';
 import './InsightCardV2.css';
 
 interface InsightCardV2Props {
@@ -89,10 +89,8 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                 className="insight-card-header"
                 onClick={() => {
                     onToggle(node.id);
-                    // 点击已完成的卡片时，聚焦并显示 Notebook
-                    if (!isPending && node.result) {
-                        onFocus?.(node.id);
-                    }
+                    // 🆕 方案A修复：无论状态如何，都设置焦点以同步Live Notebook展开状态
+                    onFocus?.(node.id);
                 }}
             >
                 {/* 左侧：卡片图标 */}
@@ -179,13 +177,13 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                 >
                     {/* 图表区域 */}
                     {node.result?.image && (
-                        <div className="chart-preview-area">
-                            <img
-                                src={node.result.image}
-                                alt={node.title}
-                                className="chart-image"
-                            />
-                        </div>
+                        <ChartImage
+                            src={node.result.image}
+                            alt={node.title}
+                            variant="card"
+                            clickable={true}
+                            downloadable={true}
+                        />
                     )}
 
                     {/* 结论区域 */}

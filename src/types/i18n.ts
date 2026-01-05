@@ -762,6 +762,8 @@ export interface LanguageConfig {
             actions: {
                 collapse: string;
                 expand: string;
+                collapseNotebook: string;
+                expandNotebook: string;
                 pin: string;
                 unpin: string;
                 quote: string;

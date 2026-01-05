@@ -178,19 +178,20 @@
 
 /* 图表预览区 */
 .chart-preview-area {
-    margin-bottom: 16px;
-    border-radius: 8px;
-    background: #ffffff;
-    width: 100%;
+    margin-bottom: var(--img-chart-margin-bottom);
+    border-radius: var(--img-chart-radius);
+    background: var(--img-chart-bg);
     overflow: hidden;
-    height: auto !important;
-    min-height: 0;
 }
 
 .chart-image {
     display: block;
-    width: 100%;
+    width: var(--img-chart-width);
     height: auto;
+    min-height: var(--img-chart-min-height);
+    max-height: var(--img-chart-max-height-card);
+    object-fit: var(--img-chart-object-fit);
+    object-position: var(--img-chart-object-position);
 }
 
 /* 结论框 */

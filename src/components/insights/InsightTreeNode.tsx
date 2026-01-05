@@ -5,6 +5,7 @@ import { ChevronRight, ChevronDown, Loader, AlertCircle, BarChart2 } from 'lucid
 import { useEffect } from 'react';
 import { logger } from '@/utils/logger';
 import { formatChartBase64 } from '@/utils/imageUtils';
+import { ChartImage } from './ChartImage';
 import './InsightTreeNode.css';
 
 export interface InsightTreeNodeProps {
@@ -136,13 +137,13 @@ export function InsightTreeNode({
                         <>
                             {/* Row 3: Visualization */}
                             {node.result.image && (
-                                <div className="insight-node-row-viz">
-                                    <img
-                                        src={formatChartBase64(node.result.image)}
-                                        alt={node.title}
-                                        className="insight-chart-thumbnail"
-                                    />
-                                </div>
+                                <ChartImage
+                                    src={formatChartBase64(node.result.image)}
+                                    alt={node.title}
+                                    variant="card"
+                                    clickable={true}
+                                    downloadable={true}
+                                />
                             )}
 
                             {/* Row 4: Summary */}

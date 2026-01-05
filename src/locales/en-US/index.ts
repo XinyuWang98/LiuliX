@@ -437,6 +437,8 @@ export const enUS: LanguageConfig = {
             actions: {
                 collapse: 'Collapse',
                 expand: 'Expand',
+                collapseNotebook: 'Collapse Notebook',
+                expandNotebook: 'Expand Notebook',
                 pin: 'Pin',
                 unpin: 'Unpin',
                 quote: 'Quote',

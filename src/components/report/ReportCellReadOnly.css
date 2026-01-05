@@ -150,13 +150,17 @@
 }
 
 .output-chart {
-  margin-bottom: var(--gap-m);
-  text-align: center;
+  margin-bottom: var(--img-chart-margin-bottom);
+  text-align: var(--img-chart-container-align);
 }
 
 .output-chart img {
-  max-width: 100%;
+  width: var(--img-chart-width);
   height: auto;
+  min-height: var(--img-chart-min-height);
+  max-height: var(--img-chart-max-height-report);
+  object-fit: var(--img-chart-object-fit);
+  object-position: var(--img-chart-object-position);
   border-radius: var(--radius-m);
   box-shadow: var(--shadow-lv2);
 }

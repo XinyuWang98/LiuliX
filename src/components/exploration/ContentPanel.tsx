@@ -2,13 +2,12 @@ import { useRef, useEffect, useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { useEvidence } from '@/contexts/EvidenceContext';
 import { DataCleaner } from '../cleaning/DataCleaner';
-import { ReportGenerator } from '../report/ReportGenerator';
+import { ReportWorkbench } from '../report/ReportWorkbench';
 import { InsightChainFlow } from '../insights/InsightChainFlow';
 import { ProjectCardGrid } from './ProjectCardGrid';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
 import { Project } from '@/utils/projectUtils';
 import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
-import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 import './ContentPanel.css';
 
 interface ContentPanelProps {
@@ -39,15 +38,15 @@ export function ContentPanel({
     // 🆕 Active File Management - 支持多文件项目的洞察刷新
     const [activeFileId, setActiveFileId] = useState<string | null>(null);
 
-    // 🆕 Notebook 显示/隐藏状态（从 localStorage 读取，默认隐藏）
+    // 🆕 Notebook 显示/隐藏状态管理
     const [showNotebook, setShowNotebook] = useState(() => {
         const saved = localStorage.getItem('insightFlow.showNotebook');
-        return saved === 'true'; // 只有明确为 'true' 时才显示，否则默认隐藏
+        return saved ? saved === 'true' : false; // 默认收起
     });
 
-    // 持久化 showNotebook 状态
+    // 保存 Notebook 显示状态
     useEffect(() => {
-        localStorage.setItem('insightFlow.showNotebook', String(showNotebook));
+        localStorage.setItem('insightFlow.showNotebook', showNotebook.toString());
     }, [showNotebook]);
 
     // 🆕 当project.files变化时，自动选择第一个文件（如果当前没有选中文件）
@@ -141,13 +140,12 @@ export function ContentPanel({
                         <LiuliGlass className="content-module-container"> {/* Added Container */}
                             <div className="section-header">
                                 <h2 className="section-title">{t('exploration.sections.insights')}</h2>
-                                {/* Notebook 切换按钮 */}
                                 <button
                                     className="notebook-toggle-btn"
                                     onClick={() => setShowNotebook(!showNotebook)}
+                                    title={showNotebook ? t('exploration.actions.collapseNotebook') : t('exploration.actions.expandNotebook')}
                                 >
-                                    {showNotebook ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
-                                    <span>{showNotebook ? '收起 Notebook' : '展开 Notebook'}</span>
+                                    {showNotebook ? t('exploration.actions.collapseNotebook') : t('exploration.actions.expandNotebook')}
                                 </button>
                             </div>
                             <InsightChainFlow
@@ -165,23 +163,22 @@ export function ContentPanel({
                 );
             })()}
 
-            {/* 分析报告 Section */}
+            {/* 4. 分析报告工作台 ReportWorkbench (替换原 ReportGenerator) */}
             {project && evidenceRecords.length > 0 && (
                 <div ref={reportRef} id="report" className="content-section">
                     <LiuliGlass className="content-module-container">
-                        <div className="section-header">
-                            <h2 className="section-title">{t('exploration.sections.report')}</h2>
-                            <span className="evidence-badge">
-                                {t('report.evidenceAdopted', { count: evidenceRecords.length })}
-                            </span>
+                        {/* 移除 Section Header，由 Workbench 内部 Toolbar 接管以实现沉浸式体验 */}
+                        <div className="section-header-hidden">
+                            {/* 保留一个空的占位或极简标题，或者完全移除。
+                                为了保持 ContentPanel 的统一间距，这里暂时移除标题，直接放 Workbench */}
                         </div>
-                        <ReportGenerator />
+                        <ReportWorkbench />
                     </LiuliGlass>
                 </div>
             )}
 
             {/* 隐藏的 FileUploader 组件 - 复用现有的文件上传逻辑 */}
-            <div style={{ display: 'none' }}>
+            <div className="hidden">
                 <FileUploader ref={fileUploaderRef} onFilesUploaded={handleProjectUpload} />
             </div>
         </div>

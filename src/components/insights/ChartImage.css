@@ -1,0 +1,169 @@
+/**
+ * ChartImage 统一图表图片组件样式
+ * 基于 _images.css 中的全局变量
+ */
+
+/* ========================================
+   容器样式
+   ======================================== */
+
+.chart-image-wrapper {
+    position: relative;
+    width: var(--img-chart-width);
+    margin-bottom: var(--img-chart-margin-bottom);
+    border-radius: var(--img-chart-radius);
+    overflow: hidden;
+    background: var(--img-chart-bg);
+}
+
+/* 场景变体 */
+
+/* 缩略图场景 */
+.chart-image-wrapper--thumbnail {
+    /* 缩略图场景 */
+    max-width: var(--img-chart-thumbnail-max-width);
+    border-radius: var(--img-chart-thumbnail-radius);
+}
+
+/* ========================================
+   图片主体
+   ======================================== */
+
+.chart-image {
+    display: block;
+    width: var(--img-chart-width);
+    height: auto;
+    min-height: var(--img-chart-min-height);
+    object-fit: var(--img-chart-object-fit);
+    object-position: var(--img-chart-object-position);
+    transition: var(--img-chart-transition);
+}
+
+/* 场景变体尺寸 */
+.chart-image--card {
+    max-height: var(--img-chart-max-height-card);
+}
+
+.chart-image--report {
+    max-height: var(--img-chart-max-height-report);
+}
+
+.chart-image--thumbnail {
+    max-height: var(--img-chart-thumbnail-max-height);
+}
+
+/* 加载中状态 */
+.chart-image--loading {
+    opacity: 0;
+}
+
+/* 悬停效果（仅在可点击时） */
+.chart-image:not(.chart-image--loading):hover {
+    transform: scale(var(--img-chart-hover-scale));
+}
+
+/* ========================================
+   加载状态 - 骨架屏
+   ======================================== */
+
+.chart-image-skeleton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: var(--img-chart-loading-min-height);
+    background: var(--img-chart-loading-bg);
+    background-size: 200% 100%;
+    border-radius: var(--img-chart-radius);
+    overflow: hidden;
+}
+
+.skeleton-shimmer {
+    width: 100%;
+    height: 100%;
+    background: var(--img-chart-loading-bg);
+    background-size: 200% 100%;
+    animation: shimmer var(--img-chart-skeleton-duration) infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* ========================================
+   错误状态
+   ======================================== */
+
+.chart-image-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--img-chart-min-height);
+    background: var(--img-chart-error-bg);
+    border: var(--img-chart-error-border);
+    border-radius: var(--img-chart-radius);
+    color: var(--img-chart-error-text-color);
+    padding: var(--gap-l);
+}
+
+.chart-image-error svg {
+    width: var(--img-chart-error-icon-size);
+    height: var(--img-chart-error-icon-size);
+    margin-bottom: var(--gap-s);
+    color: var(--error);
+    opacity: 0.5;
+}
+
+.chart-image-error p {
+    margin: 0;
+    font-size: var(--fs-sm);
+}
+
+/* ========================================
+   悬停工具栏
+   ======================================== */
+
+.chart-image-toolbar {
+    position: absolute;
+    top: var(--gap-s);
+    right: var(--gap-s);
+    display: flex;
+    gap: var(--gap-xs);
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.chart-image-wrapper:hover .chart-image-toolbar {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+}
+
+.toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-s);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}

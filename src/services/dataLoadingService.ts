@@ -94,7 +94,6 @@ export class DataLoadingService {
             const targetFile = updatedProject.files.find((f: any) => f.id === fileId);
             if (targetFile) {
                 delete targetFile.data.tableName;
-                delete targetFile.data.hasTableName;
             }
             return updatedProject;
         }

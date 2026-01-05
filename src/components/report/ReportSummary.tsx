@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useEvidence } from '@/contexts/EvidenceContext';
 import { FileText, ChevronDown, ChevronUp, Code } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
+import { ChartImage } from '../insights/ChartImage';
 import './ReportSummary.css';
 
 export function ReportSummary() {
@@ -42,8 +43,8 @@ export function ReportSummary() {
 
     if (insightChainRecords.length === 0) {
         return (
-            <div style={{ padding: 'var(--gap-l)', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                <FileText size={48} style={{ margin: '0 auto var(--gap-m)', opacity: 0.5 }} />
+            <div className="report-summary-container">
+                <FileText size={48} className="report-summary-icon" />
                 <p>暂无洞察链证据，请先完成数据分析并采纳证据</p>
             </div>
         );
@@ -88,9 +89,13 @@ export function ReportSummary() {
                                         <div key={nodeIdx} className="insight-item">
                                             {/* 图表（如果是 base64） */}
                                             {node.chartImage && (
-                                                <div className="chart-container">
-                                                    <img src={node.chartImage} alt={`图表 ${nodeIdx + 1}`} />
-                                                </div>
+                                                <ChartImage
+                                                    src={node.chartImage}
+                                                    alt={`图表 ${nodeIdx + 1}`}
+                                                    variant="report"
+                                                    clickable={true}
+                                                    downloadable={true}
+                                                />
                                             )}
 
                                             {/* 表格降级 */}
