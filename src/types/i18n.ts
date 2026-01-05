@@ -1136,6 +1136,8 @@ export interface LanguageConfig {
             promptLibrary: string;
             toggleSidebar: string;
             backToWelcome: string;
+            localModel: string;
+            apiModel: string;
             collapsed: {
                 tooltip: string;
             };

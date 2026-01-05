@@ -21,8 +21,9 @@ export function buildRouterPrompt(
     sampleData: Record<string, unknown>[],
     columnTypes?: Record<string, string>
 ): string {
-    // 获取所有 L2 Prompt
-    const l2Prompts = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' });
+    // 获取所有 L2 Prompt，并过滤掉清洗类 prompt（只保留分析类）
+    const l2Prompts = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
+        .filter(p => !p.id.startsWith('cleaner-'));
 
     // 构建可用模板清单
     const promptList = l2Prompts.map(p => {

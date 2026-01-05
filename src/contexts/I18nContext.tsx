@@ -12,6 +12,17 @@ const DEFAULT_LANGUAGE = 'zh-CN';
 // localStorage 键名
 const LANGUAGE_STORAGE_KEY = 'dataprism_language';
 
+// 🆕 全局当前语言状态（用于 Service 层访问）
+export type LanguageCode = 'zh-CN' | 'en-US';
+let currentGlobalLanguage: LanguageCode = DEFAULT_LANGUAGE as LanguageCode;
+
+/**
+ * 获取当前语言（供 Service 层使用）
+ */
+export function getCurrentLanguage(): LanguageCode {
+    return currentGlobalLanguage;
+}
+
 // i18n 上下文类型
 interface I18nContextType {
     language: LanguageConfig;
@@ -32,7 +43,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     // 从 localStorage 读取保存的语言,如果没有则使用默认语言
     const [currentLanguageCode, setCurrentLanguageCode] = useState<string>(() => {
         const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-        return savedLanguage || DEFAULT_LANGUAGE;
+        const lang = savedLanguage || DEFAULT_LANGUAGE;
+        currentGlobalLanguage = lang as LanguageCode; // 🆕 同步到全局变量
+        return lang;
     });
 
     // 根据语言代码查找语言对象
@@ -43,6 +56,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         const language = AVAILABLE_LANGUAGES.find(l => l.code === code);
         if (language) {
             setCurrentLanguageCode(code);
+            currentGlobalLanguage = code as LanguageCode; // 🆕 同步到全局变量
             // 持久化到 localStorage
             localStorage.setItem(LANGUAGE_STORAGE_KEY, code);
         }

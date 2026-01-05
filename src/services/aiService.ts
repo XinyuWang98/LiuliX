@@ -511,11 +511,11 @@ export const generateHypotheses = async (
         rowCount?: number;
         sampleData?: any[];
     },
-    t: (key: string) => string  // i18n翻译函数
+    _t: (key: string) => string  // 保留参数以兼容，但不再使用
 ): Promise<Array<{ assumption: string; verification: string }>> => {
-    const { 生成假设Prompt, 解析假设结果 } = await import('@/services/prompts/hypothesis');
+    const { 生成假设Prompt, 解析假设结果 } = await import('@/services/prompts/hypothesis/index');
 
-    const prompt = 生成假设Prompt(数据摘要, t);
+    const prompt = 生成假设Prompt(数据摘要);
     const { content } = await askAI(prompt);
     return 解析假设结果(content);
 };
@@ -533,11 +533,11 @@ export const generateInsight = async (
     数据字段列表: string[],
     用户指令: string,
     代码语言: 'python' | 'sql' = 'python',
-    t: (key: string) => string  // i18n翻译函数
+    _t: (key: string) => string  // 保留参数以兼容现有调用，但不再使用
 ): Promise<any> => {
-    const { 生成洞察Prompt, 解析洞察结果 } = await import('@/services/prompts/insightGenerator');
+    const { 生成洞察Prompt, 解析洞察结果 } = await import('@/services/prompts/insightGenerator/index');
 
-    const prompt = 生成洞察Prompt(假设描述, 数据字段列表, 用户指令, 代码语言, t);
+    const prompt = 生成洞察Prompt(假设描述, 数据字段列表, 用户指令, 代码语言);
     const { content } = await askAI(prompt);
     return 解析洞察结果(content);
 };

@@ -74,7 +74,7 @@ function AppContent() {
             } else if (hash === '#/welcome') {
                 setActiveView('welcome');
             } else if (hash === '#/v2') {
-                setActiveView('v2' as any); // V2预览页面
+                setActiveView('v2'); // V2预览页面
             } else if (hash === '#/design') {
                 setActiveView('design'); // [NEW] Design System
             } else if (hash === '#/' || hash === '') {
