@@ -4,6 +4,7 @@ import type { InsightNode } from '@/types/insightTree';
 import { ActionGrid } from './ActionGrid';
 import { useEvidence } from '@/contexts/EvidenceContext';
 import { formatChartBase64 } from '@/utils/imageUtils';
+import { useI18n } from '@contexts/I18nContext';
 
 /**
  * 详情面板组件
@@ -16,6 +17,7 @@ interface DetailPanelProps {
 
 export const DetailPanel: React.FC<DetailPanelProps> = ({ node }) => {
     const { addRecord } = useEvidence();
+    const { t } = useI18n();
     const [isAdopted, setIsAdopted] = React.useState(false);
     const [isIgnored, setIsIgnored] = React.useState(false);
 
@@ -57,14 +59,14 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ node }) => {
                             onClick={handleAdopt}
                             disabled={isAdopted || isIgnored}
                         >
-                            {isAdopted ? '✓ 已采纳' : '采纳'}
+                            {isAdopted ? `✓ ${t('insightChain.adopted')}` : t('insightChain.adopt')}
                         </button>
                         <button
                             className={`detail-panel__action-btn detail-panel__action-btn--ignore ${isIgnored ? 'detail-panel__action-btn--active' : ''}`}
                             onClick={handleIgnore}
                             disabled={isAdopted || isIgnored}
                         >
-                            {isIgnored ? '已忽略' : '忽略'}
+                            {isIgnored ? t('insightChain.ignore') : t('insightChain.ignore')}
                         </button>
                     </div>
                 </div>
@@ -110,7 +112,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ node }) => {
                         {/* AI分析报告 */}
                         {node.insight && (
                             <div className="detail-panel__insight-content">
-                                <h3 className="detail-panel__insight-title">📝 AI分析</h3>
+                                <h3 className="detail-panel__insight-title">📝 {t('insight.analyzing').replace('...', '')}</h3>
                                 <p>{node.insight}</p>
                             </div>
                         )}
@@ -120,9 +122,9 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ node }) => {
                     {node.code && (
                         <div className="detail-panel__code-container">
                             <div className="detail-panel__code-header">
-                                <span>💻 Python代码</span>
+                                <span>💻 {t('insightChain.viewCode')}</span>
                                 <button className="detail-panel__copy-btn">
-                                    复制
+                                    {t('report.copy')}
                                 </button>
                             </div>
                             <div className="detail-panel__code-content">
@@ -137,7 +139,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ node }) => {
             {node.recommendedActions && node.recommendedActions.length > 0 && (
                 <section className="detail-panel__actions-section">
                     <h2 className="detail-panel__section-title">
-                        🎯 下钻建议
+                        🎯 {t('insight.drillDown')}
                     </h2>
                     <ActionGrid actions={node.recommendedActions} nodeId={node.id} />
                 </section>

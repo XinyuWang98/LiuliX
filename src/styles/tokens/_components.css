@@ -51,4 +51,12 @@
     /* Stat Cards */
     --stat-card-min-width: 120px;
     --stat-bar-height: 4px;
+
+    /* F-06: 水印样式 */
+    --watermark-opacity: 0.8;
+    /* 提高不透明度使水印更清晰 */
+    --watermark-bottom: var(--gap-l);
+
+    /* F-13: 代码块最大高度 */
+    --code-block-max-height: 600px;
 }

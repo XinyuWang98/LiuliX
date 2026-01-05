@@ -6,6 +6,7 @@ import { Chart } from 'chart.js';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css'; // 暗色主题
 import { logger } from '../../utils/logger';
+import { useI18n } from '@contexts/I18nContext';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-sql';
 import './InsightNode.css';
@@ -22,6 +23,7 @@ export function InsightNode({ node, onAdopt, onIgnore }: InsightNodeProps) {
     const [isCopied, setIsCopied] = useState(false);
     const [isCodeExpanded, setIsCodeExpanded] = useState(false);
     const [chartBase64, setChartBase64] = useState<string | null>(null);
+    const { t } = useI18n();
 
     // 创建图表
     useEffect(() => {
@@ -99,7 +101,7 @@ export function InsightNode({ node, onAdopt, onIgnore }: InsightNodeProps) {
                     </table>
                     {node.tableData.length > 10 && (
                         <p className="insight-node__table-hint">
-                            仅显示前 10 行，共 {node.tableData.length} 行
+                            {t('grid.loading').replace('Loading data...', `${t('cleaning.showMore')} 10 / ${node.tableData.length}`)}
                         </p>
                     )}
                 </div>
@@ -107,7 +109,7 @@ export function InsightNode({ node, onAdopt, onIgnore }: InsightNodeProps) {
 
             {/* 结论 */}
             <div className="insight-node__conclusion">
-                <strong>结论：</strong>
+                <strong>{t('insightChain.conclusion')}：</strong>
                 {node.conclusion}
             </div>
 
@@ -118,14 +120,14 @@ export function InsightNode({ node, onAdopt, onIgnore }: InsightNodeProps) {
                 onToggle={(e) => setIsCodeExpanded((e.target as HTMLDetailsElement).open)}
             >
                 <summary className="insight-node__code-summary">
-                    查看代码 ({node.codeLanguage.toUpperCase()})
+                    {t('insightChain.viewCode')} ({node.codeLanguage.toUpperCase()})
                     <button
                         className="insight-node__copy-btn"
                         onClick={(e) => {
                             e.preventDefault();
                             handleCopyCode();
                         }}
-                        title="复制代码"
+                        title={t('insightChain.copyCode')}
                     >
                         {isCopied ? <Check size={16} /> : <Copy size={16} />}
                     </button>
@@ -150,11 +152,11 @@ export function InsightNode({ node, onAdopt, onIgnore }: InsightNodeProps) {
                         }}
                     >
                         <ThumbsUp size={16} />
-                        采纳
+                        {t('insightChain.adopt')}
                     </button>
                     <button className="btn-ignore" onClick={onIgnore}>
                         <ThumbsDown size={16} />
-                        忽略
+                        {t('insightChain.ignore')}
                     </button>
                 </div>
             )}
@@ -162,7 +164,7 @@ export function InsightNode({ node, onAdopt, onIgnore }: InsightNodeProps) {
             {node.isAdopted && (
                 <div className="insight-node__adopted-badge">
                     <Check size={16} />
-                    已采纳
+                    {t('insightChain.adopted')}
                 </div>
             )}
         </div>

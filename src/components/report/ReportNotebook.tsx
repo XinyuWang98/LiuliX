@@ -44,7 +44,7 @@ export function ReportNotebook({ document, onCellUpdate, mode }: ReportNotebookP
                         key={cell.id}
                         cell={cell}
                         onAudit={document.isSigned ? undefined : handleCellAudit}
-                        showAuditControls={!document.isSigned && mode === 'notebook'}
+                    // F-11: showAuditControls 已移除
                     />
                 ))}
             </div>

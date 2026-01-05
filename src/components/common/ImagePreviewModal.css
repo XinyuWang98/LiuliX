@@ -100,3 +100,16 @@
         opacity: 1;
     }
 }
+
+/* F-06: Logo 水印样式 */
+.watermark-container {
+    position: absolute;
+    bottom: var(--watermark-bottom);
+    right: var(--gap-l);
+    /* 右下角 */
+    opacity: var(--watermark-opacity);
+    pointer-events: none;
+    z-index: 10;
+    /* 灰色滤镜：将白色 Logo 转为深灰色 */
+    filter: grayscale(1) brightness(0.4) contrast(1.2);
+}

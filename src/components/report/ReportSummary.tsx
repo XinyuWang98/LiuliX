@@ -3,10 +3,12 @@ import { useEvidence } from '@/contexts/EvidenceContext';
 import { FileText, ChevronDown, ChevronUp, Code } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { ChartImage } from '../insights/ChartImage';
+import { useI18n } from '@/contexts/I18nContext';
 import './ReportSummary.css';
 
 export function ReportSummary() {
     const { records } = useEvidence();
+    const { t } = useI18n();
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
     // 过滤洞察链类型的证据
@@ -45,7 +47,7 @@ export function ReportSummary() {
         return (
             <div className="report-summary-container">
                 <FileText size={48} className="report-summary-icon" />
-                <p>暂无洞察链证据，请先完成数据分析并采纳证据</p>
+                <p>{t('report.noInsightChain')}</p>
             </div>
         );
     }
@@ -57,9 +59,9 @@ export function ReportSummary() {
                 <div className="report-bubble ai-intro">
                     <div className="bubble-header">
                         <span className="ai-avatar">🤖</span>
-                        <strong>AI 报告小助手</strong>
+                        <strong>{t('report.aiAssistant')}</strong>
                     </div>
-                    <p>已收集证据 #{String(insightChainRecords[0].id).padStart(3, '0')} - #{String(insightChainRecords[insightChainRecords.length - 1].id).padStart(3, '0')}，生成最终报告如下：</p>
+                    <p>{t('report.evidenceCollected').replace('{start}', String(insightChainRecords[0].id).padStart(3, '0')).replace('{end}', String(insightChainRecords[insightChainRecords.length - 1].id).padStart(3, '0'))}</p>
                 </div>
 
                 {/* 遍历每条证据，生成独立气泡 */}
@@ -81,7 +83,7 @@ export function ReportSummary() {
                                 <div className="bubble-content">
                                     {/* 假设 */}
                                     <div className="section">
-                                        <strong>假设：</strong>{insightChain.hypothesis.title}
+                                        <strong>{t('report.hypothesis')}：</strong>{insightChain.hypothesis.title}
                                     </div>
 
                                     {/* 遍历洞察节点 */}
@@ -124,14 +126,14 @@ export function ReportSummary() {
 
                                             {/* 结论 */}
                                             <div className="conclusion">
-                                                <strong>结论：</strong>{node.conclusion}
+                                                <strong>{t('report.conclusion')}：</strong>{node.conclusion}
                                             </div>
 
                                             {/* 代码（折叠） */}
                                             <details className="code-details">
                                                 <summary>
                                                     <Code size={16} />
-                                                    查看代码 ({node.codeLanguage.toUpperCase()})
+                                                    {t('report.viewCode')} ({node.codeLanguage.toUpperCase()})
                                                 </summary>
                                                 <pre>
                                                     <code>{node.code}</code>
@@ -149,13 +151,13 @@ export function ReportSummary() {
                 <div className="report-bubble ai-conclusion">
                     <div className="bubble-header">
                         <span className="ai-avatar">🤖</span>
-                        <strong>总体结论</strong>
+                        <strong>{t('report.overallConclusion')}</strong>
                     </div>
-                    <p>基于以上 {insightChainRecords.length} 条洞察链分析，建议：</p>
+                    <p>{t('report.basedOnInsights').replace('{count}', String(insightChainRecords.length))}</p>
                     <ul>
-                        <li>对数据进行分层清洗，重点关注高影响字段</li>
-                        <li>补充缺失值填充策略，避免偏差</li>
-                        <li>定期复查重复数据，确保数据质量</li>
+                        <li>{t('report.suggestion1')}</li>
+                        <li>{t('report.suggestion2')}</li>
+                        <li>{t('report.suggestion3')}</li>
                     </ul>
                 </div>
             </div>
@@ -164,7 +166,7 @@ export function ReportSummary() {
             <div className="report-actions">
                 <button className="btn-export" onClick={exportPDF}>
                     <FileText size={20} />
-                    下载完整报告 (PDF)
+                    {t('report.downloadPdf')}
                 </button>
             </div>
         </div>

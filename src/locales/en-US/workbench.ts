@@ -7,6 +7,8 @@ export const workbench = {
     promptLibrary: 'Prompt Library',
     toggleSidebar: 'Toggle Sidebar',
     backToWelcome: 'Back to Welcome',
+    localModel: 'Local Model',
+    apiModel: 'API Model',
     collapsed: {
         tooltip: 'Click to expand sidebar',
     },

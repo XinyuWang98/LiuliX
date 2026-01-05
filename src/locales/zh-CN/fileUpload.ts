@@ -28,4 +28,5 @@ export const fileUpload = {
     inputPlaceholder: '询问任何关于数据的问题...',
     clickOrDragShort: '点击/拖拽文件',
     dropHere: '释放以上传',
+    processingInCard: '正在处理 {filename} ({current}/{total})',  // F-18
 };

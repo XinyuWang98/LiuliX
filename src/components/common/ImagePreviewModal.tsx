@@ -1,6 +1,7 @@
 import { X, Download } from 'lucide-react';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Logo } from '@/components/common/Logo/Logo';
 import './ImagePreviewModal.css';
 
 interface ImagePreviewModalProps {
@@ -59,6 +60,11 @@ export function ImagePreviewModal({
                 )}
 
                 <img src={imageUrl} alt={altText} className="image-preview-img" />
+
+                {/* F-06: Logo 水印 */}
+                <div className="watermark-container">
+                    <Logo size="m" showText={true} />
+                </div>
             </div>
         </div>,
         document.body

@@ -18,13 +18,12 @@ import './ReportCellReadOnly.css';
 interface ReportCellReadOnlyProps {
     cell: ReportCell;
     onAudit?: (cellId: string, status: AuditStatus, note?: string) => void;
-    showAuditControls?: boolean;
+    // F-11: showAuditControls 已移除
 }
 
 export function ReportCellReadOnly({
     cell,
-    onAudit,
-    showAuditControls = true
+    onAudit: _onAudit // F-11: 暂时保留接口兼容性
 }: ReportCellReadOnlyProps) {
     const { t } = useI18n();
     const [copied, setCopied] = useState(false);
@@ -40,14 +39,14 @@ export function ReportCellReadOnly({
         }
     };
 
-    // 标记审计状态
-    const handleMarkApproved = () => {
-        onAudit?.(cell.id, AuditStatus.Approved);
-    };
-
-    const handleMarkRejected = () => {
-        onAudit?.(cell.id, AuditStatus.Rejected, '');
-    };
+    // F-11: 审计函数已移除
+    // 如需恢复审计功能，请取消以下注释：
+    // const handleMarkApproved = () => {
+    //     onAudit?.(cell.id, AuditStatus.Approved);
+    // };
+    // const handleMarkRejected = () => {
+    //     onAudit?.(cell.id, AuditStatus.Rejected, '');
+    // };
 
     // 代码高亮
     const highlightedCode = Prism.highlight(
@@ -131,11 +130,9 @@ export function ReportCellReadOnly({
 
                     {cell.output.chartImage && (
                         <ChartImage
-                            src={cell.output.chartImage}
-                            alt="Chart"
-                            variant="report"
-                            clickable={true}
-                            downloadable={true}
+                            src={cell.output?.chartImage || ''}
+                            alt={cell.output?.summary || 'Chart'}
+                            variant="card" /* F-10: 图片样式规范 */
                         />
                     )}
 
@@ -148,8 +145,9 @@ export function ReportCellReadOnly({
                 </div>
             )}
 
-            {/* Audit Controls */}
-            {showAuditControls && cell.auditStatus === AuditStatus.Pending && (
+            {/* F-11: 移除审计控件，允许一键签名 */}
+            {/* Audit Controls - REMOVED */}
+            {/* {showAuditControls && cell.auditStatus === AuditStatus.Pending && (
                 <div className="cell-audit-controls">
                     <button className="btn-audit btn-approve" onClick={handleMarkApproved}>
                         <CheckCircle size={16} />
@@ -160,7 +158,7 @@ export function ReportCellReadOnly({
                         {t('report.audit.markRejected')}
                     </button>
                 </div>
-            )}
+            )} */}
 
             {/* Audit Note (if rejected) */}
             {cell.auditNote && (

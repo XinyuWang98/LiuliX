@@ -1,6 +1,7 @@
 import React from 'react';
 import { useI18n } from '@contexts/I18nContext';
 import { Languages, Check } from 'lucide-react';
+import { Z_INDEX } from '@/constants/ui';
 
 /**
  * 语言切换器组件
@@ -42,7 +43,7 @@ export function LanguageSwitcher() {
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            zIndex: 999,
+                            zIndex: Z_INDEX.MODAL_BACKDROP,
                         }}
                         onClick={() => setIsOpen(false)}
                     />
@@ -56,7 +57,7 @@ export function LanguageSwitcher() {
                             right: 0,
                             minWidth: '150px',
                             padding: 'var(--gap-s)',
-                            zIndex: 1000,
+                            zIndex: Z_INDEX.MODAL,
                             boxShadow: 'var(--shadow-lg)',
                         }}
                     >

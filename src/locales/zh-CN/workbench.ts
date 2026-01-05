@@ -7,6 +7,8 @@ export const workbench = {
     promptLibrary: 'Prompt库',
     toggleSidebar: '展开/收起侧边栏',
     backToWelcome: '返回欢迎页',
+    localModel: '本地模型',
+    apiModel: 'API模型',
     collapsed: {
         tooltip: '点击展开侧边栏',
     },

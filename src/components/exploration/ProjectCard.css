@@ -73,6 +73,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
+    /* F-01: Flexbox 溢出修复 */
     margin: 0;
 }
 

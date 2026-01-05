@@ -27,8 +27,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 60px;
+  height: 43px;
+  /* 与右侧 header 对齐 */
   padding: 0 var(--gap-m);
+  margin: 0 var(--gap-s);
+  /* 与右侧内容对齐 */
   cursor: pointer;
   transition: opacity var(--transition-fast);
   border-bottom: 1px solid var(--glass-border);
@@ -89,11 +92,20 @@
 /* 状态栏样式 */
 .sidebar-status-bar {
   display: flex;
+  flex-direction: column;
+  /* F-15: 展开时垂直堆叠 */
   align-items: center;
-  gap: var(--gap-s);
+  /* 居中对齐 */
+  gap: var(--gap-xs);
   padding: var(--gap-s) var(--gap-m);
   border-bottom: 1px solid var(--glass-border);
   min-height: 40px;
+}
+
+/* F-14: 收起状态居中 */
+.workbench-sidebar.collapsed .sidebar-status-bar {
+  justify-content: center;
+  align-items: center;
 }
 
 .sidebar-status-bar .status-text {
@@ -102,10 +114,37 @@
   white-space: nowrap;
 }
 
+/* 状态指示器样式（从 inline style 移到 CSS） */
+.sidebar-status-bar .backend-status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* 本地模型 - 绿色 */
+.workbench-sidebar .backend-status[title*="本地"] {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+}
+
+/* API 模型 - 紫色 */
+.workbench-sidebar .backend-status[title*="API"] {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* 移除 FreeTrialBadge 的左边距（垂直堆叠时不需要） */
 .sidebar-status-bar .free-trial-badge {
-  margin-left: auto;
+  margin-left: 0;
   transform: scale(0.9);
 }
+
+/* 增大状态指示器尺寸（修复收起时看不见问题） */
+/* .sidebar-status-bar .backend-status {
+  width: 10px !important;
+  height: 10px !important;
+} */
 
 /* 底部工具区 */
 .sidebar-footer {

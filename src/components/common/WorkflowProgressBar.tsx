@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useI18n } from '@contexts/I18nContext';
 import { UploadCloud, Sparkles, LineChart, FileText, CheckCircle2 } from 'lucide-react';
+import { Z_INDEX } from '@/constants/ui';
 
 export type WorkflowStep = 'upload' | 'cleaning' | 'hypothesis' | 'insights' | 'report';
 
@@ -128,7 +129,7 @@ export function WorkflowProgressBar({ currentStep = 'upload', onStepClick, orien
                                     marginRight: '12px',
                                 }),
                                 pointerEvents: 'none',
-                                zIndex: 1000,
+                                zIndex: Z_INDEX.MODAL,
                             }}>
                                 {/* Animated Content */}
                                 <div style={{

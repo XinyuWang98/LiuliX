@@ -1,6 +1,7 @@
 import { Download, ZoomIn, AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ImagePreviewModal } from '../common/ImagePreviewModal';
+import { base64ToBlobUrl } from '@/utils/imageUtils';
 import './ChartImage.css';
 
 interface ChartImageProps {
@@ -43,6 +44,32 @@ export function ChartImage({
     const [hasError, setHasError] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
     const [showToolbar, setShowToolbar] = useState(false);
+    const [blobUrl, setBlobUrl] = useState<string>('');
+
+    // F-19: 转换 base64 为 Blob URL，解决 431 错误
+    useEffect(() => {
+        if (!src) {
+            setBlobUrl('');
+            return;
+        }
+
+        // 判断是否为 Base64 字符串（有前缀或无前缀）
+        const isBase64WithPrefix = src.startsWith('data:image');
+        const isRawBase64 = !src.startsWith('http') && !src.startsWith('blob:') && !src.startsWith('/') && src.length > 100;
+
+        if (isBase64WithPrefix || isRawBase64) {
+            // 确保有前缀后再转换
+            const base64WithPrefix = isBase64WithPrefix ? src : `data:image/png;base64,${src}`;
+            const url = base64ToBlobUrl(base64WithPrefix);
+            setBlobUrl(url);
+            return () => {
+                if (url) URL.revokeObjectURL(url);
+            };
+        } else {
+            // 普通 URL
+            setBlobUrl(src);
+        }
+    }, [src]);
 
     // 图片加载成功
     const handleImageLoad = () => {
@@ -102,9 +129,9 @@ export function ChartImage({
                 )}
 
                 {/* 图片主体 */}
-                {!hasError && (
+                {!hasError && blobUrl && (
                     <img
-                        src={src}
+                        src={blobUrl}
                         alt={alt}
                         className={`chart-image chart-image--${variant} ${isLoading ? 'chart-image--loading' : ''}`}
                         onClick={handleImageClick}

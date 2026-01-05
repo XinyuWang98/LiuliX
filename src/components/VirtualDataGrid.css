@@ -149,6 +149,19 @@
     transition: all var(--transition-fast);
 }
 
+/* 序号列专属样式 - Row Number Column */
+.row-number-col,
+.row-number {
+    text-align: center;
+    /* F-03: 序号列居中 */
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--fw-medium);
+    color: var(--text-tertiary);
+    user-select: none;
+    cursor: default;
+    background: var(--surface-elevated);
+}
+
 .type-dropdown-item:hover {
     background: var(--bg-hover);
     color: var(--text-primary);
@@ -512,7 +525,9 @@
 
 /* 序号列专属样式 - Row Number Column */
 .enhancedHeaderCell.row-number-col,
-.enhancedGridCell.row-number {
+.enhancedGridCell.row-number,
+.enhancedHeaderCell序号列,
+.enhancedGridCell序号 {
     position: sticky;
     left: 0;
     z-index: 2;
@@ -520,10 +535,11 @@
     align-items: center;
     /* 确保垂直方向居中 (对于 header 是 flex-col) */
     justify-content: center;
-    /* 确保水平方向居中 */
+    /* 确保水平方向居中 - F-03: 修复序号列居中 */
     font-weight: var(--fw-medium);
     color: var(--text-secondary);
-    background-color: var(--bg-secondary);
+    background-color: transparent;
+    /* 移除灰色背景 */
     /* 移除阴影，用户要求消除灰色阴影 */
     box-shadow: none;
 }

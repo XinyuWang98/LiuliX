@@ -27,8 +27,8 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--gap-m) var(--gap-l);
-    background: rgba(255, 255, 255, 0.8);
-    /* 浅色背景增强可读性 */
+    background: transparent;
+    /* F-08: 移除白色背景 */
     border-bottom: 1px solid var(--glass-border);
     backdrop-filter: blur(var(--blur-large));
 }

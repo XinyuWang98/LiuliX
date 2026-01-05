@@ -4,6 +4,9 @@ import { globalT } from '../contexts/I18nContext';
 import { logger } from '../utils/logger';
 import { assessMemoryBeforeExecution } from '../utils/memoryAssessment';
 
+// 🔧 DuckDB CSV 配置常量
+const MAX_CSV_LINE_SIZE = 50 * 1024 * 1024; // 50MB
+
 /**
  * CSV数据摄入相关功能
  * 职责：文件分析、CSV流式导入、自动抽样
@@ -27,13 +30,13 @@ export async function analyzeCSV(
 
     // 快速 Count (忽略错误行，防止因个别脏数据导致全盘失败)
     // 添加 max_line_size 参数支持超长行（默认2MB，这里设置为10MB）
-    const result = await conn.query(`SELECT count(*) as c FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=10485760)`);
+    const result = await conn.query(`SELECT count(*) as c FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=${MAX_CSV_LINE_SIZE})`);
     const row = result.get(0);
     const count = row ? Number(row['c']) : 0;
 
     // 获取列信息用于内存评估
     try {
-        const schemaResult = await conn.query(`DESCRIBE read_csv_auto('${file.name}', ignore_errors=true, max_line_size=10485760)`);
+        const schemaResult = await conn.query(`DESCRIBE SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=${MAX_CSV_LINE_SIZE})`);
         const columns: string[] = [];
         for (let i = 0; i < schemaResult.numRows; i++) {
             const schemaRow = schemaResult.get(i);
@@ -119,7 +122,7 @@ export async function ingestCSV(
     }
 
     // 3. 构建SQL - 先创建 original 表（原始数据，只读）
-    let sql = `CREATE TABLE ${originalTable} AS SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=10485760)`;
+    let sql = `CREATE TABLE ${originalTable} AS SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=${MAX_CSV_LINE_SIZE})`;
 
     if (shouldSample && options.sampleSize !== -1) {
         sql += ` USING SAMPLE ${Math.floor(sampleRate * 100)}%`;

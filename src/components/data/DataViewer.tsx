@@ -7,6 +7,7 @@ import { DataTable } from './DataTable';
 import { VirtualDataGrid } from '../VirtualDataGrid';
 import { SmartFileTabBar } from './SmartFileTabBar';
 import { useDataLoader } from './hooks/useDataLoader';
+import { Z_INDEX } from '@/constants/ui';
 
 interface DataViewerProps {
     project: Project | null;
@@ -149,7 +150,7 @@ export function DataViewer({ project, activeFileId: externalActiveFileId, onProj
                                             padding: 'var(--gap-s)',
                                             minWidth: '250px',
                                             maxHeight: '400px',
-                                            zIndex: 1000,
+                                            zIndex: Z_INDEX.MODAL,
                                             display: 'flex',
                                             flexDirection: 'column',
                                         }}>
@@ -305,7 +306,7 @@ export function DataViewer({ project, activeFileId: externalActiveFileId, onProj
                         gap: '16px'
                     }}>
                         <Loader size={40} style={{ color: 'var(--primary)', animation: 'spin 1s linear infinite' }} />
-                        <p style={{ color: 'var(--text-secondary)' }}>正在加载数据...</p>
+                        <p style={{ color: 'var(--text-secondary)' }}>{t('grid.loading')}</p>
                         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                     </div>
                 ) : error ? (
@@ -317,7 +318,7 @@ export function DataViewer({ project, activeFileId: externalActiveFileId, onProj
                         justifyContent: 'center',
                         color: 'var(--error)'
                     }}>
-                        错误: {error}
+                        {t('common.error')}: {error}
                     </div>
                 ) : (useDuckDB && duckInfo) ? (
                     /* DuckDB 虚拟表格 */

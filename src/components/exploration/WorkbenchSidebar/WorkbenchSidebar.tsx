@@ -88,13 +88,13 @@ export function WorkbenchSidebar({
         if (useLocalModel) {
             return {
                 color: 'var(--success)',
-                text: '本地模型',
+                text: t('workbench.localModel'),
                 glow: '0 0 8px var(--success)'
             };
         } else {
             return {
                 color: 'var(--accent)',
-                text: 'API模型',
+                text: t('workbench.apiModel'),
                 glow: '0 0 8px var(--accent)'
             };
         }
@@ -117,7 +117,7 @@ export function WorkbenchSidebar({
                 title={t('workbench.backToWelcome')}
             >
                 <Logo
-                    size="m"
+                    size="l"  /* F-16: 调整为大号 */
                     variant="flow"
                     layout="horizontal"
                     showText={!isCollapsed}
@@ -129,14 +129,6 @@ export function WorkbenchSidebar({
                 <div
                     className="backend-status"
                     title={statusInfo.text}
-                    style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: statusInfo.color,
-                        boxShadow: statusInfo.glow,
-                        flexShrink: 0,
-                    }}
                 />
                 {!isCollapsed && (
                     <>

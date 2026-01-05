@@ -71,11 +71,7 @@ export function ReportWorkbench() {
     // Actions
     const handleSignReport = () => {
         if (!document) return;
-        const allApproved = document.cells.every(c => c.auditStatus === AuditStatus.Approved);
-        if (!allApproved) {
-            alert(t('report.audit.allCellsReviewed'));
-            return;
-        }
+        // F-11: 移除 allApproved 检查，允许一键签名
         setDocument({
             ...document,
             isSigned: true,

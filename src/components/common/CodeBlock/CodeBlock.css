@@ -5,8 +5,8 @@
     background: var(--surface-elevated);
     border: 1px solid var(--border-subtle);
     overflow: hidden;
-    max-height: 600px;
-    /* 限制最大高度，确保有滚动条 */
+    max-height: var(--code-block-max-height);
+    /* F-13: 使用CSS变量 */
 }
 
 .code-block pre {
@@ -16,8 +16,8 @@
     /* 只允许垂直滚动 */
     overflow-x: hidden;
     /* 禁止水平滚动 */
-    max-height: 568px;
-    /* 减去边框和padding后的高度 */
+    max-height: calc(var(--code-block-max-height) - 32px);
+    /* F-13: 减去边框和padding */
     font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
     font-size: var(--font-size-sm);
     line-height: 1.6;
