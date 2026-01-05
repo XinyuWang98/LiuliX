@@ -1,0 +1,82 @@
+/**
+ * DrillDownRecommendationCard 样式
+ * 类似 nested-children 的卡片样式
+ */
+
+.drill-down-recommendation-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+}
+
+.drill-down-recommendation-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+    transform: translateX(4px);
+}
+
+.drill-down-recommendation-card--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* 左侧图标 */
+.drill-down-recommendation-card__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(10, 132, 255, 0.1);
+    border-radius: 50%;
+    color: var(--primary);
+}
+
+/* 中间内容区域 */
+.drill-down-recommendation-card__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.drill-down-recommendation-card__label {
+    font-size: var(--fs-s);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.drill-down-recommendation-card__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    color: var(--primary);
+    background: rgba(10, 132, 255, 0.1);
+    border-radius: 10px;
+    width: fit-content;
+}
+
+/* 右侧箭头 */
+.drill-down-recommendation-card__arrow {
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.drill-down-recommendation-card:hover .drill-down-recommendation-card__arrow {
+    color: var(--primary);
+    transform: translateX(4px);
+}

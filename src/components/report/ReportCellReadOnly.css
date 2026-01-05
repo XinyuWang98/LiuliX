@@ -1,22 +1,19 @@
 /**
- * ReportCellReadOnly 组件样式
- * 100% CSS变量，无硬编码
+ * ReportCellReadOnly 组件样式 - LiuliX 设计系统规范
  */
 
 .report-cell {
-  --cell-bg-approved: rgba(34, 197, 94, 0.1);
-  --cell-bg-rejected: rgba(239, 68, 68, 0.1);
-
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-m);
   padding: var(--gap-m);
   margin-bottom: var(--gap-m);
-  transition: all 0.2s ease;
+  transition: all var(--transition-s) var(--ease-out);
+  backdrop-filter: blur(var(--blur-medium));
 }
 
 .report-cell:hover {
-  border-color: var(--bg-accent);
+  border-color: var(--primary);
   box-shadow: var(--shadow-lv2);
 }
 
@@ -27,26 +24,26 @@
   gap: var(--gap-s);
   margin-bottom: var(--gap-m);
   padding-bottom: var(--gap-s);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .cell-id {
   font-family: var(--font-mono);
-  font-size: var(--font-size-s);
+  font-size: var(--fs-s);
   color: var(--text-secondary);
 }
 
 .cell-language {
-  font-size: var(--font-size-xs);
+  font-size: var(--fs-xs);
   padding: var(--gap-xxs) var(--gap-s);
-  background: var(--bg-accent);
-  color: var(--text-primary);
+  background: var(--primary);
+  color: var(--text-on-primary);
   border-radius: var(--radius-s);
-  font-weight: 500;
+  font-weight: var(--fw-medium);
 }
 
 .cell-depth {
-  font-size: var(--font-size-xs);
+  font-size: var(--fs-xs);
   color: var(--text-secondary);
   margin-left: auto;
 }
@@ -58,22 +55,22 @@
   gap: var(--gap-xs);
   padding: var(--gap-xs) var(--gap-s);
   border-radius: var(--radius-s);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
 }
 
 .audit-pending {
-  background: var(--bg-hover);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-secondary);
 }
 
 .audit-approved {
-  background: var(--cell-bg-approved);
+  background: rgba(34, 197, 94, 0.1);
   color: var(--success);
 }
 
 .audit-rejected {
-  background: var(--cell-bg-rejected);
+  background: rgba(239, 68, 68, 0.1);
   color: var(--error);
 }
 
@@ -94,34 +91,35 @@
   align-items: center;
   gap: var(--gap-xs);
   padding: var(--gap-xs) var(--gap-s);
-  background: var(--bg-hover);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-s);
   color: var(--text-primary);
-  font-size: var(--font-size-s);
+  font-size: var(--fs-s);
+  font-weight: var(--fw-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-s) var(--ease-out);
 }
 
 .btn-copy-code:hover {
-  background: var(--bg-accent);
-  border-color: var(--bg-accent);
+  background: var(--glass-hover);
+  border-color: var(--primary);
 }
 
 .run-disabled-hint {
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  color: var(--text-tertiary);
 }
 
 .code-block {
   margin: 0;
   padding: var(--gap-m);
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-m);
   overflow-x: auto;
   font-family: var(--font-mono);
-  font-size: var(--font-size-s);
+  font-size: var(--fs-s);
   line-height: 1.6;
 }
 
@@ -132,8 +130,8 @@
 /* Output Area */
 .cell-output-area {
   padding: var(--gap-m);
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-m);
   margin-bottom: var(--gap-m);
 }
@@ -143,11 +141,11 @@
   align-items: center;
   gap: var(--gap-s);
   padding: var(--gap-s) var(--gap-m);
-  background: var(--cell-bg-rejected);
+  background: rgba(239, 68, 68, 0.1);
   border-left: 3px solid var(--error);
   border-radius: var(--radius-s);
   color: var(--error);
-  font-size: var(--font-size-s);
+  font-size: var(--fs-s);
   margin-bottom: var(--gap-m);
 }
 
@@ -164,14 +162,16 @@
 }
 
 .output-summary {
-  font-size: var(--font-size-m);
+  font-size: var(--fs-m);
   line-height: 1.6;
+  color: var(--text-secondary);
 }
 
 .output-summary strong {
   display: block;
   margin-bottom: var(--gap-s);
   color: var(--text-primary);
+  font-weight: var(--fw-bold);
 }
 
 .output-summary p {
@@ -184,7 +184,7 @@
   display: flex;
   gap: var(--gap-s);
   padding-top: var(--gap-m);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--glass-border);
 }
 
 .btn-audit {
@@ -192,44 +192,46 @@
   align-items: center;
   gap: var(--gap-xs);
   padding: var(--gap-s) var(--gap-m);
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-s);
-  font-size: var(--font-size-s);
+  font-size: var(--fs-s);
+  font-weight: var(--fw-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-s) var(--ease-out);
 }
 
 .btn-approve {
-  background: var(--bg-panel);
+  background: var(--glass-surface);
   color: var(--success);
   border-color: var(--success);
 }
 
 .btn-approve:hover {
-  background: var(--cell-bg-approved);
+  background: rgba(34, 197, 94, 0.1);
 }
 
 .btn-reject {
-  background: var(--bg-panel);
+  background: var(--glass-surface);
   color: var(--error);
   border-color: var(--error);
 }
 
 .btn-reject:hover {
-  background: var(--cell-bg-rejected);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 /* Audit Note */
 .cell-audit-note {
   margin-top: var(--gap-m);
   padding: var(--gap-s) var(--gap-m);
-  background: var(--bg-hover);
+  background: rgba(255, 255, 255, 0.05);
   border-left: 3px solid var(--error);
   border-radius: var(--radius-s);
-  font-size: var(--font-size-s);
+  font-size: var(--fs-s);
 }
 
 .cell-audit-note strong {
   color: var(--text-primary);
+  font-weight: var(--fw-bold);
   margin-right: var(--gap-xs);
 }

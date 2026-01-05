@@ -158,47 +158,51 @@ export function ReportNotebook() {
         <div className="report-notebook">
             {/* Header */}
             <div className="report-header">
-                <h2>{document.title}</h2>
-                <div className="header-actions">
-                    <ModeToggle mode={mode} onChange={setMode} />
+                <div className="header-top">
+                    <h2>{document.title}</h2>
+                    <div className="header-actions">
+                        <ModeToggle mode={mode} onChange={setMode} />
 
-                    {/* 导出按钮组 */}
-                    <div className="export-actions">
-                        <button className="btn-icon" onClick={handleExportMarkdown} title={t('report.export.exportMarkdown')}>
-                            {copySuccess ? <Check size={16} color="var(--success)" /> : <Copy size={16} />}
-                        </button>
-                        <button className="btn-icon" onClick={handleExportHTML} title={t('report.export.downloadHTML')}>
-                            <FileText size={16} />
-                        </button>
-                        <button className="btn-icon" onClick={handleExportColab} title={t('report.notebook.copyAllToColab')}>
-                            <Download size={16} />
-                        </button>
+                        {/* 导出按钮组 */}
+                        <div className="export-actions">
+                            <button className="btn-icon" onClick={handleExportMarkdown} title={t('report.export.exportMarkdown')}>
+                                {copySuccess ? <Check size={16} color="var(--success)" /> : <Copy size={16} />}
+                            </button>
+                            <button className="btn-icon" onClick={handleExportHTML} title={t('report.export.downloadHTML')}>
+                                <FileText size={16} />
+                            </button>
+                            <button className="btn-icon" onClick={handleExportColab} title={t('report.notebook.copyAllToColab')}>
+                                <Download size={16} />
+                            </button>
+                        </div>
+
+                        {!document.isSigned && (
+                            <button
+                                className="btn-sign-report"
+                                onClick={handleSignReport}
+                                disabled={auditProgress.approved !== auditProgress.total}
+                            >
+                                ✅ {t('report.audit.signReport')}
+                            </button>
+                        )}
                     </div>
-
-                    {!document.isSigned && (
-                        <button
-                            className="btn-sign-report"
-                            onClick={handleSignReport}
-                            disabled={auditProgress.approved !== auditProgress.total}
-                        >
-                            ✅ {t('report.audit.signReport')}
-                        </button>
-                    )}
                 </div>
+
+                {/* Audit Progress - 集成到 Header 底部 */}
+                {!document.isSigned && mode === 'notebook' && (
+                    <div className="header-progress">
+                        <span className="progress-label">
+                            {t('report.audit.progress')}: {auditProgress.approved} / {auditProgress.total}
+                        </span>
+                        <div className="progress-track">
+                            <div
+                                className="progress-fill"
+                                style={{ width: `${(auditProgress.approved / auditProgress.total) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
-
-            {/* Audit Progress */}
-            {!document.isSigned && mode === 'notebook' && (
-                <div className="audit-progress-bar">
-                    <span>{t('report.audit.progress')}: {auditProgress.approved} / {auditProgress.total}</span>
-                    <div className="progress-track">
-                        <div
-                            className="progress-fill"
-                            style={{ width: `${(auditProgress.approved / auditProgress.total) * 100}%` }}
-                        />
-                    </div>
-                </div>
-            )}
 
             {/* Signed Status */}
             {document.isSigned && (

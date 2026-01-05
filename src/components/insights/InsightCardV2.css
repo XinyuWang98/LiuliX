@@ -18,6 +18,7 @@
     position: relative;
     backdrop-filter: blur(16px);
     /* 确保玻璃态模糊 */
+    margin: 0;
 }
 
 /* ========================================
@@ -182,18 +183,14 @@
     background: #ffffff;
     width: 100%;
     overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
+    height: auto !important;
+    min-height: 0;
 }
 
 .chart-image {
     display: block;
-    max-width: 100%;
+    width: 100%;
     height: auto;
-    max-height: 500px;
-    object-fit: contain;
 }
 
 /* 结论框 */

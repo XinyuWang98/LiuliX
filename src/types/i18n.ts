@@ -1124,5 +1124,22 @@ export interface LanguageConfig {
             keepCurrent: string;
             redetect: string;
         };
+
+        // 工作台侧边栏
+        workbench: {
+            projectSelection: string;
+            cleaning: string;
+            insights: string;
+            report: string;
+            promptLibrary: string;
+            toggleSidebar: string;
+            backToWelcome: string;
+            collapsed: {
+                tooltip: string;
+            };
+            external: {
+                hint: string;
+            };
+        };
     };
 }

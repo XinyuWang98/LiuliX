@@ -124,7 +124,7 @@ export const evidence = {
         analysis: '数据分析',
         insight: '数据洞察',
         visualization: '可视化',
-        insightChain: '洞察链',
+        insightChain: '洞察分析',
     },
 };
 

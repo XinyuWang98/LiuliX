@@ -28,8 +28,6 @@ interface WorkbenchSidebarProps {
 export function WorkbenchSidebar({
     selectedSection,
     onSectionChange,
-    projectCount = 0,
-    backendStatus = 'checking',
     onOpenAPISettings,
 }: WorkbenchSidebarProps) {
     const { t } = useI18n();

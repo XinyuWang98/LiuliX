@@ -1,0 +1,10 @@
+﻿
+> dataprism@0.1.0 type-check
+> tsc --noEmit
+
+src/App.tsx(333,21): error TS2322: Type '"welcome" | "dashboard" | "library" | "design"' is not assignable to type '"dashboard" | "library" | "v2" | "design" | undefined'.
+  Type '"welcome"' is not assignable to type '"dashboard" | "library" | "v2" | "design" | undefined'.
+src/components/exploration/WorkbenchSidebar/WorkbenchSidebar.tsx(31,5): error TS6133: 'projectCount' is declared but its value is never read.
+src/components/exploration/WorkbenchSidebar/WorkbenchSidebar.tsx(32,5): error TS6133: 'backendStatus' is declared but its value is never read.
+src/locales/en-US/index.ts(774,9): error TS2353: Object literal may only specify known properties, and 'workbench' does not exist in type '{ common: { loading: string; initializing: string; error: string; success: string; cancel: string; confirm: string; delete: string; edit: string; save: string; yes: string; no: string; search: string; all: string; featureInDev: string; collapse: string; verifying?: string | undefined; }; ... 33 more ...; hardware: {...'.
+src/locales/zh-CN/index.ts(58,9): error TS2353: Object literal may only specify known properties, and 'workbench' does not exist in type '{ common: { loading: string; initializing: string; error: string; success: string; cancel: string; confirm: string; delete: string; edit: string; save: string; yes: string; no: string; search: string; all: string; featureInDev: string; collapse: string; verifying?: string | undefined; }; ... 33 more ...; hardware: {...'.

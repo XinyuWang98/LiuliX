@@ -181,6 +181,22 @@ class PyodideManager {
         return this.sendMessage('WRITE_FILE', { filename, content: binaryContent });
     }
 
+    /**
+     * 加载中文字体（Source Han Sans CN）
+     * 注意：异步执行，失败不影响主流程
+     */
+    public async loadChineseFont(): Promise<void> {
+        try {
+            await this.sendMessage('LOAD_FONT_URL', {
+                url: 'https://cdn.jsdelivr.net/gh/be5invis/source-han-sans-ttf/SubsetOTF/CN/SourceHanSansCN-Regular.otf',
+                name: 'SourceHanSansCN.otf'
+            });
+            logger.log('Python', '中文字体加载成功');
+        } catch (err) {
+            logger.warn('Python', '中文字体加载失败（不影响功能）', { error: String(err) });
+        }
+    }
+
     private sendMessage(type: string, content: any): Promise<any> {
         return new Promise((resolve, reject) => {
             if (!this.worker) {

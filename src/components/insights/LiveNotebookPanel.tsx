@@ -5,6 +5,7 @@ import './LiveNotebookPanel.css';
 interface LiveNotebookPanelProps {
     codeBlocks: Array<{ id: string; title: string; code: string }>;
     focusedId: string | null; // 当前焦点节点ID
+    expandedIds?: Set<string>; // 🆕 外部控制的展开状态
 }
 
 /**
@@ -16,13 +17,18 @@ interface LiveNotebookPanelProps {
  * - 自动滚动到焦点代码块
  * - 焦点高亮效果
  * - 可折叠代码块（默认只展开聚焦的代码块）
+ * - 🆕 支持外部控制展开状态（与左侧卡片同步）
  */
-export function LiveNotebookPanel({ codeBlocks, focusedId }: LiveNotebookPanelProps) {
+export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNotebookPanelProps) {
     const [copied, setCopied] = useState(false);
     const focusedBlockRef = useRef<HTMLDivElement>(null);
 
-    // 🆕 折叠/展开状态管理
-    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+    // 🆕 内部展开状态管理（仅在没有外部控制时使用）
+    const [internalExpandedIds, setInternalExpandedIds] = useState<Set<string>>(new Set());
+
+    // 使用外部传入的 expandedIds，如果没有则使用内部状态
+    const activeExpandedIds = expandedIds || internalExpandedIds;
+    const setExpandedIds = expandedIds ? undefined : setInternalExpandedIds;
 
     const fullScript = codeBlocks.map(block => block.code).join('\n\n');
 
@@ -32,8 +38,10 @@ export function LiveNotebookPanel({ codeBlocks, focusedId }: LiveNotebookPanelPr
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // 🆕 切换单个代码块的折叠状态
+    // 🆕 切换单个代码块的折叠状态（仅在内部控制时有效）
     const toggleExpand = (id: string) => {
+        if (!setExpandedIds) return; // 如果是外部控制，则不允许手动切换
+
         setExpandedIds(prev => {
             const newSet = new Set(prev);
             if (newSet.has(id)) {
@@ -45,12 +53,12 @@ export function LiveNotebookPanel({ codeBlocks, focusedId }: LiveNotebookPanelPr
         });
     };
 
-    // 🆕 当 focusedId 变化时，自动展开聚焦的代码块，折叠其他代码块
+    // 🆕 当 focusedId 变化时，自动展开聚焦的代码块（仅在内部控制时）
     useEffect(() => {
-        if (focusedId) {
+        if (focusedId && setExpandedIds) {
             setExpandedIds(new Set([focusedId])); // 只展开聚焦的代码块
         }
-    }, [focusedId]);
+    }, [focusedId, setExpandedIds]);
 
     // 自动滚动到焦点代码块
     useEffect(() => {
@@ -86,7 +94,7 @@ export function LiveNotebookPanel({ codeBlocks, focusedId }: LiveNotebookPanelPr
                 ) : (
                     codeBlocks.map((block, index) => {
                         const isFocused = block.id === focusedId;
-                        const isExpanded = expandedIds.has(block.id);
+                        const isExpanded = activeExpandedIds.has(block.id);
                         return (
                             <div
                                 key={block.id}
@@ -97,6 +105,7 @@ export function LiveNotebookPanel({ codeBlocks, focusedId }: LiveNotebookPanelPr
                                 <div
                                     className="code-step-label"
                                     onClick={() => toggleExpand(block.id)}
+                                    style={{ cursor: expandedIds ? 'default' : 'pointer' }}
                                 >
                                     {/* 展开/折叠图标 */}
                                     <span className="expand-icon">

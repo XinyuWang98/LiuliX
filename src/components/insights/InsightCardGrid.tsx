@@ -5,6 +5,7 @@
 import { HypothesisCard } from './HypothesisCard';
 import { HypothesisCard as HypothesisCardType } from '@/types/insightChain';
 import { logger } from '@/utils/logger';
+import { formatChartBase64 } from '@/utils/imageUtils';
 
 interface InsightCardGridProps {
     hypotheses: HypothesisCardType[];
@@ -47,7 +48,7 @@ export function InsightCardGrid({
                         <div style={{ padding: 'var(--padding-card)', borderTop: '1px solid var(--border)' }}>
                             {/* 图表 */}
                             <img
-                                src={hyp.executionResult.image}
+                                src={formatChartBase64(hyp.executionResult.image)}
                                 alt="洞察分析图表"
                                 style={{ width: '100%', borderRadius: 'var(--radius-s)', marginBottom: 'var(--gap-m)' }}
                             />

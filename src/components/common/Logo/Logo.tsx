@@ -28,60 +28,78 @@ const LogoIcon: React.FC = () => {
             aria-hidden="true"
         >
             <defs>
-                {/* 
-                    琉璃质感增强：使用多层渐变模拟厚度和光线折射 
-                */}
+                {/* 方案 K (优化版): 磨砂层叠 - 高亮透透 (Brightened) */}
 
-                {/* 后置玻璃棒 (Back Bar) - 稍暗，模拟在后方 */}
-                <linearGradient id="glassBack" x1="80" y1="20" x2="20" y2="80" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="var(--text-primary)" stopOpacity="0.4" />
-                    <stop offset="50%" stopColor="var(--text-primary)" stopOpacity="0.1" />
-                    <stop offset="100%" stopColor="var(--text-primary)" stopOpacity="0.6" />
+                {/* 1. 磨砂材质 (Frosted Material) - 乳白雾面 */}
+                <linearGradient id="frostedGradient" x1="0" y1="100" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.3" />
+                    <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.1" />
+                    <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.4" />
                 </linearGradient>
 
-                {/* 前置玻璃棒 (Front Bar) - 亮，清晰，覆盖在上方 */}
-                <linearGradient id="glassFront" x1="20" y1="20" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="var(--text-primary)" stopOpacity="0.8" />
-                    <stop offset="45%" stopColor="var(--text-primary)" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="var(--text-primary)" stopOpacity="0.9" />
+                {/* 2. 晶体材质 (Crystal Material) - 极亮，纯净 */}
+                <linearGradient id="crystalGradient" x1="20" y1="20" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
+                    <stop offset="45%" stopColor="#FFFFFF" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.8" />
                 </linearGradient>
 
-                {/* 边缘高光 (Edge Highlight) */}
-                <linearGradient id="edgeGlow" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#fff" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#fff" stopOpacity="0.2" />
+                {/* 3. 边缘光 (Edge Light) - 钻石切面光泽 */}
+                <linearGradient id="sharpEdge" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1.0" />
+                    <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.5" />
                 </linearGradient>
             </defs>
 
-            {/* 1. 后置棒 (Back Bar): Top-Right to Bottom-Left ( / ) */}
-            <path
-                d="M75 15 L85 15 L25 85 L15 85 Z"
-                fill="url(#glassBack)"
-                stroke="url(#edgeGlow)"
-                strokeWidth="2"
-            />
-            {/* 侧边厚度 - 增加立体感 */}
-            <path
-                d="M25 85 L15 85 L17 83 L27 83 Z"
-                fill="var(--text-primary)"
-                fillOpacity="0.4"
-            />
+            {/* 
+               构造逻辑：
+               X 由两块板构成。
+               1. 底层板 (Bottom Slab) / : 磨砂亚克力材质，厚实，不透明度略高。
+               2. 顶层板 (Top Slab) \ : 纯净玻璃材质，通透，边缘锐利，叠加在磨砂板之上。
+            */}
 
-            {/* 2. 前置棒 (Front Bar): Top-Left to Bottom-Right ( \ ) */}
-            <g>
+            {/* Layer 1: 底层磨砂板 (Bottom-Left to Top-Right) */}
+            <g transform="translate(0, 0)">
+                {/* 主体 */}
                 <path
-                    d="M15 15 L25 15 L85 85 L75 85 Z"
-                    fill="url(#glassFront)"
-                    stroke="url(#edgeGlow)"
-                    strokeWidth="2"
-                    /* 投射阴影，增强前后层次 */
-                    style={{ filter: "drop-shadow(0 4px 4px rgba(0,0,0,0.15))" }}
+                    d="M20 90 L38 90 L85 15 L67 15 Z"
+                    fill="url(#frostedGradient)"
+                    stroke="var(--text-primary)"
+                    strokeWidth="0.5"
+                    strokeOpacity="0.2"
                 />
 
-                {/* 表面高光反射 */}
+                {/* 侧边厚度暗示 */}
                 <path
-                    d="M18 15 L22 15 L82 85 L78 85 Z"
-                    fill="url(#edgeGlow)"
+                    d="M20 90 L67 15 L65 15 L18 90 Z"
+                    fill="var(--text-primary)"
+                    fillOpacity="0.2"
+                />
+            </g>
+
+            {/* Layer 2: 顶层晶体板 (Top-Left to Bottom-Right) */}
+            <g>
+                {/* 投影 (Shadow on bottom slab) - 仅在交汇处产生微弱投影 */}
+                <path
+                    d="M15 15 L33 15 L80 90 L62 90 Z"
+                    fill="#000"
+                    fillOpacity="0.2"
+                    style={{ mixBlendMode: 'overlay', filter: 'blur(4px)' }}
+                    transform="translate(2, 4)"
+                />
+
+                {/* 玻璃主体 */}
+                <path
+                    d="M15 15 L33 15 L80 90 L62 90 Z"
+                    fill="url(#crystalGradient)"
+                    stroke="url(#sharpEdge)"
+                    strokeWidth="1.5"
+                />
+
+                {/* 内部高光折射 (Refraction Line) */}
+                <path
+                    d="M33 15 L30 15 L77 90 L80 90 Z"
+                    fill="#fff"
                     fillOpacity="0.4"
                     style={{ mixBlendMode: 'overlay' }}
                 />
@@ -104,16 +122,16 @@ export const Logo: React.FC<LogoProps> = ({
             className={`logo-container logo-layout-${layout} logo-size-${size} ${interactive ? 'interactive' : ''} variant-${variant} ${className}`}
             onClick={onClick}
         >
-            {/* 核心改动：LogoIcon 现在就是文字的一部分 (X) */}
+            {/* 布局：[Liuli] [Icon(X)] 
+               LogoIcon 仍然放在最后，作为单词的结尾。
+            */}
 
             {showText && (
                 <div className="logo-text">
-                    {/* "Liuli" 部分 */}
                     <span className="logo-text-primary">Liuli</span>
                 </div>
             )}
 
-            {/* "X" 部分 (图标) - 紧跟在文字后面，或者单独显示 */}
             <div className="logo-icon-wrapper">
                 <LogoIcon />
             </div>

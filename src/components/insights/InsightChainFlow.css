@@ -1,5 +1,5 @@
 .insight-chain-flow {
-    padding: var(--gap-m);
+    padding: 0;
 }
 
 /* 标题栏：flex 布局，按钮居右 */
@@ -7,7 +7,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--gap-m);
+    margin-bottom: 0;
 }
 
 .insight-chain-title {
@@ -84,10 +84,10 @@
 }
 
 .insight-results-container {
-    margin-top: var(--gap-l);
+    margin-top: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--gap-m);
+    gap: 0;
 }
 
 .insight-results-title {
@@ -131,6 +131,8 @@
     /* 允许内容溢出以便下钻卡片可见 */
     min-height: 400px;
     /* 最小高度确保可见性 */
+    padding: 0;
+    margin: 0;
 }
 
 /* 拖拽时禁用指针事件（防止 iframe 等干扰） */
@@ -149,7 +151,8 @@
 /* 左侧洞察树面板 */
 .tree-panel {
     flex-shrink: 0;
-    padding: var(--gap-m);
+    padding: 0 !important;
+    margin: 0;
     overflow-y: auto;
     transition: width 0.2s ease;
     /* 移除固定高度，允许内容自展开 */

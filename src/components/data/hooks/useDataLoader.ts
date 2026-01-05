@@ -80,22 +80,31 @@ export function useDataLoader(
                     if (file.data.tableName) {
                         logger.log('文件管理', '使用已有tableName', { data: { tableName: file.data.tableName } });
 
-                        const isValid = await DataLoadingService.validateTable(file.data.tableName, engine);
-                        if (isValid) {
-                            const columns = await engine.getTableColumns(file.data.tableName);
-                            const countResult = await engine.runQuery(`SELECT COUNT(*) as count FROM ${file.data.tableName}`);
-                            const rowCount = countResult[0]?.count || 0;
+                        // 1. 先尝试清理失效表名
+                        const cleanedProject = await DataLoadingService.cleanupInvalidTableName(
+                            project,
+                            activeFileId,
+                            engine
+                        );
 
-                            setDuckInfo({
-                                tableName: file.data.tableName,
-                                rowCount,
-                                columns
-                            });
+                        if (cleanedProject) {
+                            // tableName 已失效，触发项目更新并重新 ingest
+                            onProjectUpdate?.(cleanedProject);
+                            const result = await DataLoadingService.loadWithDuckDB(file, engine);
+                            setDuckInfo(result);
                             setUseDuckDB(true);
+                            updateProjectState(result.tableName);
                             return;
-                        } else {
-                            console.warn('⚠️ 已有tableName无效，将重新ingest');
                         }
+
+                        // 2. tableName 有效，直接使用
+                        const columns = await engine.getTableColumns(file.data.tableName);
+                        const countResult = await engine.runQuery(`SELECT COUNT(*) as count FROM ${file.data.tableName}`);
+                        const rowCount = countResult[0]?.count || 0;
+
+                        setDuckInfo({ tableName: file.data.tableName, rowCount, columns });
+                        setUseDuckDB(true);
+                        return;
                     }
 
 

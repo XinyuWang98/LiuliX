@@ -3,6 +3,7 @@ import './DetailPanel.css';
 import type { InsightNode } from '@/types/insightTree';
 import { ActionGrid } from './ActionGrid';
 import { useEvidence } from '@/contexts/EvidenceContext';
+import { formatChartBase64 } from '@/utils/imageUtils';
 
 /**
  * 详情面板组件
@@ -91,7 +92,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ node }) => {
                         {node.chartImage && (
                             <div className="detail-panel__chart-container">
                                 <img
-                                    src={node.chartImage}
+                                    src={formatChartBase64(node.chartImage)}
                                     alt="可视化图表"
                                     className="detail-panel__chart-image"
                                 />

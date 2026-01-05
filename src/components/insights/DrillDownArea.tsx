@@ -5,10 +5,10 @@
 
 import { useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
-import { ActionChip } from './ActionChip';
+import { DrillDownRecommendationCard } from './DrillDownRecommendationCard';
 import { DrillDownAction } from '@/types/insightTree';
 import { promptRegistry } from '@/services/promptRegistry';
-import { ChevronDown, Sparkles, Settings } from 'lucide-react';
+import { ChevronDown, Settings } from 'lucide-react';
 import './DrillDownArea.css';
 
 export interface DrillDownAreaProps {
@@ -73,22 +73,17 @@ export function DrillDownArea({
 
     return (
         <div className="drill-down-area">
-            {/* 推荐区 */}
+            {/* 推荐区 - 使用卡片式布局 */}
             {recommendations.length > 0 && (
                 <div className="drill-down-area__recommendations">
-                    <div className="drill-down-area__label">
-                        <Sparkles size={14} />
-                        <span>{t('insight.recommendedActions')}</span>
-                    </div>
-                    <div className="drill-down-area__chips">
+                    <div className="drill-down-area__cards">
                         {recommendations.map((action, index) => (
-                            <ActionChip
+                            <DrillDownRecommendationCard
                                 key={`${action.promptId}-${index}`}
                                 label={action.label}
                                 onClick={() => onExecuteAction(action)}
                                 isRecommended={action.isRecommended}
                                 disabled={isExecuting}
-                                isLoading={isExecuting}
                             />
                         ))}
                     </div>

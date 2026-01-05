@@ -81,12 +81,16 @@
     align-items: center;
 }
 
-/* Size Variants - 精细调整图标大小以匹配字高 */
+/* Size Variants - 精细调整图标大小以匹配字高 (Cap Height Matching) */
+/* 
+   注意：文字的 font-size 包含上下留白。
+   SVG 是满格的。所以 Icon 尺寸通常应小于 font-size 才能视觉对齐。
+*/
+
 .logo-size-s .logo-icon-wrapper {
-    width: 15px;
-    height: 15px;
-    /* 视觉补偿，让 X 贴近文字 */
-    margin-left: 0px;
+    width: 13px;
+    height: 13px;
+    margin-left: -1px;
 }
 
 .logo-size-s .logo-text {
@@ -94,9 +98,9 @@
 }
 
 .logo-size-m .logo-icon-wrapper {
-    width: 20px;
-    height: 20px;
-    margin-left: 1px;
+    width: 17px;
+    height: 17px;
+    margin-left: -2px;
 }
 
 .logo-size-m .logo-text {
@@ -104,9 +108,9 @@
 }
 
 .logo-size-l .logo-icon-wrapper {
-    width: 28px;
-    height: 28px;
-    margin-left: 1px;
+    width: 22px;
+    height: 22px;
+    margin-left: -4px;
 }
 
 .logo-size-l .logo-text {
@@ -116,11 +120,18 @@
 
 /* Welcome Page Hero Size */
 .logo-size-xl .logo-icon-wrapper {
-    /* 与 48px 文字匹配，图标稍微大一点以平衡视觉重量 */
-    width: 52px;
-    height: 52px;
-    /* 负边距，让 X 看起来是单词的一部分 */
-    margin-left: -2px;
+    /* 缩小图标：48px Font 的 Cap Height 约为 34px 左右 */
+    /* 稍微大一点点 (40px) 以保持 Icon 的存在感，但不能太大 */
+    width: 42px;
+    height: 42px;
+    /* 
+       核心修复：大幅增加负边距 
+       SVG 内部有约 15% 的左侧留白，在大尺寸下会变成明显的空隙。
+       -18px 用于抵消 SVG 留白 + 紧缩字距。
+    */
+    margin-left: -18px;
+    /* 微调垂直对齐，确保底部和文字基线一致 */
+    transform: translateY(-4%);
 }
 
 .logo-size-xl .logo-text {

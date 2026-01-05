@@ -10,6 +10,7 @@ import { useI18n } from '@/contexts/I18nContext';
 import { useEvidence } from '@/contexts/EvidenceContext';
 import { InsightNode, DrillDownAction, MAX_DRILL_DEPTH } from '@/types/insightTree';
 import { DrillDownArea } from './DrillDownArea';
+import { formatChartBase64 } from '@/utils/imageUtils';
 import './InsightCardV2.css';
 
 interface InsightCardV2Props {
@@ -162,9 +163,20 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                 </div>
             </div>
 
-            {/* Body - 仅在completed且展开时显示 */}
-            {!isPending && isExpanded && (
-                <div className="insight-card-body">
+            {/* Body（展开时显示）*/}
+            {isExpanded && (
+                <div
+                    className="card-body-expanded"
+                    onClick={(e) => {
+                        // 点击body区域时，设置焦点并展开右侧代码
+                        // 但不改变卡片自身的展开状态
+                        if (!isPending && node.result) {
+                            onFocus?.(node.id);
+                        }
+                        // 阻止事件冒泡到header，避免触发展开/折叠
+                        e.stopPropagation();
+                    }}
+                >
                     {/* 图表区域 */}
                     {node.result?.image && (
                         <div className="chart-preview-area">
@@ -176,28 +188,55 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                         </div>
                     )}
 
-                    {/* AI结论 */}
+                    {/* 结论区域 */}
                     {node.result?.summary && (
-                        <div className="conclusion-box">
-                            <strong>{t('insightChain.conclusion')}：</strong>
-                            {node.result.summary}
+                        <div className="card-conclusion">
+                            <div className="conclusion-label">{t('insightChain.conclusion')}</div>
+                            <div className="conclusion-text">{node.result.summary}</div>
                         </div>
                     )}
 
-                    {/* 下钻推荐区域 */}
-                    {node.result && node.drillDownActions && node.drillDownActions.length > 0 && (
-                        <div className="drill-down-section">
-                            <DrillDownArea
-                                recommendations={node.drillDownActions}
-                                availableColumns={availableColumns}
-                                depth={node.depth}
-                                maxDepth={MAX_DRILL_DEPTH}
-                                onExecuteAction={(action) => onDrillDown(node, action)}
-                                onExecuteCustom={onCustomAnalysis}
-                                isExecuting={isExecuting}
-                            />
-                        </div>
-                    )}
+                    {/* 操作按钮区 */}
+                    <div
+                        className="card-actions"
+                        onClick={(e) => e.stopPropagation()} // 按钮点击不触发body的点击事件
+                    >
+                        {onAdopt && !isPending && (
+                            <button
+                                className={`btn-adopt ${isAdopted ? 'adopted' : ''}`}
+                                onClick={handleAdopt}
+                                disabled={isAdopted}
+                            >
+                                {isAdopted ? `✓ ${t('insightChain.adopted')}` : t('insightChain.adopt')}
+                            </button>
+                        )}
+                    </div>
+
+                    {/* 下钻建议区域 */}
+                    {(() => {
+                        // 只显示未执行的下钻建议
+                        const pendingActions = (node.drillDownActions || []).filter(action => {
+                            // 检查该建议是否已被执行（即是否存在对应的子节点）
+                            const isExecuted = node.children.some(child =>
+                                child.promptId === action.promptId
+                            );
+                            return !isExecuted; // 只保留未执行的
+                        });
+
+                        return pendingActions.length > 0 ? (
+                            <div className="drill-down-section">
+                                <DrillDownArea
+                                    recommendations={pendingActions}
+                                    availableColumns={availableColumns}
+                                    depth={node.depth}
+                                    maxDepth={MAX_DRILL_DEPTH}
+                                    onExecuteAction={(action) => onDrillDown(node, action)}
+                                    onExecuteCustom={onCustomAnalysis}
+                                    isExecuting={isExecuting}
+                                />
+                            </div>
+                        ) : null;
+                    })()}
 
                     {/* 嵌套子卡片区域 */}
                     {hasChildren && (

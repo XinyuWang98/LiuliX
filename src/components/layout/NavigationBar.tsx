@@ -8,7 +8,7 @@ import './NavigationBar.css';
 interface NavigationBarProps {
     onOpenAPISettings?: () => void;
     backendStatus?: 'connected' | 'disconnected' | 'checking';
-    activeView?: 'dashboard' | 'library' | 'v2' | 'design';
+    activeView?: 'dashboard' | 'library' | 'v2' | 'design' | 'welcome';
 }
 
 export function NavigationBar({

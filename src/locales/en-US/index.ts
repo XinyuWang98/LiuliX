@@ -491,7 +491,7 @@ export const enUS: LanguageConfig = {
                 analysis: 'Analysis',
                 insight: 'Insight',
                 visualization: 'Visualization',
-                insightChain: 'Insight Chain',
+                insightChain: 'Insight Analysis',
             },
         },
         report: {

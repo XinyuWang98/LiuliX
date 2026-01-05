@@ -76,6 +76,32 @@ export class DataLoadingService {
     }
 
     /**
+     * 清理失效的 tableName
+     * @returns 返回更新后的 Project，若 tableName 有效则返回 null
+     */
+    static async cleanupInvalidTableName(
+        project: Project,
+        fileId: string,
+        engine: DuckDBEngine
+    ): Promise<Project | null> {
+        const file = project.files.find((f: any) => f.id === fileId);
+        if (!file?.data?.tableName) return null;
+
+        const isValid = await this.validateTable(file.data.tableName, engine);
+        if (!isValid) {
+            logger.warn('DuckDB', 'tableName 失效，已清理', { oldName: file.data.tableName });
+            const updatedProject = { ...project };
+            const targetFile = updatedProject.files.find((f: any) => f.id === fileId);
+            if (targetFile) {
+                delete targetFile.data.tableName;
+                delete targetFile.data.hasTableName;
+            }
+            return updatedProject;
+        }
+        return null;
+    }
+
+    /**
      * 更新项目中文件的 tableName
      */
     static updateProjectTableName(

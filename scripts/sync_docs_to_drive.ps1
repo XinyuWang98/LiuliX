@@ -1,30 +1,32 @@
+param (
+    [string]$SourceDir = ".\docs",
+    [string]$DestDrive = "G:\",
+    [string]$DestFolderName = "DataPrism_Docs"
+)
+
 $ErrorActionPreference = "Continue"
 
-# Config
-$sourceDir = ".\docs"
-$destDrive = "G:\"
-$destFolderName = "DataPrism_Docs"
-
 Write-Host "Preparing to sync docs to Google Drive (with .txt conversion)..."
+Write-Host "Source: $SourceDir"
+Write-Host "Target Drive: $DestDrive"
 
 # 1. Check G Drive
-if (-not (Test-Path $destDrive)) {
-    Write-Error "Error: Google Drive (G:) not found."
-    Write-Warning "Please ensure Google Drive Desktop is running."
-    exit 1
+if (-not (Test-Path $DestDrive)) {
+    Write-Warning "Skipping Sync: Google Drive ($DestDrive) not found. Please ensure Google Drive Desktop is running."
+    exit 0 # Soft exit to not break build chain
 }
 
 # 2. Dynamic Discovery of Drive Root
-$rootItem = Get-ChildItem -Path $destDrive -Directory | Select-Object -First 1
+$rootItem = Get-ChildItem -Path $DestDrive -Directory | Select-Object -First 1
 if (-not $rootItem) {
-    Write-Error "Error: G: drive appears empty."
-    exit 1
+    Write-Warning "Skipping Sync: Drive ($DestDrive) appears empty."
+    exit 0
 }
 $driveRoot = $rootItem.FullName
 Write-Host "Detected Drive Root: $driveRoot"
 
 # 3. Set destination
-$destPath = Join-Path $driveRoot $destFolderName
+$destPath = Join-Path $driveRoot $DestFolderName
 Write-Host "Target Path: $destPath"
 
 # 4. Create destination directory
@@ -36,14 +38,11 @@ Write-Host "Starting Sync (Converting .md -> .txt)..."
 Write-Host "--------------------------------------------------"
 
 # 5. Custom Sync Logic
-# We cannot use Robocopy because we need to rename files on the fly.
-# Strategy: Iterate source files, copy to dest with new name.
-
-$sourceFiles = Get-ChildItem -Path $sourceDir -Recurse -File
+$sourceFiles = Get-ChildItem -Path $SourceDir -Recurse -File
 
 foreach ($file in $sourceFiles) {
-    # Get relative path (e.g., \00-Intro\file.md)
-    $relativePath = $file.FullName.Substring((Resolve-Path $sourceDir).Path.Length)
+    # Get relative path
+    $relativePath = $file.FullName.Substring((Resolve-Path $SourceDir).Path.Length)
     
     # Determine Target Filename
     # If it's markdown, append .txt (NotebookLM loves .txt)
@@ -78,4 +77,3 @@ foreach ($file in $sourceFiles) {
 
 Write-Host "--------------------------------------------------"
 Write-Host "Sync Completed!"
-Write-Host "NOTE: All .md files have been renamed to .md.txt so NotebookLM can see them."

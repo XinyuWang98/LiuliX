@@ -35,29 +35,24 @@
     padding: 8px 12px;
 }
 
-/* 推荐区 */
+/**
+ * DrillDownArea 样式
+ * 下钻推荐区域 - 改为卡片式布局
+ */
+
+.drill-down-area {
+    margin-top: 16px;
+}
+
 .drill-down-area__recommendations {
+    margin-bottom: 16px;
+}
+
+/* 卡片垂直布局 */
+.drill-down-area__cards {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-s);
-}
-
-.drill-down-area__label {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-s);
-    color: var(--text-muted);
-    font-size: var(--fs-sm);
-}
-
-.drill-down-area__label svg {
-    color: var(--warning);
-}
-
-.drill-down-area__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--gap-s);
+    gap: 8px;
 }
 
 /* 自选区触发器 */

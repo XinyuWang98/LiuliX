@@ -164,6 +164,9 @@ function AppContent() {
                     setLoadingMessage(t('common.firstTimeTip'));
                 }
 
+                // 🎨 加载中文字体（后台异步，不阻塞）
+                pyodideManager.loadChineseFont();
+
                 // --- Phase 1: 核心环境加载 (Blocking) ---
                 logger.log('Python', '阶段1: 加载核心环境...');
                 setLoadingProgress(10); // 起始进度

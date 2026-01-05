@@ -4,6 +4,7 @@ import { DrillDownArea } from './DrillDownArea';
 import { ChevronRight, ChevronDown, Loader, AlertCircle, BarChart2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { logger } from '@/utils/logger';
+import { formatChartBase64 } from '@/utils/imageUtils';
 import './InsightTreeNode.css';
 
 export interface InsightTreeNodeProps {
@@ -137,7 +138,7 @@ export function InsightTreeNode({
                             {node.result.image && (
                                 <div className="insight-node-row-viz">
                                     <img
-                                        src={node.result.image}
+                                        src={formatChartBase64(node.result.image)}
                                         alt={node.title}
                                         className="insight-chart-thumbnail"
                                     />

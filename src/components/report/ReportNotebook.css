@@ -1,42 +1,33 @@
 /**
- * ReportNotebook 主容器样式
+ * ReportNotebook 主容器样式 - LiuliX 设计系统规范
  */
 
 .report-notebook {
-    --status-locked-bg: rgba(34, 197, 94, 0.1);
-    --status-warning-bg: rgba(245, 158, 11, 0.1);
-    --status-warning-color: var(--color-quality-warning);
-
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--gap-l);
+    width: 100%;
+    font-family: var(--font-family);
 }
-
-/* ... existing code ... */
 
 /* Signed Status */
 .signed-status {
     margin-bottom: var(--gap-m);
     padding: var(--gap-m);
-    background: var(--status-locked-bg);
+    background: rgba(34, 197, 94, 0.1);
     border: 1px solid var(--success);
     border-radius: var(--radius-m);
     color: var(--success);
-    font-size: var(--font-size-m);
+    font-size: var(--fs-m);
     text-align: center;
 }
-
-/* ... existing code ... */
 
 /* Report Mode Notice */
 .report-mode-notice {
     padding: var(--gap-m);
-    background: var(--status-warning-bg);
-    border: 1px solid var(--status-warning-color);
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid var(--warning);
     border-radius: var(--radius-m);
-    color: var(--status-warning-color);
+    color: var(--warning);
     text-align: center;
-    font-size: var(--font-size-m);
+    font-size: var(--fs-m);
     line-height: 1.6;
 }
 
@@ -44,22 +35,30 @@
     text-align: center;
     padding: var(--gap-xl);
     color: var(--text-secondary);
+    font-size: var(--fs-m);
 }
 
 /* Header */
 .report-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: var(--gap-m);
     margin-bottom: var(--gap-l);
     padding-bottom: var(--gap-m);
-    border-bottom: 2px solid var(--border);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .report-header h2 {
     margin: 0;
     color: var(--text-primary);
-    font-size: var(--font-size-xl);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
 }
 
 .header-actions {
@@ -74,23 +73,25 @@
     align-items: center;
     gap: var(--gap-xs);
     padding: var(--gap-s) var(--gap-m);
-    border: 1px solid var(--border);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-m);
-    background: var(--bg-panel);
+    background: var(--glass-surface);
     color: var(--text-primary);
-    font-size: var(--font-size-m);
+    font-size: var(--fs-m);
+    font-weight: var(--fw-medium);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-s) var(--ease-out);
+    backdrop-filter: blur(var(--blur-medium));
 }
 
 .btn-export-colab:hover {
-    background: var(--bg-accent);
-    border-color: var(--bg-accent);
+    background: var(--glass-hover);
+    border-color: var(--primary);
 }
 
 .btn-sign-report {
     background: var(--success);
-    color: white;
+    color: var(--text-on-primary);
     border-color: var(--success);
 }
 
@@ -103,25 +104,22 @@
     cursor: not-allowed;
 }
 
-/* Audit Progress */
-.audit-progress-bar {
-    margin-bottom: var(--gap-m);
-    padding: var(--gap-m);
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-m);
+/* Header Progress - 集成到 Header 底部 */
+.header-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
 }
 
-.audit-progress-bar span {
-    display: block;
-    margin-bottom: var(--gap-s);
-    font-size: var(--font-size-s);
+.progress-label {
+    font-size: var(--fs-s);
     color: var(--text-secondary);
+    font-weight: var(--fw-medium);
 }
 
 .progress-track {
-    height: 8px;
-    background: var(--bg-hover);
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-s);
     overflow: hidden;
 }
@@ -129,7 +127,7 @@
 .progress-fill {
     height: 100%;
     background: var(--success);
-    transition: width 0.3s ease;
+    transition: width var(--transition-m) var(--ease-out);
 }
 
 /* Signed Status */

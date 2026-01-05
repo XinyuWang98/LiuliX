@@ -87,6 +87,9 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
     // 🆕 焦点跟踪状态
     const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
 
+    // 🆕 展开状态管理 - 用于同步卡片和 Notebook 的展开状态
+    const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(new Set());
+
     // 🆕 Live Notebook 显示/隐藏状态
     // 优先使用外部 prop，否则使用内部状态和 localStorage
     // 默认隐藏，只在用户点击卡片后显示
@@ -233,6 +236,13 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                 throw new Error(`无法渲染模板: ${action.promptId}`);
             }
 
+            // ✅ 优先级：props.tableName > file.data.tableName > file.tableName
+            const effectiveTableName = tableName || file?.data?.tableName || file?.tableName;
+
+            if (!effectiveTableName) {
+                throw new Error('无法获取有效的 tableName，请检查数据加载状态');
+            }
+
             // 执行代码
             const execResult = await executeInsightWithMode(
                 {
@@ -243,7 +253,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                     aggregated_mode: { sql: '', viz_code: '' }
                 },
                 'full',
-                tableName || ''
+                effectiveTableName  // ✅ 使用有效的 tableName
             );
 
             childNode.isLoading = false;
@@ -285,22 +295,62 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         setShowNotebook(true); // 自动展开 Notebook面板
     };
 
-    // 展开/折叠处理
+    // 展开/折叠处理 - 同步更新展开状态 + 手风琴交互
     const handleToggleExpand = (nodeId: string) => {
-        const toggleNode = (nodes: InsightNodeType[]): boolean => {
+        let targetNode: InsightNodeType | null = null;
+        let targetDepth = 0;
+
+        // 查找目标节点并获取其深度
+        const findNode = (nodes: InsightNodeType[], depth: number): boolean => {
             for (const node of nodes) {
                 if (node.id === nodeId) {
-                    node.isExpanded = !node.isExpanded;
+                    targetNode = node;
+                    targetDepth = depth;
                     return true;
                 }
-                if (node.children.length > 0 && toggleNode(node.children)) {
+                if (node.children.length > 0 && findNode(node.children, depth + 1)) {
                     return true;
                 }
             }
             return false;
         };
 
-        toggleNode(insightNodes);
+        findNode(insightNodes, 0);
+
+        if (!targetNode) return;
+
+        // 如果是展开操作（当前是折叠状态，要展开）
+        const willExpand = !targetNode.isExpanded;
+
+        if (willExpand && targetDepth === 0) {
+            // 🆕 手风琴逻辑：如果是顶层节点（父洞察卡片），收起所有其他顶层节点
+            insightNodes.forEach(node => {
+                if (node.id !== nodeId && node.isExpanded) {
+                    node.isExpanded = false;
+                    // 同步更新展开状态
+                    setExpandedNodeIds(prev => {
+                        const newSet = new Set(prev);
+                        newSet.delete(node.id);
+                        return newSet;
+                    });
+                }
+            });
+        }
+
+        // 切换目标节点的展开状态
+        targetNode.isExpanded = !targetNode.isExpanded;
+
+        // 同步更新展开状态到 Notebook
+        setExpandedNodeIds(prev => {
+            const newSet = new Set(prev);
+            if (targetNode!.isExpanded) {
+                newSet.add(nodeId);
+            } else {
+                newSet.delete(nodeId);
+            }
+            return newSet;
+        });
+
         setInsightNodes([...insightNodes]);
     };
 
@@ -410,6 +460,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                             <LiveNotebookPanel
                                 codeBlocks={resolvedCodes}
                                 focusedId={focusedNodeId}
+                                expandedIds={expandedNodeIds}
                             />
                         </div>
                     )}

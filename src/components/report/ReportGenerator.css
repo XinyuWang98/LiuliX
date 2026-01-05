@@ -1,52 +1,13 @@
 /**
- * 报告生成器样式
- * 100% 使用 CSS 变量，支持主题切换
+ * ReportGenerator 样式
+ * 证据池置顶 + 报告内容在下布局
  */
 
 .report-generator-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
-}
-
-/* Tab切换 */
-.report-tabs {
-    display: flex;
-    gap: var(--gap-xs);
-    padding: var(--gap-m);
-    background: var(--bg-main);
-    border-bottom: 1px solid var(--border);
-}
-
-.report-tab {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-xs);
-    padding: var(--gap-s) var(--gap-m);
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-s);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-s);
-}
-
-.report-tab:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-}
-
-.report-tab.active {
-    background: var(--bg-accent);
-    color: var(--text-primary);
-}
-
-.report-tab-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--gap-l);
+    gap: 16px;
+    width: 100%;
 }
 
 .report-generator {
