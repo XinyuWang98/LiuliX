@@ -1,145 +1,103 @@
+/* PromptLibrary.css */
+
 .prompt-library-page {
-    display: flex;
-    height: calc(100vh - var(--nav-height));
-    /* Subtract header height */
-    background: var(--bg-app);
+    position: relative;
+    width: 100%;
+    height: 100vh;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-.library-main {
+.prompt-library-layout {
+    display: flex;
+    flex: 1;
+    height: 100%;
+    /* Occupy full height */
+    padding: var(--gap-l);
+    /* Outer padding */
+    gap: var(--gap-l);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    /* Above background */
+}
+
+/* Sidebar is handled by LibrarySidebar component, but we ensure it fits in layout */
+
+/* Main Content Area (Glass) */
+.library-main-glass {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0;
-    /* Prevent flex overflow */
+    overflow: hidden;
+    /* Glass container should clean clip */
 }
 
-/* Header */
 .library-header {
-    height: var(--nav-height);
-    /* Same as app header */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 var(--gap-l);
-    border-bottom: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(10px);
+    margin-bottom: var(--gap-l);
+    flex-shrink: 0;
 }
 
 .library-search-container {
-    flex: 1;
-    max-width: 400px;
+    width: 300px;
 }
 
-.library-title-group {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-m);
-}
-
-.library-title {
-    font-size: var(--font-l);
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.library-subtitle {
-    font-size: var(--font-s);
-    color: var(--text-tertiary);
-    border-left: 1px solid var(--border);
-    padding-left: var(--gap-m);
-}
-
-.library-search {
-    position: relative;
-    width: 100%;
-}
-
-.library-search input {
-    width: 100%;
-    padding: 8px 12px 8px 36px;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-m);
-    color: var(--text-primary);
-    font-size: var(--font-s);
-    transition: all 0.2s;
-}
-
-.library-search input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary-10);
-    outline: none;
-}
-
-.library-search-icon {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-tertiary);
-}
-
-/* Content Area */
-.library-content {
+.library-scroll-content {
     flex: 1;
     overflow-y: auto;
-    padding: var(--gap-l);
+    padding-right: var(--gap-s);
+    /* Space for scrollbar */
+    /* Custom Scrollbar for internal content */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.library-scroll-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.library-scroll-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
 }
 
 .section-container {
-    margin-bottom: 40px;
+    margin-bottom: var(--gap-xl);
 }
 
-/* .section-title 已移至 liulix.css 作为设计系统标准 */
+.section-title {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--gap-m);
+    display: flex;
+    align-items: center;
+}
 
+/* Grids */
 .prompt-grid-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--gap-m);
 }
 
-/* Masonry Grid */
 .prompt-masonry-grid {
-    column-count: 3;
-    column-gap: 32px;
-    /* Increased gap for better breathing room */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--gap-m);
 }
 
-.prompt-masonry-item {
-    break-inside: avoid;
-    margin-bottom: 32px;
-    /* Increased spacing between items */
-}
-
-/* Responsive Columns */
-@media (max-width: 1600px) {
-    .prompt-masonry-grid {
-        column-count: 3;
-    }
-
-    .prompt-grid-row {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 1200px) {
-    .prompt-masonry-grid {
-        column-count: 2;
-    }
-
-    .prompt-grid-row {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 800px) {
-    .prompt-masonry-grid {
-        column-count: 1;
-    }
-
-    .prompt-grid-row {
-        grid-template-columns: 1fr;
-    }
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+    color: var(--text-tertiary);
+    font-size: var(--fs-md);
 }

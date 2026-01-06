@@ -33,10 +33,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    /* 移除 justify-content: center; 避免内容超出视口时无法向上滚动 */
+    overflow-y: auto;
+    /* 允许垂直滚动 */
+    overflow-x: hidden;
+    /* 禁止横向滚动 */
     /* padding-left/right handles by inner content, but keep safe area */
     box-sizing: border-box;
+    /* 底部留白，确保最后的内容可以完整查看 */
+    padding-bottom: var(--gap-xxxl, 80px);
 
     /* 核心背景：通天光柱 */
     background-image:
@@ -87,13 +92,12 @@
     text-align: center;
     width: 100%;
     max-width: 1200px;
+    /* 顶部留白，避免内容紧贴导航栏 */
+    padding-top: var(--gap-xxxl, 80px);
 }
 
-/* Hero Section */
+/* Hero Section - 首屏区域 */
 .hero-section {
-    position: relative;
-    margin-bottom: 90px;
-    display: flex;
     flex-direction: column;
     align-items: center;
     /* 整体上浮动画 */
@@ -153,7 +157,8 @@
     line-height: 1.3;
     /* Add padding to ensure shadow/glow isn't cut off */
     padding-bottom: 0px;
-    margin-bottom: 24px;
+    /* 增加底部间距，拉开与副标题的距离 */
+    margin-bottom: var(--gap-l, 32px);
 
     /* 顶部亮，底部渐隐，模拟光从上方照下 */
     background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%);
@@ -169,7 +174,8 @@
     color: var(--text-dim);
     max-width: 600px;
     line-height: 1.6;
-    margin-bottom: 56px;
+    /* 增加底部间距，拉开与CTA按钮的距离 */
+    margin-bottom: var(--gap-xxxl, 64px);
     font-weight: 300;
     letter-spacing: 1px;
 }
@@ -184,6 +190,9 @@
     width: 260px;
     height: 64px;
     border-radius: 9999px;
+
+    /* 水平居中 */
+    margin: 0 auto;
 
     /* 材质: 极其纯净的水晶 */
     background: rgba(255, 255, 255, 0.08);
@@ -210,13 +219,21 @@
     border-top-color: #fff;
 }
 
-/* --- Features: 登神长阶 (Floating Steps) --- */
+/* --- Features: 登神长阶 (Floating Feature Cards Grid - Trust & Safety 卡片区域) --- */
 .features-grid {
+    /* PowerPoint风格：占据视口高度 */
+    min-height: 100vh;
+
+    /* 网格布局 + 垂直居中 */
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
-    width: 100%;
-    padding: 0 40px;
+    align-content: center;
+    /* Grid垂直居中 */
+    gap: var(--gap-xl, 40px);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--gap-xxxl, 80px) var(--gap-xl, 40px);
+
     /* 3D 透视感 */
     perspective: 1000px;
 }

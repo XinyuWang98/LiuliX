@@ -54,6 +54,11 @@ export const prompt = {
         copyCode: 'Copy Code',
         tryIt: 'Try It',
         sourceJson: 'JSON Source',
+        id: 'ID',
+        usage: 'Usage',
+        python: 'Python',
+        sql: 'SQL',
+        officialTitle: 'Official Prompt',
     },
     category: {
         analysis: 'Data Analysis',
@@ -64,6 +69,7 @@ export const prompt = {
         copy: 'Copy Prompt',
         use: 'Use this Prompt',
         copied: 'Prompt copied to clipboard',
+        clearFilters: 'Clear Filters',
     },
     examples: {
         dataCleaningExpert: {

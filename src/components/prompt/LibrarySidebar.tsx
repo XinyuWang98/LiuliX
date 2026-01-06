@@ -3,6 +3,8 @@ import { useI18n } from '@/contexts/I18nContext';
 import { promptRegistry } from '@/services/promptRegistry';
 import { PromptFilter } from '@/types/prompt';
 import { BookOpen, Sparkles, Database, Filter } from 'lucide-react';
+import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
+import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import './LibrarySidebar.css';
 
 interface LibrarySidebarProps {
@@ -39,48 +41,48 @@ export const LibrarySidebar: React.FC<LibrarySidebarProps> = ({ currentFilter, o
         onFilterChange(newFilter);
     };
 
+    const isAllActive = !currentFilter.tagValue;
+    const isCleaningActive = currentFilter.tagValue === 'cleaning';
+    const isAnalysisActive = false; // Add logic if needed
+
     return (
-        <aside className="library-sidebar">
+        <LiuliGlass className="library-sidebar" variant="vignette">
             {/* 核心分类 */}
             <div className="sidebar-section">
                 <div className="sidebar-section-title">{t('prompt.library.filter.all')}</div>
                 <div className="sidebar-menu">
-                    <div
-                        className={`sidebar-menu-item ${!currentFilter.tagValue ? 'active' : ''}`}
+                    <LiuliButton
+                        variant={isAllActive ? 'secondary' : 'ghost'}
+                        className={`sidebar-menu-btn ${isAllActive ? 'active' : ''}`}
                         onClick={() => handleCategoryClick('all')}
+                        leftIcon={<BookOpen size={16} />}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <BookOpen size={16} />
-                            <span>{t('prompt.sidebar.all')}</span>
-                        </div>
-                        {/* <span className="count">{counts.analysis.total + counts.cleaning.total}</span> */}
-                    </div>
+                        <span className="menu-label">{t('prompt.sidebar.all')}</span>
+                    </LiuliButton>
 
-                    <div
-                        className={`sidebar-menu-item ${currentFilter.tagValue === 'cleaning' ? 'active' : ''}`}
+                    <LiuliButton
+                        variant={isCleaningActive ? 'secondary' : 'ghost'}
+                        className={`sidebar-menu-btn ${isCleaningActive ? 'active' : ''}`}
                         onClick={() => handleCategoryClick('cleaning')}
+                        leftIcon={<Database size={16} />}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Database size={16} />
-                            <span>{t('prompt.sidebar.cleaning')}</span>
-                        </div>
-                        <span className="count">{counts.cleaning.all || 0}</span>
-                    </div>
+                        <span className="menu-label">{t('prompt.sidebar.cleaning')}</span>
+                        <span className="menu-count">{counts.cleaning.all || 0}</span>
+                    </LiuliButton>
 
-                    <div
-                        className={`sidebar-menu-item ${false ? 'active' : ''}`} // Logic for Analysis active state
+                    <LiuliButton
+                        variant={isAnalysisActive ? 'secondary' : 'ghost'}
+                        className={`sidebar-menu-btn ${isAnalysisActive ? 'active' : ''}`}
                         onClick={() => handleCategoryClick('analysis')}
+                        leftIcon={<Sparkles size={16} />}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Sparkles size={16} />
-                            <span>{t('prompt.sidebar.analysis')}</span>
-                        </div>
-                        <span className="count">{counts.analysis.all || 0}</span>
-                    </div>
+                        <span className="menu-label">{t('prompt.sidebar.analysis')}</span>
+                        <span className="menu-count">{counts.analysis.all || 0}</span>
+                    </LiuliButton>
                 </div>
             </div>
 
-            <div className="divider" style={{ height: '1px', background: 'var(--border)' }}></div>
+            <div className="sidebar-divider" />
 
             {/* 维度筛选 (Faceted Filters) */}
             <div className="sidebar-section">
@@ -89,16 +91,20 @@ export const LibrarySidebar: React.FC<LibrarySidebarProps> = ({ currentFilter, o
                     {t('prompt.library.filter.industry')}
                 </div>
                 <div className="sidebar-menu">
-                    {Object.entries(counts.industry).map(([value, count]) => (
-                        <div
-                            key={value}
-                            className={`sidebar-menu-item ${currentFilter.tagCategory === 'industry' && currentFilter.tagValue === value ? 'active' : ''}`}
-                            onClick={() => onFilterChange({ ...currentFilter, tagCategory: 'industry', tagValue: value })}
-                        >
-                            <span>{t(`prompt.library.tags.industry.${value}`, { defaultValue: value })}</span>
-                            <span className="count">{count as number}</span>
-                        </div>
-                    ))}
+                    {Object.entries(counts.industry).map(([value, count]) => {
+                        const isActive = currentFilter.tagCategory === 'industry' && currentFilter.tagValue === value;
+                        return (
+                            <LiuliButton
+                                key={value}
+                                variant={isActive ? 'secondary' : 'ghost'}
+                                className={`sidebar-menu-btn ${isActive ? 'active' : ''}`}
+                                onClick={() => onFilterChange({ ...currentFilter, tagCategory: 'industry', tagValue: value })}
+                            >
+                                <span className="menu-label">{t(`prompt.library.tags.industry.${value}`, { defaultValue: value })}</span>
+                                <span className="menu-count">{count as number}</span>
+                            </LiuliButton>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -108,18 +114,22 @@ export const LibrarySidebar: React.FC<LibrarySidebarProps> = ({ currentFilter, o
                     {t('prompt.library.filter.intent')}
                 </div>
                 <div className="sidebar-menu">
-                    {Object.entries(counts.intent).map(([value, count]) => (
-                        <div
-                            key={value}
-                            className={`sidebar-menu-item ${currentFilter.tagCategory === 'intent' && currentFilter.tagValue === value ? 'active' : ''}`}
-                            onClick={() => onFilterChange({ ...currentFilter, tagCategory: 'intent', tagValue: value })}
-                        >
-                            <span>{t(`prompt.library.tags.intent.${value}`, { defaultValue: value })}</span>
-                            <span className="count">{count as number}</span>
-                        </div>
-                    ))}
+                    {Object.entries(counts.intent).map(([value, count]) => {
+                        const isActive = currentFilter.tagCategory === 'intent' && currentFilter.tagValue === value;
+                        return (
+                            <LiuliButton
+                                key={value}
+                                variant={isActive ? 'secondary' : 'ghost'}
+                                className={`sidebar-menu-btn ${isActive ? 'active' : ''}`}
+                                onClick={() => onFilterChange({ ...currentFilter, tagCategory: 'intent', tagValue: value })}
+                            >
+                                <span className="menu-label">{t(`prompt.library.tags.intent.${value}`, { defaultValue: value })}</span>
+                                <span className="menu-count">{count as number}</span>
+                            </LiuliButton>
+                        );
+                    })}
                 </div>
             </div>
-        </aside>
+        </LiuliGlass>
     );
 };

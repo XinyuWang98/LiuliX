@@ -6,6 +6,10 @@ import { LibrarySidebar } from '@/components/prompt/LibrarySidebar';
 import { PromptCard } from '@/components/prompt/PromptCard';
 import { PromptDetailModal } from '@/components/prompt/PromptDetailModal';
 import { Search, Flame } from 'lucide-react';
+import { AscensionBackground } from '@/components/common/liulix/AscensionBackground';
+import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
+import { LiuliInput } from '@/components/common/liulix/LiuliInput';
+import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import './PromptLibrary.css';
 
 interface PromptLibraryProps {
@@ -23,8 +27,6 @@ export const PromptLibrary: React.FC<PromptLibraryProps> = ({ activeView: _activ
 
     // Top Prompts (Top 4)
     // Only show if we are in 'All' view (no specific tag filter)
-    // If no usage data, we might show nothing or some defaults.
-    // For demo, we just take the first 4 of the sorted list as 'Trending'
     const showTopPrompts = !filter.tagCategory && !filter.tagValue && !filter.search;
     const topPrompts = showTopPrompts ? prompts.slice(0, 4) : [];
     const otherPrompts = showTopPrompts ? prompts.slice(4) : prompts;
@@ -34,92 +36,87 @@ export const PromptLibrary: React.FC<PromptLibraryProps> = ({ activeView: _activ
     };
 
     const handlePromptClick = (prompt: UserPrompt) => {
-        // Only select for details, usage is tracked on actual execution (cleaning/insight)
         setSelectedPrompt(prompt);
     };
 
     return (
         <div className="prompt-library-page">
-            <LibrarySidebar
-                currentFilter={filter}
-                onFilterChange={setFilter}
-            />
+            <AscensionBackground />
 
-            <main className="library-main">
-                <header className="library-header">
-                    {/* Replaced Title with Search Bar mainly */}
-                    <div className="library-search-container">
-                        <div className="library-search">
-                            <Search size={16} className="library-search-icon" />
-                            <input
-                                type="text"
+            <div className="prompt-library-layout">
+                <LibrarySidebar
+                    currentFilter={filter}
+                    onFilterChange={setFilter}
+                />
+
+                <LiuliGlass className="library-main-glass" padding="large">
+                    <header className="library-header">
+                        <div className="library-search-container">
+                            <LiuliInput
+                                icon={<Search size={16} />}
                                 placeholder={t('prompt.library.searchPlaceholder')}
                                 value={filter.search || ''}
                                 onChange={handleSearchChange}
+                                className="library-search-input"
                             />
                         </div>
-                    </div>
 
-                    <div className="header-actions">
-                        {/* Placeholder for sorting or other actions if needed */}
-                        <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
-                            {t('prompt.library.totalPrompts', { count: prompts.length })}
-                        </div>
-                    </div>
-                </header>
-
-                <div className="library-content">
-
-                    {/* Top Prompts Section */}
-                    {showTopPrompts && topPrompts.length > 0 && (
-                        <div className="section-container">
-                            <div className="section-title">
-                                <Flame size={16} color="var(--warning)" style={{ marginRight: 8 }} />
-                                {t('prompt.library.trending', { count: 4 })}
+                        <div className="header-actions">
+                            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', fontFeatureSettings: '"tnum"' }}>
+                                {t('prompt.library.totalPrompts', { count: prompts.length })}
                             </div>
-                            <div className="prompt-grid-row">
-                                {topPrompts.map(prompt => (
-                                    <PromptCard
-                                        key={prompt.id}
-                                        prompt={prompt}
-                                        onClick={() => handlePromptClick(prompt)}
-                                    />
+                        </div>
+                    </header>
+
+                    <div className="library-scroll-content">
+                        {/* Top Prompts Section */}
+                        {showTopPrompts && topPrompts.length > 0 && (
+                            <div className="section-container">
+                                <div className="section-title">
+                                    <Flame size={18} color="var(--warning)" style={{ marginRight: 8 }} />
+                                    {t('prompt.library.trending', { count: 4 })}
+                                </div>
+                                <div className="prompt-grid-row">
+                                    {topPrompts.map(prompt => (
+                                        <PromptCard
+                                            key={prompt.id}
+                                            prompt={prompt}
+                                            onClick={() => handlePromptClick(prompt)}
+                                            featured={true}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* All Prompts Grid */}
+                        <div className="section-container">
+                            {showTopPrompts && <div className="section-title">{t('prompt.library.allPrompts')}</div>}
+
+                            <div className="prompt-masonry-grid">
+                                {otherPrompts.map(prompt => (
+                                    <div key={prompt.id} className="prompt-masonry-item">
+                                        <PromptCard
+                                            prompt={prompt}
+                                            onClick={() => handlePromptClick(prompt)}
+                                        />
+                                    </div>
                                 ))}
                             </div>
                         </div>
-                    )}
 
-                    {/* All Prompts Grid */}
-                    <div className="section-container">
-                        {showTopPrompts && <div className="section-title">{t('prompt.library.allPrompts')}</div>}
-
-                        <div className="prompt-masonry-grid">
-                            {otherPrompts.map(prompt => (
-                                <div key={prompt.id} className="prompt-masonry-item">
-                                    <PromptCard
-                                        prompt={prompt}
-                                        onClick={() => handlePromptClick(prompt)}
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                        {prompts.length === 0 && (
+                            <div className="empty-state">
+                                <Search size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
+                                <div style={{ marginBottom: 16 }}>{t('prompt.library.noPromptsFound', { defaultValue: 'No prompts found matching your criteria.' })}</div>
+                                <LiuliButton variant="secondary" onClick={() => setFilter({})}>
+                                    {t('prompt.action.clearFilters', { defaultValue: 'Clear Filters' })}
+                                </LiuliButton>
+                            </div>
+                        )}
                     </div>
-
-                    {prompts.length === 0 && (
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: '50vh',
-                            color: 'var(--text-tertiary)'
-                        }}>
-                            <Search size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
-                            <div>No prompts found matching your criteria.</div>
-                        </div>
-                    )}
-                </div>
-            </main>
+                </LiuliGlass>
+            </div>
 
             <PromptDetailModal
                 prompt={selectedPrompt}

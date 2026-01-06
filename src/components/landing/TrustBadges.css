@@ -1,0 +1,37 @@
+/* Trust Badges - Hero Section 下方的信任徽章 */
+.trust-badges {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-l, 24px);
+    margin-top: var(--gap-l, 24px);
+    flex-wrap: wrap;
+}
+
+.trust-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs, 6px);
+    color: var(--text-dim);
+    font-size: var(--fs-xs, 12px);
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.trust-badge:hover {
+    opacity: 1;
+}
+
+.trust-badge svg {
+    opacity: 0.8;
+}
+
+/* 响应式：移动端垂直排列 */
+@media (max-width: 768px) {
+    .trust-badges {
+        flex-direction: column;
+        gap: var(--gap-s, 12px);
+    }
+}

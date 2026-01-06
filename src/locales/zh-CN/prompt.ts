@@ -61,6 +61,11 @@ export const prompt = {
         copyCode: '复制代码',
         tryIt: '试运行',
         sourceJson: 'JSON 源码',
+        id: 'ID',
+        usage: '使用次数',
+        python: 'Python',
+        sql: 'SQL',
+        officialTitle: '官方 Prompt',
     },
     category: {
         analysis: '数据分析',
@@ -71,6 +76,7 @@ export const prompt = {
         copy: '复制 Prompt',
         use: '使用此 Prompt',
         copied: 'Prompt 已复制到剪贴板',
+        clearFilters: '清除筛选',
     },
     examples: {
         dataCleaningExpert: {

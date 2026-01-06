@@ -1,0 +1,222 @@
+/* Feedback Section - 用户反馈区域 */
+.feedback-section {
+    width: 100%;
+    padding: var(--gap-xxxxl, 120px) 0;
+    margin-top: var(--gap-xxxl, 80px);
+}
+
+.feedback-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 var(--gap-xl, 40px);
+}
+
+/* 头部 */
+.feedback-header {
+    text-align: center;
+    margin-bottom: var(--gap-xxxl, 60px);
+}
+
+.feedback-title {
+    font-size: var(--fs-xxl, 32px);
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: var(--gap-s, 12px);
+    letter-spacing: -0.5px;
+}
+
+.feedback-subtitle {
+    font-size: var(--fs-m, 16px);
+    color: var(--text-dim);
+    margin: 0;
+}
+
+/* 表单容器 */
+.feedback-form {
+    /* 玻璃态容器 */
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-l, 16px);
+    backdrop-filter: var(--blur-medium);
+    -webkit-backdrop-filter: var(--blur-medium);
+
+    /* 顶部高光 */
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* 微光辉光 - 仅内部光效 */
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02);
+
+    padding: var(--gap-xxl, 48px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l, 24px);
+}
+
+/* 邮箱和类型选择器行 */
+.feedback-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--gap-m, 16px);
+}
+
+/* 输入框基础样式 */
+.feedback-input,
+.feedback-select,
+.feedback-textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m, 12px);
+    color: var(--text-main);
+    font-size: var(--fs-sm, 14px);
+    padding: var(--gap-m, 14px) var(--gap-m, 16px);
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.feedback-input::placeholder,
+.feedback-textarea::placeholder {
+    color: var(--text-dim);
+    opacity: 0.6;
+}
+
+.feedback-input:focus,
+.feedback-select:focus,
+.feedback-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.1);
+}
+
+/* 文本框 */
+.feedback-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+}
+
+/* 下拉选择器 */
+.feedback-select {
+    cursor: pointer;
+}
+
+.feedback-select option {
+    background: var(--liuli-bg);
+    color: var(--text-main);
+}
+
+/* 提交按钮 */
+.feedback-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-s, 8px);
+
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-m, 12px);
+
+    padding: var(--gap-m, 14px) var(--gap-xl, 32px);
+    font-size: var(--fs-m, 16px);
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+
+    /* 水平居中 */
+    margin: 0 auto;
+}
+
+.feedback-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(10, 132, 255, 0.4);
+}
+
+.feedback-submit:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.feedback-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 状态提示 */
+.feedback-message {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s, 8px);
+    padding: var(--gap-m, 14px) var(--gap-l, 20px);
+    border-radius: var(--radius-m, 12px);
+    font-size: var(--fs-sm, 14px);
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.feedback-success {
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.feedback-error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* 响应式：移动端 */
+@media (max-width: 768px) {
+    .feedback-section {
+        padding: var(--gap-xxxl, 80px) 0;
+    }
+
+    .feedback-container {
+        padding: 0 var(--gap-l, 24px);
+    }
+
+    .feedback-header {
+        margin-bottom: var(--gap-xxl, 40px);
+    }
+
+    .feedback-title {
+        font-size: var(--fs-xl, 24px);
+    }
+
+    .feedback-subtitle {
+        font-size: var(--fs-sm, 14px);
+    }
+
+    .feedback-form {
+        padding: var(--gap-l, 24px);
+        gap: var(--gap-m, 16px);
+    }
+
+    .feedback-row {
+        grid-template-columns: 1fr;
+    }
+
+    .feedback-textarea {
+        min-height: 100px;
+    }
+
+    .feedback-submit {
+        padding: var(--gap-m, 12px) var(--gap-l, 24px);
+        font-size: var(--fs-sm, 14px);
+    }
+}

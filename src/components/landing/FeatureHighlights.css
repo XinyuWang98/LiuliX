@@ -1,0 +1,170 @@
+/* Feature Highlights - 价值展示层 */
+.feature-highlights {
+    width: 100%;
+    max-width: 1200px;
+    margin: var(--gap-xxxl, 80px) auto var(--gap-xxxl, 80px);
+    padding: 0 var(--gap-xl, 40px);
+}
+
+.feature-highlights-title {
+    font-size: var(--fs-xxl, 36px);
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-main);
+    margin-bottom: var(--gap-xxxl, 80px);
+    letter-spacing: -0.5px;
+}
+
+/* 单个特性项 - 交错布局 */
+.highlight-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-xxxl, 80px);
+    align-items: center;
+    margin-bottom: var(--gap-xxxl, 80px);
+    position: relative;
+}
+
+/* 左侧视觉 + 右侧内容 */
+.feature-layout-left {
+    grid-template-columns: 1fr 1.2fr;
+}
+
+/* 右侧视觉 + 左侧内容 */
+.feature-layout-right {
+    grid-template-columns: 1.2fr 1fr;
+}
+
+/* 视觉元素容器 */
+.feature-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-m, 16px);
+    padding: var(--gap-xl, 40px);
+
+    /* 玻璃态容器 */
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-l, 16px);
+    backdrop-filter: var(--blur-medium);
+    -webkit-backdrop-filter: var(--blur-medium);
+
+    /* 顶部高光 (Fresnel Effect) */
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+
+    /* 内部微光辉光 */
+    box-shadow:
+        inset 0 0 20px rgba(255, 255, 255, 0.02),
+        0 10px 30px -10px rgba(0, 0, 0, 0.3);
+
+    transition: all 0.4s ease;
+}
+
+.feature-visual:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        inset 0 0 30px rgba(10, 132, 255, 0.05),
+        0 20px 40px -10px rgba(0, 0, 0, 0.4);
+    border-color: rgba(10, 132, 255, 0.3);
+}
+
+/* 图标容器 */
+.feature-visual-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(10, 132, 255, 0.15) 0%, transparent 70%);
+    border: 1px solid rgba(10, 132, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    box-shadow: 0 0 20px rgba(10, 132, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.feature-visual:hover .feature-visual-icon {
+    background: radial-gradient(circle, rgba(10, 132, 255, 0.25) 0%, transparent 70%);
+    box-shadow: 0 0 30px rgba(10, 132, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* 特性标签 */
+.feature-label {
+    font-size: var(--fs-sm, 13px);
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: var(--gap-xs, 6px) var(--gap-m, 16px);
+    background: rgba(10, 132, 255, 0.1);
+    border: 1px solid rgba(10, 132, 255, 0.2);
+    border-radius: var(--radius-m, 12px);
+}
+
+/* 文字内容容器 */
+.feature-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m, 16px);
+}
+
+.feature-content h3 {
+    font-size: var(--fs-xl, 24px);
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: -0.3px;
+    line-height: 1.3;
+}
+
+.feature-content p {
+    font-size: var(--fs-m, 16px);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+}
+
+/* 响应式：移动端/平板端垂直排列 */
+/* 提高断点到1024px，确保PC端始终显示交错布局 */
+@media (max-width: 1024px) {
+    .feature-highlights {
+        margin: var(--gap-xxl, 60px) auto;
+        padding: 0 var(--gap-l, 24px);
+    }
+
+    .feature-highlights-title {
+        font-size: var(--fs-xl, 24px);
+        margin-bottom: var(--gap-xxl, 60px);
+    }
+
+    .highlight-item,
+    .feature-layout-left,
+    .feature-layout-right {
+        grid-template-columns: 1fr;
+        gap: var(--gap-l, 24px);
+        margin-bottom: var(--gap-xxl, 60px);
+    }
+
+    .feature-visual {
+        padding: var(--gap-l, 24px);
+    }
+
+    .feature-visual-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .feature-visual-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .feature-content h3 {
+        font-size: var(--fs-l, 18px);
+    }
+
+    .feature-content p {
+        font-size: var(--fs-sm, 14px);
+    }
+}

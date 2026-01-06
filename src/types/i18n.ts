@@ -439,7 +439,81 @@ export interface LanguageConfig {
 
         // 欢迎页面
         welcome: {
+            // Hero Section
+            hero: {
+                title: string;
+                subtitle: string;
+                uploadButton: string;
+                trustBadges: {
+                    local: string;
+                    offline: string;
+                    desktop: string;
+                };
+            };
+            // Trust & Safety Cards
+            valueProps: {
+                privacy: { title: string; desc: string };
+                safety: { title: string; desc: string };
+                control: { title: string; desc: string };
+            };
+            // Feature Highlights
+            featureHighlights: {
+                sectionTitle: string;
+                zeroSetup: { title: string; desc: string; label: string };
+                audit: { title: string; desc: string; label: string };
+                report: { title: string; desc: string; label: string };
+            };
+            // Roadmap
+            roadmap: {
+                sectionTitle: string;
+                sectionDescription: string;
+                v1: {
+                    version: string;
+                    label: string;
+                    subtitle: string;
+                    feature1: string;
+                    feature2: string;
+                    feature3: string;
+                };
+                v15: {
+                    version: string;
+                    label: string;
+                    subtitle: string;
+                    feature1: string;
+                    feature2: string;
+                    feature3: string;
+                };
+                v2: {
+                    version: string;
+                    label: string;
+                    subtitle: string;
+                    feature1: string;
+                    feature2: string;
+                    feature3: string;
+                };
+            };
+
+            // Feedback
+            feedback: {
+                title: string;
+                subtitle: string;
+                emailPlaceholder: string;
+                contentPlaceholder: string;
+                typeFeature: string;
+                typeBug: string;
+                typeQuestion: string;
+                typeOther: string;
+                submitButton: string;
+                successMessage: string;
+                errorMessage: string;
+            };
+
+            // Legacy fields
+            heroTitle?: string;
+            heroSubtitle?: string;
             title: string;
+            prefix?: string;
+            subtitle?: string;
             p0Completed: string;
             features: {
                 typeSystem: string;
@@ -457,6 +531,10 @@ export interface LanguageConfig {
                 largeFileDetection: string;
                 sampleRatio: string;
             };
+            uploadButton?: string;
+            feature1?: string;
+            feature2?: string;
+            feature3?: string;
         };
 
         // AI工坊

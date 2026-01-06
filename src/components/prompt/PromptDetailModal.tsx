@@ -3,6 +3,9 @@ import { UserPrompt } from '@/types/prompt';
 import { useI18n } from '@/contexts/I18nContext';
 import { X, Terminal, FileJson, Database, Medal, Flame } from 'lucide-react';
 import { CodeBlock } from '@/components/common/CodeBlock';
+import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
+import { LiuliButton } from '@/components/common/liulix/LiuliButton';
+import { LiuliTag } from '@/components/common/liulix/LiuliTag';
 import './PromptDetailModal.css';
 
 interface PromptDetailModalProps {
@@ -49,78 +52,87 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
 
     return (
         <div className="prompt-detail-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-            <div className="prompt-detail-modal">
+            <LiuliGlass
+                className="prompt-detail-modal"
+                variant="vignette"
+                blur="ultra"
+                padding="none" // Custom padding layout
+            >
                 {/* Header */}
                 <div className="prompt-detail-header">
                     <div className="prompt-detail-title-group">
                         <span className="prompt-detail-title">{prompt.title}</span>
                         {prompt.isOfficial && (
-                            <div className="official-badge small">
-                                <Medal size={12} />
-                                OFFICIAL
+                            <div className="official-badge small" title={t('prompt.detail.officialTitle')}>
+                                <Medal size={14} color="var(--primary)" />
+                                <span>{t('prompt.card.official').toUpperCase()}</span>
                             </div>
                         )}
                     </div>
-                    <button className="close-btn" onClick={onClose}>
-                        <X size={24} />
-                    </button>
+                    <LiuliButton variant="ghost" size="icon" onClick={onClose}>
+                        <X size={20} />
+                    </LiuliButton>
                 </div>
 
                 {/* Body Split */}
                 <div className="prompt-detail-body">
                     {/* Left: Meta Info */}
                     <div className="detail-left-col">
-                        <div className="meta-section">
-                            <div className="meta-section-title">{t('prompt.detail.description')}</div>
-                            <div className="meta-description">{prompt.description}</div>
-                        </div>
-
-                        <div className="meta-section">
-                            <div className="meta-section-title">{t('prompt.detail.tags')}</div>
-                            <div className="meta-tags">
-                                {prompt.dimensions.map((dim, idx) => (
-                                    <span key={idx} className="meta-tag">{dim.label || dim.value}</span>
-                                ))}
+                        <div className="meta-scroll-container">
+                            <div className="meta-section">
+                                <div className="meta-section-title">{t('prompt.detail.description')}</div>
+                                <div className="meta-description">{prompt.description}</div>
                             </div>
-                        </div>
 
-                        <div className="meta-section">
-                            <div className="meta-section-title">{t('prompt.detail.inputVariables')}</div>
-                            <div className="meta-tags">
-                                {prompt.inputVariables.map((v, idx) => (
-                                    <code key={idx} className="meta-tag" style={{ fontFamily: 'monospace' }}>{v}</code>
-                                ))}
+                            <div className="meta-section">
+                                <div className="meta-section-title">{t('prompt.detail.tags')}</div>
+                                <div className="meta-tags">
+                                    {prompt.dimensions.map((dim, idx) => (
+                                        <LiuliTag key={idx} variant="neutral" className="meta-tag">
+                                            {dim.label || dim.value}
+                                        </LiuliTag>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="meta-section spacer-top">
-                            <div className="meta-section-title">{t('prompt.detail.info')}</div>
-                            <div className="meta-list">
-                                <div className="meta-kv">
-                                    <span className="meta-key">ID</span>
-                                    <span className="meta-value">{prompt.id}</span>
+                            <div className="meta-section">
+                                <div className="meta-section-title">{t('prompt.detail.inputVariables')}</div>
+                                <div className="meta-tags">
+                                    {prompt.inputVariables.map((v, idx) => (
+                                        <code key={idx} className="variable-tag">{v}</code>
+                                    ))}
                                 </div>
-                                <div className="meta-kv">
-                                    <span className="meta-key">{t('prompt.detail.author')}</span>
-                                    <span className="meta-value">{prompt.author}</span>
-                                </div>
-                                <div className="meta-kv">
-                                    <span className="meta-key">{t('prompt.detail.version')}</span>
-                                    <span className="meta-value">{prompt.version}</span>
-                                </div>
-                                <div className="meta-kv">
-                                    <span className="meta-key">{t('prompt.detail.updated')}</span>
-                                    <span className="meta-value">{formatDate(prompt.updatedAt)}</span>
-                                </div>
-                                {prompt.usageCount !== undefined && (
+                            </div>
+
+                            <div className="meta-section spacer-top">
+                                <div className="meta-section-title">{t('prompt.detail.info')}</div>
+                                <div className="meta-list">
                                     <div className="meta-kv">
-                                        <span className="meta-key">Usage</span>
-                                        <span className="meta-value usage-value">
-                                            <Flame size={12} color="var(--warning)" />
-                                            {prompt.usageCount}
-                                        </span>
+                                        <span className="meta-key">{t('prompt.detail.id')}</span>
+                                        <span className="meta-value">{prompt.id}</span>
                                     </div>
-                                )}
+                                    <div className="meta-kv">
+                                        <span className="meta-key">{t('prompt.detail.author')}</span>
+                                        <span className="meta-value">{prompt.author}</span>
+                                    </div>
+                                    <div className="meta-kv">
+                                        <span className="meta-key">{t('prompt.detail.version')}</span>
+                                        <span className="meta-value">{prompt.version}</span>
+                                    </div>
+                                    <div className="meta-kv">
+                                        <span className="meta-key">{t('prompt.detail.updated')}</span>
+                                        <span className="meta-value">{formatDate(prompt.updatedAt)}</span>
+                                    </div>
+                                    {prompt.usageCount !== undefined && (
+                                        <div className="meta-kv">
+                                            <span className="meta-key">{t('prompt.detail.usage')}</span>
+                                            <span className="meta-value usage-value">
+                                                <Flame size={12} color="var(--warning)" />
+                                                {prompt.usageCount}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -129,36 +141,30 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                     <div className="detail-right-col">
                         <div className="code-tabs">
                             {hasPython && (
-                                <div
+                                <button
                                     className={`code-tab ${activeTab === 'python' ? 'active' : ''}`}
                                     onClick={() => setActiveTab('python')}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <Terminal size={14} />
-                                        Python
-                                    </div>
-                                </div>
+                                    <Terminal size={14} />
+                                    {t('prompt.detail.python')}
+                                </button>
                             )}
                             {hasSql && (
-                                <div
+                                <button
                                     className={`code-tab ${activeTab === 'sql' ? 'active' : ''}`}
                                     onClick={() => setActiveTab('sql')}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <Database size={14} />
-                                        SQL
-                                    </div>
-                                </div>
+                                    <Database size={14} />
+                                    {t('prompt.detail.sql')}
+                                </button>
                             )}
-                            <div
+                            <button
                                 className={`code-tab ${activeTab === 'json' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('json')}
                             >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    <FileJson size={14} />
-                                    JSON Source
-                                </div>
-                            </div>
+                                <FileJson size={14} />
+                                {t('prompt.detail.sourceJson')}
+                            </button>
                         </div>
 
                         <div className="code-content">
@@ -189,7 +195,7 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                         </div>
                     </div>
                 </div>
-            </div>
+            </LiuliGlass>
         </div>
     );
 };

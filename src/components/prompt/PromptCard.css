@@ -1,118 +1,107 @@
-.prompt-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-l);
-    padding: 24px;
-    /* Increased padding from var(--gap-m) */
-    box-shadow: var(--shadow-s);
-    transition: all 0.2s ease;
-    cursor: pointer;
+/* PromptCard.css */
+
+.prompt-card-glass {
+    height: 100%;
     display: flex;
+    /* Flex column is handled by LiuliGlass container? No, LiuliGlass is a div */
     flex-direction: column;
-    gap: 16px;
-    /* Increased gap */
-    position: relative;
-    overflow: hidden;
 }
 
-.prompt-card:hover {
+/* Ensure LiuliGlass children layout correctly if needed */
+/* LiuliGlass renders children directly inside */
+/* LiuliGlass renders children directly inside - Selector removed */
+
+.prompt-card-glass.featured {
+    border-color: rgba(var(--primary-rgb), 0.3) !important;
+    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.1), inset 0 0 20px rgba(var(--primary-rgb), 0.05);
+}
+
+.prompt-card-glass.featured:hover {
+    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.2), inset 0 0 20px rgba(var(--primary-rgb), 0.1);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-m);
-    border-color: var(--primary-30);
 }
 
 .prompt-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--gap-s);
+    margin-bottom: var(--gap-s);
+    min-height: 24px;
+    /* Align titles */
 }
 
 .prompt-card-title {
-    font-size: 15px;
-    /* Slightly larger */
-    font-weight: 600;
-    color: var(--text-primary);
-    line-height: 1.5;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    font-size: var(--fs-md);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
 }
 
 .official-badge {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    box-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);
+}
+
+.title-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .prompt-card-description {
-    font-size: 13px;
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
-    line-height: 1.6;
-    /* Increased line height */
+    line-height: 1.5;
+    margin-bottom: var(--gap-m);
+    flex: 1;
+    /* Push footer down */
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    /* Limit to 2 lines for cleaner look */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    flex-grow: 1;
-}
-
-.prompt-card-meta-group {
-    display: flex;
-    gap: var(--gap-s);
-    align-items: center;
 }
 
 .prompt-card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-top: auto;
-    padding-top: var(--gap-s);
-    border-top: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s);
 }
 
 .prompt-card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 6px;
 }
 
-.prompt-tag {
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 99px;
-    background: var(--bg-floating);
-    color: var(--text-tertiary);
+.prompt-dim-tag {
+    font-size: 11px !important;
+    /* Smaller tags for card */
+    padding: 2px 6px !important;
+    height: auto !important;
 }
 
-.prompt-usage {
+.prompt-card-meta-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.prompt-usage-badge,
+.prompt-date-badge {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 11px;
+    font-size: var(--fs-xs);
+    font-feature-settings: "tnum";
     color: var(--text-tertiary);
 }
 
-.prompt-meta-badge {
-    position: absolute;
-    top: -10px;
-    right: -25px;
-    background: var(--primary);
-    color: white;
-    font-size: 10px;
-    padding: 15px 30px 5px 30px;
-    transform: rotate(45deg);
-    display: none;
-    /* Optional style variant */
+.usage-count {
+    color: var(--text-secondary);
+    font-weight: 500;
 }

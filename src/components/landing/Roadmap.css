@@ -1,0 +1,320 @@
+/* Roadmap Section - 产品路线图 */
+.roadmap-section {
+    width: 100%;
+    max-width: 1200px;
+    margin: var(--gap-xxxxl, 120px) auto var(--gap-xxxl, 80px);
+    padding: 0 var(--gap-xl, 40px);
+}
+
+.roadmap-title {
+    font-size: var(--fs-xxl, 36px);
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-main);
+    margin-bottom: var(--gap-m, 16px);
+    /* 减小底部间距 */
+    letter-spacing: -0.5px;
+}
+
+.roadmap-description {
+    font-size: var(--fs-m, 16px);
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: var(--gap-xxxl, 80px);
+    opacity: 0.8;
+}
+
+/* 时间轴容器 */
+.roadmap-timeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap-xl, 40px);
+    align-items: stretch;
+    /* 确保所有卡片高度一致 */
+    position: relative;
+    padding-top: 60px;
+    /* 为节点标记留出空间 */
+}
+
+/* 时间轴横向线条 */
+.roadmap-timeline::before {
+    content: '';
+    position: absolute;
+    top: 30px;
+    /* 节点中心位置 */
+    left: 16.67%;
+    /* 第一个节点位置 */
+    right: 16.67%;
+    /* 最后一个节点位置 */
+    height: 3px;
+    /* 增加粗细 */
+    background: linear-gradient(to right,
+            var(--success) 0%,
+            var(--success) 33%,
+            var(--warning) 33%,
+            var(--warning) 66%,
+            var(--accent) 66%,
+            var(--accent) 100%);
+    opacity: 0.6;
+    /* 提高透明度 */
+    box-shadow: 0 0 8px rgba(10, 132, 255, 0.3);
+    /* 添加发光效果 */
+    z-index: 1;
+}
+
+/* 单个路线图卡片容器 */
+.roadmap-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l, 24px);
+}
+
+/* 时间轴节点圆点 */
+.roadmap-card::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    /* 在卡片上方 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid var(--liuli-bg);
+    transition: all 0.4s ease;
+    z-index: 2;
+}
+
+/* Current节点 - 绿色 */
+.roadmap-current::before {
+    background: var(--success);
+    box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.2);
+}
+
+/* Next节点 - 橙色 */
+.roadmap-next::before {
+    background: var(--warning);
+    box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.2);
+}
+
+/* Future节点 - 紫色 */
+.roadmap-future::before {
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.2);
+}
+
+/* 节点悬停效果 */
+.roadmap-card:hover::before {
+    transform: translateX(-50%) scale(1.3);
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+/* 卡片主体 - 玻璃态 */
+.roadmap-card-body {
+    /* 玻璃态容器 */
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-l, 16px);
+    backdrop-filter: var(--blur-medium);
+    -webkit-backdrop-filter: var(--blur-medium);
+
+    /* 顶部高光 (Fresnel Effect) */
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* 内部微光辉光 */
+    box-shadow:
+        inset 0 0 20px rgba(255, 255, 255, 0.02),
+        0 10px 30px -10px rgba(0, 0, 0, 0.3);
+
+    padding: var(--gap-xl, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l, 24px);
+    height: 100%;
+    /* 填满父容器，确保所有卡片高度一致 */
+
+    transition: all 0.4s ease;
+}
+
+.roadmap-card:hover .roadmap-card-body {
+    transform: translateY(-4px);
+    box-shadow:
+        inset 0 0 30px rgba(10, 132, 255, 0.05),
+        0 20px 40px -10px rgba(0, 0, 0, 0.4);
+    border-color: rgba(10, 132, 255, 0.3);
+}
+
+/* 卡片头部 */
+.roadmap-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s, 12px);
+}
+
+/* 版本徽章 */
+.roadmap-version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-xs, 6px);
+    padding: var(--gap-xs, 6px) var(--gap-s, 12px);
+    border-radius: var(--radius-s, 8px);
+    font-size: var(--fs-xs, 12px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: fit-content;
+}
+
+/* Current 徽章 - 绿色 */
+.current-badge {
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+/* Next 徽章 - 橙色 */
+.next-badge {
+    background: rgba(251, 146, 60, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+/* Future 徽章 - 紫色 */
+.future-badge {
+    background: rgba(168, 85, 247, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* 版本号 */
+.roadmap-version {
+    font-size: var(--fs-xl, 28px);
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+/* 版本副标题 */
+.roadmap-subtitle {
+    font-size: var(--fs-m, 16px);
+    color: var(--text-dim);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* 特性列表 */
+.roadmap-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-s, 12px);
+}
+
+.roadmap-features li {
+    position: relative;
+    padding-left: var(--gap-l, 24px);
+    font-size: var(--fs-sm, 14px);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* 特性列表项前的圆点 */
+.roadmap-features li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0.6;
+}
+
+/* Current 卡片的特性列表圆点 */
+.roadmap-current .roadmap-features li::before {
+    background: var(--success);
+}
+
+/* Next 卡片的特性列表圆点 */
+.roadmap-next .roadmap-features li::before {
+    background: var(--warning);
+}
+
+/* Future 卡片的特性列表圆点 */
+.roadmap-future .roadmap-features li::before {
+    background: var(--accent);
+}
+
+/* 响应式：平板端/移动端垂直排列 */
+@media (max-width: 1024px) {
+    .roadmap-section {
+        margin: var(--gap-xxxl, 80px) auto var(--gap-xxl, 60px);
+        padding: 0 var(--gap-l, 24px);
+    }
+
+    .roadmap-title {
+        font-size: var(--fs-xl, 24px);
+        margin-bottom: var(--gap-xxl, 60px);
+    }
+
+    .roadmap-timeline {
+        grid-template-columns: 1fr;
+        gap: var(--gap-xl, 48px);
+        padding-top: 0;
+        padding-left: 40px;
+        /* 为垂直时间轴留出空间 */
+    }
+
+    /* 垂直时间轴线条 */
+    .roadmap-timeline::before {
+        top: 0;
+        left: 10px;
+        right: auto;
+        bottom: 0;
+        width: 3px;
+        /* 增加粗细 */
+        height: auto;
+        background: linear-gradient(to bottom,
+                var(--success) 0%,
+                var(--success) 33%,
+                var(--warning) 33%,
+                var(--warning) 66%,
+                var(--accent) 66%,
+                var(--accent) 100%);
+        opacity: 0.6;
+        /* 提高透明度 */
+        box-shadow: 0 0 8px rgba(10, 132, 255, 0.3);
+        /* 添加发光效果 */
+    }
+
+    /* 垂直时间轴节点 */
+    .roadmap-card::before {
+        top: 24px;
+        left: -30px;
+        transform: translateX(0);
+    }
+
+    .roadmap-card:hover::before {
+        transform: scale(1.3);
+    }
+
+    .roadmap-card-body {
+        padding: var(--gap-l, 24px);
+    }
+
+    .roadmap-version {
+        font-size: var(--fs-l, 20px);
+    }
+
+    .roadmap-subtitle {
+        font-size: var(--fs-sm, 14px);
+    }
+
+    .roadmap-features li {
+        font-size: var(--fs-xs, 12px);
+    }
+}
