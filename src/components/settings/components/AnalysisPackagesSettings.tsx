@@ -13,7 +13,7 @@ import {
     getEnabledFonts,
     setEnabledFonts
 } from '@/config/analysisPackages';
-import { libraryConfigs } from '@/config/libraryConfig';
+import { getLibraryConfigs } from '@/config/libraryConfig';
 import {
     getEnabledLibraries,
     toggleLibrary,
@@ -27,6 +27,9 @@ import '../SettingsPage.css';
 export const AnalysisPackagesSettings = () => {
     const { t, language } = useI18n();
     const fontSettings = getEnabledFonts(language.code);
+
+    // 动态获取库配置（确保在 PromptRegistry 初始化后）
+    const libraryConfigs = getLibraryConfigs();
 
     // 状态管理
     const [enabledLibraries, setEnabledLibrariesState] = useState<string[]>(getEnabledLibraries());
@@ -113,24 +116,23 @@ export const AnalysisPackagesSettings = () => {
                 <div className="settings-group-title">
                     {t('settings.availableLibraries')}
                 </div>
-                <div className="library-list">
+                <div className="settings-options">
                     {libraryConfigs.map(lib => {
                         const isEnabled = enabledLibraries.includes(lib.name);
 
                         return (
-                            <div key={lib.name} className="library-row">
-                                <div className="library-main">
-                                    {/* Checkbox */}
-                                    <input
-                                        type="checkbox"
-                                        checked={isEnabled}
-                                        disabled={lib.isRequired}
-                                        onChange={() => handleToggleLibrary(lib.name)}
-                                        className={`lib-checkbox ${lib.isRequired ? 'disabled' : ''}`}
-                                    />
+                            <label key={lib.name} className={`settings-option ${lib.isRequired ? 'disabled' : ''}`}>
+                                {/* Checkbox */}
+                                <input
+                                    type="checkbox"
+                                    checked={isEnabled}
+                                    disabled={lib.isRequired}
+                                    onChange={() => handleToggleLibrary(lib.name)}
+                                    className="pkg-checkbox" // 复用圆形radio外观
+                                />
 
-                                    {/* Library info */}
-                                    <div className="library-info">
+                                <div className="option-content">
+                                    <div className="option-label">
                                         <span className="lib-name">{lib.name}</span>
                                         {lib.isRequired && (
                                             <span className="badge default">
@@ -138,21 +140,21 @@ export const AnalysisPackagesSettings = () => {
                                             </span>
                                         )}
                                     </div>
+                                    <div className="option-desc">
+                                        <div className="library-meta">
+                                            {lib.sizeEstimate && (
+                                                <span className="lib-size">{lib.sizeEstimate}</span>
+                                            )}
+                                            {lib.loadTime && (
+                                                <span className="lib-load-time">{lib.loadTime}</span>
+                                            )}
+                                            <span className="lib-usage">
+                                                {t('settings.usedBy', { count: lib.usedByPrompts.length })}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                {/* Meta info */}
-                                <div className="library-meta">
-                                    {lib.sizeEstimate && (
-                                        <span className="lib-size">{lib.sizeEstimate}</span>
-                                    )}
-                                    {lib.loadTime && (
-                                        <span className="lib-load-time">{lib.loadTime}</span>
-                                    )}
-                                    <span className="lib-usage">
-                                        {t('settings.usedBy', { count: lib.usedByPrompts.length })}
-                                    </span>
-                                </div>
-                            </div>
+                            </label>
                         );
                     })}
                 </div>

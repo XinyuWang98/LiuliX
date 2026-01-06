@@ -12,15 +12,15 @@ export function TrustBadges() {
     return (
         <div className="trust-badges">
             <div className="trust-badge">
-                <Lock size={14} />
+                <Lock size={14} className="trust-badge-icon" />
                 <span>{t('welcome.hero.trustBadges.local')}</span>
             </div>
             <div className="trust-badge">
-                <Plane size={14} />
+                <Plane size={14} className="trust-badge-icon" />
                 <span>{t('welcome.hero.trustBadges.offline')}</span>
             </div>
             <div className="trust-badge">
-                <Monitor size={14} />
+                <Monitor size={14} className="trust-badge-icon" />
                 <span>{t('welcome.hero.trustBadges.desktop')}</span>
             </div>
         </div>

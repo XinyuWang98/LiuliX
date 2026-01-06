@@ -20,8 +20,8 @@ export function Roadmap() {
 
             <div className="roadmap-timeline">
                 {/* V1.0 - Current */}
-                <div className="roadmap-card roadmap-current">
-                    <div className="roadmap-card-body">
+                <div className="roadmap-card-container roadmap-current">
+                    <div className="roadmap-card-container-body">
                         <div className="roadmap-header">
                             <div className="roadmap-version-badge current-badge">
                                 <CheckCircle size={16} />
@@ -39,8 +39,8 @@ export function Roadmap() {
                 </div>
 
                 {/* V1.5 - Next */}
-                <div className="roadmap-card roadmap-next">
-                    <div className="roadmap-card-body">
+                <div className="roadmap-card-container roadmap-next">
+                    <div className="roadmap-card-container-body">
                         <div className="roadmap-header">
                             <div className="roadmap-version-badge next-badge">
                                 <Rocket size={16} />
@@ -58,8 +58,8 @@ export function Roadmap() {
                 </div>
 
                 {/* V2.0 - Future */}
-                <div className="roadmap-card roadmap-future">
-                    <div className="roadmap-card-body">
+                <div className="roadmap-card-container roadmap-future">
+                    <div className="roadmap-card-container-body">
                         <div className="roadmap-header">
                             <div className="roadmap-version-badge future-badge">
                                 <Sparkles size={16} />

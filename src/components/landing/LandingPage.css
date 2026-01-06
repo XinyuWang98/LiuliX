@@ -96,13 +96,42 @@
     padding-top: var(--gap-xxxl, 80px);
 }
 
-/* Hero Section - 首屏区域 */
-.hero-section {
-    flex-direction: column;
-    align-items: center;
-    /* 整体上浮动画 */
-    animation: heroFloat 3s ease-in-out infinite alternate;
+/* 滚动动画基类 - 初始隐藏 */
+.scroll-fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
+
+/* 滚动动画激活态 */
+.scroll-fade-up.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Hero Section - 首屏区域 */
+/* Hero Section - 首屏区域 */
+/* Hero Section - 首屏区域 (Full Screen Centered) */
+/* 使用新类名 forcing update */
+.hero-section {
+    position: relative;
+    width: 100%;
+    /* 基础样式 */
+    animation: heroFloat 3s ease-in-out infinite alternate;
+    margin-bottom: var(--gap-xxxl, 80px);
+}
+
+.hero-centered {
+    /* 核心修改: 强行占据首屏高度 */
+    min-height: 85vh !important;
+
+    /* Flex 垂直居中 */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
 
 @keyframes heroFloat {
     from {
@@ -161,12 +190,26 @@
     margin-bottom: var(--gap-l, 32px);
 
     /* 顶部亮，底部渐隐，模拟光从上方照下 */
-    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%);
+    /* Slogan Shimmer Effect */
+    background: linear-gradient(110deg,
+            #FFFFFF 30%,
+            var(--beam-highlight) 45%,
+            var(--beam-highlight) 55%,
+            #FFFFFF 70%);
+    background-size: 200% auto;
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    animation: shine 6s linear infinite;
 
     /* 圣光溢出 */
     text-shadow: 0 -10px 40px rgba(255, 255, 255, 0.4);
+}
+
+@keyframes shine {
+    to {
+        background-position: 200% center;
+    }
 }
 
 .hero-subtitle {
@@ -178,6 +221,11 @@
     margin-bottom: var(--gap-xxxl, 64px);
     font-weight: 300;
     letter-spacing: 1px;
+}
+
+/* Trust Badges Positioning */
+.trust-badges {
+    margin-top: var(--gap-l, 32px);
 }
 
 /* --- Artifact: 核心按钮 (悬浮法器) --- */
@@ -212,6 +260,36 @@
     overflow: hidden;
 }
 
+/* CTA Pulse Effect - 脉冲光晕 */
+.hero-action-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    border-radius: 9999px;
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.7);
+    /* var(--primary) with opacity */
+    animation: pulse-glow 2s infinite;
+    z-index: -1;
+}
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 15px rgba(var(--primary-rgb), 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0);
+    }
+}
+
 .hero-action-btn:hover {
     transform: translateY(-4px) scale(1.02);
     box-shadow: 0 0 60px rgba(0, 200, 255, 0.4);
@@ -232,7 +310,9 @@
     gap: var(--gap-xl, 40px);
     max-width: 1200px;
     margin: 0 auto;
-    padding: var(--gap-xxxl, 80px) var(--gap-xl, 40px);
+    /* 调整 Padding: 移除顶部 Padding (由 Hero margin 控制)，底部留给 Margin */
+    padding: 0 var(--gap-xl, 40px);
+    margin-bottom: var(--gap-xxxl, 80px);
 
     /* 3D 透视感 */
     perspective: 1000px;

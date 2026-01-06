@@ -4,7 +4,7 @@
 export default {
     // Hero Section - 首屏核心信息
     hero: {
-        title: '白盒式交互分析引擎',
+        title: '不仅是 AI 分析，更是您的 私有数据科学家',
         subtitle: '本地优先 · 严格验证 · 完全透明',
         uploadButton: '上传第一个文件', // CTA按钮文案
         trustBadges: {

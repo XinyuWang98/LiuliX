@@ -13,7 +13,7 @@ export const workerDistributionPrompt: UserPrompt = {
     // 能力包配置 (v2.1)
     slug: 'worker-distribution-v1',
     packageId: 'basic',
-    requiredPackages: ['pandas', 'numpy', 'matplotlib'],
+    requiredPackages: ['matplotlib', 'numpy', 'pandas', 'seaborn'],
     outputCharts: ['histogram', 'bar'],
 
     layer: 'L2_EXECUTION',
@@ -29,10 +29,11 @@ export const workerDistributionPrompt: UserPrompt = {
     // ✅ Router 模式：使用预置代码模板
     executionMode: 'TEMPLATE_FILL',
 
-    // 预置 Python 代码模板 ({{column_name}} 会被替换)
+    // 预置 Python 代码模板（与英文版一致，使用 seaborn）
     codeTemplate: `import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import seaborn as sns
 import base64
 from io import BytesIO
 import json
@@ -40,33 +41,24 @@ import json
 plt.switch_backend('Agg')
 
 column_name = {{column_name}}
-col_data = df[column_name]
+col_data = pd.to_numeric(df[column_name], errors='coerce').dropna()
 
-# 判断数据类型
-if pd.api.types.is_numeric_dtype(col_data):
-    # 数值型：直方图 + 统计
-    fig, ax = plt.subplots(figsize=(10, 6), dpi=72)
-    col_data.dropna().hist(bins=30, ax=ax, color='#3498db', edgecolor='white')
-    ax.set_xlabel(column_name)
-    ax.set_ylabel('频次')
-    ax.set_title(f'{column_name} 分布分析', fontsize=14)
-    
-    # 计算统计量
-    mean_val = col_data.mean()
-    std_val = col_data.std()
-    skew_val = col_data.skew()
-    summary = f"{column_name} 均值={mean_val:.2f}, 标准差={std_val:.2f}, 偏度={skew_val:.2f}"
-else:
-    # 分类型：柱状图 Top 10
-    fig, ax = plt.subplots(figsize=(10, 6), dpi=72)
-    value_counts = col_data.value_counts().head(10)
-    value_counts.plot(kind='bar', ax=ax, color='#2ecc71')
-    ax.set_xlabel(column_name)
-    ax.set_ylabel('频次')
-    ax.set_title(f'{column_name} 类别分布 (Top 10)', fontsize=14)
-    plt.xticks(rotation=45, ha='right')
-    
-    summary = f"{column_name} 共{col_data.nunique()}个类别, Top1: {value_counts.index[0]}"
+# 创建双视图：直方图 + 密度图
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5), dpi=72)
+
+# 直方图
+ax1.hist(col_data, bins=30, color='#3498db', alpha=0.7, edgecolor='black')
+ax1.set_title(f'{column_name} 分布直方图', fontsize=14)
+ax1.set_xlabel('数值')
+ax1.set_ylabel('频次')
+ax1.grid(axis='y', alpha=0.3)
+
+# 密度图 (KDE)
+col_data.plot(kind='density', ax=ax2, color='#e74c3c', linewidth=2)
+ax2.set_title(f'{column_name} 密度图', fontsize=14)
+ax2.set_xlabel('数值')
+ax2.set_ylabel('密度')
+ax2.grid(alpha=0.3)
 
 plt.tight_layout()
 
@@ -76,6 +68,15 @@ fig.savefig(buffer, format='png', bbox_inches='tight')
 buffer.seek(0)
 image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
 plt.close(fig)
+
+# 统计量计算
+mean_val = col_data.mean()
+median_val = col_data.median()
+std_val = col_data.std()
+skew_val = col_data.skew()
+
+skew_desc = '右偏' if skew_val > 0.5 else ('左偏' if skew_val < -0.5 else '对称')
+summary = f"{column_name}: 均值={mean_val:.2f}, 中位数={median_val:.2f}, 标准差={std_val:.2f}, 分布{skew_desc}"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
 print(json.dumps(result))`,

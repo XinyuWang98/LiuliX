@@ -13,7 +13,7 @@ export const workerCorrelationPrompt: UserPrompt = {
     // 能力包配置 (v2.1)
     slug: 'worker-correlation-v1',
     packageId: 'basic',
-    requiredPackages: ['pandas', 'numpy', 'matplotlib'],
+    requiredPackages: ['matplotlib', 'numpy', 'pandas', 'seaborn'],
     outputCharts: ['scatter', 'box', 'heatmap'],
 
     layer: 'L2_EXECUTION',
@@ -29,10 +29,11 @@ export const workerCorrelationPrompt: UserPrompt = {
     // ✅ Router 模式
     executionMode: 'TEMPLATE_FILL',
 
-    // 预置 Python 代码模板
+    // 预置 Python 代码模板（与英文版一致，使用 seaborn）
     codeTemplate: `import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import seaborn as sns
 import base64
 from io import BytesIO
 import json
@@ -42,56 +43,31 @@ plt.switch_backend('Agg')
 col_x = {{col_x}}
 col_y = {{col_y}}
 
-x_data = df[col_x]
-y_data = df[col_y]
+# 提取数据并转换为数值类型
+x_data = pd.to_numeric(df[col_x], errors='coerce')
+y_data = pd.to_numeric(df[col_y], errors='coerce')
 
-x_is_numeric = pd.api.types.is_numeric_dtype(x_data)
-y_is_numeric = pd.api.types.is_numeric_dtype(y_data)
+# 移除缺失值
+valid_mask = x_data.notna() & y_data.notna()
+x_clean = x_data[valid_mask]
+y_clean = y_data[valid_mask]
 
+# 计算相关系数
+corr_coef = x_clean.corr(y_clean)
+
+# 创建散点图
 fig, ax = plt.subplots(figsize=(10, 6), dpi=72)
+ax.scatter(x_clean, y_clean, alpha=0.6, color='#3498db')
+ax.set_xlabel(col_x, fontsize=12)
+ax.set_ylabel(col_y, fontsize=12)
+ax.set_title(f'相关性分析: {col_x} vs {col_y}\\n(r = {corr_coef:.3f})', fontsize=14)
+ax.grid(alpha=0.3)
 
-if x_is_numeric and y_is_numeric:
-    # 数值 vs 数值：散点图 + 相关系数
-    valid_mask = x_data.notna() & y_data.notna()
-    ax.scatter(x_data[valid_mask], y_data[valid_mask], alpha=0.6, color='#3498db')
-    
-    # 添加趋势线
-    z = np.polyfit(x_data[valid_mask], y_data[valid_mask], 1)
-    p = np.poly1d(z)
-    ax.plot(x_data[valid_mask].sort_values(), p(x_data[valid_mask].sort_values()), 
-            "r--", alpha=0.8, label='趋势线')
-    
-    # 计算相关系数
-    corr = x_data.corr(y_data)
-    ax.set_title(f'{col_x} vs {col_y} (r={corr:.3f})', fontsize=14)
-    ax.set_xlabel(col_x)
-    ax.set_ylabel(col_y)
-    ax.legend()
-    
-    summary = f"{col_x} 与 {col_y} 的相关系数为 {corr:.3f}"
-    
-elif not x_is_numeric and y_is_numeric:
-    # 分类 vs 数值：箱线图
-    df.boxplot(column=col_y, by=col_x, ax=ax)
-    ax.set_title(f'{col_y} 按 {col_x} 分布', fontsize=14)
-    ax.set_xlabel(col_x)
-    ax.set_ylabel(col_y)
-    plt.suptitle('')  # 移除默认标题
-    
-    summary = f"不同 {col_x} 下的 {col_y} 分布存在差异"
-    
-else:
-    # 其他情况：交叉表热力图
-    crosstab = pd.crosstab(df[col_x], df[col_y])
-    im = ax.imshow(crosstab, cmap='Blues', aspect='auto')
-    ax.set_xticks(range(len(crosstab.columns)))
-    ax.set_xticklabels(crosstab.columns, rotation=45, ha='right')
-    ax.set_yticks(range(len(crosstab.index)))
-    ax.set_yticklabels(crosstab.index)
-    ax.set_title(f'{col_x} vs {col_y} 共现分布', fontsize=14)
-    plt.colorbar(im, ax=ax)
-    
-    summary = f"{col_x} 与 {col_y} 的交叉分布"
+# 添加回归线
+z = np.polyfit(x_clean, y_clean, 1)
+p = np.poly1d(z)
+ax.plot(x_clean, p(x_clean), "r--", alpha=0.8, linewidth=2, label='回归线')
+ax.legend()
 
 plt.tight_layout()
 
@@ -101,6 +77,17 @@ fig.savefig(buffer, format='png', bbox_inches='tight')
 buffer.seek(0)
 image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
 plt.close(fig)
+
+# 相关性强度解释
+if abs(corr_coef) > 0.7:
+    strength = '强'
+elif abs(corr_coef) > 0.4:
+    strength = '中等'
+else:
+    strength = '弱'
+
+direction = '正' if corr_coef > 0 else '负'
+summary = f"{col_x} 与 {col_y}: {strength}{direction}相关 (r={corr_coef:.3f})"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
 print(json.dumps(result))`,

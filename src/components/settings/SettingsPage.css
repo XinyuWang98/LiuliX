@@ -1060,105 +1060,38 @@
     flex-shrink: 0;
 }
 
-/* === Python库扁平化列表样式 === */
-.library-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.library-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-md);
-    background: var(--glass-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    transition: all 0.2s ease;
-}
-
-.library-row:hover {
-    background: var(--glass-surface-hover);
-    border-color: var(--border-light);
-    transform: translateY(-1px);
-}
-
-.library-main {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    flex: 1;
-}
-
-.lib-checkbox {
- appearance: none !important;
-    -webkit-appearance: none !important;
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    width: 13px !important;
-    height: 13px !important;
-    min-width: 13px;
-    min-height: 13px;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 50% !important;
-    background: transparent !important;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    flex-shrink: 0;
-    padding: 0 !important;
-}
-
-.lib-checkbox:not(.disabled):hover {
-    border-color: var(--text-accent) !important;
-}
-
-.lib-checkbox:checked {
-    border-color: var(--text-accent) !important;
-}
-
-.lib-checkbox:checked::after {
-    content: '';
-    width: 5px;
-    height: 5px;
-    background: var(--text-accent);
-    border-radius: 50%;
-}
-
-.lib-checkbox.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.library-info {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
+/* === Python库内部元素样式 (复用 settings-option 结构) === */
 
 .lib-name {
     font-size: var(--font-size-sm);
     font-weight: 500;
     color: var(--text-primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-family);
+    /* 库名不是代码，使用 Sans */
 }
 
+/* 调整 meta 信息在 option-desc 中的显示 */
 .library-meta {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
+    margin-top: 4px;
+    /* 增加一点间距 */
 }
 
 .lib-size,
 .lib-load-time {
-    font-family: var(--font-mono);
+    /* 数值展示规范：Sans + tnum 等宽数字 */
+    font-family: var(--font-family);
+    font-feature-settings: 'tnum';
+    font-weight: 500;
 }
 
 .lib-usage {
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
+    /* 使用标准次要文本色 */
 }
 
 /* Badge default style - 复用现有 */

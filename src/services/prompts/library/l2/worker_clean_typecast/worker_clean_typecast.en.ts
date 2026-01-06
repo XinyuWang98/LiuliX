@@ -9,20 +9,20 @@ export const workerCleanTypecastPrompt: UserPrompt = {
     name: 'worker_clean_typecast',
     title: 'Type Conversion',
     description: 'Convert column data types (string to numeric, date parsing, etc.)',
-    
+
     slug: 'worker_clean_typecast-v1',
     packageId: 'basic',
-    requiredPackages: ['pandas', 'numpy'],
+    requiredPackages: [],
     outputCharts: ['chart'],
     layer: 'L2_EXECUTION',
-    
+
     dimensions: [
         { category: 'industry', value: 'general', label: 'General' },
         { category: 'intent', value: 'exploration', label: 'Explore' },
         { category: 'method', value: 'analysis', label: 'Analysis' },
         { category: 'output', value: 'chart', label: 'Chart' }
     ],
-    
+
     template: `
 You are a professional data analyst.
 [English prompt template]
@@ -41,7 +41,7 @@ You are a professional data analyst.
   "columnsUsed": []
 }
 `,
-    
+
     inputVariables: ['df_summary'],
     author: 'System',
     version: '1.0.0',

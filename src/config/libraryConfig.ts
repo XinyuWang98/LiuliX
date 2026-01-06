@@ -79,6 +79,9 @@ export function generateLibraryConfigs(): PyodideLibraryConfig[] {
 }
 
 /**
- * 导出的库配置（惰性生成）
+ * 获取库配置列表（动态生成）
+ * 改为函数以解决初始化时序问题：确保在 PromptRegistry 完成数据填充后才生成配置
  */
-export const libraryConfigs: PyodideLibraryConfig[] = generateLibraryConfigs();
+export function getLibraryConfigs(): PyodideLibraryConfig[] {
+    return generateLibraryConfigs();
+}

@@ -21,7 +21,6 @@ export function LandingPage({ onFilesUploaded }: LandingPageProps) {
     const uploaderRef = useRef<FileUploaderRef>(null);
 
     // 滚动动画Hooks
-    const [heroRef, heroVisible] = useScrollAnimation(0.2);
     const [cardsRef, cardsVisible] = useScrollAnimation(0.1);
     const [highlightsRef, highlightsVisible] = useScrollAnimation(0.1);
     const [roadmapRef, roadmapVisible] = useScrollAnimation(0.1);
@@ -39,8 +38,15 @@ export function LandingPage({ onFilesUploaded }: LandingPageProps) {
             <main className="landing-content">
                 {/* Hero Section - 首屏 */}
                 <div
-                    ref={heroRef}
-                    className={`hero-section scroll-fade-up ${heroVisible ? 'animate' : ''}`}
+                    className="hero-section hero-centered"
+                    style={{
+                        minHeight: '85vh',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        marginBottom: '80px'
+                    }}
+                    data-layout-fix="true"
                 >
                     {/* 品牌 Logo - 添加到标题上方 */}
                     <div className="hero-logo">
