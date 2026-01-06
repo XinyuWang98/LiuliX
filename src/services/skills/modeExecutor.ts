@@ -8,7 +8,7 @@ import { calculateMaxRowsForPyodide } from '@/utils/memoryAssessment';
 import { DuckDBEngine } from '@/db/duckdbEngine';
 import { pyodideManager } from '@/services/PyodideManager';
 import { ExecutionMode } from '@/utils/memoryAssessment';
-import { InsightSuggestion } from '@/services/prompts/batchInsightGenerator';
+import { InsightSuggestion } from '@/services/prompts/library/insight';
 import { CodeEnhancer } from '@/services/prompts/guards/codeEnhancer';
 // import { validatePythonCode, formatValidationResult } from '@/utils/pythonCodeValidator';
 // import { smartFixPythonCode } from '@/utils/pythonCodeSanitizer';

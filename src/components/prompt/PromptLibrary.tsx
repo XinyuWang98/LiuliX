@@ -63,7 +63,7 @@ export const PromptLibrary: React.FC<PromptLibraryProps> = ({ activeView: _activ
                     <div className="header-actions">
                         {/* Placeholder for sorting or other actions if needed */}
                         <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
-                            {prompts.length} Prompts
+                            {t('prompt.library.totalPrompts', { count: prompts.length })}
                         </div>
                     </div>
                 </header>
@@ -75,7 +75,7 @@ export const PromptLibrary: React.FC<PromptLibraryProps> = ({ activeView: _activ
                         <div className="section-container">
                             <div className="section-title">
                                 <Flame size={16} color="var(--warning)" style={{ marginRight: 8 }} />
-                                Trending Top 4
+                                {t('prompt.library.trending', { count: 4 })}
                             </div>
                             <div className="prompt-grid-row">
                                 {topPrompts.map(prompt => (
@@ -91,7 +91,7 @@ export const PromptLibrary: React.FC<PromptLibraryProps> = ({ activeView: _activ
 
                     {/* All Prompts Grid */}
                     <div className="section-container">
-                        {showTopPrompts && <div className="section-title">All Prompts</div>}
+                        {showTopPrompts && <div className="section-title">{t('prompt.library.allPrompts')}</div>}
 
                         <div className="prompt-masonry-grid">
                             {otherPrompts.map(prompt => (

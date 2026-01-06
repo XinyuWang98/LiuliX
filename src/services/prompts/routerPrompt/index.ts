@@ -5,6 +5,8 @@
  */
 
 import { getCurrentLanguage } from '@/contexts/I18nContext';
+import { promptRegistry } from '@/services/promptRegistry';
+import { logger } from '@/utils/logger';
 import * as promptEn from './routerPrompt.en';
 import * as promptZh from './routerPrompt.zh';
 
@@ -45,5 +47,80 @@ export function buildFallbackRecommendations(
     return module.buildFallbackRecommendationsInternal(columns, columnTypes);
 }
 
-// 导出解析函数（语言无关）
-export { parseRouterResponse } from '../routerPrompt';
+/**
+ * 解析 L1 响应（语言无关的解析逻辑）
+ */
+export function parseRouterResponse(aiResponse: string): {
+    promptId: string;
+    params: Record<string, unknown>;
+    reason: string;
+    drillHint?: {
+        promptId: string;
+        params: Record<string, unknown>;
+        label: string;
+    };
+}[] {
+    try {
+        // 提取 JSON 部分
+        let jsonStr = aiResponse;
+
+        // 移除 markdown 代码块
+        const jsonMatch = aiResponse.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (jsonMatch) {
+            jsonStr = jsonMatch[1].trim();
+        }
+
+        const parsed = JSON.parse(jsonStr);
+        const recommendations = parsed.recommendations || parsed;
+
+        if (!Array.isArray(recommendations)) {
+            logger.warn('AI服务', '[RouterPrompt] 响应不是数组格式');
+            return [];
+        }
+
+        // 验证每个推荐
+        const validRecs = recommendations.filter(rec => {
+            if (!rec.promptId || !rec.params) {
+                logger.warn('AI服务', `[RouterPrompt] 推荐缺少必填字段`);
+                return false;
+            }
+
+            // 验证 promptId 存在
+            if (!promptRegistry.hasPrompt(rec.promptId)) {
+                logger.warn('AI服务', `[RouterPrompt] 无效的 promptId: ${rec.promptId}`);
+                return false;
+            }
+
+            // 🔍 验证日志：检查 drillHint
+            if (rec.drillHint) {
+                logger.log('AI服务', `[RouterPrompt] ✅ 检测到 drillHint`, {
+                    data: {
+                        promptId: rec.promptId,
+                        drillPromptId: rec.drillHint.promptId,
+                        drillLabel: rec.drillHint.label
+                    }
+                });
+            } else {
+                logger.log('AI服务', `[RouterPrompt] ⚠️ 无 drillHint`, {
+                    data: { promptId: rec.promptId }
+                });
+            }
+
+            return true;
+        });
+
+        // 🔍 总结日志
+        const withDrill = validRecs.filter(r => r.drillHint).length;
+        logger.log('AI服务', `[RouterPrompt] 解析完成: ${validRecs.length} 个推荐, ${withDrill} 个含下钻`);
+
+        return validRecs;
+    } catch (error) {
+        logger.error('AI服务', `[RouterPrompt] 解析响应失败: ${error}`);
+        // 🔍 错误时输出原始响应
+        logger.log('AI服务', '[RouterPrompt] AI 原始响应（前500字符）', {
+            data: { response: aiResponse.substring(0, 500) }
+        });
+        return [];
+    }
+}
+

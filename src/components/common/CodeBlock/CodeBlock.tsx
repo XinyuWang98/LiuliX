@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Prism from 'prismjs';
 import { Copy, Check } from 'lucide-react';
 import { formatCode } from '@/utils/codeFormatter';
+import { useI18n } from '@/contexts/I18nContext';
 import 'prismjs/themes/prism-tomorrow.css';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-sql';
@@ -35,6 +36,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     formatted = true,
     className = ''
 }) => {
+    const { t } = useI18n();
     const [copied, setCopied] = useState(false);
     const [displayCode, setDisplayCode] = useState('');
 
@@ -65,7 +67,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
                 <button
                     className="code-block-copy"
                     onClick={handleCopy}
-                    title="复制代码"
+                    title={t('prompt.detail.copyCode')}
                 >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                 </button>

@@ -95,7 +95,7 @@ export const LibrarySidebar: React.FC<LibrarySidebarProps> = ({ currentFilter, o
                             className={`sidebar-menu-item ${currentFilter.tagCategory === 'industry' && currentFilter.tagValue === value ? 'active' : ''}`}
                             onClick={() => onFilterChange({ ...currentFilter, tagCategory: 'industry', tagValue: value })}
                         >
-                            <span>{value}</span> {/* TODO: Translate value if needed */}
+                            <span>{t(`prompt.library.tags.industry.${value}`, { defaultValue: value })}</span>
                             <span className="count">{count as number}</span>
                         </div>
                     ))}
@@ -114,7 +114,7 @@ export const LibrarySidebar: React.FC<LibrarySidebarProps> = ({ currentFilter, o
                             className={`sidebar-menu-item ${currentFilter.tagCategory === 'intent' && currentFilter.tagValue === value ? 'active' : ''}`}
                             onClick={() => onFilterChange({ ...currentFilter, tagCategory: 'intent', tagValue: value })}
                         >
-                            <span>{value}</span>
+                            <span>{t(`prompt.library.tags.intent.${value}`, { defaultValue: value })}</span>
                             <span className="count">{count as number}</span>
                         </div>
                     ))}

@@ -91,5 +91,14 @@ export const packages = {
         simhei: '中文字体 (SimHei)',
         msgothic: '日语字体 (MS Gothic)',
         malgun: '韩语字体 (Malgun Gothic)'
+    },
+    libraries: {
+        pandas: 'Pandas 数据处理库',
+        numpy: 'NumPy 数值计算库',
+        matplotlib: 'Matplotlib 可视化库',
+        seaborn: 'Seaborn 统计可视化库',
+        scipy: 'SciPy 科学计算库',
+        'scikit-learn': 'Scikit-learn 机器学习库',
+        statsmodels: 'Statsmodels 统计建模库',
     }
 };

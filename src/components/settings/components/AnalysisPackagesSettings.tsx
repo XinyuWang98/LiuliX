@@ -1,173 +1,164 @@
 /**
- * 分析能力包设置组件 (Final Polish V3)
- * 1. 修复硬编码: 图表显示配置 -> t('settings.chartDisplayConfig')
- * 2. 移除未使用的 imports (chartFonts)
+ * 分析能力包设置组件 (V4: 扁平化库配置)
+ * 重构说明：
+ * 1. 移除能力包层级，改为扁平化库列表
+ * 2. 新增全局策略开关（自动加载 vs 过滤建议）
+ * 3. 复用现有 .settings-option 样式
  */
 
 import { useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { SettingsGroup } from './SettingsSection';
 import {
-    analysisPackages,
-    getEnabledPackages,
-    setEnabledPackages,
     getEnabledFonts,
     setEnabledFonts
 } from '@/config/analysisPackages';
-import { AnalysisPackage } from '@/types/analysisPackage';
-import { ChevronDown, ChevronRight, Type } from 'lucide-react';
+import { libraryConfigs } from '@/config/libraryConfig';
+import {
+    getEnabledLibraries,
+    toggleLibrary,
+    getLibraryMissingStrategy,
+    setLibraryMissingStrategy
+} from '@/config/libraryStorage';
+import { LibraryMissingStrategy } from '@/types/analysisPackage';
+import { Type } from 'lucide-react';
 import '../SettingsPage.css';
 
-interface AnalysisPackagesSettingsProps {
-    onPackagesChange?: (enabledIds: string[]) => void;
-}
-
-export const AnalysisPackagesSettings = ({ onPackagesChange }: AnalysisPackagesSettingsProps) => {
+export const AnalysisPackagesSettings = () => {
     const { t, language } = useI18n();
     const fontSettings = getEnabledFonts(language.code);
 
-    /* MVP: 仅关注中文(simhei)，默认启用中文环境下的字体 */
-    const [enabledIds, setEnabledIds] = useState<string[]>(getEnabledPackages());
-    const [expandedIds, setExpandedIds] = useState<string[]>([]);
+    // 状态管理
+    const [enabledLibraries, setEnabledLibrariesState] = useState<string[]>(getEnabledLibraries());
+    const [missingStrategy, setMissingStrategyState] = useState<LibraryMissingStrategy>(
+        getLibraryMissingStrategy()
+    );
     const [enabledFontIds, setEnabledFontIds] = useState<string[]>(fontSettings.fonts);
 
     const isSimHeiEnabled = enabledFontIds.includes('simhei');
 
-    // 切换能力包启用状态
-    const handleTogglePackage = (pkg: AnalysisPackage, e?: React.MouseEvent) => {
-        if (pkg.isBuiltIn) return;
-        e?.stopPropagation();
-
-        setEnabledIds(prev => {
-            const newIds = prev.includes(pkg.id)
-                ? prev.filter(id => id !== pkg.id)
-                : [...prev, pkg.id];
-
-            setEnabledPackages(newIds);
-            onPackagesChange?.(newIds);
-            return newIds;
-        });
+    // 切换库启用状态
+    const handleToggleLibrary = (libraryName: string) => {
+        toggleLibrary(libraryName);
+        setEnabledLibrariesState(getEnabledLibraries());
     };
 
-    const handleToggleExpand = (pkgId: string) => {
-        setExpandedIds(prev =>
-            prev.includes(pkgId) ? prev.filter(id => id !== pkgId) : [...prev, pkgId]
-        );
+    // 切换全局策略
+    const handleStrategyChange = (strategy: LibraryMissingStrategy) => {
+        setLibraryMissingStrategy(strategy);
+        setMissingStrategyState(strategy);
     };
 
+    // 切换中文字体
     const handleToggleChineseFont = () => {
         const newFonts = isSimHeiEnabled ? [] : ['simhei'];
         setEnabledFontIds(newFonts);
         setEnabledFonts(newFonts);
     };
 
-    // checkbox样式使用CSS类 .pkg-checkbox
-
-    // 辅助文本样式：使用 CSS 变量，无硬编码
-
-
     return (
         <>
             <h2 className="settings-section-title">
-                {t('settings.analysisPackages')}
+                {t('settings.pythonLibraries')}
             </h2>
             <p className="settings-section-desc">
-                {t('settings.analysisPackagesDesc')}
+                {t('settings.pythonLibrariesDesc')}
             </p>
 
-            {/* Packaging List - Grid Layout */}
-            <div className="analysis-packages-grid">
-                {analysisPackages.map(pkg => {
-                    const isEnabled = enabledIds.includes(pkg.id) || pkg.isBuiltIn;
-                    const isExpanded = expandedIds.includes(pkg.id);
+            {/* 全局策略开关 */}
+            <SettingsGroup>
+                <div className="settings-group-title">
+                    {t('settings.libraryMissingStrategy')}
+                </div>
+                <div className="settings-options">
+                    <label className="settings-option">
+                        <input
+                            type="radio"
+                            name="library-strategy"
+                            checked={missingStrategy === LibraryMissingStrategy.AUTO_LOAD}
+                            onChange={() => handleStrategyChange(LibraryMissingStrategy.AUTO_LOAD)}
+                        />
+                        <div className="option-content">
+                            <div className="option-label">
+                                {t('settings.strategy.autoLoad')}
+                                <span className="badge default">{t('settings.recommended')}</span>
+                            </div>
+                            <div className="option-desc">
+                                {t('settings.strategy.autoLoadDesc')}
+                            </div>
+                        </div>
+                    </label>
 
-                    return (
-                        <div
-                            key={pkg.id}
-                            className={`analysis-pkg-card ${isExpanded ? 'expanded' : ''}`}
-                        >
-                            <div
-                                className="analysis-pkg-header"
-                                onClick={() => handleToggleExpand(pkg.id)}
-                            >
-                                <div className="analysis-pkg-main">
-                                    <div
-                                        className="pkg-checkbox-wrapper"
-                                        onClick={(e) => handleTogglePackage(pkg, e)}
-                                    >
-                                        {pkg.isBuiltIn ? (
-                                            <input
-                                                type="checkbox"
-                                                checked={true}
-                                                disabled={true}
-                                                className="pkg-checkbox pkg-checkbox-disabled"
-                                            />
-                                        ) : (
-                                            <input
-                                                type="checkbox"
-                                                checked={isEnabled}
-                                                onChange={() => { }}
-                                                className="pkg-checkbox"
-                                            />
+                    <label className="settings-option">
+                        <input
+                            type="radio"
+                            name="library-strategy"
+                            checked={missingStrategy === LibraryMissingStrategy.FILTER_SUGGESTIONS}
+                            onChange={() => handleStrategyChange(LibraryMissingStrategy.FILTER_SUGGESTIONS)}
+                        />
+                        <div className="option-content">
+                            <div className="option-label">
+                                {t('settings.strategy.filter')}
+                            </div>
+                            <div className="option-desc">
+                                {t('settings.strategy.filterDesc')}
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </SettingsGroup>
+
+            {/* 扁平化库列表 */}
+            <SettingsGroup>
+                <div className="settings-group-title">
+                    {t('settings.availableLibraries')}
+                </div>
+                <div className="library-list">
+                    {libraryConfigs.map(lib => {
+                        const isEnabled = enabledLibraries.includes(lib.name);
+
+                        return (
+                            <div key={lib.name} className="library-row">
+                                <div className="library-main">
+                                    {/* Checkbox */}
+                                    <input
+                                        type="checkbox"
+                                        checked={isEnabled}
+                                        disabled={lib.isRequired}
+                                        onChange={() => handleToggleLibrary(lib.name)}
+                                        className={`lib-checkbox ${lib.isRequired ? 'disabled' : ''}`}
+                                    />
+
+                                    {/* Library info */}
+                                    <div className="library-info">
+                                        <span className="lib-name">{lib.name}</span>
+                                        {lib.isRequired && (
+                                            <span className="badge default">
+                                                {t('settings.required')}
+                                            </span>
                                         )}
                                     </div>
-
-                                    <span className="text-xl opacity-80" style={{ color: isEnabled ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{pkg.icon}</span>
-                                    <div className="flex flex-col">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
-                                                {t(pkg.name)}
-                                            </span>
-                                            {pkg.isBuiltIn && (
-                                                <span className="pkg-badge pkg-badge-builtin">
-                                                    {t('settings.builtIn')}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
                                 </div>
 
-                                {/* Right Side: Size + Chevron */}
-                                <div className="flex items-center gap-4 text-secondary-text">
-                                    <span className="pkg-size-badge">
-                                        {t(pkg.sizeEstimate)}
+                                {/* Meta info */}
+                                <div className="library-meta">
+                                    {lib.sizeEstimate && (
+                                        <span className="lib-size">{lib.sizeEstimate}</span>
+                                    )}
+                                    {lib.loadTime && (
+                                        <span className="lib-load-time">{lib.loadTime}</span>
+                                    )}
+                                    <span className="lib-usage">
+                                        {t('settings.usedBy', { count: lib.usedByPrompts.length })}
                                     </span>
-                                    {isExpanded ? <ChevronDown size={18} color="var(--text-secondary)" /> : <ChevronRight size={18} color="var(--text-secondary)" />}
                                 </div>
                             </div>
+                        );
+                    })}
+                </div>
+            </SettingsGroup>
 
-                            {/* Expanded Content */}
-                            {isExpanded && (
-                                <div className="analysis-pkg-content">
-                                    <div className="analysis-methods-grid">
-                                        {pkg.methods.map(method => (
-                                            <div key={method.promptId} className="method-grid-card">
-                                                <div className="method-card-header">
-                                                    <span className="font-medium text-sm" style={{ color: 'var(--text-accent)' }}>
-                                                        {t(method.name)}
-                                                    </span>
-                                                </div>
-                                                <div className="method-card-desc" style={{ color: 'var(--text-secondary)' }}>
-                                                    {t(method.description)}
-                                                </div>
-                                                <div className="method-card-tags">
-                                                    {method.outputCharts.map((chart, i) => (
-                                                        <span key={i} className="chart-tag">
-                                                            {t(chart)}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Font Settings - Switch Card */}
+            {/* Font Settings - 保持原样 */}
             <SettingsGroup>
                 <div className="settings-group-title">
                     {t('settings.chartDisplayConfig')}

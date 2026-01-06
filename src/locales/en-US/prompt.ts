@@ -4,12 +4,31 @@ export const prompt = {
         title: 'Prompt Library',
         description: 'Collection of high-quality analysis strategies and prompts',
         searchPlaceholder: 'Search prompts...',
+        trending: 'Trending Top {count}',
+        allPrompts: 'All Prompts',
+        totalPrompts: '{count} Prompts',
         filter: {
             all: 'All',
             industry: 'Industry',
             intent: 'Intent',
             method: 'Method',
             output: 'Output',
+        },
+        tags: {
+            industry: {
+                general: 'General',
+            },
+            intent: {
+                general: 'General',
+                exploration: 'Exploration',
+                causal: 'Causal',
+                cleaning: 'Cleaning',
+                dedup: 'Dedup',
+                fill_missing: 'Fill Missing',
+                standardize: 'Standardize',
+                filter: 'Filter',
+                convert: 'Convert',
+            },
         },
         card: {
             official: 'Official',

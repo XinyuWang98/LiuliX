@@ -1,5 +1,5 @@
 /**
- * 证据链生成 Prompt 模板
+ * 证据链生成 Prompt 模板（中文版本）
  * 用于生成异常→原因→佐证数据的树状关联路径
  */
 
@@ -14,12 +14,12 @@ export interface 证据节点 {
 }
 
 /**
- * 生成证据链的 prompt
- * @param 异常摘要 - 当前异常的基本信息（如“第37行数据重复，值 'abc' 出现两次”）
+ * 生成证据链的 prompt（内部实现 - 中文）
+ * @param 异常摘要 - 当前异常的基本信息（如"第37行数据重复，值 'abc' 出现两次"）
  * @param 相关数据 - 与异常相关的数据切片（可选，用于提供上下文）
  * @returns prompt 字符串
  */
-export function 生成证据链Prompt(
+export function generateEvidenceChainPromptInternal(
     异常摘要: string,
     相关数据?: any[]
 ): string {
@@ -69,11 +69,11 @@ export function 生成证据链Prompt(
 }
 
 /**
- * 解析 AI 返回的证据链结果
+ * 解析 AI 返回的证据链结果（内部实现 - 中文）
  * @param AI返回结果 - Gemini API 返回的原始文本（预期为 JSON 字符串）
- * @returns 树状证据链数据，若解析失败返回 null（前端可显示“暂无证据链”）
+ * @returns 树状证据链数据，若解析失败返回 null（前端可显示"暂无证据链"）
  */
-export function 解析证据链结果(AI返回结果: string): 证据节点 | null {
+export function parseEvidenceChainResultInternal(AI返回结果: string): 证据节点 | null {
     try {
         // 先尝试直接解析 JSON
         const parsed = JSON.parse(AI返回结果.trim());

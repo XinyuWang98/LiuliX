@@ -4,7 +4,7 @@
  */
 
 import { logger } from './logger';
-import { InsightSuggestion } from '@/services/prompts/batchInsightGenerator';
+import { InsightSuggestion } from '@/services/prompts/library/insight';
 
 /** 执行结果（用于验证） */
 export interface ExecutionResult {

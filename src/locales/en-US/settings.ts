@@ -118,6 +118,21 @@ export const settings = {
     restartEngineWarning: 'Changes require restarting the analysis engine',
     builtIn: 'Built-in',
 
+    // Python Library Configuration (Flattened)
+    pythonLibraries: 'Python Libraries',
+    pythonLibrariesDesc: 'Select Python libraries to load. Unchecked libraries will not be loaded to improve startup speed',
+    libraryMissingStrategy: 'Missing Library Strategy',
+    availableLibraries: 'Available Libraries',
+    required: 'Required',
+    recommended: 'Recommended',
+    usedBy: 'Used by {count} analyses',
+    strategy: {
+        autoLoad: 'Auto Load',
+        autoLoadDesc: 'Automatically load missing libraries when needed by insights',
+        filter: 'Show Configured Only',
+        filterDesc: 'Filter out insights that require unconfigured libraries',
+    },
+
     // Common Table Headers
     table: {
         method: 'Analysis Method',

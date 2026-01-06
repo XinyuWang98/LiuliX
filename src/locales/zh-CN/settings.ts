@@ -119,6 +119,21 @@ export const settings = {
     restartEngineWarning: '更改后需重新启动分析引擎才能生效',
     builtIn: '内置',
 
+    // Python库配置（扁平化）
+    pythonLibraries: 'Python 库配置',
+    pythonLibrariesDesc: '自定义启用的 Python 库，未勾选的库将不会加载以提升启动速度',
+    libraryMissingStrategy: '未配置库的处理策略',
+    availableLibraries: '可用库列表',
+    required: '必需',
+    recommended: '推荐',
+    usedBy: '被 {count} 个分析使用',
+    strategy: {
+        autoLoad: '自动加载',
+        autoLoadDesc: '当洞察需要未配置的库时，自动临时加载',
+        filter: '仅展示已配置',
+        filterDesc: '过滤掉需要未配置库的洞察建议',
+    },
+
     // 通用表格
     table: {
         method: '分析方法',

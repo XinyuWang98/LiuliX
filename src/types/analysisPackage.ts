@@ -48,3 +48,24 @@ export interface AnalysisPackageSettings {
     /** 上次更新时间 */
     lastUpdated: number;
 }
+
+/**
+ * Python库配置（扁平化，取代能力包）
+ */
+export interface PyodideLibraryConfig {
+    name: string;              // 库名：'seaborn'
+    displayName: string;       // i18n key（自动生成）
+    isRequired: boolean;       // 是否必需（pandas, numpy为true）
+    enabledByDefault: boolean; // 默认启用状态
+    sizeEstimate?: string;     // 大小估算（可选）
+    loadTime?: string;         // 预计加载时间（可选）
+    usedByPrompts: string[];   // 使用此库的Prompt ID列表
+}
+
+/**
+ * 全局策略：缺失库的处理方式
+ */
+export enum LibraryMissingStrategy {
+    AUTO_LOAD = 'auto_load',          // 自动临时加载
+    FILTER_SUGGESTIONS = 'filter'      // 过滤掉需要未配置库的建议
+}

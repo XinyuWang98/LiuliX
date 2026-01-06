@@ -26,6 +26,7 @@ export type ServiceName =
     | '资源管理'  // 🆕 资源与限制管理
     | '文件管理'
     | 'Python'
+    | 'Python库配置'  // 🆕 Python库配置管理
     | 'Python Worker'  // 🆕 Pyodide Worker专用
     | 'Skills'
     | 'UI'

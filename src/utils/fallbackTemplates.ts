@@ -6,7 +6,7 @@
  * 修改此文件时，请确保运行验证器检查
  */
 
-import { InsightSuggestion } from '@/services/prompts/batchInsightGenerator';
+import { InsightSuggestion } from '@/services/prompts/library/insight';
 import { validatePythonCode, formatValidationResult } from './pythonCodeValidator';
 
 /**

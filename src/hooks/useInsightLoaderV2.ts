@@ -7,7 +7,7 @@ import { InsightNode } from '@/types/insightTree';
 import { ProjectFile } from '@/utils/projectUtils';
 import { sampleDataForAI } from '@/utils/sampleData';
 import { DuckDBEngine } from '@/db/duckdbEngine';
-import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/batchInsightGenerator';
+import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/library/insight';
 // 🆕 Router 模式导入
 import { buildRouterPrompt, parseRouterResponse, buildFallbackRecommendations } from '@/services/prompts/routerPrompt';
 import { inflateRecommendations } from '@/services/insights/inflater';
@@ -17,13 +17,10 @@ import { executeInsightWithMode } from '@/services/skills/modeExecutor';
 import { getFallbackInsights } from '@/utils/fallbackTemplates';
 import { RESOURCE_LIMITS, checkAvailableMemory } from '@/utils/resourceLimits';
 import { validateExecutionResult } from '@/utils/postExecutionGate';
-import { useI18n } from '@/contexts/I18nContext';
-
 import { CacheManager } from '../utils/cacheManager';
 import { getAnalysisConfig } from '@/config/analysisConfig';
 
 export function useInsightLoaderV2() {
-    const { t } = useI18n();  // 获取i18n翻译函数
     const [loadingStage, setLoadingStage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [executionProgress, setExecutionProgress] = useState<{ current: number; total: number } | null>(null);
@@ -164,8 +161,7 @@ export function useInsightLoaderV2() {
                     选中列名,
                     采样数据.length,
                     totalRows,
-                    privacyMode === 'sanitized' ? [] : 采样数据,
-                    t
+                    privacyMode === 'sanitized' ? [] : 采样数据
                 );
                 logger.log('AI服务', '[Coder] 使用传统 Coder Prompt 模式');
             }

@@ -62,5 +62,16 @@ export const packages = {
         simhei: 'Chinese (SimHei)',
         msgothic: 'Japanese (MS Gothic)',
         malgun: 'Korean (Malgun Gothic)',
+    },
+
+    // Python Libraries
+    libraries: {
+        pandas: 'Pandas Data Processing',
+        numpy: 'NumPy Numerical Computing',
+        matplotlib: 'Matplotlib Visualization',
+        seaborn: 'Seaborn Statistical Visualization',
+        scipy: 'SciPy Scientific Computing',
+        'scikit-learn': 'Scikit-learn Machine Learning',
+        statsmodels: 'Statsmodels Statistical Modeling',
     }
 };

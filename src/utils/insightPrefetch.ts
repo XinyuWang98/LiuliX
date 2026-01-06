@@ -15,7 +15,7 @@ import { logger } from './logger';
 import { ProjectFile } from './projectUtils';
 import { sampleDataForAI } from './sampleData';
 import { prepareAIInput } from './dataPrivacy';
-import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/batchInsightGenerator';
+import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/library/insight';
 import { askAIInsight } from '@/services/aiService';
 import { localLLMService } from '@/services/localLLMService';
 import { assessMemoryBeforeExecution } from './memoryAssessment';
