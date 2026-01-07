@@ -558,7 +558,13 @@ export const enUS: LanguageConfig = {
                 copyCode: 'Copy Code',
                 codeCopied: 'Copied',
                 defaultTitle: 'LiuliX Analysis Report',
-                defaultSigner: 'AI Analyst'
+                defaultSigner: 'AI Analyst',
+                viewMode: {
+                    pure: 'Pure Code',
+                    enhanced: 'Enhanced',
+                    pureHint: 'Copy & run in Colab',
+                    enhancedHint: 'Includes guards for debugging',
+                },
             },
 
             audit: {

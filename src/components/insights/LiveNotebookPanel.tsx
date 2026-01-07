@@ -1,36 +1,97 @@
 import { useState, useRef, useEffect } from 'react';
-import { FileCode, Copy, Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { FileCode, Copy, Check, ChevronDown, ChevronRight, Code, Shield } from 'lucide-react';
+import { CodeBlock } from '@/components/common/CodeBlock/CodeBlock';
+import { useI18n } from '@/contexts/I18nContext';
 import './LiveNotebookPanel.css';
 
-interface LiveNotebookPanelProps {
-    codeBlocks: Array<{ id: string; title: string; code: string }>;
-    focusedId: string | null; // 当前焦点节点ID
-    expandedIds?: Set<string>; // 🆕 外部控制的展开状态
+/**
+ * 代码块数据结构
+ */
+interface CodeBlockItem {
+    id: string;
+    title: string;
+    code: string;        // AST 增强版代码
+    rawCode?: string;    // 纯净版代码（无防护注入）
 }
 
+interface LiveNotebookPanelProps {
+    codeBlocks: Array<CodeBlockItem>;
+    focusedId: string | null; // 当前焦点节点ID
+    expandedIds?: Set<string>; // 外部控制的展开状态
+}
+
+/** 代码查看模式 */
+type ViewMode = 'pure' | 'enhanced';
+
+/** localStorage 存储键 */
+const VIEW_MODE_STORAGE_KEY = 'notebook_view_mode';
+
 /**
- * Live Notebook Panel - 右侧代码面板（支持焦点跟踪 + 折叠/展开）
+ * Live Notebook Panel - 右侧代码面板
  * 
- * 功能：
- * - 显示所有已解析节点的代码块列表
- * - 支持一键复制完整脚本
- * - 自动滚动到焦点代码块
- * - 焦点高亮效果
- * - 可折叠代码块（默认只展开聚焦的代码块）
- * - 🆕 支持外部控制展开状态（与左侧卡片同步）
+ * v2.0 新功能：
+ * - 支持「纯净代码 / 增强代码」切换
+ * - 纯净代码：可直接复制到 Colab 运行
+ * - 增强代码：包含防护逻辑，用于问题排查
+ * - 复用 CodeBlock 组件实现语法高亮
+ * - 切换状态 localStorage 持久化
  */
 export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNotebookPanelProps) {
+    const { t } = useI18n();
     const [copied, setCopied] = useState(false);
     const focusedBlockRef = useRef<HTMLDivElement>(null);
 
-    // 🆕 内部展开状态管理（仅在没有外部控制时使用）
+    // 内部展开状态管理（仅在没有外部控制时使用）
     const [internalExpandedIds, setInternalExpandedIds] = useState<Set<string>>(new Set());
 
     // 使用外部传入的 expandedIds，如果没有则使用内部状态
     const activeExpandedIds = expandedIds || internalExpandedIds;
     const setExpandedIds = expandedIds ? undefined : setInternalExpandedIds;
 
-    const fullScript = codeBlocks.map(block => block.code).join('\n\n');
+    // ✅ 代码查看模式状态（持久化）
+    const [viewMode, setViewMode] = useState<ViewMode>(() => {
+        const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+        return (saved as ViewMode) || 'pure'; // 默认纯净模式
+    });
+
+    // ✅ 持久化 viewMode 到 localStorage
+    useEffect(() => {
+        localStorage.setItem(VIEW_MODE_STORAGE_KEY, viewMode);
+    }, [viewMode]);
+
+    // 🔍 调试：检查传入的 codeBlocks 数据
+    useEffect(() => {
+        if (codeBlocks.length > 0) {
+            const sample = codeBlocks[0];
+            console.log('[LiveNotebook 调试] 传入数据:', {
+                viewMode,
+                hasRawCode: !!sample.rawCode,
+                rawCodeLength: sample.rawCode?.length,
+                codeLength: sample.code.length,
+                isSame: sample.rawCode === sample.code,
+                rawPreview: sample.rawCode?.slice(0, 100),
+                codePreview: sample.code.slice(0, 100)
+            });
+        }
+    }, [codeBlocks, viewMode]);
+
+    /**
+     * 获取用于显示的代码
+     * - pure 模式：返回 rawCode（无则回退到 code）
+     * - enhanced 模式：返回 code
+     */
+    const getDisplayCode = (block: CodeBlockItem): string => {
+        return viewMode === 'pure'
+            ? (block.rawCode || block.code)
+            : block.code;
+    };
+
+    /**
+     * 获取完整脚本（用于一键复制）
+     */
+    const fullScript = codeBlocks
+        .map(block => getDisplayCode(block))
+        .join('\n\n');
 
     const handleCopy = () => {
         navigator.clipboard.writeText(fullScript);
@@ -38,7 +99,7 @@ export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNo
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // 🆕 切换单个代码块的折叠状态（仅在内部控制时有效）
+    // 切换单个代码块的折叠状态（仅在内部控制时有效）
     const toggleExpand = (id: string) => {
         if (!setExpandedIds) return; // 如果是外部控制，则不允许手动切换
 
@@ -53,7 +114,7 @@ export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNo
         });
     };
 
-    // 🆕 当 focusedId 变化时，自动展开聚焦的代码块（仅在内部控制时）
+    // 当 focusedId 变化时，自动展开聚焦的代码块（仅在内部控制时）
     useEffect(() => {
         if (focusedId && setExpandedIds) {
             setExpandedIds(new Set([focusedId])); // 只展开聚焦的代码块
@@ -78,30 +139,58 @@ export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNo
                     <FileCode size={16} />
                     <span>Live Notebook</span>
                 </div>
-                <button className="copy-all-btn" onClick={handleCopy} title="复制完整代码">
-                    {copied ? <Check size={14} /> : <Copy size={14} />}
-                    <span>{copied ? '已复制' : '复制'}</span>
-                </button>
+
+                <div className="notebook-header-actions">
+                    {/* ✅ 代码模式切换按钮组 */}
+                    <div className="view-mode-toggle" title={viewMode === 'pure'
+                        ? t('report.notebook.viewMode.pureHint')
+                        : t('report.notebook.viewMode.enhancedHint')}>
+                        <button
+                            className={`view-mode-btn ${viewMode === 'pure' ? 'active' : ''}`}
+                            onClick={() => setViewMode('pure')}
+                            aria-label={t('report.notebook.viewMode.pure')}
+                        >
+                            <Code size={12} />
+                            <span>{t('report.notebook.viewMode.pure')}</span>
+                        </button>
+                        <button
+                            className={`view-mode-btn ${viewMode === 'enhanced' ? 'active' : ''}`}
+                            onClick={() => setViewMode('enhanced')}
+                            aria-label={t('report.notebook.viewMode.enhanced')}
+                        >
+                            <Shield size={12} />
+                            <span>{t('report.notebook.viewMode.enhanced')}</span>
+                        </button>
+                    </div>
+
+                    {/* 复制按钮 */}
+                    <button className="copy-all-btn" onClick={handleCopy} title={t('report.notebook.copyAllToColab')}>
+                        {copied ? <Check size={14} /> : <Copy size={14} />}
+                        <span>{copied ? t('report.notebook.codeCopied') : t('report.copy')}</span>
+                    </button>
+                </div>
             </div>
 
             {/* Content */}
             <div className="notebook-content">
                 {codeBlocks.length === 0 ? (
                     <div className="notebook-empty">
-                        <FileCode size={32} style={{ opacity: 0.2 }} />
-                        <p>点击左侧节点即可生成代码</p>
+                        <FileCode size={32} className="notebook-empty-icon" />
+                        <p>{t('insightChain.noInsights') || '点击左侧节点即可生成代码'}</p>
                     </div>
                 ) : (
                     codeBlocks.map((block, index) => {
                         const isFocused = block.id === focusedId;
                         const isExpanded = activeExpandedIds.has(block.id);
+                        const displayCode = getDisplayCode(block);
+
                         return (
                             <div
                                 key={block.id}
                                 ref={isFocused ? focusedBlockRef : null}
                                 className={`code-block-item ${isFocused ? 'focused' : ''} ${isExpanded ? 'expanded' : 'collapsed'}`}
                             >
-                                {/* 🆕 可点击的标题栏 */}
+                                {/* 可点击的标题栏 */}
                                 <div
                                     className="code-step-label"
                                     onClick={() => toggleExpand(block.id)}
@@ -114,9 +203,17 @@ export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNo
                                     <span>Step {index + 1}: {block.title}</span>
                                 </div>
 
-                                {/* 🆕 只在展开时显示代码 */}
+                                {/* ✅ 复用 CodeBlock 组件显示代码 */}
                                 {isExpanded && (
-                                    <pre className="liuli-code-block">{block.code}</pre>
+                                    <CodeBlock
+                                        key={`${block.id}-${viewMode}`}  // ✅ 包含 viewMode 的 key 强制重新渲染
+                                        code={displayCode}
+                                        language="python"
+                                        copyable={true}
+                                        showLineNumbers={false}
+                                        formatted={false}
+                                        className="notebook-code-block"
+                                    />
                                 )}
                             </div>
                         );

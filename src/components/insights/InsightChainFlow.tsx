@@ -8,8 +8,7 @@ import { logger } from '../../utils/logger';
 import { Loader } from 'lucide-react';
 import { useInsightLoaderV2 } from '@/hooks/useInsightLoaderV2';
 import { useInsightRefresh } from '@/hooks/useInsightRefresh';
-import { getRenderedCode } from '@/services/insights/inflater';
-import { executeInsightWithMode } from '@/services/skills/modeExecutor';
+import { executeAndFillResult } from '@/services/insights/executor';  // ✅ 使用公共执行器
 import { ProjectFile } from '@/utils/projectUtils';
 import { getCurrentRoleConfig } from '@/config/userRolePresets';
 import './InsightChainFlow.css';
@@ -173,10 +172,10 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         };
     }, [isResizing, handleResize, handleResizeEnd]);
 
-    // 🆕 收集所有已解析节点的代码
+    // 🆕 收集所有已解析节点的代码（包含纯净代码和增强代码）
     const resolvedCodes = useMemo(() => {
-        const collectResolvedCodes = (nodes: InsightNodeType[]): Array<{ id: string; title: string; code: string }> => {
-            const results: Array<{ id: string; title: string; code: string }> = [];
+        const collectResolvedCodes = (nodes: InsightNodeType[]): Array<{ id: string; title: string; code: string; rawCode?: string }> => {
+            const results: Array<{ id: string; title: string; code: string; rawCode?: string }> = [];
 
             const traverse = (nodeList: InsightNodeType[]) => {
                 for (const node of nodeList) {
@@ -185,7 +184,8 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                         results.push({
                             id: node.id,
                             title: node.title,
-                            code: node.result.code
+                            code: node.result.code,
+                            rawCode: node.result.rawCode  // ✅ 同时传递纯净代码
                         });
                     }
                     if (node.children && node.children.length > 0) {
@@ -259,13 +259,6 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         setInsightNodes([...insightNodes]);
 
         try {
-            // 渲染代码
-            const renderedCode = await getRenderedCode(action.promptId, action.params);
-
-            if (!renderedCode) {
-                throw new Error(`无法渲染模板: ${action.promptId}`);
-            }
-
             // ✅ 优先级：props.tableName > file.data.tableName > file.tableName
             const effectiveTableName = tableName || file?.data?.tableName || file?.tableName;
 
@@ -273,46 +266,27 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                 throw new Error('无法获取有效的 tableName，请检查数据加载状态');
             }
 
-            // 执行代码
-            const execResult = await executeInsightWithMode(
-                {
-                    title: childNode.title,
-                    description: '',
-                    columns_used: childNode.columnsUsed,
-                    full_mode: { code: renderedCode },
-                    aggregated_mode: { sql: '', viz_code: '' }
-                },
-                'full',
-                effectiveTableName  // ✅ 使用有效的 tableName
-            );
+            // ✅ 使用公共执行器（统一处理 rawCode）
+            const executorResult = await executeAndFillResult(childNode, {
+                tableName: effectiveTableName,
+                enableQualityGate: false,  // 下钻不使用质量门控
+                logPrefix: '下钻'
+            });
 
             childNode.isLoading = false;
 
-            // 🔍 验证日志：检查执行结果
-            logger.log('UI', '下钻执行结果', {
-                data: {
-                    success: execResult.success,
-                    hasImage: !!execResult.data?.image,
-                    imageLength: execResult.data?.image?.length || 0,
-                    hasSummary: !!execResult.data?.summary,
-                    summaryLength: execResult.data?.summary?.length || 0,
-                    hasCode: !!renderedCode,
-                    codeLength: renderedCode?.length || 0,
-                    error: execResult.error
-                }
-            });
-
-            if (execResult.success) {
-                childNode.result = {
-                    code: renderedCode,
-                    image: execResult.data?.image,
-                    summary: execResult.data?.summary || '',
-                    columnsUsed: childNode.columnsUsed
-                };
-                logger.log('UI', '下钻成功', { data: { title: childNode.title } });
+            if (executorResult.success && executorResult.result) {
+                childNode.result = executorResult.result;
+                logger.log('UI', '下钻成功', {
+                    data: {
+                        title: childNode.title,
+                        hasRawCode: !!executorResult.result.rawCode,
+                        rawCodeLength: executorResult.result.rawCode?.length || 0
+                    }
+                });
             } else {
-                childNode.error = execResult.error || t('common.error');
-                logger.error('UI', '下钻失败', execResult.error);
+                childNode.error = executorResult.error || t('common.error');
+                logger.error('UI', '下钻失败', executorResult.error);
             }
         } catch (error) {
             childNode.isLoading = false;

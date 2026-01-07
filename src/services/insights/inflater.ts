@@ -92,8 +92,10 @@ export async function inflateRecommendation(
 
     // 3. 渲染代码模板 (如果有)
     let code: string | undefined;
+    let rawCode: string | undefined;
     if (prompt.executionMode === 'TEMPLATE_FILL' && prompt.codeTemplate) {
-        const rawCode = renderTemplate(prompt.codeTemplate, rec.params);
+        // ✅ 先渲染纯净代码（无防护注入，可直接在 Colab 运行）
+        rawCode = renderTemplate(prompt.codeTemplate, rec.params);
 
         // ✅ v3.0: 异步自动增强代码（零Token成本）
         const enhanceResult = await CodeEnhancer.enhance(rawCode, {
@@ -103,6 +105,19 @@ export async function inflateRecommendation(
         });
 
         code = enhanceResult.code;
+
+        // 🔍 调试：对比rawCode和增强后的code
+        logger.log('AI服务', `[Inflater] 代码增强对比`, {
+            data: {
+                rawCodeLength: rawCode.length,
+                enhancedCodeLength: code.length,
+                lengthGain: code.length - rawCode.length,
+                isSame: rawCode === code,
+                rawPreview: rawCode.slice(0, 200),
+                enhancedPreview: code.slice(0, 200)
+            }
+        });
+
         logger.log('AI服务', `[Inflater] 使用模板模式渲染代码 + 自动增强`, {
             data: { rulesApplied: enhanceResult.rulesApplied }
         });
@@ -145,10 +160,23 @@ export async function inflateRecommendation(
         // 预填充代码（如果有模板）
         result: code ? {
             code,
+            rawCode,  // ✅ 同时保存纯净代码
             summary: '',
             columnsUsed: extractColumnsUsed(rec.params)
         } : undefined
     };
+
+    // 🔍 调试：检查 rawCode 生成情况
+    if (code && !rawCode) {
+        logger.warn('AI服务', `[Inflater] ⚠️ 节点有 code 但缺少 rawCode`, {
+            data: {
+                nodeId: node.id,
+                promptId: prompt.id,
+                executionMode: prompt.executionMode,
+                hasCodeTemplate: !!prompt.codeTemplate
+            }
+        });
+    }
 
     return node;
 }
@@ -173,10 +201,10 @@ export async function inflateRecommendations(
 }
 
 /**
- * 获取 Prompt 的渲染后代码
+ * 获取 Prompt 的渲染后代码（同时返回纯净和增强版本）
  * 用于在 Hook 中执行
  */
-export async function getRenderedCode(promptId: string, params: Record<string, unknown>): Promise<string | null> {
+export async function getRenderedCode(promptId: string, params: Record<string, unknown>): Promise<{ code: string; rawCode: string } | null> {
     const prompt = promptRegistry.getPrompt(promptId);
 
     if (!prompt) {
@@ -205,5 +233,8 @@ export async function getRenderedCode(promptId: string, params: Record<string, u
         }
     });
 
-    return enhanceResult.code;
+    return {
+        code: enhanceResult.code,
+        rawCode  // ✅ 同时返回纯净代码
+    };
 }

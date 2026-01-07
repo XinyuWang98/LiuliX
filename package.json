@@ -10,8 +10,9 @@
     "server": "cd server && node index.js",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "sync:docs": "powershell -ExecutionPolicy Bypass -File ./scripts/sync_docs_to_drive.ps1 || echo 'Sync Skipped'",
-    "type-check": "tsc --noEmit",
+    "doc:lint": "npx tsx scripts/doc-guardian.ts lint",
+    "doc:index": "npx tsx scripts/doc-guardian.ts index",
+    "doc:archive": "npx tsx scripts/doc-guardian.ts archive",
     "validate:prompts": "npx -y tsx scripts/validate-prompts.ts || echo 'Prompt validation failed'",
     "monitor:cleanup": "npx -y tsx scripts/retention_policy.ts"
   },

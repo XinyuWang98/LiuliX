@@ -12,11 +12,10 @@ import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/servi
 import { buildRouterPrompt, parseRouterResponse, buildFallbackRecommendations } from '@/services/prompts/routerPrompt';
 import { inflateRecommendations } from '@/services/insights/inflater';
 import { logger } from '../utils/logger';
-import { assessMemoryBeforeExecution } from '@/utils/memoryAssessment';
-import { executeInsightWithMode } from '@/services/skills/modeExecutor';
+// ✅ 使用公共执行器
+import { executeBatchNodes } from '@/services/insights/executor';
 import { getFallbackInsights } from '@/utils/fallbackTemplates';
 import { RESOURCE_LIMITS, checkAvailableMemory } from '@/utils/resourceLimits';
-import { validateExecutionResult } from '@/utils/postExecutionGate';
 import { CacheManager } from '../utils/cacheManager';
 import { getAnalysisConfig } from '@/config/analysisConfig';
 
@@ -217,6 +216,7 @@ export function useInsightLoaderV2() {
                         isExpanded: false,
                         result: {
                             code: sugg.full_mode.code,
+                            rawCode: sugg.full_mode.code,  // ✅ 保留纯净代码（fallback无增强）
                             summary: '',
                             columnsUsed: sugg.columns_used || []
                         }
@@ -225,7 +225,7 @@ export function useInsightLoaderV2() {
                 }
             }
 
-            // ========== 步骤5：执行代码并填充结果 ==========
+            // ========== 步骤5：执行代码并填充结果（使用公共执行器）==========
             setLoadingStage('progress.validating');
 
             const maxInsights = Math.min(
@@ -233,28 +233,15 @@ export function useInsightLoaderV2() {
                 RESOURCE_LIMITS.SAFETY_LIMITS.MAX_INSIGHTS_PER_RUN
             );
 
-            for (let i = 0; i < maxInsights; i++) {
-                const node = insightNodes[i];
+            // 截取需要执行的节点
+            const nodesToExecute = insightNodes.slice(0, maxInsights);
 
-                // 更新进度
-                setExecutionProgress({ current: i + 1, total: maxInsights });
-                setLoadingStage('progress.generatingInsight');
+            // ✅ 列名校验（在执行前过滤无效节点）
+            const { validateColumnsExist } = await import('@/utils/columnValidator');
+            const columnParamKeys = ['column_name', 'col_x', 'col_y', 'date_col', 'value_col', 'group_col'];
 
-                // 执行中内存监控
-                if (i % 2 === 0 && i > 0) {
-                    const freeMemory = checkAvailableMemory();
-                    if (freeMemory < RESOURCE_LIMITS.SAFETY_LIMITS.MIN_FREE_MEMORY) {
-                        logger.warn('AI服务', `内存不足，停止执行剩余${maxInsights - i}个洞察`);
-                        break;
-                    }
-                }
-
-                // 🆕 方案 B: 列名校验（使用公共工具）
-                const { validateColumnsExist } = await import('@/utils/columnValidator');
-
+            for (const node of nodesToExecute) {
                 const paramsToValidate: Record<string, unknown> = {};
-                const columnParamKeys = ['column_name', 'col_x', 'col_y', 'date_col', 'value_col', 'group_col'];
-
                 for (const key of columnParamKeys) {
                     if (node.params?.[key]) {
                         paramsToValidate[key] = node.params[key];
@@ -269,88 +256,38 @@ export function useInsightLoaderV2() {
                     });
                     node.result = {
                         code: '',
+                        rawCode: '',
                         summary: `列名校验失败: 列 ${validationResult.invalidColumns?.join(', ')} 不存在于数据集中`,
                         columnsUsed: []
                     };
-                    continue;
-                }
-
-                // 如果节点已有代码，执行它
-                if (node.result?.code) {
-                    try {
-                        node.isLoading = true;
-
-                        // 内存评估
-                        const assessment = await assessMemoryBeforeExecution(
-                            totalRows,
-                            node.columnsUsed
-                        );
-
-                        logger.log('AI服务', `洞察${i + 1}: ${assessment.mode}模式`, {
-                            data: { title: node.title, memory: `${assessment.estimatedMemory.toFixed(0)}MB` }
-                        });
-
-                        // 执行代码
-                        const execResult = await executeInsightWithMode(
-                            {
-                                title: node.title,
-                                description: '',
-                                columns_used: node.columnsUsed,
-                                full_mode: { code: node.result.code },
-                                aggregated_mode: { sql: '', viz_code: '' }
-                            },
-                            assessment.mode,
-                            tableName || ''
-                        );
-
-
-                        node.isLoading = false;
-
-                        if (execResult.success) {
-                            // 质量门控
-                            const postScore = validateExecutionResult(
-                                {
-                                    title: node.title,
-                                    description: '',
-                                    columns_used: node.columnsUsed,
-                                    full_mode: { code: node.result.code },
-                                    aggregated_mode: { sql: '', viz_code: '' }
-                                },
-                                {
-                                    image: execResult.data?.image || '',
-                                    summary: execResult.data?.summary || ''
-                                }
-                            );
-
-                            if (postScore.passed) {
-                                // 填充结果
-                                node.result = {
-                                    code: node.result.code,
-                                    image: execResult.data?.image,
-                                    summary: execResult.data?.summary || '',
-                                    columnsUsed: node.columnsUsed
-                                };
-                            } else {
-                                logger.log('AI服务', `洞察${i + 1}质量不足，标记为低质量`, {
-                                    data: {
-                                        title: node.title,
-                                        score: postScore.total,
-                                        reasons: postScore.reasons
-                                    }
-                                });
-                                node.error = `质量评分不足：${postScore.total}/100`;
-                            }
-                        } else {
-                            node.error = execResult.error || '执行失败';
-                            logger.warn('Skills', `洞察${i + 1}执行失败`, { data: execResult.error });
-                        }
-                    } catch (error) {
-                        node.isLoading = false;
-                        node.error = String(error);
-                        logger.error('Skills', `洞察${i + 1}执行异常`, error);
-                    }
+                    node.error = '列名校验失败';
                 }
             }
+
+            // ✅ 使用公共执行器批量执行（统一处理 rawCode）
+            const validNodesToExecute = nodesToExecute.filter(node => !node.error);
+
+            await executeBatchNodes(
+                validNodesToExecute,
+                {
+                    tableName: tableName || '',
+                    totalRows,
+                    enableQualityGate: true,
+                    logPrefix: '批量洞察'
+                },
+                (current, total) => {
+                    setExecutionProgress({ current, total });
+                    setLoadingStage('progress.generatingInsight');
+
+                    // 内存监控
+                    if (current % 2 === 0 && current > 1) {
+                        const freeMemory = checkAvailableMemory();
+                        if (freeMemory < RESOURCE_LIMITS.SAFETY_LIMITS.MIN_FREE_MEMORY) {
+                            logger.warn('AI服务', `内存不足，可能影响后续执行`);
+                        }
+                    }
+                }
+            );
 
             // 过滤掉失败的节点（可选，保留失败节点可以显示错误信息）
             const validNodes = insightNodes.filter(node => node.result && !node.error);

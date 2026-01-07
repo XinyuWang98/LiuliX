@@ -968,6 +968,12 @@ export interface LanguageConfig {
                 codeCopied: string;
                 defaultTitle: string;
                 defaultSigner: string;
+                viewMode: {
+                    pure: string;
+                    enhanced: string;
+                    pureHint: string;
+                    enhancedHint: string;
+                };
             };
 
             audit: {

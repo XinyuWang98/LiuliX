@@ -47,21 +47,21 @@ export default {
 
     // Feature Highlights - 价值层（展示收益）
     featureHighlights: {
-        sectionTitle: 'LiuliX的独特优势',
+        sectionTitle: '为私有化数据分析设计的全栈方案',
         zeroSetup: {
-            title: '零配置极速启动',
-            desc: '告别繁琐配置。LiuliX内置科学计算栈(Pandas/Scikit-learn),拖入文件即刻开跑。在飞机上也能跑数据。',
-            label: '内置引擎', // Built-in Engine
+            title: '开箱即用 · 零配置',
+            desc: '内置 Python 与 DuckDB 引擎。新人入职无需配置环境，点开浏览器即可工作。即使在飞机/高铁断网环境，也能流畅处理百万级数据。',
+            label: '全栈集成',
         },
         audit: {
-            title: '秒级回溯',
-            desc: '这不是Log,这是您的"分析黑匣子"。LiuliX的每一步操作都会生成不可篡改的证据记录，随时回溯，一键审计。',
-            label: '审计追踪', // Audit Trail
+            title: '数据隐形衣 · 本地优先',
+            desc: '深度集成本地 AI 链路，数据永不出域。支持纯本地运行 (Qwen/Llama)，亦可平滑切换 API 模式。丰俭由人，合规尽在掌握。',
+            label: '隐私安全',
         },
         report: {
-            title: '分析即报告',
-            desc: '摒弃"先分析再写PPT"的传统流程。您采纳的每一个洞察都会自动汇聚成一份交互式报告。点击导出，即刻交付。',
-            label: '自动报告', // Auto Report
+            title: '白盒审计 · 透明交付',
+            desc: '清洗与分析过程自动生成可读代码。一键导出 PDF 报告，老板无需安装软件，浏览器即可查看交互式结论与代码审计。',
+            label: '透明交付',
         },
     },
 

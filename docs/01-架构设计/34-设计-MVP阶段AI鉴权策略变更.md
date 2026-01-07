@@ -1,81 +1,68 @@
-# MVP 阶段 AI 鉴权策略变更设计
+# 设计：MVP 阶段 AI 鉴权策略变更 (Feature Flag 版)
 
-> [!IMPORTANT]
-> 本文档记录 MVP 阶段移除用户端自定义 API Key 入口，全面转向“邀请码+后端托管 Key”模式的决策与设计。
+**日期**: 2026-01-07  
+**状态**: ✅ 已确认  
+**版本**: v1.1  
 
-## 1. 背景与决策
+## 1. 核心决策
+为简化 MVP 阶段用户体验，同时保留未来扩展性，决定采用 **特征开关 (Feature Toggle)** 策略管理 AI 设置界面。
 
-### 1.1 现状
-- 原设计允许用户在“设置”面板输入自己的 API Key (OpenAI/Gemini/DeepSeek)。
-- 同时存在“邀请码”机制，用于解锁后端托管的免费试用 Key。
+-   **默认行为 (MVP)**：隐藏复杂的 API Key 配置，仅提供 **"本地 vs 内置"** 二选一界面。
+-   **高级行为 (Advanced)**：通过开关开启完整配置界面（支持 Gemini/Claude/Grok 等自定义 Key）。
+-   **架构维持**：保留 `src/server` 作为后端代理，负责隐藏 DeepSeek Key、验证邀请码及实施免费额度控制。不迁移至纯前端。
 
-### 1.2 问题
-- **产品定位模糊**: 让用户填写 API Key 会让产品看起来像一个简单的“AI 套壳”工具，降低专业感。
-- **体验门槛高**: 目标用户（数据分析师）可能没有自己的 API Key。
-- **管理复杂**: 前端需要同时维护 Custom Key 和 System Key 两套逻辑。
+## 2. 详细变更方案
 
-### 1.3 决策
-- **MVP 阶段**: **使用特征开关 (Feature Toggle) 隐藏**用户端 API Key 入口，而非删除代码。
-- **唯一鉴权方式**: **邀请码 (Invitation Code)**。
-- **后端策略**: 所有请求通过 Proxy 转发，后端根据邀请码鉴权，并使用系统托管的 DeepSeek API Key。
-- **扩展性**: 后续如需开放 Custom Key，只需修改环境变量开启开关。
+### 2.1 特征开关机制
+-   **开关名称**: `ENABLE_ADVANCED_API_CONFIG`
+-   **默认值**: `false`
+-   **控制方式**: `src/config/featureFlags.ts` (代码级默认) + `localStorage` (运行时覆盖)。
 
-## 2. 变更影响范围
+### 2.2 设置界面重构 (`APISettings.tsx`)
 
-### 2.1 UI/UX 调整
-- **SettingsModal (设置面板)**:
-  - 引入 `ENABLE_USER_API_KEYS` 开关。
-  - MVP 阶段开关默认为 `false`，界面不渲染 `ModelSettings` 区域。
-  - 代码逻辑保留，随时可复用。
-- **Header (顶部导航)**:
-  - 简化状态展示，不再区分 "Custom Key" vs "Trial Key"。
+### 2.2 设置界面重构 (`APISettings.tsx`)
 
-### 2.2 核心逻辑调整
-- **aiService.ts**:
-  - 增加安全检查：若开关关闭，即使本地有残留 Key 也忽略，强制使用 Proxy 通道。
-  - 异常处理统一为：“请输入/检查邀请码”或“配额耗尽”。
+#### 模式 A：简易模式 (默认)
 
-### 2.3 隐私与合规
-- **数据脱敏**: 无论是否使用托管 Key，发送给 AI 的数据必须经过脱敏处理（行数限制、敏感字段过滤）。
-- **用户协议**: 需在邀请码输入处或首次使用时，明确提示“使用系统 AI 服务处理数据”。
+**核心变更：邀请码前置（Global Gate）**
+用户必须先输入 **邀请码** 才能解锁 AI 功能。
 
-## 3. 实施步骤
+1.  **全局激活区**
+    -   **输入框**: "请输入内测邀请码"
+    -   **行为**: 调用 `/api/validate-invite-code` 验证。验证通过后解锁下方模型选择。
 
-1. **Features Config**: 创建 `src/config/features.ts`，定义 `ENABLE_USER_API_KEYS`。
-2. **Hide UI**: 修改 `SettingsModal.tsx`，使用开关包裹 Key 输入相关代码。
-3. **Service Safety**: 在 `aiService.ts` 中添加开关判断，防止逻辑绕过。
+2.  **模型选择区 (解锁后可用)**
 
-## 4. 风险评估与缓解策略 (Risk Assessment)
+    -   **🏠 本地隐私模式 (Local Mode)**
+        -   **配额**: **无限使用** (Hardware Dependent)
+        -   **后端**: Ollama (运行于 localhost:11434)
+        -   **说明**: "不消耗云端额度，完全免费"
 
-> [!CAUTION]
-> 使用单一系统兜底 API Key (System Fallback Key) 存在资源竞争与配额耗尽风险，需严格控制。
+    -   **✨ LiuliX 内置 AI (Cloud Mode)**
+        -   **配额**: **有限额度** (基于邀请码策略，如 20次/天)
+        -   **后端**: DeepSeek (通过 LiuliX 代理服务器)
+        -   **说明**: "消耗云端计算资源"
 
-### 4.1 核心风险
-1.  **全局限流 (Global Rate Limit)**:
-    - DeepSeek 等服务商通常对单个 API Key 有 RPM/TPM 限制。
-    - 风险：MVP 阶段如果多个用户同时高频使用（如批量数据清洗），可能触发 `429 Too Many Requests`，导致所有用户不可用（单点故障）。
-2.  **成本不可控 (Uncontrolled Cost)**:
-    - 恶意用户或 Bug 导致的死循环可能短时间内耗尽账户余额。
-3.  **密钥泄露 (Key Leakage)**:
-    - 虽然 Key 存储在后端，但如果代理服务鉴权逻辑有漏洞，黑客可伪造请求盗刷流量。
+#### 模式 B：高级模式 (开关开启)
+-   渲染原有的 `APISettings` 完整界面。
+-   支持选择 Gemini, Claude, Grok 等模型。
+-   支持手动输入 API Key 和 Base URL。
 
-### 4.2 缓解策略 (Mitigation)
-1.  **后端限流 (Backend Throttling)**:
-    - **策略**: 基于 `x-invite-code` 或 IP 进行限流（例如：每分钟最多 10 次请求，每天最多 100 次）。
-    - **Header 检查**: 严格校验 `x-invite-code` 是否在白名单内。
-2.  **前端防抖与缓存 (Frontend Debounce & Cache)**:
-    - **缓存**: 对相同的 Prompt（如生成的 SQL 清洗规则）在前端或后端进行缓存。
-    - **Loading 锁**: AI 请求响应期间，禁用提交按钮，防止用户疯狂点击。
-3.  **监控告警 (Monitoring)**:
-    - 后端需记录 Token 消耗量，当达到阈值（如余额 < $5）时发送相关告警。
+### 2.3 服务层适配 (`aiService.ts`)
+-   **DeepSeek 配置增强**:
+    -   支持从 `localStorage` 读取 `invite_code`。
+    -   请求 Header 增加 `x-invite-code`。
+-   **兼容性**:
+    -   保持 `CONFIG` 对象中的其他模型配置不变，以支持高级模式。
 
-### 4.3 兜底策略升级 (Advanced Fallback)
-> [!TIP]
-> 针对“单 Key 风险”，建议在 MVP 后期采用以下低成本升级方案，无需重构代码。
+## 3. 验证与测试
+1.  **MVP 验证**:
+    -   清空 LocalStorage -> 确认界面仅显示二选一。
+    -   输入邀请码 -> 确认 DeepSeek 调用成功。
+2.  **高级功能验证**:
+    -   `localStorage.setItem('ENABLE_ADVANCED_API_CONFIG', 'true')`。
+    -   确认界面恢复完整版。
 
-1.  **多 Key 轮询 (Multi-Key Round Robin)**:
-    - 后端支持读取 `DEEPSEEK_KEYS="key1,key2,key3"` 环境变量。
-    - 简单的随机或轮询算法选择 Key，分散并发压力。
-2.  **备用 Key 池**:
-    - 准备 1-2 个备用的 `api_key` 仅在主 Key 报错 429 时自动切换（需简单的状态机逻辑）。
-    - **当前 MVP 决策**: 暂不实现自动轮询，优先保证人工监控和手动热切换能力。
+## 4. 后续规划
+-   **v1.5**: 视用户反馈决定是否开放更多模型的简易配置（如 "Bring Your Own Key"）。
+-   **v2.0**: 企业版可能默认开启高级配置。

@@ -57,8 +57,10 @@ export interface L1Response {
  * L2 Prompt 执行后的返回结构
  */
 export interface ExecutionResult {
-    /** 生成的代码 */
+    /** 生成的代码（AST增强版，包含防护逻辑） */
     code: string;
+    /** 纯净代码（无防护注入，可直接在 Colab 运行） */
+    rawCode?: string;
     /** 分析结论摘要 */
     summary: string;
     /** 使用的列名 */

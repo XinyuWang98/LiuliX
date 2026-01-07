@@ -208,7 +208,13 @@ export const report = {
         copyCode: '复制代码',
         codeCopied: '代码已复制',
         defaultTitle: 'LiuliX 智能分析报告',
-        defaultSigner: 'AI 数据分析师'
+        defaultSigner: 'AI 数据分析师',
+        viewMode: {
+            pure: '纯净代码',
+            enhanced: '增强代码',
+            pureHint: '可直接复制到 Colab 运行',
+            enhancedHint: '包含防护代码，用于问题排查',
+        },
     },
 
     audit: {
