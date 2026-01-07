@@ -66,6 +66,24 @@ export const settings = {
     connectionSuccessShort: '连接成功',
     settingComplete: '完成设置',
 
+    // MVP简易模式AI配置
+    aiSettings: {
+        title: 'AI 配置',
+        simpleMode: '模型选择',
+        modeSelection: '选择 AI 模式',
+        localMode: '本地隐私模式',
+        localModeDesc: '使用本机 Ollama，完全免费，数据不出本机',
+        cloudMode: 'LiuliX 内置 AI',
+        cloudModeDesc: '使用云端 AI，消耗邀请码额度',
+        cloudModeDescNew: '使用平台提供的 AI 服务，无需配置 API Key',
+        cloudModeHint: '云端模式使用平台内置的 DeepSeek API，会消耗您的邀请码额度',
+        unlockFirst: '请先输入邀请码激活',
+        modeLocal: '本地模式',
+        modeCloud: '云端模式',
+        unlimited: '无限使用',
+        quotaBased: '基于额度',
+    },
+
     // Skills架构配置
     skillsTitle: '启用Skills架构 (实验性)',
     skillsDesc: 'Function Calling模式，提升AI推理准确率',

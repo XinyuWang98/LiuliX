@@ -16,10 +16,11 @@
 ## 2. 功能对齐与文档 (Feature Alignment & Docs)
 
 ### � AI 鉴权策略变更 (Design)
-- **关联文档**: [34-设计-MVP阶段AI鉴权策略变更.md](file:///Users/catherinewang/Documents/GitHub/LiuliX/docs/01-架构设计/34-设计-MVP阶段AI鉴权策略变更.md)
+- **关联文档**: [45-设计-AI免费试用与邀请码策略.md](../04-技术专题/45-设计-AI免费试用与邀请码策略.md)
 - **检查项**:
-  - [ ] 确认已实现“本地 vs 内置”二选一界面 (Feature Flag 控制)。
-  - [ ] 确认邀请码验证链路通畅。
+  - [x] 确认已实现“本地 vs 内置”二选一界面 (Feature Flag 控制)。
+  - [x] 确认邀请码验证链路通畅 (前端集成完成)。
+  - [ ] **【新增】验证 Feature Flags 后端集成** (安全加固)。
 
 ### 🧩 Prompt 库用户编辑功能 (MVP)
 - **关联文档**: [08-专题-Prompt库MVP功能设计总纲.md](file:///Users/catherinewang/Documents/GitHub/LiuliX/docs/04-技术专题/02-Prompt库/08-专题-Prompt库MVP功能设计总纲.md)

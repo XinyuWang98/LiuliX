@@ -64,6 +64,24 @@ export const settings = {
     connectionSuccessShort: 'Connected',
     settingComplete: 'Setup Complete',
 
+    // MVP Simple Mode AI Settings
+    aiSettings: {
+        title: 'AI Configuration',
+        simpleMode: 'Model Selection',
+        modeSelection: 'Select AI Mode',
+        localMode: 'Local Privacy Mode',
+        localModeDesc: 'Use local Ollama, completely free, data stays on device',
+        cloudMode: 'LiuliX Built-in AI',
+        cloudModeDesc: 'Use Cloud AI, consumes invite code quota',
+        cloudModeDescNew: 'Use platform-provided AI service, no API Key needed',
+        cloudModeHint: 'Cloud mode uses built-in DeepSeek API, consuming your invite code quota',
+        unlockFirst: 'Please activate with invite code first',
+        modeLocal: 'Local Mode',
+        modeCloud: 'Cloud Mode',
+        unlimited: 'Unlimited',
+        quotaBased: 'Quota-based',
+    },
+
     // Skills Architecture Configuration
     skillsTitle: 'Enable Skills Architecture (Experimental)',
     skillsDesc: 'Function Calling mode, improves AI reasoning accuracy',

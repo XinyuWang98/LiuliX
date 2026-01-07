@@ -29,6 +29,10 @@ export interface FeatureFlags {
     SKILLS_ARCHITECTURE: boolean;       // Skills架构（已实现，默认关闭）
     PYODIDE_OFFLINE: boolean;           // Pyodide离线模式
     USE_AST_CODE_ENHANCER: boolean;     // AST代码增强器（v3.0，默认关闭）
+
+    // MVP阶段控制
+    ENABLE_ADVANCED_API_CONFIG: boolean; // 高级API配置界面（MVP阶段默认关闭）
+    ENABLE_INVITE_CODE_GATE: boolean;    // 邀请码前置验证（开发阶段关闭，上线时开启）
 }
 
 /**
@@ -60,7 +64,11 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
     // 实验性功能
     SKILLS_ARCHITECTURE: false,  // 已实现，默认关闭
     PYODIDE_OFFLINE: false,
-    USE_AST_CODE_ENHANCER: true  // ✅ v3.0 AST增强器已启用（2026-01-03测试）
+    USE_AST_CODE_ENHANCER: true,  // ✅ v3.0 AST增强器已启用（2026-01-03测试）
+
+    // MVP阶段控制
+    ENABLE_ADVANCED_API_CONFIG: false,  // MVP阶段隐藏高级配置
+    ENABLE_INVITE_CODE_GATE: false      // 开发阶段关闭邀请码验证
 };
 
 /**

@@ -5,6 +5,9 @@ import { AlertCircle, X } from 'lucide-react';
 import { parseFile, ParsedFileData } from '@utils/fileParser';
 import { formatFileSize, formatLargeNumber } from '@utils/formatters';
 import { DuckDBEngine } from '../../db/duckdbEngine';
+import { isFeatureEnabled } from '@/config/featureFlags';
+import { hasInviteCode } from '@/utils/userIdManager';
+import { InviteCodeModal } from '@/components/InviteCodeModal/InviteCodeModal';
 import './FileUploader.css';
 
 interface FileUploaderProps {
@@ -30,6 +33,9 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
     const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
     const [currentFileName, setCurrentFileName] = useState<string>('');
     const [showBatchSampleModal, setShowBatchSampleModal] = useState(false);
+    // 邀请码门槛状态
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [pendingFiles, setPendingFiles] = useState<FileList | null>(null);
 
     // Warn strategy state
     const [warnFiles, setWarnFiles] = useState<{ file: File, rowCount: number, index: number }[]>([]);
@@ -40,14 +46,51 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
     // DuckDB singleton
     const engine = DuckDBEngine.getInstance();
 
+    // 检查邀请码门槛
+    const checkInviteCodeGate = (): boolean => {
+        const needsInviteCode = isFeatureEnabled('ENABLE_INVITE_CODE_GATE');
+        if (needsInviteCode && !hasInviteCode()) {
+            setShowInviteModal(true);
+            return false; // 拦截操作
+        }
+        return true; // 允许继续
+    };
+
+    // 邀请码激活成功后的回调
+    const handleInviteCodeSuccess = () => {
+        setShowInviteModal(false);
+        // 如果有待处理的文件，继续处理
+        if (pendingFiles) {
+            processFiles(pendingFiles);
+            setPendingFiles(null);
+        } else {
+            // 否则重新打开文件选择对话框
+            fileInputRef.current?.click();
+        }
+    };
+
     useImperativeHandle(ref, () => ({
-        openFileDialog: () => fileInputRef.current?.click(),
-        handleFiles: (files: FileList) => handleFiles(files),
-        triggerUpload: () => fileInputRef.current?.click()
+        openFileDialog: () => {
+            if (checkInviteCodeGate()) {
+                fileInputRef.current?.click();
+            }
+        },
+        handleFiles: (files: FileList) => {
+            if (checkInviteCodeGate()) {
+                processFiles(files);
+            } else {
+                setPendingFiles(files);
+            }
+        },
+        triggerUpload: () => {
+            if (checkInviteCodeGate()) {
+                fileInputRef.current?.click();
+            }
+        }
     }));
 
-    const handleFiles = async (files: FileList) => {
-        // ... (logic remains the same)
+    // 实际处理文件的逻辑（从 handleFiles 拆分出来）
+    const processFiles = async (files: FileList) => {
         setFileErrors([]);
         setIsUploading(true);
         const fileArray = Array.from(files);
@@ -147,7 +190,13 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
     };
 
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files?.length) handleFiles(e.target.files);
+        if (e.target.files?.length) {
+            if (checkInviteCodeGate()) {
+                processFiles(e.target.files);
+            } else {
+                setPendingFiles(e.target.files);
+            }
+        }
     };
 
     return (
@@ -232,6 +281,17 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
                     </div>
                 </div>,
                 document.body
+            )}
+
+            {/* 邀请码门槛弹窗 */}
+            {showInviteModal && (
+                <InviteCodeModal
+                    onClose={() => {
+                        setShowInviteModal(false);
+                        setPendingFiles(null);
+                    }}
+                    onSuccess={handleInviteCodeSuccess}
+                />
             )}
         </>
     );

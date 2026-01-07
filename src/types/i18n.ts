@@ -306,6 +306,57 @@ export interface LanguageConfig {
             hardwareRecLocal: string;
             hardwareRecCloud: string;
             hardwareUnknown: string;
+
+            // MVP简易模式AI配置
+            aiSettings: {
+                title: string;
+                simpleMode: string;
+                modeSelection: string;
+                localMode: string;
+                localModeDesc: string;
+                cloudMode: string;
+                cloudModeDesc: string;
+                cloudModeDescNew: string;
+                cloudModeHint: string;
+                unlockFirst: string;
+                modeLocal: string;
+                modeCloud: string;
+                unlimited: string;
+                quotaBased: string;
+            };
+
+            // Ollama模型配置
+            ollamaChecking: string;
+            ollamaNotRunning: string;
+            ollamaDownload: string;
+            ollamaConnected: string;
+            ollamaRefresh: string;
+            installedModels: string;
+            recommendedModels: string;
+            customModel: string;
+            customModelPlaceholder: string;
+            downloading: string;
+            downloadSuccess: string;
+            downloadFailed: string;
+            selectModelTip: string;
+            connectionError: string;
+            qwen7bDesc: string;
+            qwen14bDesc: string;
+            qwen3bDesc: string;
+            qwenGeneralDesc: string;
+
+            // 模型调用逻辑说明
+            modelLogicTitle: string;
+            modelLogicLocal: string;
+            modelLogicAPI: string;
+            modelLogicFallback: string;
+
+            // MVP阶段功能限制
+            mvpNotAvailable: string;
+
+            // 语言名称
+            langZhCN: string;
+            langEnUS: string;
         };
 
         // Prompt 库

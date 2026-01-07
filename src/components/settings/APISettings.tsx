@@ -10,6 +10,8 @@ import {
     validateAPIKey
 } from '@utils/apiKeyManager';
 import { geminiService } from '../../services/GeminiService';
+import { isFeatureEnabled } from '@/config/featureFlags';
+import { APISettingsSimple } from './APISettingsSimple';
 
 // 模型配置类型
 interface ModelOption {
@@ -56,6 +58,11 @@ interface APISettingsProps {
 }
 
 export function APISettings({ onClose }: APISettingsProps) {
+    // Feature Flag检查：如果关闭高级配置，则使用简易模式
+    if (!isFeatureEnabled('ENABLE_ADVANCED_API_CONFIG')) {
+        return <APISettingsSimple onClose={onClose} />;
+    }
+
     const { t } = useI18n();
     const [provider, setProvider] = useState<APIProvider>('gemini');
     const [selectedModel, setSelectedModel] = useState<ModelOption>(AVAILABLE_MODELS[0]);
