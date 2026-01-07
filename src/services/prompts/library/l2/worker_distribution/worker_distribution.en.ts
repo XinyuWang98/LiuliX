@@ -13,7 +13,7 @@ export const workerDistributionPrompt: UserPrompt = {
 
     slug: 'worker-distribution-v1',
     packageId: 'basic',
-    requiredPackages: ['matplotlib', 'numpy', 'pandas', 'seaborn'],
+    requiredPackages: ['matplotlib', 'numpy', 'pandas', 'scipy', 'seaborn'],
     outputCharts: ['histogram', 'density', 'box'],
     layer: 'L2_EXECUTION',
 

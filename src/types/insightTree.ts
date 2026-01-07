@@ -132,6 +132,12 @@ export interface InsightNode {
     children: InsightNode[];
     /** 是否展开 */
     isExpanded: boolean;
+
+    // 🆕 用户反馈状态
+    /** 是否已采纳 */
+    isAdopted?: boolean;
+    /** 是否已拒绝 */
+    isIgnored?: boolean;
 }
 
 /**

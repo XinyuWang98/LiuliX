@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FileCode, Copy, Check, ChevronDown, ChevronRight, Code, Shield } from 'lucide-react';
+import { FileCode, Copy, Check, ChevronDown, ChevronRight, Code, Shield, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { CodeBlock } from '@/components/common/CodeBlock/CodeBlock';
 import { useI18n } from '@/contexts/I18nContext';
 import './LiveNotebookPanel.css';
@@ -13,6 +13,8 @@ interface CodeBlockItem {
     code: string;        // AST 增强版代码
     rawCode?: string;    // 纯净版代码（无防护注入）
     depth?: number;      // 🆕 节点层级
+    isAdopted?: boolean; // 🆕 是否已采纳
+    isIgnored?: boolean; // 🆕 是否已拒绝
 }
 
 interface LiveNotebookPanelProps {
@@ -202,6 +204,17 @@ export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNo
                                         {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                     </span>
                                     <span>STEP {index + 1} • L{block.depth ?? 0} • {block.title}</span>
+                                    {/* 🆕 状态图标 */}
+                                    {block.isAdopted && (
+                                        <span className="status-badge adopted" title={t('insightChain.adopted')}>
+                                            <ThumbsUp size={12} />
+                                        </span>
+                                    )}
+                                    {block.isIgnored && (
+                                        <span className="status-badge ignored" title={t('insightChain.ignored')}>
+                                            <ThumbsDown size={12} />
+                                        </span>
+                                    )}
                                 </div>
 
                                 {/* ✅ 复用 CodeBlock 组件显示代码 */}

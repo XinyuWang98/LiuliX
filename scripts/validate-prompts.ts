@@ -76,6 +76,34 @@ function extractImports(code: string): Set<string> {
 }
 
 /**
+ * 检测代码中的隐式依赖 (运行时依赖)
+ * 例如: df.plot(kind='density') 隐式依赖 scipy
+ */
+function detectImplicitDependencies(code: string): Set<string> {
+    const implicit = new Set<string>();
+
+    // Pandas 绘图的隐式依赖
+    const pandasPlotPatterns = [
+        { pattern: /\.plot\s*\(\s*kind\s*=\s*['"](?:density|kde)['"]/g, package: 'scipy', reason: 'pandas.plot(kind="density/kde")需要scipy.stats.gaussian_kde' },
+        { pattern: /\.plot\.(?:kde|density)\s*\(/g, package: 'scipy', reason: 'pandas.plot.kde()需要scipy' }
+    ];
+
+    for (const { pattern, package: pkg, reason } of pandasPlotPatterns) {
+        if (pattern.test(code)) {
+            implicit.add(pkg);
+            console.log(`      💡 检测到隐式依赖: ${pkg} (${reason})`);
+        }
+    }
+
+    // Matplotlib seaborn样式可能需要seaborn
+    if (/plt\.style\.use\s*\(\s*['"]seaborn/.test(code)) {
+        implicit.add('seaborn');
+        console.log(`      💡 检测到隐式依赖: seaborn (matplotlib样式)`);
+    }
+
+    return implicit;
+}
+/**
  * 从 TypeScript 文件中提取 requiredPackages 和 codeTemplate
  */
 function parsePromptFile(filePath: string): { requiredPackages: string[], codeTemplate: string | null, executionMode: string | null } | null {
@@ -111,21 +139,26 @@ function validatePackageConsistency(filePath: string, requiredPackages: string[]
 
     const declared = new Set(requiredPackages);
     const imported = extractImports(codeTemplate);
+    const implicit = detectImplicitDependencies(codeTemplate); // ✅ 检测隐式依赖
+
+    // 合并显式import和隐式依赖
+    const allRequired = new Set([...imported, ...implicit]);
 
     // 检查缺失声明（使用了但未声明）
-    for (const pkg of imported) {
+    for (const pkg of allRequired) {
         if (!declared.has(pkg)) {
+            const source = imported.has(pkg) ? '显式import' : '隐式依赖';
             errors.push({
                 file: filePath,
                 type: 'missing',
-                message: `缺失依赖: ${pkg} 在代码中使用但未在 requiredPackages 声明`
+                message: `缺失依赖 [${source}]: ${pkg} 在代码中使用但未在 requiredPackages 声明`
             });
         }
     }
 
     // 检查冗余声明（声明了但未使用）
     for (const pkg of declared) {
-        if (!imported.has(pkg)) {
+        if (!allRequired.has(pkg)) {
             errors.push({
                 file: filePath,
                 type: 'unused',

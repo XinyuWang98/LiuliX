@@ -201,7 +201,9 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                 title: node.title,
                 code: node.result!.code,        // ✅ 已在 filter 中确认 result 存在
                 rawCode: node.result!.rawCode,  // ✅ 同时传递纯净代码
-                depth: node.depth               // 🆕 用于 Notebook 标题显示层级
+                depth: node.depth,              // 🆕 用于 Notebook 标题显示层级
+                isAdopted: node.isAdopted,      // 🆕 采纳状态
+                isIgnored: node.isIgnored       // 🆕 拒绝状态
             }));
     }, [insightNodes]);
 
@@ -301,7 +303,16 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
         // 🆕 自动设置焦点到新解析的节点，并显示 Notebook
         setFocusedNodeId(childNode.id);
+        // ✅ 同步更新Live Notebook展开状态（手风琴效果）
+        setExpandedNodeIds(new Set([childNode.id]));
         setShowNotebook(true); // 自动展开 Notebook面板
+
+        logger.log('UI', 'Live Notebook焦点同步（下钻）', {
+            data: {
+                focusedId: childNode.id,
+                expandedIds: [childNode.id]
+            }
+        });
     };
 
     // 展开/折叠处理 - 同步更新展开状态 + 手风琴交互
@@ -374,6 +385,27 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         });
 
         setInsightNodes([...insightNodes]);
+    };
+
+    // 🆕 处理节点状态变化 (adopted/ignored)
+    const handleStatusChange = (nodeId: string, isAdopted: boolean, isIgnored: boolean) => {
+        // 递归查找并更新节点
+        const updateNodeStatus = (nodes: InsightNodeType[]): boolean => {
+            for (const node of nodes) {
+                if (node.id === nodeId) {
+                    node.isAdopted = isAdopted;
+                    node.isIgnored = isIgnored;
+                    return true;
+                }
+                if (node.children.length > 0 && updateNodeStatus(node.children)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        updateNodeStatus(insightNodes);
+        setInsightNodes([...insightNodes]); // 触发重新渲染
     };
 
     // 自定义分析（可选）
@@ -457,8 +489,22 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                             onDrillDown={handleDrillDown}
                             onToggleExpand={handleToggleExpand}
                             onCustomAnalysis={handleCustomAnalysis}
-                            onFocus={setFocusedNodeId}
+                            onFocus={(nodeId) => {
+                                // ✅ 方案A修复：设置焦点的同时,更新Live Notebook的展开状态
+                                setFocusedNodeId(nodeId);
+
+                                // ✅ 手风琴效果：只展开聚焦的代码块,折叠其他所有代码块
+                                setExpandedNodeIds(new Set([nodeId]));
+
+                                logger.log('UI', 'Live Notebook焦点同步', {
+                                    data: {
+                                        focusedId: nodeId,
+                                        expandedIds: [nodeId]
+                                    }
+                                });
+                            }}
                             onAdopt={onInsightAdopt} // 🆕
+                            onStatusChange={handleStatusChange} // 🆕 状态变化回调
                         />
                     </div>
 

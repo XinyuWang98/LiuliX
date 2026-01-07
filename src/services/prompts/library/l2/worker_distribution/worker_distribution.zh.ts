@@ -13,7 +13,7 @@ export const workerDistributionPrompt: UserPrompt = {
     // 能力包配置 (v2.1)
     slug: 'worker-distribution-v1',
     packageId: 'basic',
-    requiredPackages: ['matplotlib', 'numpy', 'pandas', 'seaborn'],
+    requiredPackages: ['matplotlib', 'numpy', 'pandas', 'scipy', 'seaborn'],
     outputCharts: ['histogram', 'bar'],
 
     layer: 'L2_EXECUTION',

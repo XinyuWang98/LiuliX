@@ -22,6 +22,7 @@ interface InsightCardV2Props {
     onCustomAnalysis: (promptId: string, params: Record<string, unknown>) => void;
     isExecuting?: boolean;
     onAdopt?: () => void; // 🆕 采纳回调
+    onStatusChange?: (nodeId: string, isAdopted: boolean, isIgnored: boolean) => void; // 🆕 状态变化回调
 }
 
 export const InsightCardV2: React.FC<InsightCardV2Props> = ({
@@ -32,7 +33,8 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
     onDrillDown,
     onCustomAnalysis,
     isExecuting = false,
-    onAdopt // 🆕
+    onAdopt, // 🆕
+    onStatusChange // 🆕
 }) => {
     const { t } = useI18n();
     const { addRecord } = useEvidence();
@@ -60,6 +62,8 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
         });
         setIsAdopted(true);
         setIsIgnored(false);
+        // ✅ 通知父组件更新状态
+        onStatusChange?.(node.id, true, false);
         onAdopt?.(); // 🆕 触发回调
     };
 
@@ -68,6 +72,8 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
         e.stopPropagation();
         setIsIgnored(true);
         setIsAdopted(false);
+        // ✅ 通知父组件更新状态
+        onStatusChange?.(node.id, false, true);
     };
 
     // 状态判断

@@ -22,6 +22,8 @@ export interface ForestNodeProps {
     onFocus?: (nodeId: string) => void;
     /** 采纳回调 */
     onAdopt?: () => void;
+    /** 状态变更回调 (采纳/忽略) */
+    onStatusChange?: (nodeId: string, isAdopted: boolean, isIgnored: boolean) => void;
 }
 
 /**
