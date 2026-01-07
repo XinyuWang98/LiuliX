@@ -28,6 +28,8 @@ export function LandingPage({ onFilesUploaded }: LandingPageProps) {
     const [feedbackRef, feedbackVisible] = useScrollAnimation(0.1);
 
     const handleStartClick = () => {
+        console.log('[LandingPage] Upload button clicked');
+        console.log('[LandingPage] uploaderRef.current:', uploaderRef.current);
         uploaderRef.current?.triggerUpload();
     };
 

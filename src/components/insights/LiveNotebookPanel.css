@@ -62,14 +62,28 @@
     /* 默认不收缩 */
 }
 
-/* 🆕 展开状态：自动填充剩余高度 */
+/* 🆕 展开状态：填充剩余高度 */
 .code-block-item.expanded {
     flex: 1;
-    /* 占据剩余空间 */
     min-height: 200px;
-    /* 最小高度 */
     overflow: hidden;
-    /* 防止溢出 */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 展开状态下，CodeBlock 填满剩余空间 */
+.code-block-item.expanded .notebook-code-block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 确保 CodeBlock 内部的 pre 元素填满容器 */
+.code-block-item.expanded .notebook-code-block pre {
+    flex: 1;
+    margin: 0;
+    overflow-y: auto;
 }
 
 /* 其他折叠项保持最小高度 */
@@ -225,8 +239,7 @@
     /* Ensure code block behaves as block */
     min-height: 100%;
     /* Ensure it fills parent */
-    padding-bottom: 20px;
-    /* Add some breathing room at the bottom */
+    /* 移除 padding-bottom，避免底部紫色留白 */
 }
 
 .notebook-content {
@@ -291,6 +304,10 @@
     cursor: pointer;
     transition: background 0.2s;
     user-select: none;
+    font-family: var(--font-sans);
+    /* 强制无衬线字体 */
+    font-feature-settings: 'tnum';
+    /* 等宽数字对齐 */
 }
 
 .code-step-label:hover {
@@ -321,12 +338,12 @@
    Live Notebook 焦点样式（焦点跟踪功能）
    ======================================== */
 
-/* 焦点代码块高亮 */
+/* 焦点代码块高亮 - 仅使用边框，不使用背景色避免紫色留白 */
 .code-block-item.focused {
     border-color: var(--primary);
-    background: rgba(10, 132, 255, 0.12);
+    border-width: 2px;
     box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.25);
-    transform: scale(1.01);
+    /* 移除 background 和 transform，避免填充留白 */
 }
 
 /* 非焦点代码块降低亮度 */

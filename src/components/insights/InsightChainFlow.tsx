@@ -175,7 +175,22 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
     // 🆕 收集所有顶层已解析节点的代码（不包括下钻子节点）
     // ✅ 修复：仅收集顶层节点，确保左侧卡片数量与右侧代码块一致
     const resolvedCodes = useMemo(() => {
-        return insightNodes
+        // 🔧 递归展平所有节点（包括嵌套的 children）
+        const flattenNodes = (nodes: InsightNodeType[]): InsightNodeType[] => {
+            return nodes.reduce<InsightNodeType[]>((acc, node) => {
+                // 添加当前节点
+                acc.push(node);
+                // 递归添加子节点
+                if (node.children && node.children.length > 0) {
+                    acc.push(...flattenNodes(node.children));
+                }
+                return acc;
+            }, []);
+        };
+
+        const allNodes = flattenNodes(insightNodes);
+
+        return allNodes
             .filter(node =>
                 !node.isLoading &&     // 已完成加载
                 !node.error &&          // 无错误  
@@ -185,7 +200,8 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                 id: node.id,
                 title: node.title,
                 code: node.result!.code,        // ✅ 已在 filter 中确认 result 存在
-                rawCode: node.result!.rawCode   // ✅ 同时传递纯净代码
+                rawCode: node.result!.rawCode,  // ✅ 同时传递纯净代码
+                depth: node.depth               // 🆕 用于 Notebook 标题显示层级
             }));
     }, [insightNodes]);
 

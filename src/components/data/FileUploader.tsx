@@ -5,7 +5,7 @@ import { AlertCircle, X } from 'lucide-react';
 import { parseFile, ParsedFileData } from '@utils/fileParser';
 import { formatFileSize, formatLargeNumber } from '@utils/formatters';
 import { DuckDBEngine } from '../../db/duckdbEngine';
-import { isFeatureEnabled } from '@/config/featureFlags';
+import { isFeatureEnabled, setFeatureFlags } from '@/config/featureFlags';
 import { hasInviteCode } from '@/utils/userIdManager';
 import { InviteCodeModal } from '@/components/InviteCodeModal/InviteCodeModal';
 import './FileUploader.css';
@@ -46,13 +46,30 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
     // DuckDB singleton
     const engine = DuckDBEngine.getInstance();
 
+    // 🔧 开发阶段：强制关闭邀请码门槛
+    // TODO: 生产环境部署时移除此代码块
+    if (isFeatureEnabled('ENABLE_INVITE_CODE_GATE')) {
+        console.warn('[FileUploader] 检测到邀请码门槛已启用，开发阶段强制关闭');
+        setFeatureFlags({ ENABLE_INVITE_CODE_GATE: false });
+    }
+
     // 检查邀请码门槛
     const checkInviteCodeGate = (): boolean => {
         const needsInviteCode = isFeatureEnabled('ENABLE_INVITE_CODE_GATE');
-        if (needsInviteCode && !hasInviteCode()) {
+        const userHasCode = hasInviteCode();
+
+        console.log('[FileUploader] checkInviteCodeGate Debug:', {
+            needsInviteCode,
+            userHasCode,
+            willBlock: needsInviteCode && !userHasCode
+        });
+
+        if (needsInviteCode && !userHasCode) {
+            console.log('[FileUploader] Blocking: User needs invite code');
             setShowInviteModal(true);
             return false; // 拦截操作
         }
+        console.log('[FileUploader] Allowing: No invite code needed or user has code');
         return true; // 允许继续
     };
 
@@ -83,7 +100,10 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
             }
         },
         triggerUpload: () => {
+            console.log('[FileUploader] triggerUpload called');
+            console.log('[FileUploader] checkInviteCodeGate result:', checkInviteCodeGate());
             if (checkInviteCodeGate()) {
+                console.log('[FileUploader] Triggering file input click');
                 fileInputRef.current?.click();
             }
         }

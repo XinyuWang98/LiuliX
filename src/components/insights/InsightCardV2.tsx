@@ -79,9 +79,6 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
     // 构建面包屑路径（从parentContext或其他字段推导）
     const breadcrumbPath = node.parentContext ? [node.parentContext] : [];
 
-    // 获取列名（取第一个列作为主列）
-    const mainColumn = node.columnsUsed[0] || '';
-
     return (
         <div className={`insight-card-v2 ${isPending ? 'is-pending' : ''} ${hasChildren ? 'has-children' : ''}`}>
             {/* Header */}
@@ -93,9 +90,9 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                     onFocus?.(node.id);
                 }}
             >
-                {/* 左侧：卡片图标 */}
-                <div className="card-icon">
-                    <BarChart2 size={18} />
+                {/* 左侧：层级徽章 */}
+                <div className={`card-icon depth-${node.depth}`}>
+                    L{node.depth}
                 </div>
 
                 {/* 中间：信息区域 */}
@@ -103,15 +100,15 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                     {/* 行1：标题 */}
                     <div className="card-title">{node.title}</div>
 
-                    {/* 行2：数据上下文（文件名 + 列名）*/}
-                    {(node.fileName || mainColumn) && (
+                    {/* 行2：数据上下文（文件名 + 所有列名）*/}
+                    {(node.fileName || node.columnsUsed.length > 0) && (
                         <div className="card-context">
                             {node.fileName && (
                                 <span className="context-badge context-file">{node.fileName}</span>
                             )}
-                            {mainColumn && (
-                                <span className="context-badge context-column">{mainColumn}</span>
-                            )}
+                            {node.columnsUsed.map((column, index) => (
+                                <span key={index} className="context-badge context-column">{column}</span>
+                            ))}
                         </div>
                     )}
 
@@ -194,21 +191,7 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                         </div>
                     )}
 
-                    {/* 操作按钮区 */}
-                    <div
-                        className="card-actions"
-                        onClick={(e) => e.stopPropagation()} // 按钮点击不触发body的点击事件
-                    >
-                        {onAdopt && !isPending && (
-                            <button
-                                className={`btn-adopt ${isAdopted ? 'adopted' : ''}`}
-                                onClick={handleAdopt}
-                                disabled={isAdopted}
-                            >
-                                {isAdopted ? `✓ ${t('insightChain.adopted')}` : t('insightChain.adopt')}
-                            </button>
-                        )}
-                    </div>
+
 
                     {/* 下钻建议区域 */}
                     {(() => {

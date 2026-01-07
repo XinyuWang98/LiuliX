@@ -32,6 +32,16 @@ export default defineConfig({
     build: {
         target: 'esnext',  // 支持现代浏览器特性
         rollupOptions: {
+            onwarn(warning, warn) {
+                // 忽略 DuckDB Worker 的 sourcemap 警告
+                if (
+                    warning.code === 'SOURCEMAP_ERROR' &&
+                    warning.message.includes('duckdb')
+                ) {
+                    return;
+                }
+                warn(warning);
+            },
             output: {
                 manualChunks: {
                     // 分离大型库以优化加载

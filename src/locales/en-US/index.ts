@@ -381,7 +381,7 @@ export const enUS: LanguageConfig = {
             nullRate: 'Null Rate',
             uniqueValues: 'Unique',
             missingPercent: 'Missing %',
-            selectedColumns: 'Selected Columns',
+            selectedColumns: 'Selected {count}/{total}',
             selectColumns: 'Select Columns',
             clickToExpand: 'Expand stats',
             clickToCollapse: 'Collapse stats',

@@ -12,6 +12,7 @@ interface CodeBlockItem {
     title: string;
     code: string;        // AST 增强版代码
     rawCode?: string;    // 纯净版代码（无防护注入）
+    depth?: number;      // 🆕 节点层级
 }
 
 interface LiveNotebookPanelProps {
@@ -200,7 +201,7 @@ export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNo
                                     <span className="expand-icon">
                                         {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                     </span>
-                                    <span>Step {index + 1}: {block.title}</span>
+                                    <span>STEP {index + 1} • L{block.depth ?? 0} • {block.title}</span>
                                 </div>
 
                                 {/* ✅ 复用 CodeBlock 组件显示代码 */}
@@ -209,7 +210,7 @@ export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNo
                                         key={`${block.id}-${viewMode}`}  // ✅ 包含 viewMode 的 key 强制重新渲染
                                         code={displayCode}
                                         language="python"
-                                        copyable={true}
+                                        copyable={false} /* ❌ 移除内部复制按钮，头部已有全局复制 CodeBlock.css .code-block-copy */
                                         showLineNumbers={false}
                                         formatted={false}
                                         className="notebook-code-block"

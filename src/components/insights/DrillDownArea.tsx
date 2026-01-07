@@ -85,6 +85,7 @@ export function DrillDownArea({
                                 onClick={() => onExecuteAction(action)}
                                 isRecommended={action.isRecommended}
                                 disabled={isExecuting}
+                                depth={depth}
                             />
                         ))}
                     </div>

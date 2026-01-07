@@ -163,6 +163,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 10;
+    /* 确保按钮在最上层可点击 */
 }
 
 .project-card:hover .card-more-btn {

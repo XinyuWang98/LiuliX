@@ -42,11 +42,76 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
-/* Header 左侧图标 */
+/* Header 左侧层级徽章 */
+/* Header 左侧层级徽章 (Redesigned) */
 .card-icon {
     flex-shrink: 0;
-    color: var(--primary);
-    margin-top: 2px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    /* 更柔和的圆角 */
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-family: var(--font-sans);
+    font-feature-settings: 'tnum';
+
+    /* 核心变量定义 */
+    --icon-hue: var(--primary);
+
+    /* 统一使用 mix 颜色 */
+    background: color-mix(in srgb, var(--icon-hue), transparent 90%);
+    color: var(--icon-hue);
+    border: 1px solid color-mix(in srgb, var(--icon-hue), transparent 60%);
+
+    /* 添加一点微弱的光晕 */
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--icon-hue), transparent 95%);
+    transition: all 0.2s ease;
+}
+
+/* 简单的 Hue 映射，告别大段重复代码 */
+.card-icon.depth-0 {
+    --icon-hue: var(--primary);
+}
+
+.card-icon.depth-1 {
+    --icon-hue: #a855f7;
+}
+
+/* Purple */
+.card-icon.depth-2 {
+    --icon-hue: #06b6d4;
+}
+
+/* Cyan */
+.card-icon.depth-3 {
+    --icon-hue: #10b981;
+}
+
+/* Emerald */
+.card-icon.depth-4 {
+    --icon-hue: #f59e0b;
+}
+
+/* Amber */
+.card-icon.depth-5 {
+    --icon-hue: #ef4444;
+}
+
+/* Red */
+.card-icon.depth-6 {
+    --icon-hue: #ec4899;
+}
+
+/* Pink */
+
+/* 悬停效果 */
+.insight-card-header:hover .card-icon {
+    background: color-mix(in srgb, var(--icon-hue), transparent 85%);
+    transform: translateY(-1px);
 }
 
 /* Header 中间信息区域 */
@@ -195,7 +260,8 @@
 }
 
 /* 结论框 */
-.conclusion-box {
+/* 结论框 */
+.card-conclusion {
     padding: 12px;
     background: rgba(10, 132, 255, 0.08);
     border-left: 3px solid var(--primary);
@@ -203,12 +269,17 @@
     font-size: 13px;
     line-height: 1.6;
     color: var(--text-secondary);
+    margin-top: 12px;
 }
 
-.conclusion-box strong {
+.card-conclusion .conclusion-label {
     color: var(--text-primary);
-    display: block;
+    font-weight: 600;
     margin-bottom: 4px;
+}
+
+.card-conclusion .conclusion-text {
+    color: var(--text-secondary);
 }
 
 /* ========================================

@@ -5,8 +5,8 @@
     background: var(--surface-elevated);
     border: 1px solid var(--border-subtle);
     overflow: hidden;
-    max-height: var(--code-block-max-height);
-    /* F-13: 使用CSS变量 */
+    /* max-height: var(--code-block-max-height); */
+    /* 移除高度限制，让代码块自适应 */
 }
 
 .code-block pre {

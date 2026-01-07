@@ -17,39 +17,12 @@ import { pyodideManager } from './services/PyodideManager';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { useResizable } from '@/hooks/useResizable';
 import { logger } from './utils/logger';
-import { Logo } from './components/common/Logo/Logo';
 import { LiuliShowcase } from './pages/LiuliShowcase'; // [NEW] Design System
+import { LoadingScreen } from './components/common/LoadingScreen/LoadingScreen';
 import './App.css';
 import { ingestFilesAndCreateProject } from './utils/projectImporter';
 import { saveProjects, loadProjects } from './utils/indexedDB';
 
-
-
-interface LoadingScreenProps {
-    progress: number;
-    message: string;
-}
-
-function LoadingScreen({ progress, message }: LoadingScreenProps) {
-    const { t } = useI18n();
-    return (
-        <div className="loading-screen">
-            <Logo layout="vertical" size="l" variant="flow" />
-            <div className="loading-status">
-                <p className="loading-text">
-                    {message || t('common.initializing')}
-                </p>
-                {progress > 0 && (
-                    <div className="loading-progress-container">
-                        <span className="loading-progress-percent">{Math.round(progress)}%</span>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
-
-// ... imports
 
 function AppContent() {
     const { t, language } = useI18n(); // t is stable and will update when language changes
@@ -61,13 +34,10 @@ function AppContent() {
 
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'v2' | 'design' | 'welcome'>('v2');
-    const [cleaningTrigger, setCleaningTrigger] = useState(0); // 用于触发数据清洗建议生成
-    const [isPyodideReady, setIsPyodideReady] = useState(false);
+    const [cleaningTrigger, setCleaningTrigger] = useState(0);
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
     const [showRight, setShowRight] = useState(() => localStorage.getItem('layout.showRight') !== 'false');
     const [showAPISettings, setShowAPISettings] = useState(false);
-    const [loadingProgress, setLoadingProgress] = useState(0);
-    const [loadingMessage, setLoadingMessage] = useState('');
     const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
     const [backendStatus, setBackendStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
 
@@ -143,109 +113,13 @@ function AppContent() {
     useEffect(() => localStorage.setItem('layout.showLeft', showLeft.toString()), [showLeft]);
     useEffect(() => localStorage.setItem('layout.showRight', showRight.toString()), [showRight]);
 
-    const isPyodideReadyRef = useRef(false);
-
-    useEffect(() => {
-        // 防止Strict Mode重复执行
-        if (isPyodideReadyRef.current) return;
-        isPyodideReadyRef.current = true;
-
-        const init = async () => {
-            logger.log('系统', '应用初始化开始');
-            try {
-                // 🔍 WebLLM缓存诊断
-                const { diagnoseWebLLMCache } = await import('./utils/webllmDiagnostics');
-                diagnoseWebLLMCache().catch(err => logger.error('诊断工具', '诊断失败', err));
-
-                // 自动启用本地模型
-                if (!localStorage.getItem('use_local_model')) {
-                    localStorage.setItem('use_local_model', 'true');
-                    logger.log('系统', '已自动启用本地模型');
-                }
-
-                // 💡 检查是否首次运行 (用于显示友好提示)
-                const isFirstRun = !localStorage.getItem('app_has_run_before');
-                if (isFirstRun) {
-                    // 显示首次运行提示
-                    setLoadingMessage(t('common.firstTimeTip'));
-                }
-
-                // 🎨 加载中文字体（后台异步，不阻塞）
-                pyodideManager.loadChineseFont();
-
-                // --- Phase 1: 核心环境加载 (Blocking) ---
-                logger.log('Python', '阶段1: 加载核心环境...');
-                setLoadingProgress(10); // 起始进度
-
-                await pyodideManager.initialize((msg, _progress) => {
-                    // 更新进度文案 (支持多语言替换)
-                    if (msg.includes('Loading Pyodide')) {
-                        setLoadingMessage(t('common.initCore', { current: 1, total: 3 }));
-                        setLoadingProgress(30);
-                    } else if (msg.includes('Loading Pandas')) {
-                        setLoadingMessage(t('common.loadPandas'));
-                        setLoadingProgress(60);
-                    } else {
-                        // 其他消息透传
-                        setLoadingMessage(msg);
-                    }
-                });
-
-                // 显式等待核心包就绪
-                await pyodideManager.loadEssentials((msg) => {
-                    logger.log('Python', msg);
-                    setLoadingProgress(90);
-                });
-
-                logger.log('Python', '核心环境加载完成');
-                setIsPyodideReady(true);
-
-                // 标记非首次运行
-                if (isFirstRun) {
-                    localStorage.setItem('app_has_run_before', 'true');
-                }
-
-                // --- Phase 2: 用户扩展加载 (Silent/Background) ---
-                // 不阻塞 UI，延迟执行避免争抢资源
-                setTimeout(async () => {
-                    logger.log('Python', '阶段2: 静默加载扩展包...');
-                    try {
-                        await pyodideManager.loadUserConfigExtensions((msg) => {
-                            logger.log('Python', `[扩展] ${msg}`);
-                        });
-                    } catch (extErr) {
-                        logger.warn('Python', '扩展包加载部分失败 (不影响主功能)', extErr);
-                    }
-
-                    // 并行启动本地模型预加载 (Silent)
-                    const shouldPreload = localStorage.getItem('use_local_model') === 'true';
-                    if (shouldPreload) {
-                        logger.log('本地模型', '后台预加载启动...');
-                        import('@/services/localLLMService').then(({ localLLMService, SUPPORTED_MODELS }) => {
-                            localLLMService.reload(SUPPORTED_MODELS.QWEN_7B, (_p, _m) => {
-                                // 仅记录日志，不更新 UI Loading
-                                // logger.debug('本地模型', `后台进度 ${p}%: ${m}`);
-                            }).catch(err => logger.warn('本地模型', '后台加载失败', err));
-                        });
-                    }
-                }, 1000);
-
-                logger.log('系统', '应用初始化完成');
-            } catch (err) {
-                logger.error('Python', '引擎加载失败', err);
-                setIsPyodideReady(true);
-            }
-        };
-        init();
-    }, [t]);
-
-    // 后端健康检查
+    // 后端健康检查（立即执行，不等待 Pyodide）
     useEffect(() => {
         const checkBackendHealth = async () => {
             try {
                 const response = await fetch('http://localhost:3001/health', {
                     method: 'GET',
-                    signal: AbortSignal.timeout(3000) // 3秒超时
+                    signal: AbortSignal.timeout(3000)
                 });
                 if (response.ok) {
                     setBackendStatus('connected');
@@ -259,14 +133,10 @@ function AppContent() {
             }
         };
 
-        // 首次检查
-        if (isPyodideReady) {
-            checkBackendHealth();
-            // 每30秒重新检查一次
-            const interval = setInterval(checkBackendHealth, 30000);
-            return () => clearInterval(interval);
-        }
-    }, [isPyodideReady]);
+        checkBackendHealth();
+        const interval = setInterval(checkBackendHealth, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     // ⚠️ MVP阶段：免费提供API Key服务，暂时禁用自动弹窗
     // 等到正式部署上线后再启用此功能，引导用户配置自己的Key
@@ -327,10 +197,6 @@ function AppContent() {
             logger.error('UI', '项目创建失败 - 捕获异常', err);
         }
     };
-
-    if (!isPyodideReady) {
-        return <LoadingScreen progress={loadingProgress} message={loadingMessage} />;
-    }
 
     return (
         <div className={`app-container ${(isLeftResizing || isRightResizing) ? 'resizing' : ''}`}>

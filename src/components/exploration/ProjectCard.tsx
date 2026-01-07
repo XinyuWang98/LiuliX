@@ -106,16 +106,22 @@ export const ProjectCard = forwardRef<ProjectCardHandle, ProjectCardProps>(
                     className="card-more-btn"
                     onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
+                        console.log('[ProjectCard] More button clicked'); // 调试日志
                         // ✅ 修复：使用按钮的实际位置，而非事件的clientX/clientY
                         const buttonRect = e.currentTarget.getBoundingClientRect();
+                        console.log('[ProjectCard] Button rect:', buttonRect); // 调试日志
                         // 创建一个模拟事件，使用按钮右下角作为菜单起点
                         const mockEvent = {
                             ...e,
                             clientX: buttonRect.right,
                             clientY: buttonRect.bottom,
                         } as React.MouseEvent;
+                        console.log('[ProjectCard] Calling onContextMenu with:', mockEvent.clientX, mockEvent.clientY); // 调试日志
                         onContextMenu(mockEvent);
                     }}
+                    aria-label="More options"
+                    title="More options"
                 >
                     <MoreVertical size={16} />
                 </button>

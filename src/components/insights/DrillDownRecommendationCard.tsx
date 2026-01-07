@@ -15,14 +15,20 @@ interface DrillDownRecommendationCardProps {
     disabled?: boolean;
     /** 是否是 AI 推荐 */
     isRecommended?: boolean;
+    /** 当前深度 (用于显示层级徽章) */
+    depth: number;
 }
 
 export function DrillDownRecommendationCard({
     label,
     onClick,
     disabled = false,
-    isRecommended = false
+    isRecommended = false,
+    depth
 }: DrillDownRecommendationCardProps) {
+    // 下钻建议卡片显示的是下一层级 (depth + 1)
+    const nextDepth = depth + 1;
+
     return (
         <div
             className={`drill-down-recommendation-card ${disabled ? 'drill-down-recommendation-card--disabled' : ''}`}
@@ -30,9 +36,9 @@ export function DrillDownRecommendationCard({
             role="button"
             tabIndex={disabled ? -1 : 0}
         >
-            {/* 左侧图标 */}
-            <div className="drill-down-recommendation-card__icon">
-                <Sparkles size={16} />
+            {/* 左侧层级徽章 - 复用 InsightCardV2 的 card-icon 样式 */}
+            <div className={`card-icon depth-${nextDepth}`}>
+                L{nextDepth}
             </div>
 
             {/* 中间标题 */}
