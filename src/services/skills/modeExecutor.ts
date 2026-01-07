@@ -10,6 +10,7 @@ import { pyodideManager } from '@/services/PyodideManager';
 import { ExecutionMode } from '@/utils/memoryAssessment';
 import { InsightSuggestion } from '@/services/prompts/library/insight';
 import { CodeEnhancer } from '@/services/prompts/guards/codeEnhancer';
+import { promptRegistry } from '@/services/promptRegistry';
 // import { validatePythonCode, formatValidationResult } from '@/utils/pythonCodeValidator';
 // import { smartFixPythonCode } from '@/utils/pythonCodeSanitizer';
 
@@ -25,22 +26,24 @@ export interface ModeExecutionResult {
  * @param suggestion AI生成的洞察建议（包含双模式）
  * @param mode 内存评估决定的执行模式
  * @param tableName 当前表名
+ * @param promptId Prompt ID（可选，用于查询库依赖）
  * @returns 执行结果
  */
 export async function executeInsightWithMode(
     suggestion: InsightSuggestion,
     mode: ExecutionMode,
-    tableName: string
+    tableName: string,
+    promptId?: string
 ): Promise<ModeExecutionResult> {
     try {
         logger.log('Skills', `执行模式: ${mode}`, { data: { title: suggestion.title } });
 
         if (mode === 'full' || mode === 'sampled') {
             // full和sampled都使用full_mode代码（数据已经在Pyodide中加载）
-            return await executeFullMode(suggestion, mode, tableName);  // ✅ 传递tableName
+            return await executeFullMode(suggestion, mode, tableName, promptId);
         } else {
             // aggregated模式：先DuckDB聚合，再Pyodide可视化
-            return await executeAggregatedMode(suggestion, tableName);
+            return await executeAggregatedMode(suggestion, tableName, promptId);
         }
     } catch (error: any) {
         logger.error('Skills', `执行失败 (${mode})`, error);
@@ -70,7 +73,8 @@ function escapeJsonForPython(jsonStr: string): string {
 async function executeFullMode(
     suggestion: InsightSuggestion,
     mode: ExecutionMode,
-    tableName: string  // ✅ 添加tableName参数
+    tableName: string,
+    promptId?: string  // ✅ 添加promptId参数用于查询库依赖
 ): Promise<ModeExecutionResult> {
     if (!tableName) {
         throw new Error('Table name is required for full mode execution');
@@ -158,7 +162,19 @@ except Exception as e:
 
         const finalCode = enhanceResult.code;
 
-        const result = await pyodideManager.runPython(finalCode);
+        // ✅ 获取库依赖并传递给 Pyodide
+        let requiredPackages: string[] = [];
+        if (promptId) {
+            const prompt = promptRegistry.getPrompt(promptId);
+            if (prompt?.requiredPackages) {
+                requiredPackages = prompt.requiredPackages;
+                logger.log('Python库配置', '检测到库依赖', {
+                    data: { promptId, packages: requiredPackages.join(', ') }
+                });
+            }
+        }
+
+        const result = await pyodideManager.runPython(finalCode, requiredPackages);
 
         return {
             success: true,
@@ -176,7 +192,8 @@ except Exception as e:
  */
 async function executeAggregatedMode(
     suggestion: InsightSuggestion,
-    tableName: string
+    tableName: string,
+    promptId?: string  // ✅ 添加promptId参数
 ): Promise<ModeExecutionResult> {
     const { sql, viz_code } = suggestion.aggregated_mode;
 
@@ -226,8 +243,20 @@ df = pd.DataFrame(json.loads(data_json))
         data: { rulesApplied: vizEnhanceResult.rulesApplied.length }
     });
 
-    // 4. 执行增强后的viz_code生成图表
-    const result = await pyodideManager.runPython(vizEnhanceResult.code);
+    // 4. 获取库依赖
+    let requiredPackages: string[] = [];
+    if (promptId) {
+        const prompt = promptRegistry.getPrompt(promptId);
+        if (prompt?.requiredPackages) {
+            requiredPackages = prompt.requiredPackages;
+            logger.log('Python库配置', '检测到库依赖（聚合模式）', {
+                data: { promptId, packages: requiredPackages.join(', ') }
+            });
+        }
+    }
+
+    // 5. 执行增强后的viz_code生成图表
+    const result = await pyodideManager.runPython(vizEnhanceResult.code, requiredPackages);
 
 
     // 解析结果

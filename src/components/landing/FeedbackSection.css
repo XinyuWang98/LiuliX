@@ -1,4 +1,4 @@
-/* Feedback Section - 用户反馈区域 */
+/* Feedback Section - 社区互动区域 */
 .feedback-section {
     width: 100%;
     padding: var(--gap-xxxxl, 120px) 0;
@@ -6,7 +6,7 @@
 }
 
 .feedback-container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 0 var(--gap-xl, 40px);
 }
@@ -31,192 +31,102 @@
     margin: 0;
 }
 
-/* 表单容器 */
-.feedback-form {
-    /* 玻璃态容器 */
+/* 社区卡片网格 */
+.community-grid {
+    display: flex;
+    justify-content: center;
+    /* grid-template-columns: repeat(2, 1fr); */
+    gap: var(--gap-l, 24px);
+    margin-top: 40px;
+}
+
+.community-card {
+    /* Limit width for single card display */
+    width: 100%;
+    max-width: 400px;
     background: var(--glass-surface);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-l, 16px);
-    backdrop-filter: var(--blur-medium);
-    -webkit-backdrop-filter: var(--blur-medium);
-
-    /* 顶部高光 */
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-
-    /* 微光辉光 - 仅内部光效 */
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02);
-
-    padding: var(--gap-xxl, 48px);
+    padding: 32px;
     display: flex;
     flex-direction: column;
-    gap: var(--gap-l, 24px);
-}
-
-/* 邮箱和类型选择器行 */
-.feedback-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: var(--gap-m, 16px);
-}
-
-/* 输入框基础样式 */
-.feedback-input,
-.feedback-select,
-.feedback-textarea {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-m, 12px);
-    color: var(--text-main);
-    font-size: var(--fs-sm, 14px);
-    padding: var(--gap-m, 14px) var(--gap-m, 16px);
+    align-items: center;
+    text-align: center;
     transition: all 0.3s ease;
-    font-family: inherit;
-}
-
-.feedback-input::placeholder,
-.feedback-textarea::placeholder {
-    color: var(--text-dim);
-    opacity: 0.6;
-}
-
-.feedback-input:focus,
-.feedback-select:focus,
-.feedback-textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.1);
-}
-
-/* 文本框 */
-.feedback-textarea {
-    resize: vertical;
-    min-height: 120px;
-    line-height: 1.6;
-}
-
-/* 下拉选择器 */
-.feedback-select {
     cursor: pointer;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
 }
 
-.feedback-select option {
-    background: var(--liuli-bg);
+/* 悬停效果 */
+.community-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* 卡片内部元素 */
+.community-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 20px;
     color: var(--text-main);
 }
 
-/* 提交按钮 */
-.feedback-submit {
+.community-card:hover .community-icon {
+    color: var(--primary);
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.card-desc {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.card-action {
+    margin-top: auto;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: var(--gap-s, 8px);
-
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    color: white;
-    border: none;
-    border-radius: var(--radius-m, 12px);
-
-    padding: var(--gap-m, 14px) var(--gap-xl, 32px);
-    font-size: var(--fs-m, 16px);
+    gap: 8px;
+    color: var(--primary);
     font-weight: 600;
-
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
-
-    /* 水平居中 */
-    margin: 0 auto;
+    font-size: 14px;
 }
 
-.feedback-submit:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(10, 132, 255, 0.4);
+/* Discord 特色样式 */
+.is-discord:hover {
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(88, 101, 242, 0.05) 100%);
+    border-color: #5865F2;
 }
 
-.feedback-submit:active:not(:disabled) {
-    transform: translateY(0);
+.is-discord:hover .community-icon,
+.is-discord:hover .card-action {
+    color: #5865F2;
 }
 
-.feedback-submit:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+/* GitHub 特色样式 */
+.is-github:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-color: var(--text-main);
 }
 
-/* 状态提示 */
-.feedback-message {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-s, 8px);
-    padding: var(--gap-m, 14px) var(--gap-l, 20px);
-    border-radius: var(--radius-m, 12px);
-    font-size: var(--fs-sm, 14px);
-    font-weight: 500;
-    animation: slideIn 0.3s ease;
+.is-github:hover .community-icon,
+.is-github:hover .card-action {
+    color: var(--text-main);
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.feedback-success {
-    background: rgba(52, 211, 153, 0.15);
-    color: var(--success);
-    border: 1px solid rgba(52, 211, 153, 0.3);
-}
-
-.feedback-error {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-/* 响应式：移动端 */
+/* 响应式 */
 @media (max-width: 768px) {
-    .feedback-section {
-        padding: var(--gap-xxxl, 80px) 0;
-    }
-
-    .feedback-container {
-        padding: 0 var(--gap-l, 24px);
-    }
-
-    .feedback-header {
-        margin-bottom: var(--gap-xxl, 40px);
-    }
-
-    .feedback-title {
-        font-size: var(--fs-xl, 24px);
-    }
-
-    .feedback-subtitle {
-        font-size: var(--fs-sm, 14px);
-    }
-
-    .feedback-form {
-        padding: var(--gap-l, 24px);
-        gap: var(--gap-m, 16px);
-    }
-
-    .feedback-row {
+    .community-grid {
         grid-template-columns: 1fr;
-    }
-
-    .feedback-textarea {
-        min-height: 100px;
-    }
-
-    .feedback-submit {
-        padding: var(--gap-m, 12px) var(--gap-l, 24px);
-        font-size: var(--fs-sm, 14px);
     }
 }

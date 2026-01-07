@@ -123,7 +123,8 @@ export async function executeAndFillResult(
                 aggregated_mode: { sql: '', viz_code: '' }
             },
             assessment.mode,
-            tableName
+            tableName,
+            node.promptId  // ✅ 传递 promptId 用于自动查询库依赖
         );
 
         if (!execResult.success) {

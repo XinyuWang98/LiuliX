@@ -121,17 +121,17 @@
 /* Welcome Page Hero Size */
 .logo-size-xl .logo-icon-wrapper {
     /* 缩小图标：48px Font 的 Cap Height 约为 34px 左右 */
-    /* 稍微大一点点 (40px) 以保持 Icon 的存在感，但不能太大 */
-    width: 42px;
-    height: 42px;
+    /* 调整：比 Liuli 字高略大一号，但不要过于夸张 */
+    width: 38px;
+    height: 38px;
     /* 
        核心修复：大幅增加负边距 
        SVG 内部有约 15% 的左侧留白，在大尺寸下会变成明显的空隙。
-       -18px 用于抵消 SVG 留白 + 紧缩字距。
+       -16px 用于抵消 SVG 留白 + 紧缩字距。
     */
-    margin-left: -18px;
-    /* 微调垂直对齐，确保底部和文字基线一致 */
-    transform: translateY(-4%);
+    margin-left: -16px;
+    /* 微调垂直对齐 */
+    transform: translateY(-2%);
 }
 
 .logo-size-xl .logo-text {

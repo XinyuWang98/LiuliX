@@ -9,6 +9,7 @@ import { DrillDownRecommendationCard } from './DrillDownRecommendationCard';
 import { DrillDownAction } from '@/types/insightTree';
 import { promptRegistry } from '@/services/promptRegistry';
 import { ChevronDown, Settings } from 'lucide-react';
+import { isFeatureEnabled } from '@/utils/featureFlags';
 import './DrillDownArea.css';
 
 export interface DrillDownAreaProps {
@@ -91,20 +92,22 @@ export function DrillDownArea({
             )}
 
             {/* 自选区触发器 */}
-            <div className="drill-down-area__custom-trigger">
-                <button
-                    className="drill-down-area__custom-btn"
-                    onClick={() => setShowCustom(!showCustom)}
-                    disabled={isExecuting}
-                >
-                    <Settings size={14} />
-                    <span>{t('insight.customAnalysis')}</span>
-                    <ChevronDown
-                        size={14}
-                        className={`drill-down-area__chevron ${showCustom ? 'drill-down-area__chevron--open' : ''}`}
-                    />
-                </button>
-            </div>
+            {isFeatureEnabled('CUSTOM_DRILL_DOWN_TRIGGER') && (
+                <div className="drill-down-area__custom-trigger">
+                    <button
+                        className="drill-down-area__custom-btn"
+                        onClick={() => setShowCustom(!showCustom)}
+                        disabled={isExecuting}
+                    >
+                        <Settings size={14} />
+                        <span>{t('insight.customAnalysis')}</span>
+                        <ChevronDown
+                            size={14}
+                            className={`drill-down-area__chevron ${showCustom ? 'drill-down-area__chevron--open' : ''}`}
+                        />
+                    </button>
+                </div>
+            )}
 
             {/* 自选区展开内容 */}
             {showCustom && (

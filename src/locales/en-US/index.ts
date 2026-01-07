@@ -1,6 +1,7 @@
 // English translations main entry
 // TODO: Split this into modules like zh-CN after full migration
 import { LanguageConfig } from '@/types/i18n';
+import { common, data, nav, sidebar } from './common';
 import { prompt } from './prompt';
 import { settings } from './settings';
 import welcome from './welcome';
@@ -12,43 +13,11 @@ export const enUS: LanguageConfig = {
     code: 'en-US',
     name: 'English',
     translations: {
-        common: {
-            loading: 'Loading...',
-            initializing: 'Initializing Python Kernel...',
-            error: 'Error',
-            success: 'Success',
-            cancel: 'Cancel',
-            confirm: 'Confirm',
-            delete: 'Delete',
-            edit: 'Edit',
-            save: 'Save',
-            yes: 'Yes',
-            no: 'No',
-            search: 'Search',
-            all: 'All',
-            featureInDev: 'Feature in development...',
-            collapse: 'Collapse',
-            verifying: 'Verifying...',
-        },
-        data: {
-            unique: 'Unique',
-            missing: 'Missing',
-            min: 'Min',
-            max: 'Max',
-            mean: 'Mean',
-        },
-        nav: {
-            appName: 'LiuliX',
-            noProject: 'No Project Selected',
-            dashboard: 'Data Explorer',
-            promptLibrary: 'Prompt Library',
-            settings: 'Settings',
-            user: 'User',
-            theme: 'Switch Theme',
-        },
-        sidebar: {
-            collapse: 'Collapse Sidebar',
-        },
+        common,
+        data,
+        nav,
+        sidebar,
+
 
         // Header
         header: {
@@ -326,6 +295,22 @@ export const enUS: LanguageConfig = {
             suggFillUnknown: 'Mark as Unknown',
             suggFillMedian: 'Fill with Median',
             suggFillMode: 'Fill with Mode',
+
+            // ✅ 新增：SQL警告提示（修复英语环境下显示中文的问题）
+            tryAI: 'No rule-based suggestions. Try AI analysis?',
+            dataGood: 'Data quality is good, no cleaning needed.',
+            allApplied: 'All suggestions applied, data updated.',
+            serviceUnavailable: 'AI service temporarily unavailable, please try again later.',
+
+            // AI Loading States
+            aiProgressThink: 'AI is analyzing data patterns...',
+            aiProgressAnalyzing: 'Performing deep analysis...',
+            aiProgressGenerating: 'Generating cleaning suggestions...',
+            aiProgressValidating: 'Validating SQL safety...',
+            aiProgressFinalizing: 'Finalizing report...',
+            processing: 'Processing...',
+
+            sqlWarning: 'Note: Replace {fileName} with actual table name before execution',
         },
         quality: {
             title: 'Data Quality',

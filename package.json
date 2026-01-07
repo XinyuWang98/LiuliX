@@ -16,6 +16,7 @@
     "doc:index": "npx tsx scripts/doc-guardian.ts index",
     "doc:archive": "npx tsx scripts/doc-guardian.ts archive",
     "validate:prompts": "npx -y tsx scripts/validate-prompts.ts || echo 'Prompt validation failed'",
+    "verify": "npx -y tsx scripts/verify-core.ts",
     "monitor:cleanup": "npx -y tsx scripts/retention_policy.ts"
   },
   "dependencies": {

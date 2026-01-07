@@ -29,6 +29,7 @@ export const common = {
     initCore: '正在初始化 Python 核心环境 ({current}/{total})...',
     loadPandas: '正在加载 Pandas 数据分析库...',
     firstTimeTip: '💡 首次运行提示：正在配置本地分析引擎（约 20MB），这可能需要一点时间。下次启动将瞬间完成。',
+    pageTitle: 'LiuliX - 数据探索平台',
 };
 
 export const data = {

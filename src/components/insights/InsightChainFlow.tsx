@@ -172,34 +172,21 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         };
     }, [isResizing, handleResize, handleResizeEnd]);
 
-    // 🆕 收集所有已解析节点的代码（包含纯净代码和增强代码）
+    // 🆕 收集所有顶层已解析节点的代码（不包括下钻子节点）
+    // ✅ 修复：仅收集顶层节点，确保左侧卡片数量与右侧代码块一致
     const resolvedCodes = useMemo(() => {
-        const collectResolvedCodes = (nodes: InsightNodeType[]): Array<{ id: string; title: string; code: string; rawCode?: string }> => {
-            const results: Array<{ id: string; title: string; code: string; rawCode?: string }> = [];
-
-            const traverse = (nodeList: InsightNodeType[]) => {
-                for (const node of nodeList) {
-                    // 检查节点是否已解析且有代码
-                    if (!node.isLoading && node.result?.code) {
-                        results.push({
-                            id: node.id,
-                            title: node.title,
-                            code: node.result.code,
-                            rawCode: node.result.rawCode  // ✅ 同时传递纯净代码
-                        });
-                    }
-                    if (node.children && node.children.length > 0) {
-                        traverse(node.children);
-                    }
-                }
-            };
-
-            traverse(nodes);
-            return results;
-        };
-
-        const codes = collectResolvedCodes(insightNodes);
-        return codes;
+        return insightNodes
+            .filter(node =>
+                !node.isLoading &&     // 已完成加载
+                !node.error &&          // 无错误  
+                node.result?.code       // 有代码
+            )
+            .map(node => ({
+                id: node.id,
+                title: node.title,
+                code: node.result!.code,        // ✅ 已在 filter 中确认 result 存在
+                rawCode: node.result!.rawCode   // ✅ 同时传递纯净代码
+            }));
     }, [insightNodes]);
 
     // 🆕 日志：监控 resolvedCodes 更新

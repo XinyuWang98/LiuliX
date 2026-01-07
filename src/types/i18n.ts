@@ -23,6 +23,7 @@ export interface LanguageConfig {
             featureInDev: string;
             collapse: string;  // 新增：收起/折叠
             verifying?: string; // 验证中...
+            pageTitle: string; // 页面标题
         };
 
         // 数据统计
@@ -544,19 +545,16 @@ export interface LanguageConfig {
                 };
             };
 
-            // Feedback
-            feedback: {
+            // Community - 社区互动区域
+            community: {
                 title: string;
                 subtitle: string;
-                emailPlaceholder: string;
-                contentPlaceholder: string;
-                typeFeature: string;
-                typeBug: string;
-                typeQuestion: string;
-                typeOther: string;
-                submitButton: string;
-                successMessage: string;
-                errorMessage: string;
+                discordTitle: string;
+                discordDesc: string;
+                joinDiscord: string;
+                githubTitle: string;
+                githubDesc: string;
+                starGithub: string;
             };
 
             // Legacy fields
@@ -767,6 +765,18 @@ export interface LanguageConfig {
             suggFillUnknown: string;
             suggFillMedian: string;
             suggFillMode: string;
+            // ✅ 新增字段（修复英语环境显示中文问题）
+            tryAI: string;
+            dataGood: string;
+            allApplied: string;
+            serviceUnavailable: string;
+            aiProgressThink: string;
+            aiProgressAnalyzing: string;
+            aiProgressGenerating: string;
+            aiProgressValidating: string;
+            aiProgressFinalizing: string;
+            processing: string;
+            sqlWarning: string;
         };
 
         quality: {

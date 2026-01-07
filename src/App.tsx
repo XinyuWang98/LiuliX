@@ -52,7 +52,13 @@ function LoadingScreen({ progress, message }: LoadingScreenProps) {
 // ... imports
 
 function AppContent() {
-    const { t } = useI18n();
+    const { t, language } = useI18n(); // t is stable and will update when language changes
+
+    // Update document title when language changes
+    useEffect(() => {
+        document.title = t('common.pageTitle');
+    }, [language, t]);
+
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'v2' | 'design' | 'welcome'>('v2');
     const [cleaningTrigger, setCleaningTrigger] = useState(0); // 用于触发数据清洗建议生成

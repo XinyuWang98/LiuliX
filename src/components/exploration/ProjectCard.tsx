@@ -21,7 +21,7 @@ interface ProjectCardProps {
 
 export const ProjectCard = forwardRef<ProjectCardHandle, ProjectCardProps>(
     ({ project, isActive, onClick, onContextMenu, onRename }, ref) => {
-        const { t } = useI18n();
+        const { t, language } = useI18n();
         const [isEditing, setIsEditing] = useState(false);
         const [editName, setEditName] = useState(project.name);
 
@@ -88,7 +88,7 @@ export const ProjectCard = forwardRef<ProjectCardHandle, ProjectCardProps>(
                         <span className="limit-warning" title={t('exploration.project.card.nearLimit')}>⚠</span>
                     )}
                     <span className="separator">·</span>
-                    <span className="time">{formatRelativeTime(project.updatedAt || project.createdAt)}</span>
+                    <span className="time">{formatRelativeTime(project.updatedAt || project.createdAt, language.code as 'zh-CN' | 'en-US')}</span>
                 </div>
 
                 {/* 文件列表（显示所有，可滚动） */}
@@ -106,7 +106,15 @@ export const ProjectCard = forwardRef<ProjectCardHandle, ProjectCardProps>(
                     className="card-more-btn"
                     onClick={(e) => {
                         e.stopPropagation();
-                        onContextMenu(e);
+                        // ✅ 修复：使用按钮的实际位置，而非事件的clientX/clientY
+                        const buttonRect = e.currentTarget.getBoundingClientRect();
+                        // 创建一个模拟事件，使用按钮右下角作为菜单起点
+                        const mockEvent = {
+                            ...e,
+                            clientX: buttonRect.right,
+                            clientY: buttonRect.bottom,
+                        } as React.MouseEvent;
+                        onContextMenu(mockEvent);
                     }}
                 >
                     <MoreVertical size={16} />

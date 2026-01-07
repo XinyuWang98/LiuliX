@@ -30,19 +30,16 @@ export default {
         },
     },
 
-    // Feedback - 用户反馈区域
-    feedback: {
-        title: '💬 您的反馈',
-        subtitle: '帮助我们打造更好的LiuliX',
-        emailPlaceholder: '邮箱（可选，用于回复）',
-        contentPlaceholder: '请分享您的想法、建议或遇到的问题...',
-        typeFeature: '功能建议',
-        typeBug: 'Bug报告',
-        typeQuestion: '使用问题',
-        typeOther: '其他',
-        submitButton: '提交反馈',
-        successMessage: '感谢您的反馈！我们会仔细阅读并考虑您的建议。',
-        errorMessage: '请填写反馈内容',
+    // Community - 社区互动区域
+    community: {
+        title: '加入 LiuliX 社区',
+        subtitle: '与开发者和数据极客一起重新定义数据分析',
+        discordTitle: '实时讨论',
+        discordDesc: '遇到问题？有新想法？直接来 Discord 聊聊。',
+        joinDiscord: '加入服务器',
+        githubTitle: '开源共建',
+        githubDesc: '查看源码、提交 Issue 或贡献 PR。',
+        starGithub: '去 Star',
     },
 
     // Feature Highlights - 价值层（展示收益）

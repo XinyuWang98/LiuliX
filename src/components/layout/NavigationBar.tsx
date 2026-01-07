@@ -1,6 +1,7 @@
 import { useI18n } from '@contexts/I18nContext';
 import { Settings, User } from 'lucide-react';
 import { Logo } from '@/components/common/Logo/Logo';
+import { DiscordIcon } from '@/components/common/DiscordIcon';
 import { FreeTrialBadge } from '@/components/Header/FreeTrialBadge';
 import '@/components/Header/FreeTrialBadge.css';
 import './NavigationBar.css';
@@ -69,6 +70,26 @@ export function NavigationBar({
                 />
 
                 <FreeTrialBadge />
+
+                <div style={{ width: '1px', height: '16px', background: 'var(--border)', margin: '0 var(--gap-xs)' }} />
+
+                {/* Discord Link */}
+                <a
+                    className="btn-ghost"
+                    title="Discord"
+                    href="https://discord.gg/RnDvjtrs72"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'inherit',
+                        textDecoration: 'none'
+                    }}
+                >
+                    <DiscordIcon size={18} />
+                </a>
 
                 <div style={{ width: '1px', height: '16px', background: 'var(--border)', margin: '0 var(--gap-xs)' }} />
 

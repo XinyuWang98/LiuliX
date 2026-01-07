@@ -211,12 +211,24 @@
     overflow: hidden;
     transition: width 0.2s ease;
     display: flex;
-    /* flex容器，子元素填满 */
-    height: 100%;
+    /* 核心修改：绝对定位，高度跟随父容器（即左侧高度） */
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    /* 移除之前的高度计算 */
+    height: auto;
+
+    /* 视觉优化：左边框和背景 */
+    background: var(--bg-panel);
+    /* 确保背景不透明 */
+    border-left: 1px solid var(--border);
+    z-index: 5;
 }
 
 .insight-split-view.resizing .notebook-panel {
     transition: none;
+    pointer-events: none;
 }
 
 /* 显示/隐藏切换按钮 */

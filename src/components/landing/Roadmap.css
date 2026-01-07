@@ -256,36 +256,25 @@
     /* 图标与文字间距 */
 }
 
-/* 特性列表项前的圆点 - 改为相对定位的图标/圆点 */
+/* 特性列表项前的圆点 - 已移除 */
 .roadmap-features li::before {
-    content: '';
-    position: static;
-    /* 改为 static 以便使用 flex gap */
-    /* ... 保持原有样式 but now valid via flex */
-    flex-shrink: 0;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--primary);
-    opacity: 0.6;
-    margin-top: 0;
-    /* reset */
+    display: none;
 }
 
-/* Current 卡片的特性列表圆点 */
-.roadmap-current .roadmap-features li::before {
+/* Current 卡片的特性列表圆点 - 已移除 */
+/* .roadmap-current .roadmap-features li::before {
     background: var(--success);
-}
+} */
 
-/* Next 卡片的特性列表圆点 */
-.roadmap-next .roadmap-features li::before {
+/* Next 卡片的特性列表圆点 - 已移除 */
+/* .roadmap-next .roadmap-features li::before {
     background: var(--warning);
-}
+} */
 
-/* Future 卡片的特性列表圆点 */
-.roadmap-future .roadmap-features li::before {
+/* Future 卡片的特性列表圆点 - 已移除 */
+/* .roadmap-future .roadmap-features li::before {
     background: var(--accent);
-}
+} */
 
 /* 响应式：平板端/移动端垂直排列 */
 @media (max-width: 1024px) {

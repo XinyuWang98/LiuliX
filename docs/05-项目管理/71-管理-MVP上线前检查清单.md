@@ -63,7 +63,17 @@
 
 ---
 
-## 5. 核心架构专项验证 (Core Architecture Verification)
+## 5. 核心架构升级 (Core Architecture Upgrade)
+
+### 🧠 Prompt 闭环架构 (L1/L2 Split)
+- **关联文档**: [125-专题-EDA闭环与Context回流方案.md](../04-技术专题/02-Prompt库/125-专题-EDA闭环与Context回流方案.md)
+- **优先级**: **P0 (Critical)**
+- **检查项**:
+  - [ ] **Layer 1**: 实现 Context 提取器与 Router Prompt。
+  - [ ] **Layer 2**: 实现 `ContextMixin` 并应用到所有执行类 Prompt。
+  - [ ] **Store**: 实现全局 `AnalysisContext` 状态管理。
+
+## 6. 核心架构专项验证 (Core Architecture Verification)
 
 > [!WARNING]
 > 本项目依赖 Local-First + WASM 架构，以下验证对于稳定性至关重要。

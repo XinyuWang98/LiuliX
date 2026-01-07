@@ -7,6 +7,7 @@ import { TrustBadges } from './TrustBadges';
 import { FeatureHighlights } from './FeatureHighlights';
 import { Roadmap } from './Roadmap';
 import { FeedbackSection } from './FeedbackSection';
+import { Footer } from '@/components/layout/Footer';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import './LandingPage.css';
 import '@/components/exploration/EmptyStateWelcome.css';
@@ -119,6 +120,9 @@ export function LandingPage({ onFilesUploaded }: LandingPageProps) {
                     <FeedbackSection />
                 </div>
             </main>
+
+            {/* Footer - 全局页脚 */}
+            <Footer />
 
             {/* Hidden Uploader */}
             <div style={{ display: 'none' }}>

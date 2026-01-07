@@ -17,6 +17,10 @@ export const common = {
     initCore: 'Initializing Python Core ({current}/{total})...',
     loadPandas: 'Loading Pandas Library...',
     firstTimeTip: '💡 First Run Tip: Configuring local analysis engine (~20MB). This may take a moment. Next launch will be instant.',
+    pageTitle: 'LiuliX - Data Exploration Platform',
+    featureInDev: 'Feature in development...',
+    collapse: 'Collapse',
+    verifying: 'Verifying...',
 };
 
 export const data = {
@@ -35,4 +39,8 @@ export const nav = {
     settings: 'Settings',
     user: 'User',
     theme: 'Switch Theme',
+};
+
+export const sidebar = {
+    collapse: 'Collapse Sidebar',
 };

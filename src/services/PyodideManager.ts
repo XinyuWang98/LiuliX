@@ -5,6 +5,8 @@ import {
     getPyodidePackagesToLoad,
     chartFonts
 } from '../config/analysisPackages';
+import { canExecuteWithLibraries } from '../utils/libraryChecker';
+import { LibraryMissingStrategy } from '../types/analysisPackage';
 
 export interface PyodideResponse {
     id: string;
@@ -112,8 +114,51 @@ class PyodideManager {
         return this.readyPromise;
     }
 
-    public async runPython(code: string): Promise<any> {
+    /**
+     * 检查并安装指定的Python库
+     * @param requiredPackages - Prompt需要的库列表
+     * @param onProgress - 进度回调
+     */
+    public async ensurePackagesInstalled(
+        requiredPackages: string[],
+        onProgress?: (msg: string) => void
+    ): Promise<void> {
+        if (!requiredPackages || requiredPackages.length === 0) {
+            return;
+        }
+
+        const { missingLibraries, strategy } = canExecuteWithLibraries(requiredPackages);
+
+        // ✅ 仅在 FILTER_SUGGESTIONS 模式下检查用户是否启用
+        if (strategy === LibraryMissingStrategy.FILTER_SUGGESTIONS && missingLibraries.length > 0) {
+            throw new Error(`以下库未启用: ${missingLibraries.join(', ')}。请在设置中启用或切换为"自动加载"模式。`);
+        }
+
+        // ✅ 无条件发送所有 requiredPackages，让 Worker 的 micropip 自己判断
+        // micropip 会自动跳过已安装的包，无需在此处过滤
+        logger.log('Python库配置', '确保库已安装', {
+            data: { packages: requiredPackages.join(', ') }
+        });
+
+        if (onProgress) {
+            onProgress(`正在检查/安装 ${requiredPackages.join(', ')}...`);
+        }
+
+        await this.sendMessage('LOAD_PACKAGES', { packages: requiredPackages });
+
+        logger.log('Python库配置', '库检查/安装完成', {
+            data: { packages: requiredPackages.join(', ') }
+        });
+    }
+
+    public async runPython(code: string, requiredPackages?: string[]): Promise<any> {
         await this.waitForReady();
+
+        // 在执行代码前检查并安装所需的库
+        if (requiredPackages && requiredPackages.length > 0) {
+            await this.ensurePackagesInstalled(requiredPackages);
+        }
+
         return this.sendMessage('RUN_CODE', code);
     }
 

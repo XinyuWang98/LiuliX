@@ -80,19 +80,16 @@ export default {
         },
     },
 
-    // Feedback - User Feedback Section
-    feedback: {
-        title: '💬 Your Feedback',
-        subtitle: 'Help us build a better LiuliX',
-        emailPlaceholder: 'Email (optional, for follow-up)',
-        contentPlaceholder: 'Please share your thoughts, suggestions, or issues...',
-        typeFeature: 'Feature Request',
-        typeBug: 'Bug Report',
-        typeQuestion: 'Usage Question',
-        typeOther: 'Other',
-        submitButton: 'Submit Feedback',
-        successMessage: 'Thank you for your feedback! We will review and consider your suggestions.',
-        errorMessage: 'Please fill in the feedback content',
+    // Community - Only Community Hub
+    community: {
+        title: 'Join LiuliX Community',
+        subtitle: 'Redefine data analysis with developers and geeks',
+        discordTitle: 'Live Discussion',
+        discordDesc: 'Got questions? Have ideas? Chat with us on Discord.',
+        joinDiscord: 'Join Server',
+        githubTitle: 'Open Source',
+        githubDesc: 'View source, submit issues, or contribute PRs.',
+        starGithub: 'Star on GitHub',
     },
 
     // Legacy fields (backward compatibility)

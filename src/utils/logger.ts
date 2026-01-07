@@ -45,7 +45,13 @@ export interface LogOptions {
 }
 
 class Logger {
-    private isDev = import.meta.env.DEV;
+    private isDev = (() => {
+        try {
+            return (import.meta as any).env?.DEV ?? true;
+        } catch {
+            return true;
+        }
+    })();
 
     /**
      * 获取当前时间戳
