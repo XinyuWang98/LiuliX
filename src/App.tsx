@@ -365,11 +365,11 @@ export default function App() {
         <I18nProvider>
             <ThemeProvider>
                 <EvidenceProvider>
-                    <InsightChainProvider>
-                        <AnalysisContextProvider>
+                    <AnalysisContextProvider>
+                        <InsightChainProvider>
                             <AppContent />
-                        </AnalysisContextProvider>
-                    </InsightChainProvider>
+                        </InsightChainProvider>
+                    </AnalysisContextProvider>
                 </EvidenceProvider>
             </ThemeProvider>
         </I18nProvider>

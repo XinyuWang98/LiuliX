@@ -7,6 +7,8 @@ from .column_validation import ColumnValidationRule
 from .empty_check import EmptyCheckRule
 from .exception_wrap import ExceptionWrapRule
 from .groupby_enhance import GroupByEnhanceRule
+from .plot_protection import PlotProtectionRule
+from .sklearn_protection import SklearnProtectionRule
 
 __all__ = [
     'EnhancementRule',
@@ -15,4 +17,7 @@ __all__ = [
     'EmptyCheckRule',
     'ExceptionWrapRule',
     'GroupByEnhanceRule',
+    'PlotProtectionRule',
+    'SklearnProtectionRule',
 ]
+

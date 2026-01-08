@@ -194,6 +194,9 @@ export function useInsightLoaderV2() {
             setLoadingStage('progress.analyzingResponse');
             let insightNodes: InsightNode[] = [];
 
+            // 🆕 获取已采纳的洞察用于 Context 注入
+            const adoptedInsights = getAdoptedInsights();
+
             if (USE_ROUTER_MODE) {
                 // ✅ Router 模式：解析轻量 JSON → 膨胀为完整节点
                 const recommendations = parseRouterResponse(aiResponse);
@@ -201,10 +204,10 @@ export function useInsightLoaderV2() {
                 if (recommendations.length === 0) {
                     logger.warn('AI服务', '[Router] AI未返回推荐，使用规则层兜底');
                     const fallbackRecs = buildFallbackRecommendations(选中列名, columnTypes);
-                    insightNodes = await inflateRecommendations(fallbackRecs as any);
+                    insightNodes = await inflateRecommendations(fallbackRecs as any, adoptedInsights);
                 } else {
                     logger.log('AI服务', '[Router] 解析成功', { data: { count: recommendations.length } });
-                    insightNodes = await inflateRecommendations(recommendations as any);
+                    insightNodes = await inflateRecommendations(recommendations as any, adoptedInsights);
                 }
             } else {
                 // 旧版 Coder 模式（需要转换为 InsightNode）
@@ -444,8 +447,8 @@ export function useInsightLoaderV2() {
                     return;
                 }
 
-                // 4. 膨胀为 InsightNode[]
-                const newNodes = await inflateRecommendations(recommendations as any);
+                // 4. 膨胀为 InsightNode[] (🆕 传递 analysisContext)
+                const newNodes = await inflateRecommendations(recommendations as any, analysisContext);
 
                 // 设置 depth 和 parentId
                 newNodes.forEach((node: any) => {

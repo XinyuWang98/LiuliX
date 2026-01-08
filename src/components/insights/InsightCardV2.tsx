@@ -5,9 +5,10 @@
  */
 
 import React, { useState } from 'react';
-import { BarChart2, ChevronDown, ChevronRight, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ChevronDown, ChevronRight, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
 import { useEvidence } from '@/contexts/EvidenceContext';
+import { useAnalysisContext, AdoptedInsight } from '@/contexts/AnalysisContext'; // 🆕 Context 闭环
 import { InsightNode, DrillDownAction, MAX_DRILL_DEPTH } from '@/types/insightTree';
 import { DrillDownArea } from './DrillDownArea';
 import { ChartImage } from './ChartImage';
@@ -38,16 +39,22 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
 }) => {
     const { t } = useI18n();
     const { addRecord } = useEvidence();
+    const { addAdoptedInsight } = useAnalysisContext(); // 🆕 Context 闭环
 
     // 采纳/忽略状态
     const [isAdopted, setIsAdopted] = useState(false);
     const [isIgnored, setIsIgnored] = useState(false);
 
-    // 采纳洞察到证据池
+    // 采纳洞察到证据池 + AnalysisContext (🆕 Context 闭环)
     const handleAdopt = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!node.result) return;
+        console.log('[InsightCardV2] handleAdopt 触发', { nodeId: node.id, hasResult: !!node.result });
+        if (!node.result) {
+            console.warn('[InsightCardV2] handleAdopt 跳过: node.result 不存在');
+            return;
+        }
 
+        // 1. 添加到证据池（现有逻辑）
         addRecord({
             type: 'insightChain',
             title: node.title,
@@ -60,11 +67,28 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                 columnsUsed: node.columnsUsed,
             },
         });
+
+        // 2. 🆕 添加到 AnalysisContext（EDA 闭环）
+        const insight: AdoptedInsight = {
+            id: node.id,
+            depth: node.depth,
+            parentId: undefined,  // InsightNode 暂无 parentId，使用 undefined
+            type: inferInsightType(node.title),
+            description: node.title,
+            structuredData: {
+                column: node.columnsUsed[0],
+                issues: [],
+                values: {}
+            },
+            timestamp: Date.now()
+        };
+        addAdoptedInsight(insight);
+
+        // 3. 更新 UI 状态
         setIsAdopted(true);
         setIsIgnored(false);
-        // ✅ 通知父组件更新状态
         onStatusChange?.(node.id, true, false);
-        onAdopt?.(); // 🆕 触发回调
+        onAdopt?.();
     };
 
     // 忽略洞察
@@ -263,3 +287,16 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
         </div>
     );
 };
+
+/**
+ * 🆕 辅助函数：从标题推断洞察类型
+ */
+function inferInsightType(title: string): AdoptedInsight['type'] {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('分布') || lowerTitle.includes('distribution')) return 'distribution';
+    if (lowerTitle.includes('相关') || lowerTitle.includes('correlation')) return 'correlation';
+    if (lowerTitle.includes('缺失') || lowerTitle.includes('missing') || lowerTitle.includes('quality')) return 'data_quality';
+    if (lowerTitle.includes('趋势') || lowerTitle.includes('trend')) return 'trend';
+    if (lowerTitle.includes('异常') || lowerTitle.includes('outlier')) return 'outlier';
+    return 'other';
+}

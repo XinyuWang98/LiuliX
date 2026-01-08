@@ -33,13 +33,17 @@ class CodeEnhancer:
             ColumnValidationRule,
             ArrayProtectionRule,
             GroupByEnhanceRule,
-            ExceptionWrapRule
+            ExceptionWrapRule,
+            PlotProtectionRule,
+            SklearnProtectionRule
         )
         
         # 注册所有规则（按优先级顺序）
         self.rules = [
             EmptyCheckRule(df_name),
             ColumnValidationRule(columns, df_name),
+            PlotProtectionRule(),      # 绘图前检查
+            SklearnProtectionRule(),   # sklearn fit 前检查
             ArrayProtectionRule(),
             GroupByEnhanceRule(),
             ExceptionWrapRule()

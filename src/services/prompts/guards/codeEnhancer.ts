@@ -105,7 +105,11 @@ export class CodeEnhancer {
             rulesApplied.push('column-validation');
         }
 
-        // 🔴 规则3: 数组访问保护（临时禁用）
+        // 🆕 规则3: 绘图前数据检查
+        enhanced = this.injectPlotDataCheck(enhanced);
+        rulesApplied.push('plot-data-check');
+
+        // 🔴 规则3(旧): 数组访问保护（临时禁用）
         // TODO: v3.0 AST方案已实现精确识别，正则方案永久禁用此规则
         // 参考文档: docs/04-技术专题/02-Prompt库/08-专题-Prompt库AI代码质量提升方案.md §13.1
 
@@ -164,6 +168,38 @@ if missing:
 
 `;
         return validation + code;
+    }
+
+    /**
+     * 规则3: 绘图前数据检查
+     * 在所有 .plot() 调用前检查数据是否为空
+     */
+    private static injectPlotDataCheck(code: string): string {
+        // 匹配模式: variable.plot(...) 或 variable.plot.kind(...)
+        const plotPattern = /(\w+)\.plot\(/g;
+
+        let enhanced = code;
+        const matches: Array<{ varName: string; index: number }> = [];
+        let match;
+
+        // 收集所有匹配
+        while ((match = plotPattern.exec(code)) !== null) {
+            matches.push({
+                varName: match[1],
+                index: match.index
+            });
+        }
+
+        // 从后往前替换（避免索引偏移）
+        for (let i = matches.length - 1; i >= 0; i--) {
+            const { varName, index } = matches[i];
+            const check = `if len(${varName}) == 0:\n    raise ValueError(f"数据为空，无法绘图：{${varName}}")\n`;
+
+            // 在 .plot() 前插入检查
+            enhanced = enhanced.slice(0, index) + check + enhanced.slice(index);
+        }
+
+        return enhanced;
     }
 
     /**

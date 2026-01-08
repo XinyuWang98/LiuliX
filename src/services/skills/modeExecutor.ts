@@ -97,29 +97,65 @@ async function executeFullMode(
         const countResult = await db.runQuery(`SELECT COUNT(*) as total FROM ${tableName}`);
         const totalRows = Number(countResult[0]?.total || 0);
 
-        let query = `SELECT * FROM ${tableName}`;
         let isLimited = false;
-
         if (totalRows > maxRows) {
-            query = `SELECT * FROM ${tableName} LIMIT ${maxRows}`;
             isLimited = true;
             logger.warn('Skills', `数据量过大（${totalRows}行），已限制到${maxRows}行（基于${columnCount}列内存评估）`);
         }
 
-        const data = await db.runQuery(query);
-
         pyodideManager.initialize();
         await pyodideManager.waitForReady();
 
-        // 1. 序列化 JSON (处理 BigInt)
-        const rawJson = JSON.stringify(data, (_key, value) =>
-            typeof value === 'bigint' ? value.toString() : value
-        );
+        // ✅ 上下文检测：检查 Pyodide 中是否已有 df（下钻场景复用父节点数据）
+        const contextCheckScript = `
+import sys
+has_df = 'df' in globals() and 'pd' in sys.modules
+if has_df:
+    import pandas as pd
+    if isinstance(globals().get('df'), pd.DataFrame):
+        print("[上下文检测] True")
+        print(f"[上下文信息] shape={df.shape}, columns={list(df.columns)}")
+    else:
+        print("[上下文检测] False")
+else:
+    print("[上下文检测] False")
+`;
 
-        // 2. 转义以嵌入 Python 字符串
-        const safeJsonData = escapeJsonForPython(rawJson);
+        const checkResult = await pyodideManager.runPython(contextCheckScript);
+        // ✅ 兼容多种返回值格式（字符串、对象等）
+        const resultStr = typeof checkResult === 'string'
+            ? checkResult
+            : (checkResult?.textOutput || String(checkResult || ''));
+        const hasExistingDf = resultStr.includes('[上下文检测] True');
 
-        const dataScript = `
+        if (hasExistingDf) {
+            // 🔄 复用场景：下钻节点直接使用父节点的 DataFrame
+            logger.log('Skills', '检测到父节点上下文，复用已有 DataFrame', {
+                data: { contextInfo: resultStr }
+            });
+        } else {
+            // 🆕 全新场景：从 DuckDB 加载数据
+            let query = `SELECT * FROM ${tableName}`;
+
+            if (totalRows > maxRows) {
+                query = `SELECT * FROM ${tableName} LIMIT ${maxRows}`;
+            }
+
+            const data = await db.runQuery(query);
+
+            logger.log('Skills', '全新执行，从 DuckDB 加载数据', {
+                data: { rows: data.length, limited: isLimited, maxRows }
+            });
+
+            // 1. 序列化 JSON (处理 BigInt)
+            const rawJson = JSON.stringify(data, (_key, value) =>
+                typeof value === 'bigint' ? value.toString() : value
+            );
+
+            // 2. 转义以嵌入 Python 字符串
+            const safeJsonData = escapeJsonForPython(rawJson);
+
+            const dataScript = `
 import pandas as pd
 import json
 
@@ -135,8 +171,11 @@ except Exception as e:
     print(f"Error loading JSON data: {str(e)}")
     raise e
 `;
-        await pyodideManager.runPython(dataScript);
-        logger.log('Skills', `数据已加载到Pyodide`, { data: { rows: data.length, limited: isLimited, maxRows } });
+            await pyodideManager.runPython(dataScript);
+            logger.log('Skills', `数据已加载到Pyodide`, { data: { rows: data.length, limited: isLimited, maxRows } });
+        }
+
+
 
 
 

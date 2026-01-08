@@ -17,5 +17,7 @@ liulix_enhancer/rules/column_validation.py
 liulix_enhancer/rules/empty_check.py
 liulix_enhancer/rules/exception_wrap.py
 liulix_enhancer/rules/groupby_enhance.py
+liulix_enhancer/rules/plot_protection.py
+liulix_enhancer/rules/sklearn_protection.py
 tests/test_core.py
 tests/test_edge_cases.py
