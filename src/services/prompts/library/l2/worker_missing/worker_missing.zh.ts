@@ -10,12 +10,10 @@ export const workerMissingPrompt: UserPrompt = {
     title: '缺失值分析',
     description: '扫描全表，统计各列缺失数量和比例，识别缺失模式',
 
-
-
     // 能力包配置 (v2.1)
     slug: 'worker-missing-v1',
     packageId: 'basic',
-    requiredPackages: [],
+    requiredPackages: ['pandas', 'matplotlib', 'numpy'],
     outputCharts: ['chart'],
     layer: 'L2_EXECUTION',
 
@@ -26,38 +24,93 @@ export const workerMissingPrompt: UserPrompt = {
         { category: 'output', value: 'chart', label: '图表' }
     ],
 
-    template: `
-你是一个专业的 Python 数据分析师。
-请针对 DataFrame \`df\` 进行全表缺失值分析。
+    // ✅ Router 模式：全自动代码生成
+    executionMode: 'TEMPLATE_FILL',
+    template: '', // Placeholder for TS compliance
 
-# 数据集摘要
-{{df_summary}}
+    codeTemplate: `import pandas as pd
+import matplotlib.pyplot as plt
+import io
+import base64
+import json
+import numpy as np
 
-# 要求
-1. 统计每列的缺失值数量和比例。
-2. 按缺失比例降序排序。
-3. 筛选出缺失比例 > 0 的列。
-4. 绘制水平柱状图，展示各列缺失比例。
-5. 使用颜色渐变：
-   - 缺失比例 < 5%: 绿色
-   - 缺失比例 5%-20%: 黄色
-   - 缺失比例 > 20%: 红色
-6. 标题: "数据集缺失值分析"。
-7. 使用 matplotlib/seaborn 绘图。
-8. **不要** 生成任何 plt.show()，图表对象请保留在内存中。
-9. 返回 JSON 格式结果。
+plt.switch_backend('Agg')
 
-# 输出格式 (JSON Only)
-{
-  "code": "...",
-  "summary": "共 X 列存在缺失，缺失最严重的是 A 列 (Y%)，建议优先处理",
-  "columnsUsed": []
-}
-`,
+def analyze(df):
+    try:
+        # 1. 计算缺失值
+        missing = df.isnull().sum()
+        missing = missing[missing > 0]
+        
+        if missing.empty:
+             summary = "✅ 数据集完整，未发现任何缺失值。"
+             # 生成一个全绿的简单图表
+             fig, ax = plt.subplots(figsize=(8, 2))
+             ax.text(0.5, 0.5, "100% Complete (No Missing Data)", 
+                     ha='center', va='center', fontsize=14, color='#2ecc71')
+             ax.axis('off')
+             columns_used = []
+        else:
+            # 计算比例
+            total_rows = len(df)
+            missing_pct = (missing / total_rows) * 100
+            missing_df = pd.DataFrame({'count': missing, 'pct': missing_pct})
+            missing_df = missing_df.sort_values('pct', ascending=True) 
+            
+            # 颜色映射 (红>20%, 黄>5%, 绿<5%)
+            colors = []
+            for pct in missing_df['pct']:
+                if pct > 20: colors.append('#e74c3c') # Red
+                elif pct > 5: colors.append('#f1c40f') # Yellow
+                else: colors.append('#2ecc71') # Green
+            
+            # 绘图
+            fig_height = max(4, len(missing_df) * 0.4)
+            fig, ax = plt.subplots(figsize=(10, fig_height), dpi=100)
+            bars = ax.barh(missing_df.index, missing_df['pct'], color=colors)
+            
+            ax.set_xlabel('缺失比例 (%)')
+            ax.set_title(f'发现 {len(missing_df)} 个列存在缺失值')
+            ax.grid(axis='x', linestyle='--', alpha=0.3)
+            
+            # 标注数值
+            for i, v in enumerate(missing_df['pct']):
+                count = missing_df.iloc[i]['count']
+                ax.text(v + 0.2, i, f'{v:.1f}% ({count})', va='center', fontsize=9)
+                
+            plt.tight_layout()
+            
+            # 摘要
+            top_col = missing_df.index[-1]
+            top_pct = missing_df.iloc[-1]['pct']
+            summary = f"共 {len(missing_df)} 列存在缺失。缺失最严重的是 {top_col} ({top_pct:.1f}%)。"
+            columns_used = list(missing.index)
 
-    inputVariables: ['df_summary'],
+        # 转 Base64
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close(fig)
+        
+        # 兼容旧版格式 (code字段留空)
+        result = {
+            "image": image_base64, 
+            "summary": summary,
+            "columnsUsed": columns_used,
+            "code": ""
+        }
+        return json.dumps(result)
+        
+    except Exception as e:
+        return json.dumps({"error": str(e), "image": "", "summary": "分析失败"})
+
+print(analyze(df))`,
+
+    inputVariables: [],
     author: 'System',
-    version: '1.0.0',
+    version: '2.0.0',
     isBuiltIn: true,
     updatedAt: Date.now()
 };

@@ -19,12 +19,23 @@ import { RESOURCE_LIMITS, checkAvailableMemory } from '@/utils/resourceLimits';
 import { CacheManager } from '../utils/cacheManager';
 import { getAnalysisConfig } from '@/config/analysisConfig';
 
+// 🆕 EDA 闭环依赖
+import { useInsightChain } from '@/contexts/InsightChainContext';
+import { useAnalysisContext } from '@/contexts/AnalysisContext';
+// import { injectContextToPrompt } from '@/services/prompts/contextInjector'; // 在 buildRouterPrompt 内部使用
+// import { aiRequestQueue } from '@/services/aiRequestQueue'; // P1: 请求队列 -> 这里还没实现，先注释掉
+
 export function useInsightLoaderV2() {
     const [loadingStage, setLoadingStage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [executionProgress, setExecutionProgress] = useState<{ current: number; total: number } | null>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
+
     const currentFileRef = useRef<any>(null);  // 🆕 追踪当前处理的文件
+
+    // 🆕 EDA 闭环 Context
+    const { addInsightNode, updateInsightNode } = useInsightChain();
+    const { getAdoptedInsights } = useAnalysisContext();
 
     /**
      * 加载洞察假设（集成版）
@@ -342,11 +353,157 @@ export function useInsightLoaderV2() {
         }
     };
 
+    /**
+     * 🆕 EDA 闭环：静默触发后续分析
+     * 基于父卡片和 AnalysisContext 生成新推荐
+     */
+    const triggerFollowUp = async (parentNode: InsightNode) => {
+        const MAX_DRILL_DEPTH = 3;
+
+        // P0 防护：深度限制
+        if (parentNode.depth >= MAX_DRILL_DEPTH) {
+            logger.log('AI洞察', '已达最大下钻深度，跳过静默触发');
+            return;
+        }
+
+        logger.log('AI洞察', '[SilentTrigger] 开始静默触发', {
+            data: { parentId: parentNode.id, depth: parentNode.depth }
+        });
+
+        // 1. 创建 Loading 占位节点
+        const loadingNodeId = `loading-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        // 使用 any 绕过类型检查 (insightTree vs insightChain 类型不兼容)
+        const loadingNode: any = {
+            id: loadingNodeId,
+            depth: parentNode.depth + 1, // 下一层级
+            parentId: parentNode.id,
+            hypothesisId: (parentNode as any).hypothesisId || 'unknown',
+            title: '正在生成关联推荐...',
+            conclusion: '结合历史发现分析中...',
+            columnsUsed: [],
+            params: {},
+            promptId: '',
+            chartType: 'table',
+            isLoading: true, // UI 组件需要识别此状态显示 Skeleton
+            isAdopted: false,
+            timestamp: Date.now(),
+            code: '',
+            codeLanguage: 'python'
+        };
+
+        addInsightNode(loadingNode as any); // 强制转换以兼容 InsightChain 类型
+
+        // 使用请求队列串行执行
+        try {
+            await (async () => {
+                // 确保上下文最新
+                const analysisContext = getAdoptedInsights();
+
+                // 准备数据
+                const currentFile = currentFileRef.current;
+                if (!currentFile || !currentFile.columns) {
+                    throw new Error('缺少文件上下文数据');
+                }
+
+                // 1. 构建 Router Prompt (含 Context)
+                const prompt = buildRouterPrompt(
+                    currentFile.columns,
+                    [],
+                    currentFile.columnTypes,
+                    analysisContext
+                );
+                logger.log('AI洞察', '[SilentTrigger] Prompt 构建完成', {
+                    data: { promptLength: prompt.length, contextCount: analysisContext.length }
+                });
+
+                // 2. 调用 AI 服务
+                const { invokeAI } = await import('@/services/aiInvoker');
+                const aiStartTime = performance.now();
+
+                const aiResponse = await invokeAI(prompt, {
+                    type: 'insight',
+                    priority: 'normal' // 使用 normal 优先级
+                });
+
+                const aiDuration = (performance.now() - aiStartTime) / 1000;
+                logger.log('AI洞察', `[SilentTrigger] AI响应收到`, {
+                    data: { length: aiResponse.length, duration: aiDuration.toFixed(1) + 's' }
+                });
+
+                // 3. 解析响应
+                const recommendations = parseRouterResponse(aiResponse);
+
+                if (recommendations.length === 0) {
+                    logger.warn('AI洞察', '[SilentTrigger] AI未返回推荐');
+                    // 移除 Loading 节点
+                    updateInsightNode(loadingNodeId, {
+                        title: '暂无更多推荐',
+                        conclusion: '基于当前发现，暂无进一步分析建议',
+                        isLoading: false
+                    } as any);
+                    return;
+                }
+
+                // 4. 膨胀为 InsightNode[]
+                const newNodes = await inflateRecommendations(recommendations as any);
+
+                // 设置 depth 和 parentId
+                newNodes.forEach((node: any) => {
+                    node.depth = parentNode.depth + 1;
+                    node.parentId = parentNode.id;
+                });
+
+                logger.log('AI洞察', '[SilentTrigger] 膨胀完成', {
+                    data: { count: newNodes.length }
+                });
+
+                // 5. 执行代码获取结果
+                await executeBatchNodes(
+                    newNodes,
+                    currentFile.tableName || 'uploaded_data',
+                    (current, total) => {
+                        logger.log('AI洞察', `[SilentTrigger] 执行进度 ${current}/${total}`);
+                    }
+                );
+
+                // 6. 更新 Loading 节点为第一个结果，其他节点添加到树
+                if (newNodes.length > 0) {
+                    const firstNode = newNodes[0];
+                    updateInsightNode(loadingNodeId, {
+                        ...firstNode,
+                        id: loadingNodeId, // 保持 ID 不变
+                        isLoading: false
+                    } as any);
+
+                    // 添加其余节点
+                    for (let i = 1; i < newNodes.length; i++) {
+                        addInsightNode(newNodes[i] as any);
+                    }
+                }
+
+                logger.log('AI洞察', '[SilentTrigger] 完成', {
+                    data: { totalNodes: newNodes.length }
+                });
+
+            })();
+        } catch (error) {
+            logger.error('AI洞察', '[SilentTrigger] 触发失败', error);
+            // 标记错误状态
+            updateInsightNode(loadingNodeId, {
+                title: '推荐生成失败',
+                conclusion: String(error),
+                isLoading: false,
+                isError: true
+            } as any);
+        }
+    };
+
     return {
         isLoading,
         executionProgress,
         loadingStage,
         loadInsights,
         cancelLoading,
+        triggerFollowUp, // 🆕 导出方法
     };
 }

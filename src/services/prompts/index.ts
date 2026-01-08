@@ -42,6 +42,10 @@ import { cleanerStandardizeCasePrompt } from './library/l2/cleaner_standardize_c
 import { workerRegressionPrompt } from './library/l2/worker_regression/index';
 import { workerDecisionTreePrompt } from './library/l2/worker_decision_tree/index';
 import { workerClusterPrompt } from './library/l2/worker_cluster/index';
+import { workerGrangerPrompt } from './library/l2/worker_granger/index';
+// L2 扩展分析类 (Advanced)
+import { workerTimeDecompositionPrompt } from './library/l2/worker_time_decomposition/index';
+import { workerDbscanPrompt } from './library/l2/worker_dbscan/index';
 
 // 导出种子全集 (1个L1 + 18个L2 = 19个)
 export const seedPrompts = [
@@ -83,7 +87,10 @@ export const seedPrompts = [
     // L2 执行层 - 高级分析类 (3个) 🆕
     workerRegressionPrompt,
     workerDecisionTreePrompt,
-    workerClusterPrompt
+    workerClusterPrompt,
+    workerGrangerPrompt,
+    workerTimeDecompositionPrompt,
+    workerDbscanPrompt
 ];
 
 /**

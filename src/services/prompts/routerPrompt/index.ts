@@ -7,6 +7,8 @@
 import { getCurrentLanguage } from '@/contexts/I18nContext';
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
+import { injectContextToPrompt } from '@/services/prompts/contextInjector'; // 🆕
+import { AdoptedInsight } from '@/contexts/AnalysisContext'; // 🆕
 import * as promptEn from './routerPrompt.en';
 import * as promptZh from './routerPrompt.zh';
 
@@ -19,15 +21,31 @@ const promptModules = {
 /**
  * 构建 Router Prompt
  * 自动根据当前语言选择对应版本
+ * 
+ * @param columns 列名列表
+ * @param sampleData 采样数据
+ * @param columnTypes 列类型映射
+ * @param analysisContext 🆕 已采纳的洞察 (用于 Context 回流)
  */
 export function buildRouterPrompt(
     columns: string[],
     sampleData: Record<string, unknown>[],
-    columnTypes?: Record<string, string>
+    columnTypes?: Record<string, string>,
+    analysisContext?: AdoptedInsight[]  // 🆕 新增参数
 ): string {
     const lang = getCurrentLanguage();
     const module = promptModules[lang];
-    return module.buildRouterPromptInternal(columns, sampleData, columnTypes);
+    let prompt = module.buildRouterPromptInternal(columns, sampleData, columnTypes);
+
+    // 🆕 注入历史 Context
+    if (analysisContext && analysisContext.length > 0) {
+        prompt = injectContextToPrompt(prompt, analysisContext);
+        logger.log('AI服务', '[RouterPrompt] Context 注入完成', {
+            data: { insightCount: analysisContext.length }
+        });
+    }
+
+    return prompt;
 }
 
 /**

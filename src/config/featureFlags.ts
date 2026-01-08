@@ -33,6 +33,9 @@ export interface FeatureFlags {
     // MVP阶段控制
     ENABLE_ADVANCED_API_CONFIG: boolean; // 高级API配置界面（MVP阶段默认关闭）
     ENABLE_INVITE_CODE_GATE: boolean;    // 邀请码前置验证（开发阶段关闭，上线时开启）
+
+    // 智能闭环
+    ENABLE_EDA_CONTEXT_LOOP: boolean;    // EDA 闭环与 Context 回流（开发中）
 }
 
 /**
@@ -68,7 +71,10 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 
     // MVP阶段控制
     ENABLE_ADVANCED_API_CONFIG: false,  // MVP阶段隐藏高级配置
-    ENABLE_INVITE_CODE_GATE: false      // 开发阶段关闭邀请码验证
+    ENABLE_INVITE_CODE_GATE: false,     // 开发阶段关闭邀请码验证
+
+    // 智能闭环
+    ENABLE_EDA_CONTEXT_LOOP: false      // EDA 闭环功能（开发中）
 };
 
 /**

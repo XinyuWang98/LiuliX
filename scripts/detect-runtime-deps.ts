@@ -16,6 +16,11 @@ import path from 'path';
 import { loadPyodide } from 'pyodide';
 import type { PyodideInterface } from 'pyodide';
 
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const PROMPTS_DIR = path.join(PROJECT_ROOT, 'src', 'services', 'prompts', 'library');
 
@@ -34,9 +39,7 @@ let globalPyodide: PyodideInterface | null = null;
 async function initPyodide(): Promise<PyodideInterface> {
     if (!globalPyodide) {
         console.log('🐍 正在初始化Pyodide环境...(首次加载约10秒)\n');
-        globalPyodide = await loadPyodide({
-            indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
-        });
+        globalPyodide = await loadPyodide();
         console.log('✅ Pyodide初始化完成\n');
     }
     return globalPyodide;
@@ -78,13 +81,25 @@ import numpy as np
 df = pd.DataFrame({
     'test_col': np.random.rand(100),
     'numeric': np.arange(100),
-    'category': ['A', 'B', 'C'] * 33 + ['A']
+    'category': ['A', 'B', 'C'] * 33 + ['A'],
+    'date_col': pd.date_range(start='1/1/2022', periods=100)
 })
 
+# 模板变量替换
 # 模板变量替换
 column_name = 'test_col'
 x_col = 'numeric'
 y_col = 'test_col'
+date_col = 'date_col'
+target_col = 'numeric'
+category_col = 'category'
+n = 5
+feature_cols = ['numeric', 'numeric'] # Use list of strings
+n_clusters = 3
+period = 7
+value_col = 'numeric'
+eps = 0.5
+min_samples = 5
 
 # 执行模板代码
 ${codeTemplate}
@@ -261,8 +276,8 @@ function printReport(results: RuntimeCheckResult[]) {
     }
 }
 
-// 主入口
-if (require.main === module) {
+// 主入口 (ESM Compatible)
+if (import.meta.url.startsWith('file:') && process.argv[1] === fileURLToPath(import.meta.url)) {
     runRuntimeCheck().catch(err => {
         console.error('检测失败:', err);
         process.exit(1);

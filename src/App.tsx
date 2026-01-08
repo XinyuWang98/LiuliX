@@ -3,6 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { EvidenceProvider } from './contexts/EvidenceContext';
 import { InsightChainProvider } from './contexts/InsightChainContext';
+import { AnalysisContextProvider } from './contexts/AnalysisContext'; // 🆕 EDA 闭环
 import { NavigationBar } from './components/layout/NavigationBar';
 import { LeftSidebar } from './components/layout/LeftSidebar';
 import { PromptLibrary } from './components/prompt/PromptLibrary';
@@ -365,7 +366,9 @@ export default function App() {
             <ThemeProvider>
                 <EvidenceProvider>
                     <InsightChainProvider>
-                        <AppContent />
+                        <AnalysisContextProvider>
+                            <AppContent />
+                        </AnalysisContextProvider>
                     </InsightChainProvider>
                 </EvidenceProvider>
             </ThemeProvider>
