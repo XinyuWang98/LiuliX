@@ -7,8 +7,7 @@
 export const FeatureFlags = {
     /** 多层级導航功能（智能折叠导航） */
     MULTI_LEVEL_NAV: import.meta.env.VITE_FEATURE_MULTI_LEVEL_NAV === 'true' || import.meta.env.DEV, // 开发环境默认启用
-    /** 自定义下钻触发器 (MVP阶段暂时关闭) */
-    CUSTOM_DRILL_DOWN_TRIGGER: false,
+    // 🗑️ CUSTOM_DRILL_DOWN_TRIGGER 已于 2026-01-08 清理（从未启用）
 } as const;
 
 /** 功能特性类型 */

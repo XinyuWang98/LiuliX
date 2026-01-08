@@ -4,7 +4,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { SettingsGroup, SettingsRow } from './SettingsSection';
 import Switch from './Switch';
 import { LiuliButton } from '@/components/common/liulix/LiuliButton';
-import { Play, CheckCircle, AlertCircle, ArrowUp, ArrowDown, Loader, Monitor, Globe } from 'lucide-react';
+import { Loader, Monitor, Globe } from 'lucide-react';
 import '../SettingsPage.css';
 import { SUPPORTED_MODELS } from '@/services/localLLMService';
 import { LogDownloadButton } from './LogDownloadButton';
@@ -19,12 +19,6 @@ import { type AIModel } from '@/services/aiService';
 import { type HardwareDetectionResult } from '@/utils/hardwareDetection';
 import { type AIModeRecommendation } from '@/utils/aiModeRecommendation';
 
-const MODEL_NAMES: Record<string, string> = {
-    gemini: 'Gemini 2.5 Flash',
-    grok: 'Grok Beta',
-    claude: 'Claude 3.5 Sonnet',
-    deepseek: 'DeepSeek Chat'
-};
 
 interface SettingsContentProps {
     activeCategory: string;
@@ -122,7 +116,46 @@ export const SettingsContent = (props: SettingsContentProps) => {
                     <h2 className="settings-section-title">{t('settings.aiConfig')}</h2>
                     <p className="settings-section-desc">{t('settings.aiConfigDesc')}</p>
 
+                    {/* 当前模式提示（前置） */}
+                    <div style={{
+                        padding: 'var(--gap-m)',
+                        background: props.useLocalModel
+                            ? 'rgba(100, 150, 255, 0.1)'
+                            : 'rgba(0, 200, 100, 0.1)',
+                        borderRadius: 'var(--radius-m)',
+                        border: `1px solid ${props.useLocalModel ? 'rgba(100, 150, 255, 0.3)' : 'var(--primary)'}`,
+                        marginBottom: 'var(--gap-l)',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 'var(--gap-m)',
+                    }}>
+                        {props.useLocalModel ? (
+                            <Monitor size={20} color="rgba(100, 150, 255, 1)" />
+                        ) : (
+                            <Globe size={20} color="var(--primary)" />
+                        )}
+                        <div style={{ flex: 1 }}>
+                            <div style={{
+                                fontSize: 'var(--fs-sm)',
+                                fontWeight: 'var(--fw-medium)',
+                                color: props.useLocalModel ? 'rgba(100, 150, 255, 1)' : 'var(--primary)',
+                                marginBottom: 'var(--gap-xs)',
+                            }}>
+                                {props.useLocalModel
+                                    ? t('settings.aiSettings.localMode')
+                                    : t('settings.aiSettings.cloudMode')
+                                }
+                            </div>
+                            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 'var(--line-height)' }}>
+                                💡 {props.useLocalModel
+                                    ? t('settings.aiSettings.localPriorityHint')
+                                    : t('settings.aiSettings.cloudTrialHint')
+                                }
+                            </div>
+                        </div>
+                    </div>
 
+                    {/* 硬件环境检测 */}
                     <SettingsGroup title={t('settings.hardwareEnvironment')}>
                         {props.isDetecting ? (
                             <div className="hardware-detection-row">
@@ -151,43 +184,61 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         )}
                     </SettingsGroup>
 
-                    {/* Local Model Settings (Moved here) */}
-                    <SettingsGroup title={t('settings.localModelTitle')}>
-                        <SettingsRow
-                            label={t('settings.localModelEnableTitle')}
-                            description={t('settings.localModelDesc')}
-                            action={
-                                <Switch
-                                    checked={props.useLocalModel}
-                                    onChange={props.onAIModeChange}
-                                />
-                            }
-                        />
-                        {props.useLocalModel && (
+                    {/* 简化的模式切换 */}
+                    <SettingsGroup>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: 'var(--gap-m)',
+                            background: 'var(--bg-secondary)',
+                            borderRadius: 'var(--radius-m)',
+                            border: '1px solid var(--border)',
+                        }}>
+                            <div style={{ flex: 1 }}>
+                                <div style={{
+                                    fontSize: 'var(--fs-m)',
+                                    fontWeight: 'var(--fw-medium)',
+                                    marginBottom: 'var(--gap-xs)',
+                                }}>
+                                    {t('settings.aiSettings.useLocalModel')}
+                                </div>
+                                <div style={{
+                                    fontSize: 'var(--fs-xs)',
+                                    color: 'var(--text-secondary)',
+                                }}>
+                                    {props.useLocalModel
+                                        ? t('settings.aiSettings.localModeDesc')
+                                        : t('settings.aiSettings.cloudModeDescNew')
+                                    }
+                                </div>
+                            </div>
+
+                            {/* Toggle Switch */}
+                            <Switch
+                                checked={props.useLocalModel}
+                                onChange={props.onAIModeChange}
+                            />
+                        </div>
+                    </SettingsGroup>
+
+                    {/* 本地模型选择器（仅在启用本地模式时显示） */}
+                    {props.useLocalModel && (
+                        <SettingsGroup>
                             <LocalModelSelector
                                 currentModel={localStorage.getItem('ollama_model') || SUPPORTED_MODELS.QWEN_7B}
                                 onModelChange={(modelId) => {
                                     localStorage.setItem('ollama_model', modelId);
-                                    // 触发模型重新加载
                                     window.dispatchEvent(new CustomEvent('ollama-model-change', { detail: modelId }));
                                 }}
                             />
-                        )}
-                        {/* 调用逻辑说明 */}
-                        <div className="model-logic-info">
-                            <div className="model-logic-title">{t('settings.modelLogicTitle')}</div>
-                            <ul className="model-logic-list">
-                                <li>{props.useLocalModel ? t('settings.modelLogicLocal') : t('settings.modelLogicAPI')}</li>
-                                {props.useLocalModel && <li>{t('settings.modelLogicFallback')}</li>}
-                            </ul>
-                        </div>
-                    </SettingsGroup>
+                        </SettingsGroup>
+                    )}
 
-                    {/* API Keys */}
-                    <SettingsGroup title={t('settings.apiPriorityAndKeys')}>
+                    {/* API Keys - MVP阶段隐藏，用户使用内置API */}
+                    {/* <SettingsGroup title={t('settings.apiPriorityAndKeys')}>
                         <div className="api-keys-list">
                             {props.priority.map((model, index) => {
-                                // MVP阶段只启用DeepSeek
                                 const isDisabled = model !== 'deepseek';
                                 return (
                                     <div
@@ -244,7 +295,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                                 );
                             })}
                         </div>
-                    </SettingsGroup>
+                    </SettingsGroup> */}
                 </>
             )}
 

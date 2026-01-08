@@ -72,17 +72,48 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 };
 
 /**
- * 获取特征开关状态
+ * 获取特征开关状态（增强版 - 三层优先级）
+ * 
+ * 优先级顺序：
+ * 1. 远程配置（后端API，24小时缓存）- 最高优先级
+ * 2. 本地覆盖（localStorage开发调试）- 中等优先级
+ * 3. 默认配置（硬编码兜底）- 最低优先级
  */
 export function getFeatureFlags(): FeatureFlags {
     try {
-        const stored = localStorage.getItem('feature_flags');
-        if (stored) {
-            return { ...DEFAULT_FEATURE_FLAGS, ...JSON.parse(stored) };
+        // === 优先级1: 远程配置（后端API，24小时缓存） ===
+        const remoteStored = localStorage.getItem('feature_flags_remote');
+        const remoteTimestamp = localStorage.getItem('feature_flags_remote_timestamp');
+
+        let remoteFlags: Partial<FeatureFlags> = {};
+
+        if (remoteStored && remoteTimestamp) {
+            const age = Date.now() - parseInt(remoteTimestamp);
+            // 24小时内有效
+            if (age < 24 * 60 * 60 * 1000) {
+                remoteFlags = JSON.parse(remoteStored);
+            } else {
+                // 缓存过期，清理
+                localStorage.removeItem('feature_flags_remote');
+                localStorage.removeItem('feature_flags_remote_timestamp');
+            }
         }
+
+        // === 优先级2: 本地覆盖（开发调试用） ===
+        const localOverride = localStorage.getItem('feature_flags');
+        const localFlags = localOverride ? JSON.parse(localOverride) : {};
+
+        // === 优先级3: 默认配置（兜底） ===
+        // 合并策略: DEFAULT <- remote <- local
+        return {
+            ...DEFAULT_FEATURE_FLAGS,
+            ...remoteFlags,      // 远程配置覆盖默认值
+            ...localFlags        // 本地配置优先级最高（开发用）
+        };
     } catch (error) {
         console.warn('[特征开关] 配置加载失败', error);
     }
+
     return DEFAULT_FEATURE_FLAGS;
 }
 

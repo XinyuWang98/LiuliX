@@ -62,10 +62,10 @@ export const AnalysisPackagesSettings = () => {
     return (
         <>
             <h2 className="settings-section-title">
-                {t('settings.pythonLibraries')}
+                {t('settings.analysisPackages')}
             </h2>
             <p className="settings-section-desc">
-                {t('settings.pythonLibrariesDesc')}
+                {t('settings.analysisPackagesDesc')}
             </p>
 
             {/* 全局策略开关 */}

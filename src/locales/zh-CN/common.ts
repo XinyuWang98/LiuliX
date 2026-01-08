@@ -48,6 +48,8 @@ export const nav = {
     settings: '设置',
     user: '用户',
     theme: '切换主题',
+    help: '帮助文档', // 新增
+    docs: '用户手册', // 新增
 };
 
 // 侧边栏

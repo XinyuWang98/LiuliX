@@ -19,6 +19,7 @@ import { useResizable } from '@/hooks/useResizable';
 import { logger } from './utils/logger';
 import { LiuliShowcase } from './pages/LiuliShowcase'; // [NEW] Design System
 import { LoadingScreen } from './components/common/LoadingScreen/LoadingScreen';
+import { initializeConfig } from './services/configService'; // [NEW 2026-01-08] Feature Flags配置
 import './App.css';
 import { ingestFilesAndCreateProject } from './utils/projectImporter';
 import { saveProjects, loadProjects } from './utils/indexedDB';
@@ -136,6 +137,16 @@ function AppContent() {
         checkBackendHealth();
         const interval = setInterval(checkBackendHealth, 30000);
         return () => clearInterval(interval);
+    }, []);
+
+    // 🆕 Feature Flags 配置初始化（2026-01-08 新增）
+    useEffect(() => {
+        const loadRemoteConfig = async () => {
+            await initializeConfig();
+            logger.log('系统', 'Feature Flags 配置初始化完成');
+        };
+
+        loadRemoteConfig();
     }, []);
 
     // ⚠️ MVP阶段：免费提供API Key服务，暂时禁用自动弹窗

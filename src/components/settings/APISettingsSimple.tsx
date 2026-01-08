@@ -19,8 +19,8 @@ export function APISettingsSimple({ onClose }: APISettingsSimpleProps) {
     const { t } = useI18n();
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [isActivated, setIsActivated] = useState(hasInviteCode());
-    const [selectedMode, setSelectedMode] = useState<'local' | 'cloud'>(
-        localStorage.getItem('use_local_model') === 'true' ? 'local' : 'cloud'
+    const [useLocalModel, setUseLocalModel] = useState(
+        localStorage.getItem('use_local_model') === 'true'
     );
 
     // 监听邀请码变化
@@ -31,16 +31,17 @@ export function APISettingsSimple({ onClose }: APISettingsSimpleProps) {
     }, []);
 
     // 处理模式切换
-    const handleModeChange = (mode: 'local' | 'cloud') => {
-        setSelectedMode(mode);
-        localStorage.setItem('use_local_model', mode === 'local' ? 'true' : 'false');
+    const handleToggle = () => {
+        const newValue = !useLocalModel;
+        setUseLocalModel(newValue);
+        localStorage.setItem('use_local_model', newValue ? 'true' : 'false');
         // 触发全局更新事件
-        window.dispatchEvent(new CustomEvent('ai-mode-change', { detail: mode }));
+        window.dispatchEvent(new CustomEvent('ai-mode-change', { detail: newValue ? 'local' : 'cloud' }));
     };
 
     // 是否需要邀请码门槛
     const needsInviteCode = isFeatureEnabled('ENABLE_INVITE_CODE_GATE');
-    const canSelectMode = !needsInviteCode || isActivated;
+    const canToggle = !needsInviteCode || isActivated;
 
     return (
         <div
@@ -62,11 +63,9 @@ export function APISettingsSimple({ onClose }: APISettingsSimpleProps) {
             <div
                 className="card"
                 style={{
-                    maxWidth: '600px',
+                    maxWidth: '500px',
                     width: '90%',
                     padding: 'var(--gap-xl)',
-                    maxHeight: '90vh',
-                    overflowY: 'auto',
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -91,6 +90,45 @@ export function APISettingsSimple({ onClose }: APISettingsSimpleProps) {
                     <button onClick={onClose} className="btn-ghost" style={{ padding: '4px' }}>
                         <X size={20} />
                     </button>
+                </div>
+
+                {/* 当前模式提示（前置） */}
+                <div style={{
+                    padding: 'var(--gap-m)',
+                    background: useLocalModel
+                        ? 'rgba(100, 150, 255, 0.1)'
+                        : 'rgba(0, 200, 100, 0.1)',
+                    borderRadius: 'var(--radius-m)',
+                    border: `1px solid ${useLocalModel ? 'rgba(100, 150, 255, 0.3)' : 'var(--primary)'}`,
+                    marginBottom: 'var(--gap-l)',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 'var(--gap-m)',
+                }}>
+                    {useLocalModel ? (
+                        <HardDrive size={20} color="rgba(100, 150, 255, 1)" />
+                    ) : (
+                        <Cloud size={20} color="var(--primary)" />
+                    )}
+                    <div style={{ flex: 1 }}>
+                        <div style={{
+                            fontSize: 'var(--fs-sm)',
+                            fontWeight: 'var(--fw-medium)',
+                            color: useLocalModel ? 'rgba(100, 150, 255, 1)' : 'var(--primary)',
+                            marginBottom: 'var(--gap-xs)',
+                        }}>
+                            {useLocalModel
+                                ? t('settings.aiSettings.localMode')
+                                : t('settings.aiSettings.cloudMode')
+                            }
+                        </div>
+                        <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', lineHeight: 'var(--line-height)' }}>
+                            💡 {useLocalModel
+                                ? t('settings.modelLogicLocal')
+                                : t('settings.aiSettings.cloudModeHint')
+                            }
+                        </div>
+                    </div>
                 </div>
 
                 {/* 邀请码激活区 - 仅在门槛开启时显示 */}
@@ -129,124 +167,76 @@ export function APISettingsSimple({ onClose }: APISettingsSimpleProps) {
                     </div>
                 )}
 
-                {/* 模式选择区 */}
-                <div style={{ opacity: canSelectMode ? 1 : 0.5, pointerEvents: canSelectMode ? 'auto' : 'none' }}>
-                    <label style={{
-                        fontSize: 'var(--fs-sm)',
-                        fontWeight: 'var(--fw-medium)',
-                        color: 'var(--text-secondary)',
-                        display: 'block',
-                        marginBottom: 'var(--gap-m)',
-                    }}>
-                        {t('settings.aiSettings.modeSelection')}
-                    </label>
-
-                    <div style={{ display: 'grid', gap: 'var(--gap-m)' }}>
-                        {/* 本地模式 */}
-                        <div
-                            onClick={() => canSelectMode && handleModeChange('local')}
-                            style={{
-                                padding: 'var(--gap-m)',
-                                border: `2px solid ${selectedMode === 'local' ? 'var(--primary)' : 'var(--border)'}`,
-                                borderRadius: 'var(--radius-m)',
-                                cursor: canSelectMode ? 'pointer' : 'not-allowed',
-                                transition: 'all 0.2s',
-                                background: selectedMode === 'local' ? 'rgba(0, 200, 100, 0.05)' : 'var(--bg-main)',
-                            }}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--gap-m)' }}>
-                                <HardDrive size={32} color={selectedMode === 'local' ? 'var(--primary)' : 'var(--text-secondary)'} />
-                                <div style={{ flex: 1 }}>
-                                    <div style={{
-                                        fontSize: 'var(--fs-m)',
-                                        fontWeight: 'var(--fw-medium)',
-                                        marginBottom: 'var(--gap-xs)',
-                                        color: selectedMode === 'local' ? 'var(--primary)' : 'var(--text-primary)',
-                                    }}>
-                                        {t('settings.aiSettings.localMode')}
-                                    </div>
-                                    <div style={{
-                                        fontSize: 'var(--fs-sm)',
-                                        color: 'var(--text-secondary)',
-                                        marginBottom: 'var(--gap-xs)',
-                                    }}>
-                                        {t('settings.aiSettings.localModeDesc')}
-                                    </div>
-                                    <div style={{
-                                        display: 'inline-block',
-                                        padding: '2px 8px',
-                                        background: 'rgba(0, 200, 100, 0.1)',
-                                        color: 'var(--primary)',
-                                        borderRadius: 'var(--radius-s)',
-                                        fontSize: 'var(--fs-xs)',
-                                    }}>
-                                        {t('settings.aiSettings.unlimited')}
-                                    </div>
-                                </div>
-                                {selectedMode === 'local' && (
-                                    <CheckCircle size={20} color="var(--primary)" />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* 云端模式 */}
-                        <div
-                            onClick={() => canSelectMode && handleModeChange('cloud')}
-                            style={{
-                                padding: 'var(--gap-m)',
-                                border: `2px solid ${selectedMode === 'cloud' ? 'var(--primary)' : 'var(--border)'}`,
-                                borderRadius: 'var(--radius-m)',
-                                cursor: canSelectMode ? 'pointer' : 'not-allowed',
-                                transition: 'all 0.2s',
-                                background: selectedMode === 'cloud' ? 'rgba(0, 200, 100, 0.05)' : 'var(--bg-main)',
-                            }}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--gap-m)' }}>
-                                <Cloud size={32} color={selectedMode === 'cloud' ? 'var(--primary)' : 'var(--text-secondary)'} />
-                                <div style={{ flex: 1 }}>
-                                    <div style={{
-                                        fontSize: 'var(--fs-m)',
-                                        fontWeight: 'var(--fw-medium)',
-                                        marginBottom: 'var(--gap-xs)',
-                                        color: selectedMode === 'cloud' ? 'var(--primary)' : 'var(--text-primary)',
-                                    }}>
-                                        {t('settings.aiSettings.cloudMode')}
-                                    </div>
-                                    <div style={{
-                                        fontSize: 'var(--fs-sm)',
-                                        color: 'var(--text-secondary)',
-                                        marginBottom: 'var(--gap-xs)',
-                                    }}>
-                                        {t('settings.aiSettings.cloudModeDescNew')}
-                                    </div>
-                                    <div style={{
-                                        display: 'inline-block',
-                                        padding: '2px 8px',
-                                        background: 'var(--warning)',
-                                        borderRadius: 'var(--radius-s)',
-                                        fontSize: 'var(--fs-xs)',
-                                    }}>
-                                        {t('settings.aiSettings.quotaBased')}
-                                    </div>
-                                </div>
-                                {selectedMode === 'cloud' && (
-                                    <CheckCircle size={20} color="var(--primary)" />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 提示信息 */}
+                {/* 简化的模式切换 */}
                 <div style={{
-                    marginTop: 'var(--gap-l)',
-                    padding: 'var(--gap-m)',
-                    background: 'var(--bg-secondary)',
-                    borderRadius: 'var(--radius-m)',
-                    fontSize: 'var(--fs-xs)',
-                    color: 'var(--text-secondary)',
+                    opacity: canToggle ? 1 : 0.5,
+                    pointerEvents: canToggle ? 'auto' : 'none'
                 }}>
-                    💡 {selectedMode === 'local' ? t('settings.modelLogicLocal') : t('settings.aiSettings.cloudModeHint')}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: 'var(--gap-m)',
+                        background: 'var(--bg-secondary)',
+                        borderRadius: 'var(--radius-m)',
+                        border: '1px solid var(--border)',
+                    }}>
+                        <div style={{ flex: 1 }}>
+                            <div style={{
+                                fontSize: 'var(--fs-m)',
+                                fontWeight: 'var(--fw-medium)',
+                                marginBottom: 'var(--gap-xs)',
+                            }}>
+                                {t('settings.aiSettings.useLocalModel')}
+                            </div>
+                            <div style={{
+                                fontSize: 'var(--fs-xs)',
+                                color: 'var(--text-secondary)',
+                            }}>
+                                {useLocalModel
+                                    ? t('settings.aiSettings.localModeDesc')
+                                    : t('settings.aiSettings.cloudModeDescNew')
+                                }
+                            </div>
+                        </div>
+
+                        {/* Toggle Switch */}
+                        <button
+                            onClick={handleToggle}
+                            disabled={!canToggle}
+                            style={{
+                                position: 'relative',
+                                width: '48px',
+                                height: '28px',
+                                background: useLocalModel ? 'rgba(100, 150, 255, 1)' : 'var(--primary)',
+                                borderRadius: '14px',
+                                border: 'none',
+                                cursor: canToggle ? 'pointer' : 'not-allowed',
+                                transition: 'background 0.2s',
+                                flexShrink: 0,
+                            }}
+                        >
+                            <div style={{
+                                position: 'absolute',
+                                top: '2px',
+                                left: useLocalModel ? '22px' : '2px',
+                                width: '24px',
+                                height: '24px',
+                                background: 'white',
+                                borderRadius: '50%',
+                                transition: 'left 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}>
+                                {useLocalModel ? (
+                                    <HardDrive size={12} color="rgba(100, 150, 255, 1)" />
+                                ) : (
+                                    <Cloud size={12} color="var(--primary)" />
+                                )}
+                            </div>
+                        </button>
+                    </div>
                 </div>
             </div>
 

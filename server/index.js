@@ -115,6 +115,10 @@ function checkFreeTrialLimit(type) {
     };
 }
 
+// 🆕 Feature Flags 配置路由（2026-01-08 新增）
+const { registerConfigRoutes } = require('./configRoutes');
+registerConfigRoutes(app);
+
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -398,6 +402,7 @@ app.post('/api/validate-invite-code', (req, res) => {
 app.listen(port, () => {
     console.log(`\n🚀 后端代理服务器运行于 http://localhost:${port}`);
     console.log(`   - 健康检查: http://localhost:${port}/health`);
+    console.log(`   - Feature Flags: http://localhost:${port}/api/config`);
     console.log(`   - 代理端点: http://localhost:${port}/api/proxy`);
     console.log(`   - 模型服务: http://localhost:${port}/api/model/*\n`);
 });
