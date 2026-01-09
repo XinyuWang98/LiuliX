@@ -12,6 +12,7 @@ import { useAnalysisContext, AdoptedInsight } from '@/contexts/AnalysisContext';
 import { InsightNode, DrillDownAction, MAX_DRILL_DEPTH } from '@/types/insightTree';
 import { DrillDownArea } from './DrillDownArea';
 import { ChartImage } from './ChartImage';
+import { logger } from '@/utils/logger';  // ✅ 添加logger导入
 import './InsightCardV2.css';
 
 interface InsightCardV2Props {
@@ -22,7 +23,7 @@ interface InsightCardV2Props {
     onDrillDown: (node: InsightNode, action: DrillDownAction) => void;
     onCustomAnalysis: (promptId: string, params: Record<string, unknown>) => void;
     isExecuting?: boolean;
-    onAdopt?: () => void; // 🆕 采纳回调
+    onAdopt?: (nodeId: string) => void; // ✅ 接受nodeId参数以支持EDA闭环
     onStatusChange?: (nodeId: string, isAdopted: boolean, isIgnored: boolean) => void; // 🆕 状态变化回调
 }
 
@@ -48,7 +49,7 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
     // 采纳洞察到证据池 + AnalysisContext (🆕 Context 闭环)
     const handleAdopt = (e: React.MouseEvent) => {
         e.stopPropagation();
-        console.log('[InsightCardV2] handleAdopt 触发', { nodeId: node.id, hasResult: !!node.result });
+        logger.log('UI', 'InsightCardV2 handleAdopt触发', { data: { nodeId: node.id, hasResult: !!node.result } });
         if (!node.result) {
             console.warn('[InsightCardV2] handleAdopt 跳过: node.result 不存在');
             return;
@@ -88,7 +89,7 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
         setIsAdopted(true);
         setIsIgnored(false);
         onStatusChange?.(node.id, true, false);
-        onAdopt?.();
+        onAdopt?.(node.id); // ✅ 传递nodeId以支持EDA闭环
     };
 
     // 忽略洞察
@@ -262,7 +263,8 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                                     onDrillDown={onDrillDown}
                                     onCustomAnalysis={onCustomAnalysis}
                                     isExecuting={isExecuting}
-                                    onAdopt={onAdopt} // 🆕
+                                    onAdopt={onAdopt}
+                                    onStatusChange={onStatusChange} // ✅ 修复: 传递状态回调
                                 />
                             ))}
                         </div>

@@ -1,4 +1,5 @@
 import { InsightNode, DrillDownAction } from '@/types/insightTree';
+import { InsightAdoptCallback, InsightStatusChangeCallback } from '@/types/insightCallbacks';
 
 /**
  * ForestNode 组件的 Props
@@ -20,10 +21,10 @@ export interface ForestNodeProps {
     availableColumns: string[];
     /** 焦点处理 */
     onFocus?: (nodeId: string) => void;
-    /** 采纳回调 */
-    onAdopt?: () => void;
-    /** 状态变更回调 (采纳/忽略) */
-    onStatusChange?: (nodeId: string, isAdopted: boolean, isIgnored: boolean) => void;
+    /** 采纳回调 - ✅ 使用共享类型 */
+    onAdopt?: InsightAdoptCallback;
+    /** 状态变更回调 - ✅ 使用共享类型 */
+    onStatusChange?: InsightStatusChangeCallback;
 }
 
 /**

@@ -9,7 +9,7 @@ interface ForestExplorerProps {
     onToggleExpand: (nodeId: string) => void;
     onCustomAnalysis: (promptId: string, params: Record<string, unknown>) => void;
     onFocus: (nodeId: string) => void;
-    onAdopt?: () => void; // 🆕
+    onAdopt?: (nodeId: string) => void; // ✅ 接受nodeId参数以支持EDA闭环
     onStatusChange?: (nodeId: string, isAdopted: boolean, isIgnored: boolean) => void; // 🆕
 }
 

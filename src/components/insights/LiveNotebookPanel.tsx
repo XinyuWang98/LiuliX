@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FileCode, Copy, Check, ChevronDown, ChevronRight, Code, Shield, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { CodeBlock } from '@/components/common/CodeBlock/CodeBlock';
 import { useI18n } from '@/contexts/I18nContext';
+import { logger } from '@/utils/logger';  // ✅ 添加logger导入
 import './LiveNotebookPanel.css';
 
 /**
@@ -62,18 +63,18 @@ export function LiveNotebookPanel({ codeBlocks, focusedId, expandedIds }: LiveNo
         localStorage.setItem(VIEW_MODE_STORAGE_KEY, viewMode);
     }, [viewMode]);
 
-    // 🔍 调试：检查传入的 codeBlocks 数据
+    // 🔍 调试:检查传入的codeBlocks数据
     useEffect(() => {
         if (codeBlocks.length > 0) {
             const sample = codeBlocks[0];
-            console.log('[LiveNotebook 调试] 传入数据:', {
-                viewMode,
-                hasRawCode: !!sample.rawCode,
-                rawCodeLength: sample.rawCode?.length,
-                codeLength: sample.code.length,
-                isSame: sample.rawCode === sample.code,
-                rawPreview: sample.rawCode?.slice(0, 100),
-                codePreview: sample.code.slice(0, 100)
+            logger.log('UI', 'LiveNotebook数据检查', {
+                data: {
+                    viewMode,
+                    hasRawCode: !!sample.rawCode,
+                    rawCodeLength: sample.rawCode?.length,
+                    codeLength: sample.code.length,
+                    isSame: sample.rawCode === sample.code
+                }
             });
         }
     }, [codeBlocks, viewMode]);

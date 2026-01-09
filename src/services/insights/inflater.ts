@@ -12,8 +12,6 @@ import { L1Recommendation, InsightNode, DrillDownAction } from '@/types/insightT
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { CodeEnhancer } from '@/services/prompts/guards/codeEnhancer';  // v2.0: 代码增强器
-import { injectContextToPrompt } from '@/services/prompts/contextInjector'; // 🆕 Context 注入
-import { AdoptedInsight } from '@/contexts/AnalysisContext'; // 🆕 Context 类型
 
 // 生成唯一 ID
 function generateId(): string {
@@ -75,12 +73,10 @@ function extractColumnsUsed(params: Record<string, unknown>): string[] {
  * 
  * @param rec L1 推荐
  * @param depth 深度
- * @param adoptedInsights 🆕 已采纳的洞察（用于 Context 注入）
  */
 export async function inflateRecommendation(
     rec: L1Recommendation,
-    depth: number = 0,
-    adoptedInsights?: AdoptedInsight[]  // 🆕 新增参数
+    depth: number = 0
 ): Promise<InsightNode | null> {
     // 1. 获取 Prompt 模板
     const prompt = promptRegistry.getPrompt(rec.promptId);
@@ -101,17 +97,9 @@ export async function inflateRecommendation(
     let code: string | undefined;
     let rawCode: string | undefined;
     if (prompt.executionMode === 'TEMPLATE_FILL' && prompt.codeTemplate) {
-        // 🆕 如果有已采纳的洞察,先注入 Context
-        let template = prompt.codeTemplate;
-        if (adoptedInsights && adoptedInsights.length > 0) {
-            template = injectContextToPrompt(template, adoptedInsights);
-            logger.log('AI服务', `[Inflater] Context 注入完成`, {
-                data: { insightCount: adoptedInsights.length, promptId: rec.promptId }
-            });
-        }
-
-        // ✅ 先渲染纯净代码（无防护注入，可直接在 Colab 运行）
-        rawCode = renderTemplate(template, rec.params);
+        // ✅ 直接使用代码模板渲染 (Context已在 buildRouterPrompt 中注入到 AI Prompt)
+        // ❌ 不要将 Context 注入到代码模板中,否则会导致Python代码中出现markdown+emoji
+        rawCode = renderTemplate(prompt.codeTemplate, rec.params);
 
         // ✅ v3.0: 异步自动增强代码（零Token成本）
         const enhanceResult = await CodeEnhancer.enhance(rawCode, {
@@ -201,16 +189,14 @@ export async function inflateRecommendation(
  * 批量膨胀 L1 推荐列表
  * 
  * @param recommendations L1 推荐列表
- * @param adoptedInsights 🆕 已采纳的洞察（用于 Context 注入）
  */
 export async function inflateRecommendations(
-    recommendations: L1Recommendation[],
-    adoptedInsights?: AdoptedInsight[]  // 🆕 新增参数
+    recommendations: L1Recommendation[]
 ): Promise<InsightNode[]> {
     const nodes: InsightNode[] = [];
 
     for (const rec of recommendations) {
-        const node = await inflateRecommendation(rec, 0, adoptedInsights);  // 🆕 传递 Context
+        const node = await inflateRecommendation(rec, 0);
         if (node) {
             nodes.push(node);
         }

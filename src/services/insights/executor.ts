@@ -100,7 +100,58 @@ export async function executeAndFillResult(
             };
         }
 
-        // ========== 步骤2：内存评估 ==========
+        // ========== 步骤2: 列名预验证 (🆕 P1增强) ==========
+        const { validateColumnReferences } = await import('@/utils/pythonColumnExtractor');
+        const { DuckDBEngine } = await import('@/db/duckdbEngine');
+
+        try {
+            const db = DuckDBEngine.getInstance();
+            await db.init();
+            const schema = await db.runQuery(`DESCRIBE ${tableName}`);
+            const actualColumns = schema.map((row: any) => row.column_name);
+
+            const validation = validateColumnReferences(code, actualColumns);
+
+            if (!validation.isValid) {
+                if (validation.placeholderColumns.length > 0) {
+                    logger.error('AI服务', `[${logPrefix}] 列名验证失败: 检测到占位符`, {
+                        data: {
+                            placeholderColumns: validation.placeholderColumns,
+                            invalidColumns: validation.invalidColumns,
+                            usedColumns: validation.usedColumns
+                        }
+                    });
+
+                    return {
+                        success: false,
+                        error: `代码包含占位符列名: ${validation.placeholderColumns.join(', ')}。这是AI生成错误,请重新生成代码。\n可用列: ${actualColumns.join(', ')}`
+                    };
+                }
+
+                logger.error('AI服务', `[${logPrefix}] 列名验证失败: 列不存在`, {
+                    data: {
+                        invalidColumns: validation.invalidColumns,
+                        availableColumns: actualColumns,
+                        usedColumns: validation.usedColumns
+                    }
+                });
+
+                return {
+                    success: false,
+                    error: `代码引用了不存在的列: ${validation.invalidColumns.join(', ')}。\n可用列: ${actualColumns.join(', ')}`
+                };
+            }
+
+            logger.log('AI服务', `[${logPrefix}] 列名验证通过`, {
+                data: { validatedColumns: validation.usedColumns }
+            });
+        } catch (schemaError: any) {
+            logger.warn('AI服务', `[${logPrefix}] 列名验证跳过`, {
+                data: { reason: schemaError.message }
+            });
+        }
+
+        // ========== 步骤3：内存评估 ==========
         const assessment = await assessMemoryBeforeExecution(
             totalRows,
             node.columnsUsed

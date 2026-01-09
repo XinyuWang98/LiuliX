@@ -74,7 +74,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
     ENABLE_INVITE_CODE_GATE: false,     // 开发阶段关闭邀请码验证
 
     // 智能闭环
-    ENABLE_EDA_CONTEXT_LOOP: false      // EDA 闭环功能（开发中）
+    ENABLE_EDA_CONTEXT_LOOP: false,     // EDA闭环功能(暂时关闭,P1拦截率25%<70%,待优化正则或实施P2)
 };
 
 /**

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { InsightNode as InsightNodeType } from '@/types/insightTree';
 import { DrillDownAction } from '@/types/insightTree';
@@ -8,9 +8,10 @@ import { logger } from '../../utils/logger';
 import { Loader } from 'lucide-react';
 import { useInsightLoaderV2 } from '@/hooks/useInsightLoaderV2';
 import { useInsightRefresh } from '@/hooks/useInsightRefresh';
-import { executeAndFillResult } from '@/services/insights/executor';  // ✅ 使用公共执行器
+import { useNotebookLayout } from '@/hooks/useNotebookLayout';  // ✅ 新Hook
+import { useInsightNodeManager } from '@/hooks/useInsightNodeManager';  // ✅ 新Hook
+import { executeAndFillResult } from '@/services/insights/executor';
 import { ProjectFile } from '@/utils/projectUtils';
-import { getCurrentRoleConfig } from '@/config/userRolePresets';
 import './InsightChainFlow.css';
 
 const INIT_DELAY_MS = 800;
@@ -31,12 +32,31 @@ interface InsightChainFlowProps {
     onInsightAdopt?: () => void; // 🆕
 }
 
+import { enhanceProjectFile } from '@/utils/fileEnhancer';
+
 export function InsightChainFlow({ columns, rowCount, tableName, file, insightCache, hideTitle = false, showNotebook: showNotebookProp, onInsightAdopt }: InsightChainFlowProps) {
     const { t } = useI18n();
-    const roleConfig = getCurrentRoleConfig();
 
-    // 使用 InsightNode 状态
-    const [insightNodes, setInsightNodes] = useState<InsightNodeType[]>([]);
+    // ✅ 新Hook: Notebook布局管理
+    const {
+        showNotebook,
+        notebookWidthPercent,
+        isResizing,
+        containerRef,
+        handleResizeStart
+    } = useNotebookLayout(showNotebookProp);
+
+    // ✅ 新Hook: InsightNode管理
+    const {
+        insightNodes,
+        setInsightNodes,
+        focusedNodeId,
+        expandedNodeIds,
+        resolvedCodes,
+        handleToggleExpand,
+        handleStatusChange,
+        setFocusWithExpand
+    } = useInsightNodeManager();
 
     // 使用 V2 Hook（包含完整质量门控）
     const {
@@ -44,17 +64,21 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         executionProgress,
         loadingStage, // 🆕 获取详细进度状态
         loadInsights,
-        cancelLoading
+        cancelLoading,
+        triggerFollowUp  // ✅ 导出EDA闭环函数
     } = useInsightLoaderV2();
 
     // 加载洞察函数（V2 + 质量门控）
     const handleLoadInsights = async () => {
         // ✅ 优先级：传入的 tableName > file.data.tableName > file.tableName
         // 遵循与 useDataLoader.ts 一致的模式
-        const effectiveTableName = tableName || file?.data?.tableName || file?.tableName;
+        const effectiveTableName = tableName || file?.data?.tableName || file?.tableName || 'uploaded_data';
+
+        // ✅ 使用工具函数增强file对象 (替换原有13行手动逻辑)
+        const enhancedFile = enhanceProjectFile(file, effectiveTableName, rowCount);
 
         logger.log('AI洞察', '使用V2增强模式（含双重质量门控）');
-        const result = await loadInsights(columns, rowCount, effectiveTableName, file);
+        const result = await loadInsights(columns, rowCount, effectiveTableName, enhancedFile);
         setInsightNodes(result); // 直接设置 InsightNode[]
     };
 
@@ -84,141 +108,6 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
     const showInitializing = isInitializing && insightNodes.length === 0;
     const showEmpty = !isLoading && !isInitializing && insightNodes.length === 0;
-
-    // 🆕 焦点跟踪状态
-    const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
-
-    // 🆕 展开状态管理 - 用于同步卡片和 Notebook 的展开状态
-    const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(new Set());
-
-    // 🆕 Live Notebook 显示/隐藏状态
-    // 优先级：外部 prop > 用户手动设置 > 角色配置
-    const [internalShowNotebook, setInternalShowNotebook] = useState(() => {
-        // 如果有外部 prop，使用外部值
-        if (showNotebookProp !== undefined) return showNotebookProp;
-
-        // 优先使用用户手动设置
-        const userPreference = localStorage.getItem('insights_notebook_manual');
-        if (userPreference !== null) {
-            return userPreference === 'true';
-        }
-
-        // 否则使用角色配置
-        const showCode = localStorage.getItem('insights_show_code');
-        return showCode === 'true' || (showCode === null && roleConfig.insights.showCode);
-    });
-    const showNotebook = showNotebookProp !== undefined ? showNotebookProp : internalShowNotebook;
-    const setShowNotebook = (value: boolean) => {
-        setInternalShowNotebook(value);
-        // 🆕 保存用户手动偏好
-        localStorage.setItem('insights_notebook_manual', String(value));
-    };
-
-    // 🆕 Notebook 宽度状态 (默认 50%)
-    const [notebookWidthPercent, setNotebookWidthPercent] = useState(() => {
-        const saved = localStorage.getItem('insightFlow.notebookWidth');
-        return saved ? parseFloat(saved) : 50; // 默认 1:1 布局
-    });
-
-    // 🆕 拖拽状态
-    const [isResizing, setIsResizing] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    // 保存用户偏好到 localStorage
-    useEffect(() => {
-        localStorage.setItem('insightFlow.showNotebook', showNotebook.toString());
-    }, [showNotebook]);
-
-    useEffect(() => {
-        localStorage.setItem('insightFlow.notebookWidth', notebookWidthPercent.toString());
-    }, [notebookWidthPercent]);
-
-    // 🆕 拖拽处理逻辑
-    const handleResizeStart = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        setIsResizing(true);
-        document.body.style.cursor = 'ew-resize';
-        document.body.style.userSelect = 'none';
-    }, []);
-
-    const handleResizeEnd = useCallback(() => {
-        setIsResizing(false);
-        document.body.style.cursor = 'default';
-        document.body.style.userSelect = '';
-    }, []);
-
-    const handleResize = useCallback((e: MouseEvent) => {
-        if (!isResizing || !containerRef.current) return;
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const containerWidth = containerRect.width;
-        const offsetX = e.clientX - containerRect.left;
-
-        // 计算右侧 Notebook 的宽度百分比
-        const newPercent = ((containerWidth - offsetX) / containerWidth) * 100;
-        // 限制范围: 25% ~ 75%
-        const clampedPercent = Math.max(25, Math.min(75, newPercent));
-        setNotebookWidthPercent(clampedPercent);
-    }, [isResizing]);
-
-    // 全局事件监听
-    useEffect(() => {
-        if (isResizing) {
-            window.addEventListener('mousemove', handleResize);
-            window.addEventListener('mouseup', handleResizeEnd);
-        }
-        return () => {
-            window.removeEventListener('mousemove', handleResize);
-            window.removeEventListener('mouseup', handleResizeEnd);
-        };
-    }, [isResizing, handleResize, handleResizeEnd]);
-
-    // 🆕 收集所有顶层已解析节点的代码（不包括下钻子节点）
-    // ✅ 修复：仅收集顶层节点，确保左侧卡片数量与右侧代码块一致
-    const resolvedCodes = useMemo(() => {
-        // 🔧 递归展平所有节点（包括嵌套的 children）
-        const flattenNodes = (nodes: InsightNodeType[]): InsightNodeType[] => {
-            return nodes.reduce<InsightNodeType[]>((acc, node) => {
-                // 添加当前节点
-                acc.push(node);
-                // 递归添加子节点
-                if (node.children && node.children.length > 0) {
-                    acc.push(...flattenNodes(node.children));
-                }
-                return acc;
-            }, []);
-        };
-
-        const allNodes = flattenNodes(insightNodes);
-
-        return allNodes
-            .filter(node =>
-                !node.isLoading &&     // 已完成加载
-                !node.error &&          // 无错误  
-                node.result?.code       // 有代码
-            )
-            .map(node => ({
-                id: node.id,
-                title: node.title,
-                code: node.result!.code,        // ✅ 已在 filter 中确认 result 存在
-                rawCode: node.result!.rawCode,  // ✅ 同时传递纯净代码
-                depth: node.depth,              // 🆕 用于 Notebook 标题显示层级
-                isAdopted: node.isAdopted,      // 🆕 采纳状态
-                isIgnored: node.isIgnored       // 🆕 拒绝状态
-            }));
-    }, [insightNodes]);
-
-    // 🆕 日志：监控 resolvedCodes 更新
-    useEffect(() => {
-        if (resolvedCodes.length > 0) {
-            logger.log('UI', 'Live Notebook代码块更新', {
-                data: {
-                    total: resolvedCodes.length,
-                    ids: resolvedCodes.map(c => c.id),
-                    titles: resolvedCodes.map(c => c.title)
-                }
-            });
-        }
-    }, [resolvedCodes]);
 
     // 🆕 下钻处理逻辑
     const handleDrillDown = async (
@@ -301,111 +190,52 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
         setInsightNodes([...insightNodes]);
 
-        // 🆕 自动设置焦点到新解析的节点，并显示 Notebook
-        setFocusedNodeId(childNode.id);
-        // ✅ 同步更新Live Notebook展开状态（手风琴效果）
-        setExpandedNodeIds(new Set([childNode.id]));
-        setShowNotebook(true); // 自动展开 Notebook面板
-
-        logger.log('UI', 'Live Notebook焦点同步（下钻）', {
-            data: {
-                focusedId: childNode.id,
-                expandedIds: [childNode.id]
-            }
-        });
+        // ✅ 自动设置焦点到新解析的节点
+        setFocusWithExpand(childNode.id);
     };
 
-    // 展开/折叠处理 - 同步更新展开状态 + 手风琴交互
-    const handleToggleExpand = (nodeId: string) => {
-        let targetNode: InsightNodeType | null = null;
-        let targetDepth = 0;
+    // ✅ EDA闭环: 采纳洞察后自动触发下一步分析
+    const handleAdoptWithFollowUp = async (nodeId: string) => {
+        logger.log('用户操作', '洞察被采纳', { data: { nodeId } });
 
-        // 查找目标节点并获取其深度
-        const findNode = (nodes: InsightNodeType[], depth: number): boolean => {
+        // 查找被采纳的节点
+        const findNode = (nodes: InsightNodeType[]): InsightNodeType | null => {
             for (const node of nodes) {
-                if (node.id === nodeId) {
-                    targetNode = node;
-                    targetDepth = depth;
-                    return true;
-                }
-                if (node.children.length > 0 && findNode(node.children, depth + 1)) {
-                    return true;
+                if (node.id === nodeId) return node;
+                if (node.children.length > 0) {
+                    const found = findNode(node.children);
+                    if (found) return found;
                 }
             }
-            return false;
+            return null;
         };
 
-        findNode(insightNodes, 0);
-
-        if (!targetNode) return;
-
-        // 如果是展开操作（当前是折叠状态，要展开）
-        // 使用类型守卫确保 TypeScript 正确推断类型
-        const currentNode: InsightNodeType = targetNode;
-        const willExpand = !currentNode.isExpanded;
-
-        if (willExpand && targetDepth === 0) {
-            // 🆕 手风琴逻辑：如果是顶层节点（父洞察卡片），收起所有其他顶层节点
-            insightNodes.forEach(node => {
-                if (node.id !== nodeId && node.isExpanded) {
-                    node.isExpanded = false;
-                    // 同步更新展开状态
-                    setExpandedNodeIds(prev => {
-                        const newSet = new Set(prev);
-                        newSet.delete(node.id);
-                        return newSet;
-                    });
-                }
-            });
+        const adoptedNode = findNode(insightNodes);
+        if (!adoptedNode) {
+            logger.warn('用户操作', '未找到被采纳的节点', { data: { nodeId } });
+            return;
         }
 
-        // 切换目标节点的展开状态
-        currentNode.isExpanded = !currentNode.isExpanded;
-
-        // 同步更新展开状态到 Notebook
-        setExpandedNodeIds(prev => {
-            const newSet = new Set(prev);
-            if (targetNode!.isExpanded) {
-                newSet.add(nodeId);
-            } else {
-                newSet.delete(nodeId);
-            }
-
-            // 🆕 日志：展开状态更新
-            logger.log('UI', '展开状态已更新', {
+        // 触发EDA闭环 (仅L0和L1节点触发,避免层级过深)
+        if (adoptedNode.depth <= 1) {
+            logger.log('AI洞察', '触发EDA闭环', {
                 data: {
-                    nodeId,
-                    isExpanded: targetNode!.isExpanded,
-                    expandedCount: newSet.size,
-                    expandedIds: Array.from(newSet)
+                    nodeId: adoptedNode.id,
+                    depth: adoptedNode.depth,
+                    title: adoptedNode.title
                 }
             });
 
-            return newSet;
-        });
-
-        setInsightNodes([...insightNodes]);
-    };
-
-    // 🆕 处理节点状态变化 (adopted/ignored)
-    const handleStatusChange = (nodeId: string, isAdopted: boolean, isIgnored: boolean) => {
-        // 递归查找并更新节点
-        const updateNodeStatus = (nodes: InsightNodeType[]): boolean => {
-            for (const node of nodes) {
-                if (node.id === nodeId) {
-                    node.isAdopted = isAdopted;
-                    node.isIgnored = isIgnored;
-                    return true;
-                }
-                if (node.children.length > 0 && updateNodeStatus(node.children)) {
-                    return true;
-                }
+            try {
+                await triggerFollowUp(adoptedNode);
+                setInsightNodes([...insightNodes]); // 刷新UI
+            } catch (error) {
+                logger.error('AI洞察', 'EDA闭环触发失败', error);
             }
-            return false;
-        };
+        }
 
-        updateNodeStatus(insightNodes);
-        setInsightNodes([...insightNodes]); // 触发重新渲染
+        // 保留原有的跳转逻辑
+        onInsightAdopt?.();
     };
 
     // 自定义分析（可选）
@@ -489,21 +319,8 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                             onDrillDown={handleDrillDown}
                             onToggleExpand={handleToggleExpand}
                             onCustomAnalysis={handleCustomAnalysis}
-                            onFocus={(nodeId) => {
-                                // ✅ 方案A修复：设置焦点的同时,更新Live Notebook的展开状态
-                                setFocusedNodeId(nodeId);
-
-                                // ✅ 手风琴效果：只展开聚焦的代码块,折叠其他所有代码块
-                                setExpandedNodeIds(new Set([nodeId]));
-
-                                logger.log('UI', 'Live Notebook焦点同步', {
-                                    data: {
-                                        focusedId: nodeId,
-                                        expandedIds: [nodeId]
-                                    }
-                                });
-                            }}
-                            onAdopt={onInsightAdopt} // 🆕
+                            onFocus={setFocusWithExpand}
+                            onAdopt={handleAdoptWithFollowUp} // ✅ 使用EDA闭环handler
                             onStatusChange={handleStatusChange} // 🆕 状态变化回调
                         />
                     </div>

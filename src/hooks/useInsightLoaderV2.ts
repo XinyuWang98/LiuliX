@@ -18,6 +18,7 @@ import { getFallbackInsights } from '@/utils/fallbackTemplates';
 import { RESOURCE_LIMITS, checkAvailableMemory } from '@/utils/resourceLimits';
 import { CacheManager } from '../utils/cacheManager';
 import { getAnalysisConfig } from '@/config/analysisConfig';
+import { buildEDAExecutionContext } from '@/services/insights/executionContextBuilder';
 
 // 🆕 EDA 闭环依赖
 import { useInsightChain } from '@/contexts/InsightChainContext';
@@ -204,10 +205,10 @@ export function useInsightLoaderV2() {
                 if (recommendations.length === 0) {
                     logger.warn('AI服务', '[Router] AI未返回推荐，使用规则层兜底');
                     const fallbackRecs = buildFallbackRecommendations(选中列名, columnTypes);
-                    insightNodes = await inflateRecommendations(fallbackRecs as any, adoptedInsights);
+                    insightNodes = await inflateRecommendations(fallbackRecs as any);
                 } else {
                     logger.log('AI服务', '[Router] 解析成功', { data: { count: recommendations.length } });
-                    insightNodes = await inflateRecommendations(recommendations as any, adoptedInsights);
+                    insightNodes = await inflateRecommendations(recommendations as any);
                 }
             } else {
                 // 旧版 Coder 模式（需要转换为 InsightNode）
@@ -448,7 +449,7 @@ export function useInsightLoaderV2() {
                 }
 
                 // 4. 膨胀为 InsightNode[] (🆕 传递 analysisContext)
-                const newNodes = await inflateRecommendations(recommendations as any, analysisContext);
+                const newNodes = await inflateRecommendations(recommendations as any);
 
                 // 设置 depth 和 parentId
                 newNodes.forEach((node: any) => {
@@ -460,10 +461,10 @@ export function useInsightLoaderV2() {
                     data: { count: newNodes.length }
                 });
 
-                // 5. 执行代码获取结果
+                // 5. 执行代码获取结果 (✅ 使用工具函数构建ExecutionContext)
                 await executeBatchNodes(
                     newNodes,
-                    currentFile.tableName || 'uploaded_data',
+                    buildEDAExecutionContext(currentFile.tableName || 'uploaded_data'),
                     (current, total) => {
                         logger.log('AI洞察', `[SilentTrigger] 执行进度 ${current}/${total}`);
                     }
