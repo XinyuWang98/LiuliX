@@ -6,8 +6,8 @@
 import { logger } from '../utils/logger';
 import { localModelQueue } from '../utils/localModelQueue';
 
-// 后端API基础URL
-const API_BASE_URL = 'http://localhost:3001/api/model';
+// 后端API基础URL（环境变量优先，本地开发为空则使用 Vite Proxy）
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || ''}/api/model`;
 
 // 支持的模型列表（按质量排序）
 export const SUPPORTED_MODELS = {

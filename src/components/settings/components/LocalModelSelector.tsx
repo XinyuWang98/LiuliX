@@ -82,7 +82,8 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch('http://localhost:3001/api/model/list');
+            const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+            const response = await fetch(`${API_BASE_URL}/api/model/list`);
             const data: ModelListResponse = await response.json();
 
             setOllamaAvailable(data.available);
@@ -124,7 +125,8 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
         try {
             logger.log('本地模型', `开始下载模型: ${modelId}`);
 
-            const response = await fetch('http://localhost:3001/api/model/download', {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+            const response = await fetch(`${API_BASE_URL}/api/model/download`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ model: modelId })

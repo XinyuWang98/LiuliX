@@ -5,13 +5,19 @@
 
 ## 1. 关键缺陷修复 (Critical Bug Fixes)
 
-### 🚨 邀请码验证接口硬编码问题
+### 🚨 邀请码验证接口硬编码问题（已修复 ✅）
 - **问题描述**: `InviteCodeModal.tsx` 中验证接口被硬编码为 `http://localhost:3001/api/validate-invite-code`。
 - **影响**: 导致非本机环境（如局域网测试、生产环境部署）下无法验证邀请码，用户无法获得试用权限。
-- **修复方案**:
-  - [ ] 修改 `src/components/InviteCodeModal/InviteCodeModal.tsx`，移除硬编码 URL。
-  - [ ] 使用相对路径 `/api/validate-invite-code` 或配置环境变量 `VITE_API_BASE_URL`。
-  - [ ] 确保 `vite.config.ts` 中的代理配置正确处理生产环境构建或提供 Nginx 反向代理配置。
+- **修复方案**: ✅ **已完成（2026-01-09）**
+  - [x] 修改 `src/components/InviteCodeModal/InviteCodeModal.tsx`，移除硬编码 URL
+  - [x] 修改 `src/services/localLLMService.ts`，移除硬编码 URL
+  - [x] 修改 `src/App.tsx` 健康检查接口，移除硬编码 URL
+  - [x] 修改 `src/components/settings/components/LocalModelSelector.tsx`，移除硬编码 URL
+  - [x] 使用环境变量 `VITE_API_URL` 动态配置后端地址
+  - [x] 配置后端 CORS 白名单（`server/index.js`）
+  - [ ] 本地环境验证（待测试）
+  - [ ] 生产构建验证（待测试）
+- **相关文档**: [73-管理-API配置方案决策记录.md](./73-管理-API配置方案决策记录.md)
 
 ## 2. 功能对齐与文档 (Feature Alignment & Docs)
 

@@ -39,8 +39,24 @@ if (validInviteCodes.size > 0) {
     console.log('🔑 邀请码数量:', validInviteCodes.size);
 }
 
-// ... CORS and Middleware ...
-app.use(cors());
+// CORS 配置（支持环境变量白名单）
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:5173', 'http://localhost:5174']; // 默认本地开发地址
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // 允许无 origin 的请求（如 Postman、curl）
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.warn(`[CORS] 拒绝来自 ${origin} 的请求`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 

@@ -119,7 +119,9 @@ function AppContent() {
     useEffect(() => {
         const checkBackendHealth = async () => {
             try {
-                const response = await fetch('http://localhost:3001/health', {
+                // 环境变量优先，本地开发为空则使用 Vite Proxy
+                const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+                const response = await fetch(`${API_BASE_URL}/health`, {
                     method: 'GET',
                     signal: AbortSignal.timeout(3000)
                 });

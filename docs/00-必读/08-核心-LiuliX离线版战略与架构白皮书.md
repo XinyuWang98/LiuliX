@@ -17,6 +17,7 @@ LiuliX 不做"中国的 Kaggle"，而是做 **"AI Native 的 Excel/Tableau"**（
 | **核心场景** | 竞赛、培训、展示 | 日常工作、生产、交付 |
 | **数据位置** | 云端 (Cloud) | 本地 (Local-First) |
 | **网络依赖** | 强依赖 (Web Notebook) | 零依赖 (离线可用) |
+| **AI 推理** | **云端 Only** | **本地 Only (AI Native)** |
 | **商业模式** | B端招聘/私有化部署 | C端订阅/B端工具授权 |
 
 ### 1.2 Kaggle 带来的启示

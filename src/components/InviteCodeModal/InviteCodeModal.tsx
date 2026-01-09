@@ -30,7 +30,9 @@ export const InviteCodeModal = ({ onClose, onSuccess }: InviteCodeModalProps) =>
 
         try {
             // 验证邀请码（调用后端）
-            const response = await fetch('http://localhost:3001/api/validate-invite-code', {
+            // 环境变量优先，本地开发时为空则使用 Vite Proxy
+            const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+            const response = await fetch(`${API_BASE_URL}/api/validate-invite-code`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: code.toUpperCase() })
