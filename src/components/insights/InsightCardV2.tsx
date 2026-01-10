@@ -65,6 +65,7 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                 nodeId: node.id,
                 depth: node.depth,
                 code: node.result.code,
+                rawCode: node.result.rawCode, // ✅ 保存纯净代码用于报告展示
                 columnsUsed: node.columnsUsed,
             },
         });

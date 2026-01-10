@@ -91,6 +91,14 @@ export function parseRouterResponse(aiResponse: string): {
         const parsed = JSON.parse(jsonStr);
         const recommendations = parsed.recommendations || parsed;
 
+        // 🔍 临时调试:记录AI原始响应
+        logger.log('AI服务', '[RouterPrompt] AI原始响应JSON', {
+            data: {
+                response: jsonStr.substring(0, 1000),
+                parsed: JSON.stringify(parsed).substring(0, 500)
+            }
+        });
+
         if (!Array.isArray(recommendations)) {
             logger.warn('AI服务', '[RouterPrompt] 响应不是数组格式');
             return [];

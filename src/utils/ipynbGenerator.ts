@@ -16,7 +16,8 @@ export function generateIpynb(cells: ReportCell[], title: string) {
                 id: cell.id,
                 depth: cell.depth
             },
-            source: cell.code.split('\n'),
+            // ✅ 优先使用纯净代码（rawCode），适合 Jupyter/Colab 直接运行
+            source: (cell.rawCode || cell.code).split('\n'),
             outputs: []
         })),
         metadata: {

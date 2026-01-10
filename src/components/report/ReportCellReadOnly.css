@@ -111,21 +111,7 @@
   color: var(--text-tertiary);
 }
 
-.code-block {
-  margin: 0;
-  padding: var(--gap-m);
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-m);
-  overflow-x: auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-s);
-  line-height: 1.6;
-}
-
-.code-block code {
-  font-family: var(--font-mono);
-}
+/* ✅ 代码块样式已统一至 liulix.css 的 .liuli-code-block，此处不再重复定义 */
 
 /* Output Area */
 .cell-output-area {

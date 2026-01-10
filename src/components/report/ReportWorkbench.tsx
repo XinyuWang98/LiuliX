@@ -29,7 +29,8 @@ export function ReportWorkbench() {
                 return {
                     id: record.id,
                     code: record.metadata?.code || '',
-                    language: (record.metadata?.codeLanguage as 'sql' | 'python') || 'sql',
+                    rawCode: record.metadata?.rawCode, // ✅ 提取纯净代码
+                    language: (record.metadata?.codeLanguage as 'sql' | 'python') || 'python',
                     output: {
                         chartImage: record.metadata?.chartImage,
                         summary: record.description

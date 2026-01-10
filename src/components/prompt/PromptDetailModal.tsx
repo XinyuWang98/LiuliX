@@ -174,6 +174,7 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                                     language="python"
                                     formatted={true}
                                     copyable={true}
+                                    className="liuli-code-block"
                                 />
                             )}
                             {activeTab === 'sql' && prompt.sqlTemplate && (
@@ -182,6 +183,7 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                                     language="sql"
                                     formatted={true}
                                     copyable={true}
+                                    className="liuli-code-block"
                                 />
                             )}
                             {activeTab === 'json' && (
@@ -190,6 +192,7 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                                     language="json"
                                     formatted={false}
                                     copyable={true}
+                                    className="liuli-code-block"
                                 />
                             )}
                         </div>

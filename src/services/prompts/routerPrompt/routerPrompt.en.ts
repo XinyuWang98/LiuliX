@@ -7,6 +7,7 @@
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { PROMPT_IDS } from '@/constants/promptIds';
+import { formatSchemaForPrompt, type ColumnSchema } from '@/services/schemaService';  // 🆕 Use SchemaService
 
 /**
  * Build Router Prompt (English)
@@ -26,11 +27,18 @@ export function buildRouterPromptInternal(
         return `- ${p.id}: ${p.title} (params: ${params})`;
     }).join('\n');
 
-    // Build column information
-    const columnInfo = columns.map(col => {
-        const type = columnTypes?.[col] || 'unknown';
-        return `- ${col} (${type})`;
-    }).join('\n');
+    // 🆕 Use SchemaService to format column info (with constraints)
+    const schema: ColumnSchema[] = columns.map(col => ({
+        name: col,
+        type: columnTypes?.[col] || 'unknown'
+    }));
+
+    const columnInfo = formatSchemaForPrompt(schema, {
+        includeConstraints: true,  // ✅ Add constraints
+        format: 'markdown',
+        language: 'en-US',
+        includeTypes: true
+    });
 
     // Build sample data preview (handle BigInt)
     const sanitizedSampleData = sampleData.slice(0, 3).map(row => {

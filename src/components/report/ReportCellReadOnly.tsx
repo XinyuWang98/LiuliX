@@ -4,15 +4,12 @@
  */
 
 import { useState } from 'react';
-import Prism from 'prismjs';
-import 'prismjs/themes/prism-tomorrow.css';
-import 'prismjs/components/prism-sql';
-import 'prismjs/components/prism-python';
 import { Copy, Check, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { ReportCell, AuditStatus } from '@/types/report';
 import { useI18n } from '@/contexts/I18nContext';
 import { logger } from '@/utils/logger';
 import { ChartImage } from '../insights/ChartImage';
+import { CodeBlock } from '@/components/common/CodeBlock'; // ✅ 复用 CodeBlock 组件
 import './ReportCellReadOnly.css';
 
 interface ReportCellReadOnlyProps {
@@ -28,10 +25,13 @@ export function ReportCellReadOnly({
     const { t } = useI18n();
     const [copied, setCopied] = useState(false);
 
+    // ✅ 优先使用纯净代码（适合 Colab），回退到增强版代码
+    const displayCode = cell.rawCode || cell.code;
+
     // 复制代码到剪贴板
     const handleCopyCode = async () => {
         try {
-            await navigator.clipboard.writeText(cell.code);
+            await navigator.clipboard.writeText(displayCode);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
@@ -47,13 +47,6 @@ export function ReportCellReadOnly({
     // const handleMarkRejected = () => {
     //     onAudit?.(cell.id, AuditStatus.Rejected, '');
     // };
-
-    // 代码高亮
-    const highlightedCode = Prism.highlight(
-        cell.code,
-        cell.language === 'sql' ? Prism.languages.sql : Prism.languages.python,
-        cell.language
-    );
 
     // 审计状态徽章
     const getAuditBadge = () => {
@@ -95,7 +88,7 @@ export function ReportCellReadOnly({
                 {getAuditBadge()}
             </div>
 
-            {/* Code Area (只读) */}
+            {/* Code Area (只读) - ✅ 改用 CodeBlock 组件 */}
             <div className="cell-code-area">
                 <div className="code-header">
                     <button
@@ -110,12 +103,13 @@ export function ReportCellReadOnly({
                         ⚠️ {t('report.notebook.runDisabled')}
                     </span>
                 </div>
-                <pre className="code-block">
-                    <code
-                        className={`language-${cell.language}`}
-                        dangerouslySetInnerHTML={{ __html: highlightedCode }}
-                    />
-                </pre>
+                <CodeBlock
+                    code={displayCode}
+                    language={cell.language}
+                    copyable={false} // 已有外部复制按钮
+                    formatted={false} // 保持原始代码格式
+                    className="liuli-code-block" // ✅ 使用统一样式
+                />
             </div>
 
             {/* Output Area */}

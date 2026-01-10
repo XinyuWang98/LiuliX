@@ -47,8 +47,11 @@ export interface ReportCell {
     /** Cell唯一标识 */
     id: string;
 
-    /** 代码内容（SQL/Python） */
+    /** 代码内容（AST增强版，包含防护逻辑） */
     code: string;
+
+    /** 纯净代码（无AST防护，适合复制到Colab运行） */
+    rawCode?: string;
 
     /** 代码语言 */
     language: 'sql' | 'python';

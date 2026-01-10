@@ -18,7 +18,7 @@ import { logger } from '@/utils/logger';
 /**
  * 执行上下文配置
  */
-interface ExecutionContext {
+export interface ExecutionContext {
     /** 数据表名称 */
     tableName: string;
     /** 总行数（用于内存评估） */
@@ -102,13 +102,12 @@ export async function executeAndFillResult(
 
         // ========== 步骤2: 列名预验证 (🆕 P1增强) ==========
         const { validateColumnReferences } = await import('@/utils/pythonColumnExtractor');
-        const { DuckDBEngine } = await import('@/db/duckdbEngine');
 
         try {
-            const db = DuckDBEngine.getInstance();
-            await db.init();
-            const schema = await db.runQuery(`DESCRIBE ${tableName}`);
-            const actualColumns = schema.map((row: any) => row.column_name);
+            // 🆕 使用 SchemaService 获取Schema
+            const { getTableSchema } = await import('@/services/schemaService');
+            const schema = await getTableSchema(tableName);
+            const actualColumns = schema.map(col => col.name);
 
             const validation = validateColumnReferences(code, actualColumns);
 

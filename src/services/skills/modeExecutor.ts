@@ -89,8 +89,9 @@ async function executeFullMode(
     await db.init();
 
     try {
-        // ✅ 优化：使用动态内存计算替代魔法数字
-        const schema = await db.runQuery(`DESCRIBE ${tableName}`);
+        // ✅ 使用 SchemaService 获取Schema
+        const { getTableSchema } = await import('@/services/schemaService');
+        const schema = await getTableSchema(tableName);
         const columnCount = schema.length;
         const maxRows = calculateMaxRowsForPyodide(columnCount);
 
@@ -183,23 +184,8 @@ except Exception as e:
 
 
 
-        // ✅ 代码增强：注入防御性逻辑（零Token成本）
-        const columnNames = schema.map((row: any) => row.column_name);
-        const enhanceResult = await CodeEnhancer.enhance(code, {
-            columns: columnNames,
-            dfName: 'df',
-            promptType: suggestion.title // 用于场景化增强
-        });
-
-        logger.log('AI代码增强', '增强完成', {
-            data: {
-                rulesApplied: enhanceResult.rulesApplied.length,
-                originalLength: enhanceResult.originalLength,
-                enhancedLength: enhanceResult.enhancedLength
-            }
-        });
-
-        const finalCode = enhanceResult.code;
+        // ✅ code已在inflater.ts中完成AST增强,无需重复增强
+        const finalCode = code;
 
         // ✅ 获取库依赖并传递给 Pyodide
         let requiredPackages: string[] = [];

@@ -332,7 +332,8 @@
 /* =========================================
    6. 代码块统一样式 (Code Block)
    ========================================= */
-.liuli-code-block {
+/* ✅ 提升选择器优先级，确保覆盖 .code-block 基础样式 */
+.code-block.liuli-code-block {
     position: relative;
     font-family: var(--font-mono);
     font-size: var(--fs-xs);
@@ -350,7 +351,7 @@
 }
 
 /* 代码块内的 pre 标签（兼容 Prism.js） */
-.liuli-code-block pre {
+.code-block.liuli-code-block pre {
     margin: 0;
     font-family: inherit;
     font-size: inherit;
@@ -359,22 +360,22 @@
 }
 
 /* 代码块内的 code 标签 */
-.liuli-code-block code {
+.code-block.liuli-code-block code {
     font-family: inherit;
     font-size: inherit;
     color: inherit;
 }
 
 /* 滚动条样式 */
-.liuli-code-block::-webkit-scrollbar {
+.code-block.liuli-code-block::-webkit-scrollbar {
     height: 6px;
 }
 
-.liuli-code-block::-webkit-scrollbar-thumb {
+.code-block.liuli-code-block::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 3px;
 }
 
-.liuli-code-block::-webkit-scrollbar-track {
+.code-block.liuli-code-block::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.2);
 }

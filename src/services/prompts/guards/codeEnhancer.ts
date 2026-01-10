@@ -56,213 +56,36 @@ export class CodeEnhancer {
     static async enhance(code: string, context: EnhanceContext): Promise<EnhanceResult> {
         const flags = getFeatureFlags();
 
-        // 尝试使用AST增强器（v3.0）
-        if (flags.USE_AST_CODE_ENHANCER) {
-            try {
-                const Adapter = await getAdapter();
-                const result = await Adapter.enhance(code, context);
+        // ✅ AST增强器是唯一方案
+        if (!flags.USE_AST_CODE_ENHANCER) {
+            throw new Error('AST代码增强器未启用,无法执行代码增强');
+        }
 
-                // 成功使用AST方案
-                if (result.success) {
-                    logger.log('AI代码增强', 'AST增强成功', {
-                        data: {
-                            rulesApplied: result.rulesApplied?.length || 0,
-                            codeLength: result.code.length
-                        }
-                    });
-                    return result;
+        try {
+            const Adapter = await getAdapter();
+            const result = await Adapter.enhance(code, context);
+
+            // AST失败时直接抛错,不降级
+            if (!result.success) {
+                throw new Error(`AST增强失败: ${result.error || '未知错误'}`);
+            }
+
+            logger.log('AI代码增强', 'AST增强成功', {
+                data: {
+                    rulesApplied: result.rulesApplied?.length || 0,
+                    codeLength: result.code.length
                 }
-            } catch (error: any) {
-                // AST方案失败，记录日志并降级
-                logger.warn('AI代码增强', 'AST增强失败，降级到正则方案', {
-                    error: error.message
-                });
-            }
-        }
-
-        // 降级到v2.0正则方案（同步）
-        return this.enhanceWithRegex(code, context);
-    }
-
-    /**
-     * v2.0 正则方案（作为降级备份）
-     * 
-     * 保持原有逻辑不变，确保兼容性
-     */
-    private static enhanceWithRegex(code: string, context: EnhanceContext): EnhanceResult {
-        const rulesApplied: string[] = [];
-        let enhanced = code;
-        const originalLength = code.length;
-
-        // 规则1: 全局空数据检查
-        enhanced = this.injectEmptyCheck(enhanced, context);
-        rulesApplied.push('empty-check');
-
-        // 规则2: 列存在性验证
-        const usedColumns = this.extractUsedColumns(enhanced);
-        if (usedColumns.length > 0) {
-            enhanced = this.injectColumnValidation(enhanced, context, usedColumns);
-            rulesApplied.push('column-validation');
-        }
-
-        // 🆕 规则3: 绘图前数据检查
-        enhanced = this.injectPlotDataCheck(enhanced);
-        rulesApplied.push('plot-data-check');
-
-        // 🔴 规则3(旧): 数组访问保护（临时禁用）
-        // TODO: v3.0 AST方案已实现精确识别，正则方案永久禁用此规则
-        // 参考文档: docs/04-技术专题/02-Prompt库/08-专题-Prompt库AI代码质量提升方案.md §13.1
-
-        // 规则4: 全局异常捕获
-        enhanced = this.wrapTryCatch(enhanced);
-        rulesApplied.push('try-catch-wrapper');
-
-        // 场景化增强
-        if (context.promptType?.includes('groupby')) {
-            enhanced = this.enhanceGroupBy(enhanced, context);
-            rulesApplied.push('groupby-enhancement');
-        }
-
-        logger.log('AI代码增强', 'v2.0正则增强完成', {
-            data: {
-                rulesApplied: rulesApplied.length
-            }
-        });
-
-        return {
-            code: enhanced,
-            rulesApplied,
-            originalLength,
-            enhancedLength: enhanced.length,
-            success: true
-        };
-    }
-
-    /**
-     * 规则1: 注入空数据检查
-     */
-    private static injectEmptyCheck(code: string, ctx: EnhanceContext): string {
-        const dfName = ctx.dfName || 'df';
-        const check = `# === 自动注入：空数据检查 ===
-if len(${dfName}) == 0:
-    raise ValueError("输入数据为空，无法进行分析")
-
-`;
-        return check + code;
-    }
-
-    /**
-     * 规则2: 注入列存在性验证
-     */
-    private static injectColumnValidation(
-        code: string,
-        ctx: EnhanceContext,
-        usedColumns: string[]
-    ): string {
-        const dfName = ctx.dfName || 'df';
-        const validation = `# === 自动注入：列存在性检查 ===
-required_cols = ${JSON.stringify(usedColumns)}
-missing = [c for c in required_cols if c not in ${dfName}.columns]
-if missing:
-    raise ValueError(f"缺少必需列: {missing}")
-
-`;
-        return validation + code;
-    }
-
-    /**
-     * 规则3: 绘图前数据检查
-     * 在所有 .plot() 调用前检查数据是否为空
-     */
-    private static injectPlotDataCheck(code: string): string {
-        // 匹配模式: variable.plot(...) 或 variable.plot.kind(...)
-        const plotPattern = /(\w+)\.plot\(/g;
-
-        let enhanced = code;
-        const matches: Array<{ varName: string; index: number }> = [];
-        let match;
-
-        // 收集所有匹配
-        while ((match = plotPattern.exec(code)) !== null) {
-            matches.push({
-                varName: match[1],
-                index: match.index
             });
+
+            return result;
+
+        } catch (error: any) {
+            // 记录错误并直接抛出,不降级
+            logger.error('AI代码增强', 'AST增强失败', {
+                error: error.message
+            });
+            throw error;
         }
-
-        // 从后往前替换（避免索引偏移）
-        for (let i = matches.length - 1; i >= 0; i--) {
-            const { varName, index } = matches[i];
-            const check = `if len(${varName}) == 0:\n    raise ValueError(f"数据为空，无法绘图：{${varName}}")\n`;
-
-            // 在 .plot() 前插入检查
-            enhanced = enhanced.slice(0, index) + check + enhanced.slice(index);
-        }
-
-        return enhanced;
     }
 
-    /**
-     * 规则4: 全局异常捕获
-     */
-    private static wrapTryCatch(code: string): string {
-        const indented = code.split('\n')
-            .map(line => '    ' + line)
-            .join('\n');
-
-        return `try:
-${indented}
-except IndexError as e:
-    raise ValueError(f"数据索引越界（可能是过滤后结果为空）: {str(e)}")
-except KeyError as e:
-    raise ValueError(f"列不存在: {str(e)}")
-except ZeroDivisionError:
-    raise ValueError("除零错误（可能是分组后某组数据为空）")
-`;
-    }
-
-    /**
-     * 场景化增强：groupby类Prompt
-     */
-    private static enhanceGroupBy(code: string, ctx: EnhanceContext): string {
-        // 尝试提取分组列
-        const groupColMatch = code.match(/groupby\(['"]([^'"]+)['"]\)/);
-        if (!groupColMatch) return code;
-
-        const groupCol = groupColMatch[1];
-        const dfName = ctx.dfName || 'df';
-
-        const groupCheck = `# === Groupby专用检查 ===
-if ${dfName}['${groupCol}'].nunique() < 2:
-    raise ValueError(f"分组列 ${groupCol} 唯一值过少，无法分组")
-
-`;
-        return groupCheck + code;
-    }
-
-    /**
-     * 辅助：从代码中提取使用的列名
-     */
-    private static extractUsedColumns(code: string): string[] {
-        const columns = new Set<string>();
-
-        // 匹配 df['col'] 或 df["col"]
-        const regex1 = /df\[['"]([^'"]+)['"]\]/g;
-        let match;
-        while ((match = regex1.exec(code)) !== null) {
-            columns.add(match[1]);
-        }
-
-        // 匹配 df.col（但排除方法调用如 df.groupby）
-        const regex2 = /df\.([a-zA-Z_][a-zA-Z0-9_]*)\b(?!\()/g;
-        while ((match = regex2.exec(code)) !== null) {
-            const col = match[1];
-            // 排除DataFrame的方法名
-            if (!['groupby', 'agg', 'mean', 'sum', 'count', 'head', 'tail', 'describe'].includes(col)) {
-                columns.add(col);
-            }
-        }
-
-        return Array.from(columns);
-    }
 }

@@ -141,17 +141,15 @@ export function useInsightLoaderV2() {
 
             // ========== 步骤3：AI生成洞察（双模式） ==========
 
-            // ✅ 获取列类型信息（Router 模式需要）
+            // ✅ 使用 SchemaService 获取列类型信息
             let columnTypes: Record<string, string> | undefined;
             if (tableName) {
                 try {
-                    const engine = DuckDBEngine.getInstance();
-                    const describeResult = await engine.runQuery(`DESCRIBE ${tableName}`);
-                    columnTypes = Object.fromEntries(
-                        describeResult.map((row: any) => [row.column_name, row.column_type])
-                    );
+                    const { getTableSchema, extractColumnTypes } = await import('@/services/schemaService');
+                    const schema = await getTableSchema(tableName);
+                    columnTypes = extractColumnTypes(schema);
                 } catch (e) {
-                    logger.warn('AI洞察', 'Failed to get column types');
+                    logger.warn('AI洞察', '获取列类型失败');
                 }
             }
 

@@ -7,6 +7,7 @@
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { PROMPT_IDS } from '@/constants/promptIds';
+import { formatSchemaForPrompt, type ColumnSchema } from '@/services/schemaService';  // 🆕 使用SchemaService
 
 /**
  * 构建 Router Prompt（中文）
@@ -26,11 +27,18 @@ export function buildRouterPromptInternal(
         return `- ${p.id}: ${p.title} (参数: ${params})`;
     }).join('\n');
 
-    // 构建列信息
-    const columnInfo = columns.map(col => {
-        const type = columnTypes?.[col] || '未知';
-        return `- ${col} (${type})`;
-    }).join('\n');
+    // 🆕 使用 SchemaService 构建列信息 (带约束说明)
+    const schema: ColumnSchema[] = columns.map(col => ({
+        name: col,
+        type: columnTypes?.[col] || '未知'
+    }));
+
+    const columnInfo = formatSchemaForPrompt(schema, {
+        includeConstraints: true,  // ✅ 添加约束说明
+        format: 'markdown',
+        language: 'zh-CN',
+        includeTypes: true
+    });
 
     // 构建采样数据预览（处理BigInt）
     const sanitizedSampleData = sampleData.slice(0, 3).map(row => {
