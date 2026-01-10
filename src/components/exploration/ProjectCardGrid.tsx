@@ -38,9 +38,12 @@ export function ProjectCardGrid({ currentProject, onProjectSelect, onNewProject 
         }
     };
 
-    // 右键菜单处理（修复：添加防溢出逻辑）
+    // 右键菜单处理（修复：添加防溢出逻辑 + 防御性检查）
     const handleContextMenu = (e: React.MouseEvent, projectId: string) => {
-        e.preventDefault();
+        // 防御性检查：某些模拟事件对象可能没有 preventDefault 方法
+        if (e.preventDefault && typeof e.preventDefault === 'function') {
+            e.preventDefault();
+        }
 
         // 计算菜单位置（防止溢出屏幕）
         let x = e.clientX;

@@ -11,6 +11,7 @@ import { useInsightRefresh } from '@/hooks/useInsightRefresh';
 import { useNotebookLayout } from '@/hooks/useNotebookLayout';  // ✅ 新Hook
 import { useInsightNodeManager } from '@/hooks/useInsightNodeManager';  // ✅ 新Hook
 import { executeAndFillResult } from '@/services/insights/executor';
+import { extractColumnsUsed } from '@/services/insights/inflater';  // 🆕 复用列名提取函数
 import { ProjectFile } from '@/utils/projectUtils';
 import './InsightChainFlow.css';
 
@@ -138,7 +139,7 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
             id: `drill-${Date.now()}-${Math.random()}`,
             depth: parentNode.depth + 1,
             title: action.label || t('insight.drillDown'),
-            columnsUsed: Object.values(action.params).filter(v => typeof v === 'string') as string[],
+            columnsUsed: extractColumnsUsed(action.params),  // ✅ 使用专业提取函数，支持数组参数
             promptId: action.promptId,
             params: action.params,
             isLoading: true,
@@ -160,9 +161,10 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                 throw new Error('无法获取有效的 tableName，请检查数据加载状态');
             }
 
-            // ✅ 使用公共执行器（统一处理 rawCode）
+            // ✅ 使用公共执行器（统一处理 rawCode + 内存评估）
             const executorResult = await executeAndFillResult(childNode, {
                 tableName: effectiveTableName,
+                totalRows: rowCount,  // ✅ 传递行数用于内存评估和采样决策
                 enableQualityGate: false,  // 下钻不使用质量门控
                 logPrefix: '下钻'
             });

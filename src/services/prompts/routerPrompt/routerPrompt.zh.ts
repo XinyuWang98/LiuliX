@@ -93,6 +93,14 @@ ${promptList}
 ⚠️ **promptId约束**:
 - 必须严格从上述模板列表中选择（包括版本号，如 -v1）
 - 禁止自创promptId或省略版本号
+
+⚠️ **params约束**:
+- **必须填写真实列名**: params中的列名必须从【列信息】中选择
+- **禁止使用占位符**: 严禁使用'value', 'date', 'category'等通用名称
+- **完全匹配**: 列名必须与数据集中的列名完全一致（大小写敏感）
+- **示例**:
+  - ❌ 错误: {"column_name": "value"}
+  - ✅ 正确: {"column_name": "median_income"}
 - 示例正确: "worker-distribution-v1"
 - 示例错误: "distribution", "worker-distribution" (缺少-v1)
 

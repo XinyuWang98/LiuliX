@@ -12,6 +12,7 @@ import { L1Recommendation, InsightNode, DrillDownAction } from '@/types/insightT
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { CodeEnhancer } from '@/services/prompts/guards/codeEnhancer';  // v2.0: 代码增强器
+import { getTableSchema } from '@/services/schemaService';  // 🆕 Task 2.3: 第三道防线（性能优化）
 
 // 生成唯一 ID
 function generateId(): string {
@@ -54,14 +55,47 @@ export function renderTemplate(template: string, params: Record<string, unknown>
 
 /**
  * 从参数中提取使用的列名
+ * 
+ * 支持以下参数格式：
+ * - 单列：column_name, col_x, col_y, target_col等
+ * - 数组：feature_cols, group_cols等
  */
-function extractColumnsUsed(params: Record<string, unknown>): string[] {
+export function extractColumnsUsed(params: Record<string, unknown>): string[] {
     const columns: string[] = [];
-    const columnKeys = ['column_name', 'col_x', 'col_y', 'date_col', 'value_col', 'group_col'];
 
+    // 🆕 扩展字段列表以覆盖更多模板
+    const columnKeys = [
+        // 通用单列字段
+        'column_name', 'col_x', 'col_y',
+        // 特定用途单列
+        'date_col', 'value_col', 'group_col', 'category_col', 'metric_col',
+        // 回归/ML相关
+        'target_col', 'feature_col',
+        // 聚类相关（可能是数组）
+        'cluster_col'
+    ];
+
+    // 数组类型的列名字段
+    const arrayColumnKeys = [
+        'feature_cols', 'group_cols', 'category_cols'
+    ];
+
+    // 提取单列参数
     for (const key of columnKeys) {
         if (params[key] && typeof params[key] === 'string') {
             columns.push(params[key] as string);
+        }
+    }
+
+    // 🆕 提取数组类型的列名参数
+    for (const key of arrayColumnKeys) {
+        if (Array.isArray(params[key])) {
+            const arr = params[key] as unknown[];
+            for (const item of arr) {
+                if (typeof item === 'string') {
+                    columns.push(item);
+                }
+            }
         }
     }
 
@@ -72,10 +106,14 @@ function extractColumnsUsed(params: Record<string, unknown>): string[] {
  * 膨胀单个 L1 推荐为 InsightNode
  * 
  * @param rec L1 推荐
+ * @param tableName 表名（用于列名白名单校验）
+ * @param schemaCache Schema缓存（性能优化，避免重复查询）
  * @param depth 深度
  */
 export async function inflateRecommendation(
     rec: L1Recommendation,
+    tableName: string,
+    schemaCache?: Array<{ name: string; type: string }>,  // 🆕 Schema缓存
     depth: number = 0
 ): Promise<InsightNode | null> {
     // 1. 获取 Prompt 模板
@@ -92,6 +130,51 @@ export async function inflateRecommendation(
         logger.warn('AI服务', `[Inflater] 缺少参数: ${missingParams.join(', ')}`);
         return null;
     }
+
+
+
+    // 🆕 Task 2.3: 第三道防线 - 列名白名单校验（性能优化版）
+    const extractedColumns = extractColumnsUsed(rec.params);
+
+    if (extractedColumns.length > 0) {
+        // 有提取到列名 → 使用白名单校验
+        try {
+            // 使用缓存的schema，如果没有则查询
+            const schema = schemaCache || await getTableSchema(tableName);
+            const validColumns = new Set(schema.map(col => col.name));
+
+            const invalidColumns = extractedColumns.filter(col => !validColumns.has(col));
+
+            if (invalidColumns.length > 0) {
+                logger.warn('AI服务', `[Inflater] 🚫 检测到不存在的列名，拒绝推荐`, {
+                    data: {
+                        promptId: rec.promptId,
+                        invalidColumns,
+                        extractedColumns,
+                        params: rec.params
+                    }
+                });
+                return null;
+            }
+
+            logger.log('AI服务', `[Inflater] ✅ 列名白名单校验通过`, {
+                data: { promptId: rec.promptId, columns: extractedColumns }
+            });
+        } catch (error) {
+            logger.error('AI服务', '[Inflater] Schema获取失败，跳过校验', { error });
+            // fail-open: 获取Schema失败时允许通过
+        }
+    } else {
+        // 无法提取列名 → 记录警告但允许通过
+        logger.warn('AI服务', `[Inflater] ⚠️ 无法提取列名参数，跳过校验`, {
+            data: {
+                promptId: rec.promptId,
+                params: rec.params
+            }
+        });
+    }
+
+
 
     // 3. 渲染代码模板 (如果有)
     let code: string | undefined;
@@ -186,23 +269,42 @@ export async function inflateRecommendation(
 }
 
 /**
- * 批量膨胀 L1 推荐列表
+ * 批量膨胀推荐（性能优化版）
  * 
- * @param recommendations L1 推荐列表
+ * @param recommendations L1推荐列表
+ * @param tableName 表名（用于列名校验）
  */
 export async function inflateRecommendations(
-    recommendations: L1Recommendation[]
+    recommendations: L1Recommendation[],
+    tableName: string
 ): Promise<InsightNode[]> {
+    const startTime = performance.now();  // 🔍 性能追踪
+    logger.log('AI服务', `[Inflater] 🚀 开始批量膨胀`, {
+        data: { count: recommendations.length, tableName }
+    });
+
     const nodes: InsightNode[] = [];
 
+    // 🆕 性能优化：提前查询一次schema，避免重复查询
+    let schemaCache: Array<{ name: string; type: string }> | undefined;
+    try {
+        schemaCache = await getTableSchema(tableName);
+        logger.log('AI服务', `[Inflater] Schema缓存已加载`, {
+            data: { columns: schemaCache.length }
+        });
+    } catch (error) {
+        logger.warn('AI服务', '[Inflater] Schema预加载失败，将逐个查询', { error });
+    }
+
     for (const rec of recommendations) {
-        const node = await inflateRecommendation(rec, 0);
+        const node = await inflateRecommendation(rec, tableName, schemaCache, 0);
         if (node) {
             nodes.push(node);
         }
     }
 
-    logger.log('AI服务', `[Inflater] 膨胀完成: ${nodes.length}/${recommendations.length} 个节点`);
+    const totalDuration = performance.now() - startTime;
+    logger.log('AI服务', `[Inflater] 🏁 膨胀完成: ${nodes.length}/${recommendations.length} 个节点 (总耗时: ${totalDuration.toFixed(1)}ms)`);
     return nodes;
 }
 

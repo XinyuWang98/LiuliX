@@ -9,6 +9,7 @@ import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { injectContextToPrompt } from '@/services/prompts/contextInjector'; // 🆕
 import { AdoptedInsight } from '@/contexts/AnalysisContext'; // 🆕
+import { validateColumnNames } from './columnValidator'; // 🆕 Task 2.2
 import * as promptEn from './routerPrompt.en';
 import * as promptZh from './routerPrompt.zh';
 
@@ -66,9 +67,27 @@ export function buildFallbackRecommendations(
 }
 
 /**
- * 解析 L1 响应（语言无关的解析逻辑）
+ * 解析AI响应JSON
+ * 
+ * @param aiResponse AI返回的JSON字符串
+ * @param availableColumns 可用列名列表（用于校验params中的列名）
+ * @returns 推荐列表
+ * 
+ * @example
+ * const recs = parseRouterResponse(aiResponse, ['age', 'income']);
+ * // [
+ * //   {
+ * //     promptId: 'worker-distribution-v1',
+ * //     params: { column_name: 'age' },
+ * //     reason: '年龄分布',
+ * //     drillHint: { promptId: '...', params: {...}, label: '...' }
+ * //   }
+ * // ]
  */
-export function parseRouterResponse(aiResponse: string): {
+export function parseRouterResponse(
+    aiResponse: string,
+    availableColumns?: string[]
+): {
     promptId: string;
     params: Record<string, unknown>;
     reason: string;
@@ -115,6 +134,21 @@ export function parseRouterResponse(aiResponse: string): {
             if (!promptRegistry.hasPrompt(rec.promptId)) {
                 logger.warn('AI服务', `[RouterPrompt] 无效的 promptId: ${rec.promptId}`);
                 return false;
+            }
+
+            // 🆕 验证列名合法性(Task 2.2)
+            if (availableColumns && availableColumns.length > 0) {
+                const invalidColumns = validateColumnNames(rec.params, availableColumns);
+                if (invalidColumns.length > 0) {
+                    logger.warn('AI服务', `[RouterPrompt] 过滤非法列名推荐`, {
+                        data: {
+                            promptId: rec.promptId,
+                            invalidColumns,
+                            params: rec.params
+                        }
+                    });
+                    return false;
+                }
             }
 
             // 🔍 验证日志：检查 drillHint

@@ -187,16 +187,32 @@ function getConstraintsText(language: 'zh-CN' | 'en-US'): string {
     if (language === 'zh-CN') {
         return `
 ⚠️ **重要约束**:
-1. 代码中只能使用上述列名,禁止臆造新列(如'id', 'value', 'category')
-2. 如果需要新列,必须先创建: df['new_col'] = ...
-3. 所有列名必须与上述列表严格匹配(大小写敏感)
+1. **严格使用上述列名**: 代码中只能使用上述列名，禁止臆造新列
+2. **禁止使用通用占位符**: 严禁使用以下通用名称：
+   - 'id', 'value', 'count', 'data', 'item'
+   - 'date', 'time', 'timestamp', 'datetime'  
+   - 'category', 'type', 'name', 'label', 'status'
+   - 'column', 'field', 'col', 'x', 'y'
+3. **创建新列规则**: 如需新列，必须先创建: df['new_col'] = ...
+4. **大小写敏感**: 列名严格区分大小写，必须完全匹配
+5. **验证示例**:
+   - ❌ 错误: df['value'].mean()  (value不在列表中)
+   - ✅ 正确: df['median_income'].mean()  (使用真实列名)
 `.trim();
     } else {
         return `
 ⚠️ **Important Constraints**:
-1. Code must only use the above column names, do not invent new columns (e.g., 'id', 'value', 'category')
-2. To create new columns: df['new_col'] = ...
-3. Column names are case-sensitive
+1. **Use Above Columns Only**: Code must only reference the columns listed above
+2. **No Generic Placeholders**: Forbidden generic names:
+   - 'id', 'value', 'count', 'data', 'item'
+   - 'date', 'time', 'timestamp', 'datetime'
+   - 'category', 'type', 'name', 'label', 'status'
+   - 'column', 'field', 'col', 'x', 'y'
+3. **New Column Rule**: To create columns: df['new_col'] = ...
+4. **Case Sensitive**: Column names must match exactly
+5. **Examples**:
+   - ❌ Wrong: df['value'].mean()  (value not in list)
+   - ✅ Correct: df['median_income'].mean()  (real column name)
 `.trim();
     }
 }

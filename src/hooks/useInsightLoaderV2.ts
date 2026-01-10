@@ -193,20 +193,24 @@ export function useInsightLoaderV2() {
             setLoadingStage('progress.analyzingResponse');
             let insightNodes: InsightNode[] = [];
 
-            // 🆕 获取已采纳的洞察用于 Context 注入
-            const adoptedInsights = getAdoptedInsights();
+            // 🆕 获取已采纳的洞察用于 Context 注入 (EDA闭环暂未启用,保留以便后续使用)
+            const _adoptedInsights = getAdoptedInsights();
 
             if (USE_ROUTER_MODE) {
                 // ✅ Router 模式：解析轻量 JSON → 膨胀为完整节点
-                const recommendations = parseRouterResponse(aiResponse);
+                const recommendations = parseRouterResponse(aiResponse, 选中列名); // 🆕 传递columns用于校验
+
+                logger.log('AI服务', `[LoadInsights] 🔍 准备膨胀推荐`, {
+                    data: { count: recommendations.length, tableName: tableName! }
+                });
 
                 if (recommendations.length === 0) {
                     logger.warn('AI服务', '[Router] AI未返回推荐，使用规则层兜底');
                     const fallbackRecs = buildFallbackRecommendations(选中列名, columnTypes);
-                    insightNodes = await inflateRecommendations(fallbackRecs as any);
+                    insightNodes = await inflateRecommendations(fallbackRecs as any, tableName!);  // 🆕 传递tableName（非空断言）
                 } else {
                     logger.log('AI服务', '[Router] 解析成功', { data: { count: recommendations.length } });
-                    insightNodes = await inflateRecommendations(recommendations as any);
+                    insightNodes = await inflateRecommendations(recommendations as any, tableName!);  // 🆕 传递tableName（非空断言）
                 }
             } else {
                 // 旧版 Coder 模式（需要转换为 InsightNode）
@@ -403,9 +407,11 @@ export function useInsightLoaderV2() {
 
                 // 准备数据
                 const currentFile = currentFileRef.current;
-                if (!currentFile || !currentFile.columns) {
+                if (!currentFile || !currentFile.columns || !currentFile.tableName) {
                     throw new Error('缺少文件上下文数据');
                 }
+
+                const tableName = currentFile.tableName;  // 🆕 提取 tableName 供后续使用
 
                 // 1. 构建 Router Prompt (含 Context)
                 const prompt = buildRouterPrompt(
@@ -433,7 +439,10 @@ export function useInsightLoaderV2() {
                 });
 
                 // 3. 解析响应
-                const recommendations = parseRouterResponse(aiResponse);
+                const recommendations = parseRouterResponse(
+                    aiResponse,
+                    parentNode.columnsUsed || [] // 🆕 传递父节点使用的列名
+                );
 
                 if (recommendations.length === 0) {
                     logger.warn('AI洞察', '[SilentTrigger] AI未返回推荐');
@@ -447,7 +456,7 @@ export function useInsightLoaderV2() {
                 }
 
                 // 4. 膨胀为 InsightNode[] (🆕 传递 analysisContext)
-                const newNodes = await inflateRecommendations(recommendations as any);
+                const newNodes = await inflateRecommendations(recommendations as any, tableName);  // 🆕 传递tableName
 
                 // 设置 depth 和 parentId
                 newNodes.forEach((node: any) => {

@@ -61,10 +61,18 @@ export async function executeAndFillResult(
 ): Promise<ExecutorResult> {
     const {
         tableName,
-        totalRows = 0,
+        totalRows: rawTotalRows,  // 🔍 不设默认值，保留原始值
         enableQualityGate = false,
         logPrefix = 'Executor'
     } = context;
+
+    // 🔍 关键修复：检查 totalRows 是否传递
+    const totalRows = rawTotalRows || 0;
+    if (!rawTotalRows) {
+        logger.warn('AI服务', `[${logPrefix}] ⚠️ totalRows 未传递，使用默认值0（可能影响内存评估）`, {
+            data: { context }
+        });
+    }
 
     try {
         // ========== 步骤1：获取代码 ==========
@@ -151,6 +159,13 @@ export async function executeAndFillResult(
         }
 
         // ========== 步骤3：内存评估 ==========
+        logger.log('AI服务', `[${logPrefix}] 内存评估准备`, {
+            data: {
+                totalRows,
+                columnsUsed: node.columnsUsed
+            }
+        });
+
         const assessment = await assessMemoryBeforeExecution(
             totalRows,
             node.columnsUsed
@@ -264,17 +279,30 @@ export async function executeBatchNodes(
     onProgress?: (current: number, total: number) => void
 ): Promise<void> {
     const total = nodes.length;
+    const batchStartTime = performance.now();  // 🔍 性能追踪
+
+    logger.log('AI服务', `[Executor] 🚀 开始批量执行`, {
+        data: { total, tableName: context.tableName }
+    });
 
     for (let i = 0; i < total; i++) {
         const node = nodes[i];
+        const nodeStartTime = performance.now();
 
         // 进度回调
         onProgress?.(i + 1, total);
 
         // 跳过没有代码的节点
         if (!node.result?.code && !node.promptId) {
+            logger.log('AI服务', `[Executor] ⏭️ 跳过节点 ${i + 1}/${total} (无代码)`, {
+                data: { title: node.title }
+            });
             continue;
         }
+
+        logger.log('AI服务', `[Executor] 🔧 执行节点 ${i + 1}/${total}`, {
+            data: { title: node.title, promptId: node.promptId }
+        });
 
         node.isLoading = true;
 
@@ -285,10 +313,27 @@ export async function executeBatchNodes(
 
         node.isLoading = false;
 
+        const nodeDuration = performance.now() - nodeStartTime;
+        logger.log('AI服务', `[Executor] ${executorResult.success ? '✅' : '❌'} 节点 ${i + 1} 完成 (${nodeDuration.toFixed(1)}ms)`, {
+            data: {
+                title: node.title,
+                success: executorResult.success,
+                error: executorResult.error
+            }
+        });
+
         if (executorResult.success && executorResult.result) {
             node.result = executorResult.result;
         } else {
             node.error = executorResult.error;
         }
     }
+
+    const totalDuration = performance.now() - batchStartTime;
+    logger.log('AI服务', `[Executor] 🏁 批量执行完成 (总耗时: ${totalDuration.toFixed(1)}ms)`, {
+        data: {
+            total,
+            successful: nodes.filter(n => n.result && !n.error).length
+        }
+    });
 }

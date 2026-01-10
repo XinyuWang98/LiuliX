@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { EvidenceProvider } from './contexts/EvidenceContext';
@@ -14,12 +14,10 @@ import { PanelRight, PanelLeft } from 'lucide-react';
 import { ExplorationFlow } from './components/exploration/ExplorationFlow';
 import { ExplorationFlowV2 } from './components/ExplorationFlowV2'; // V2预览页面
 import { LandingPage } from './components/landing/LandingPage';
-import { pyodideManager } from './services/PyodideManager';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { useResizable } from '@/hooks/useResizable';
 import { logger } from './utils/logger';
 import { LiuliShowcase } from './pages/LiuliShowcase'; // [NEW] Design System
-import { LoadingScreen } from './components/common/LoadingScreen/LoadingScreen';
 import { initializeConfig } from './services/configService'; // [NEW 2026-01-08] Feature Flags配置
 import './App.css';
 import { ingestFilesAndCreateProject } from './utils/projectImporter';

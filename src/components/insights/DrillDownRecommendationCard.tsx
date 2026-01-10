@@ -3,7 +3,7 @@
  * 以卡片形式展示下钻建议，替代原来的 ActionChip 列表
  */
 
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import './DrillDownRecommendationCard.css';
 
 interface DrillDownRecommendationCardProps {

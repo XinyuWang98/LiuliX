@@ -597,6 +597,22 @@ export const enUS: LanguageConfig = {
             status: {
                 notSignedYet: 'Not signed yet',
                 canPreviewNoExport: 'Preview only, no export'
+            },
+            // Phase 1: 左右分栏新增字段
+            annotation: {
+                placeholder: 'Add notes...'
+            },
+            code: {
+                title: 'Code',
+                lines: 'lines'
+            },
+            cell: {
+                defaultTitle: 'Untitled Cell'
+            },
+            globalSetup: {
+                title: 'Global Setup',
+                collapsed: 'Collapsed',
+                lines: 'lines'
             }
         },
         aiCost: {
