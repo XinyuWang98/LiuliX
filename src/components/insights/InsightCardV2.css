@@ -241,6 +241,28 @@
     border-top: 1px solid var(--glass-border);
 }
 
+/* 展开后的Body区域 */
+.card-body-expanded {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    min-height: 80px; /* 确保即使无图表也有最小可见高度 */
+    animation: expand-in 0.2s ease-out;
+}
+
+@keyframes expand-in {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px; /* 足够大的值以容纳内容 */
+    }
+}
+
 /* 图表预览区 */
 .chart-preview-area {
     margin-bottom: var(--img-chart-margin-bottom);

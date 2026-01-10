@@ -53,6 +53,9 @@ export interface ReportCell {
     /** 纯净代码（无AST防护，适合复制到Colab运行） */
     rawCode?: string;
 
+    /** 去除 import 后的展示代码（左右分栏用） */
+    presentationCode?: string;
+
     /** 代码语言 */
     language: 'sql' | 'python';
 
@@ -62,8 +65,18 @@ export interface ReportCell {
         chartImage?: string;
         /** AI生成的摘要/结论 */
         summary?: string;
+        /** Python stdout 输出（用于左侧显示） */
+        stdout?: string;
         /** 错误信息（如果执行失败） */
         error?: string;
+    };
+
+    /** Cell 元数据 */
+    metadata?: {
+        /** 用户手写的业务解读 */
+        annotation?: string;
+        /** Cell 标题 */
+        title?: string;
     };
 
     /** 深度层级（用于缩进显示） */
@@ -92,6 +105,9 @@ export interface ReportDocument {
 
     /** Cell列表 */
     cells: ReportCell[];
+
+    /** 全局设置块（合并的 import 语句） */
+    globalSetup?: string;
 
     /** 是否已签字审计 */
     isSigned: boolean;

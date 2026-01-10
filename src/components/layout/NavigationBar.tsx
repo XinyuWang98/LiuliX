@@ -32,15 +32,21 @@ export function NavigationBar({
 
                 <nav className="nav-tabs">
                     <button
-                        className={`nav - tab ${activeView === 'dashboard' ? 'active' : ''} `}
-                        onClick={() => window.location.hash = '#/'}
+                        className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
+                        onClick={() => {
+                            window.history.pushState(null, '', '/');
+                            window.dispatchEvent(new PopStateEvent('popstate'));
+                        }}
                     >
                         {t('nav.dashboard')}
                     </button>
 
                     <button
-                        className={`nav - tab ${activeView === 'library' ? 'active' : ''} `}
-                        onClick={() => window.location.hash = '#/prompts'}
+                        className={`nav-tab ${activeView === 'library' ? 'active' : ''}`}
+                        onClick={() => {
+                            window.history.pushState(null, '', '/prompts');
+                            window.dispatchEvent(new PopStateEvent('popstate'));
+                        }}
                     >
                         {t('nav.promptLibrary')}
                     </button>

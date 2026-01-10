@@ -63,13 +63,14 @@ export function WorkbenchSidebar({
     // Logo 点击跳转欢迎页
     const handleLogoClick = () => {
         logger.log('UI', '点击Logo，跳转欢迎页');
-        window.location.hash = '#/welcome';
+        window.history.pushState(null, '', '/welcome');
+        window.dispatchEvent(new PopStateEvent('popstate'));
     };
 
     // Prompt库新标签页打开
     const handlePromptLibraryClick = () => {
         logger.log('UI', 'Prompt库新标签页打开');
-        window.open('#/prompts', '_blank');
+        window.open('/prompts', '_blank');
     };
 
     // 设置按钮点击

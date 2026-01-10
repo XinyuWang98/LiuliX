@@ -1086,6 +1086,22 @@ export interface LanguageConfig {
                 notSignedYet: string;
                 canPreviewNoExport: string;
             };
+            // Phase 1: 左右分栏新增
+            annotation: {
+                placeholder: string;
+            };
+            code: {
+                title: string;
+                lines: string;
+            };
+            cell: {
+                defaultTitle: string;
+            };
+            globalSetup: {
+                title: string;
+                collapsed: string;
+                lines: string;
+            };
         };
 
         // AI成本提示

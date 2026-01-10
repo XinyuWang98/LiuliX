@@ -1,0 +1,58 @@
+/**
+ * CellCode 样式
+ * 右侧代码域：使用 CSS 变量
+ */
+
+.cell-code {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-muted);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+}
+
+/* 折叠头部 */
+.cell-code-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-s) var(--spacing-m);
+    background: var(--surface-elevated);
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--transition-fast);
+}
+
+.cell-code-header:hover {
+    background: var(--surface-hover);
+}
+
+.cell-code-icon {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+}
+
+.cell-code-title {
+    font-size: var(--font-size-s);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+.cell-code-meta {
+    margin-left: auto;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+/* 代码内容区 */
+.cell-code-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* 覆盖 CodeBlock 背景色以融入 */
+.cell-code-content .code-block {
+    border-radius: 0;
+    margin: 0;
+}

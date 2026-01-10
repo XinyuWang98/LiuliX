@@ -265,6 +265,22 @@ export const report = {
     status: {
         notSignedYet: '报告尚未签字审计',
         canPreviewNoExport: '可查看Report预览，但无法导出'
+    },
+
+    // Phase 1: 左右分栏新增
+    annotation: {
+        placeholder: '点击此处添加业务洞察...',
+    },
+    code: {
+        title: '代码',
+        lines: '行',
+    },
+    cell: {
+        defaultTitle: '分析结果',
+    },
+    globalSetup: {
+        title: '全局设置',
+        collapsed: '（点击展开）',
+        lines: '行 import 语句',
     }
 };
-

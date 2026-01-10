@@ -35,7 +35,7 @@ function AppContent() {
     }, [language, t]);
 
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'v2' | 'design' | 'welcome'>('v2');
+    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'workbench' | 'design' | 'welcome'>('workbench');
     const [cleaningTrigger, setCleaningTrigger] = useState(0);
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
     const [showRight, setShowRight] = useState(() => localStorage.getItem('layout.showRight') !== 'false');
@@ -43,30 +43,36 @@ function AppContent() {
     const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
     const [backendStatus, setBackendStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
 
-    // Simple Hash Router
+    // 导航辅助函数
+    const navigateTo = (path: string) => {
+        window.history.pushState(null, '', path);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+    };
+
+    // History Router
     useEffect(() => {
-        const handleHashChange = () => {
-            const hash = window.location.hash;
-            if (hash === '#/prompts') {
+        const handleRouteChange = () => {
+            const pathname = window.location.pathname;
+            if (pathname === '/prompts') {
                 setActiveView('library');
-            } else if (hash === '#/welcome') {
+            } else if (pathname === '/welcome') {
                 setActiveView('welcome');
-            } else if (hash === '#/v2') {
-                setActiveView('v2'); // V2预览页面
-            } else if (hash === '#/design') {
-                setActiveView('design'); // [NEW] Design System
-            } else if (hash === '#/' || hash === '') {
-                // 重定向到 V2 页面（废弃旧 dashboard）
-                window.location.hash = '#/v2';
-                setActiveView('v2'); // 立即更新状态，防止闪烁
+            } else if (pathname === '/workbench') {
+                setActiveView('workbench'); // 工作台页面
+            } else if (pathname === '/design') {
+                setActiveView('design'); // Design System
+            } else if (pathname === '/') {
+                // 重定向到工作台页面（废弃旧 dashboard）
+                navigateTo('/workbench');
+                setActiveView('workbench'); // 立即更新状态，防止闪烁
             }
         };
 
         // Check on mount
-        handleHashChange();
+        handleRouteChange();
 
-        window.addEventListener('hashchange', handleHashChange);
-        return () => window.removeEventListener('hashchange', handleHashChange);
+        window.addEventListener('popstate', handleRouteChange);
+        return () => window.removeEventListener('popstate', handleRouteChange);
     }, []);
 
     // 页面加载时从IndexedDB恢复最新项目（修复ProjectSelector未显示Bug）
@@ -82,7 +88,7 @@ function AppContent() {
                 logger.error('UI', '恢复项目失败', { data: error });
             }
         };
-        if (window.location.hash === '#/v2') restoreLatestProject();
+        if (window.location.pathname === '/workbench') restoreLatestProject();
     }, []);
 
     // ========== Feature Flag：多层级导航 ==========
@@ -202,9 +208,9 @@ function AppContent() {
             // 4. 更新当前选中项目
             setSelectedProject(newProject);
 
-            // 5. 导航到 V2 页面（新的交互流程）
-            window.location.hash = '#/v2';
-            logger.log('UI', 'Step 9: 导航至 /#/v2 完成');
+            // 5. 导航到工作台页面（新的交互流程）
+            navigateTo('/workbench');
+            logger.log('UI', 'Step 9: 导航至工作台完成');
 
             logger.log('UI', 'Step 10: 全流程完成');
         } catch (err) {
@@ -214,8 +220,8 @@ function AppContent() {
 
     return (
         <div className={`app-container ${(isLeftResizing || isRightResizing) ? 'resizing' : ''}`}>
-            {/* V2 页面不显示顶部导航栏 */}
-            {activeView !== 'v2' && (
+            {/* 工作台页面不显示顶部导航栏 */}
+            {activeView !== 'workbench' && (
                 <NavigationBar
                     onOpenAPISettings={() => setShowAPISettings(true)}
                     backendStatus={backendStatus}
@@ -233,8 +239,8 @@ function AppContent() {
             ) : activeView === 'welcome' ? (
                 /* [NEW] 独立欢迎页 */
                 <LandingPage onFilesUploaded={handleWelcomeUpload} />
-            ) : activeView === 'v2' ? (
-                /* V2预览页面：全屏显示 (若无项目则显示落地页) */
+            ) : activeView === 'workbench' ? (
+                /* 工作台页面：全屏显示 (若无项目则显示落地页) */
                 selectedProject ? (
                     <ExplorationFlowV2
                         project={selectedProject}
@@ -261,8 +267,8 @@ function AppContent() {
                             <LeftSidebar
                                 onProjectSelect={(project) => {
                                     setSelectedProject(project);
-                                    // 导航到 V2 页面（废弃旧 dashboard）
-                                    window.location.hash = '#/v2';
+                                    // 导航到工作台页面（废弃旧 dashboard）
+                                    navigateTo('/workbench');
                                 }}
                                 onClose={() => setShowLeft(false)}
                             />

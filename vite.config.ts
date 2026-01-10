@@ -5,6 +5,7 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
     server: {
+        historyApiFallback: true,  // SPA fallback，所有路由返回 index.html
         proxy: {
             '/api': {
                 target: 'http://localhost:3001',

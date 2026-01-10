@@ -85,7 +85,8 @@ export function ReportCellReadOnly({
                 <span className="cell-id">Cell #{cell.id.slice(0, 6)}</span>
                 <span className="cell-language">{cell.language.toUpperCase()}</span>
                 <span className="cell-depth">Depth: {cell.depth}</span>
-                {getAuditBadge()}
+                {/* ❌ 移除审核徽章 - 改为整体报告签字 */}
+                {/* {getAuditBadge()} */}
             </div>
 
             {/* Code Area (只读) - ✅ 改用 CodeBlock 组件 */}

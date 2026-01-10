@@ -1,8 +1,10 @@
 import { useRef, useEffect, useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { useEvidence } from '@/contexts/EvidenceContext';
+import { ReportProvider } from '@/contexts/ReportContext';
 import { DataCleaner } from '../cleaning/DataCleaner';
 import { ReportWorkbench } from '../report/ReportWorkbench';
+import { ReportActions } from '../report/ReportActions';
 import { InsightChainFlow } from '../insights/InsightChainFlow';
 import { ProjectCardGrid } from './ProjectCardGrid';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
@@ -167,12 +169,18 @@ export function ContentPanel({
             {project && evidenceRecords.length > 0 && (
                 <div ref={reportRef} id="report" className="content-section">
                     <LiuliGlass className="content-module-container">
-                        {/* 移除 Section Header，由 Workbench 内部 Toolbar 接管以实现沉浸式体验 */}
-                        <div className="section-header-hidden">
-                            {/* 保留一个空的占位或极简标题，或者完全移除。
-                                为了保持 ContentPanel 的统一间距，这里暂时移除标题，直接放 Workbench */}
-                        </div>
-                        <ReportWorkbench />
+                        {/* ✅ 用 ReportProvider 包裹整个报告模块 */}
+                        <ReportProvider>
+                            {/* ✅ 恢复 Section Header，与其他模块保持一致 */}
+                            <div className="section-header">
+                                <h2 className="section-title">{t('exploration.sections.report')}</h2>
+                                {/* ✅ 新增操作按钮区域 */}
+                                <div className="section-actions">
+                                    <ReportActions />
+                                </div>
+                            </div>
+                            <ReportWorkbench />
+                        </ReportProvider>
                     </LiuliGlass>
                 </div>
             )}
