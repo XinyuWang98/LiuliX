@@ -145,7 +145,10 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
             isLoading: true,
             drillDownActions: [],
             children: [],
-            isExpanded: true
+            isExpanded: true,
+            // 🆕 继承父节点的采样状态
+            isSampled: parentNode.isSampled,
+            sampleSize: parentNode.sampleSize
         };
 
         // 添加到父节点

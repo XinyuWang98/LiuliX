@@ -1,0 +1,204 @@
+
+> dataprism@0.1.0 dev
+> npm run sync:docs && npm run type-check && npm run validate:prompts && npm run check:flags && npm run monitor:cleanup && vite
+
+
+> dataprism@0.1.0 sync:docs
+> echo 'Skipping docs sync'
+
+Skipping docs sync
+
+> dataprism@0.1.0 type-check
+> tsc --noEmit || echo 'Type check completed with warnings'
+
+src/components/report/ReportCellReadOnly.tsx(52,11): error TS6133: 'getAuditBadge' is declared but its value is never read.
+src/hooks/useInsightLoaderV2.ts(197,19): error TS6133: '_adoptedInsights' is declared but its value is never read.
+Type check completed with warnings
+
+> dataprism@0.1.0 validate:prompts
+> npx -y tsx scripts/validate-prompts.ts || echo 'Prompt validation failed'
+
+🔍 开始扫描 Prompt 文件...
+
+找到 41 个中文版本, 41 个英文版本
+
+      💡 检测到隐式依赖: scipy (pandas.plot(kind="density/kde")需要scipy.stats.gaussian_kde)
+      💡 检测到隐式依赖: scipy (pandas.plot(kind="density/kde")需要scipy.stats.gaussian_kde)
+
+🌐 校验中英文版本一致性...
+
+
+============================================================
+📊 校验报告
+============================================================
+
+============================================================
+✅ 通过: 82
+❌ 失败: 0
+⚠️ 警告: 0
+============================================================
+
+🎉 所有 Prompt 模板校验通过！
+
+> dataprism@0.1.0 check:flags
+> npx -y tsx scripts/check-feature-flags.ts
+
+
+🔍 Feature Flags 使用情况检测
+
+============================================================
+
+📋 发现 20 个 Feature Flags 定义
+
+
+✅ 使用中 (6个)
+----------------------------------------
+  • AUTO_REPORT
+    来源: config | 值: false
+    使用: 2处
+      - src/config/skillsConfig.ts:15
+      - src/config/skillsConfig.ts:35
+  • USE_AST_CODE_ENHANCER
+    来源: config | 值: true
+    使用: 1处
+      - src/services/prompts/guards/codeEnhancer.ts:60
+  • ENABLE_ADVANCED_API_CONFIG
+    来源: config | 值: false
+    使用: 1处
+      - src/components/settings/APISettings.tsx:62
+  • ENABLE_INVITE_CODE_GATE
+    来源: config | 值: false
+    使用: 4处
+      - src/components/settings/APISettingsSimple.tsx:43
+      - src/components/data/FileUploader.tsx:51
+      - src/components/data/FileUploader.tsx:53
+      ... 还有 1 处
+  • ENABLE_EDA_CONTEXT_LOOP
+    来源: config | 值: false
+    使用: 1处
+      - src/contexts/InsightChainContext.tsx:102
+  • MULTI_LEVEL_NAV
+    来源: utils | 值: import.meta.env.VITE_FEATURE_MULTI_LEVEL_NAV === 'true' || import.meta.env.DEV
+    使用: 4处
+      - src/App.tsx:95
+      - src/App.tsx:263
+      - src/App.tsx:306
+      ... 还有 1 处
+
+⚠️ 未使用 (14个)
+----------------------------------------
+  • REAL_AI_INSIGHT
+    来源: config | 值: false
+    说明: /
+    建议: 📦 归档
+  • REAL_AI_CLEANING
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • AI_CHAT_PANEL
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • LOCAL_AI_MODEL
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • PDF_EXPORT
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • INTERACTIVE_HTML
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • GOOGLE_SHEETS
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • DATABASE_CONNECT
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • API_IMPORT
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • AGENT_MODE
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • ADVANCED_VIZ
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • COLLABORATION
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • SKILLS_ARCHITECTURE
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+  • PYODIDE_OFFLINE
+    来源: config | 值: false
+    说明: 无
+    建议: 📦 归档
+
+============================================================
+💡 清理建议
+============================================================
+
+📦 建议归档 (14个):
+  • REAL_AI_INSIGHT - 代码中未检测到使用
+  • REAL_AI_CLEANING - 代码中未检测到使用
+  • AI_CHAT_PANEL - 代码中未检测到使用
+  • LOCAL_AI_MODEL - 代码中未检测到使用
+  • PDF_EXPORT - 代码中未检测到使用
+  • INTERACTIVE_HTML - 代码中未检测到使用
+  • GOOGLE_SHEETS - 代码中未检测到使用
+  • DATABASE_CONNECT - 代码中未检测到使用
+  • API_IMPORT - 代码中未检测到使用
+  • AGENT_MODE - 代码中未检测到使用
+  • ADVANCED_VIZ - 代码中未检测到使用
+  • COLLABORATION - 代码中未检测到使用
+  • SKILLS_ARCHITECTURE - 代码中未检测到使用
+  • PYODIDE_OFFLINE - 代码中未检测到使用
+
+  归档后90天未启用将自动进入清理队列
+
+----------------------------------------
+📊 统计
+  总计: 20 个 Feature Flags
+  使用中: 6
+  未使用: 14
+  已废弃: 0
+
+============================================================
+✅ 检测完成
+
+
+> dataprism@0.1.0 monitor:cleanup
+> npx -y tsx scripts/retention_policy.ts
+
+[Retention Policy] Checking files in /Users/catherinewang/Documents/GitHub/LiuliX/src/deprecated...
+[Retention Policy] Check complete. Deleted 0 files.
+
+  VITE v5.4.21  ready in 137 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+Sourcemap for "/Users/catherinewang/Documents/GitHub/LiuliX/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js" points to missing source files
+4:20:50 PM [vite] http proxy error: /api/proxy/deepseek-cleaning
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+4:20:52 PM [vite] http proxy error: /api/proxy/deepseek-insight
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+5:11:33 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+5:32:24 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+5:32:46 PM [vite] hmr update /src/components/insights/InsightCardV2.tsx
+5:33:12 PM [vite] hmr update /src/components/insights/InsightCardV2.tsx
+5:33:30 PM [vite] hmr update /src/components/insights/InsightCardV2.css
+6:07:30 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx

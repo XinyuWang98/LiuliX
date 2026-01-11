@@ -1,0 +1,230 @@
+正在加载环境变量: /Users/catherinewang/Documents/GitHub/LiuliX/server/.env.local
+✅ 清洗建议 API Key: sk-88f24b3...
+🎁 免费试用限制: 关闭（测试模式）
+🔑 邀请码数量: 2
+✅ Feature Flags 路由已注册: GET /api/config
+
+🚀 后端代理服务器运行于 http://localhost:3001
+   - 健康检查: http://localhost:3001/health
+   - Feature Flags: http://localhost:3001/api/config
+   - 代理端点: http://localhost:3001/api/proxy
+   - 模型服务: http://localhost:3001/api/model/*
+
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗错误] Client network socket disconnected before secure TLS connection was established
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[Feature Flags] 配置请求: {
+  ENABLE_INVITE_CODE_GATE: false,
+  ENABLE_ADVANCED_API_CONFIG: false,
+  USE_AST_CODE_ENHANCER: true
+}
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek

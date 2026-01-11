@@ -267,73 +267,118 @@ export async function executeAndFillResult(
 }
 
 /**
- * 批量执行洞察节点
+ * 批量执行洞察节点（🆕 策略自适应版本）
  * 
  * @param nodes 洞察节点数组
  * @param context 执行上下文
  * @param onProgress 进度回调
+ * @param onNodeComplete 节点完成回调（流式渲染）
  */
 export async function executeBatchNodes(
     nodes: InsightNode[],
     context: ExecutionContext,
-    onProgress?: (current: number, total: number) => void
+    onProgress?: (current: number, total: number) => void,
+    onNodeComplete?: (node: InsightNode) => void
 ): Promise<void> {
     const total = nodes.length;
-    const batchStartTime = performance.now();  // 🔍 性能追踪
+    const batchStartTime = performance.now();
 
-    logger.log('AI服务', `[Executor] 🚀 开始批量执行`, {
-        data: { total, tableName: context.tableName }
+    logger.group('AI服务', `[Executor] 🚀 批量执行 ${total} 个洞察`);
+
+    // ========== 🆕 步骤1：策略评估 ==========
+    const { assessExecutionStrategy } = await import('@/utils/executionStrategy');
+    const { sortNodesByComplexity } = await import('@/utils/insightComplexity');
+    const { executeSerial, executeParallel } = await import('./scheduler');
+
+    const strategy = assessExecutionStrategy(nodes, context.totalRows || 0);
+
+    logger.log('AI服务', `[Executor] 📊 策略评估完成`, {
+        data: {
+            mode: strategy.mode,
+            concurrency: strategy.concurrency,
+            sortByComplexity: strategy.sortByComplexity,
+            enableSampling: strategy.enableSampling,
+            estimatedTime: `${strategy.estimatedTime.toFixed(1)}秒`,
+            reason: strategy.reason
+        }
     });
 
-    for (let i = 0; i < total; i++) {
-        const node = nodes[i];
-        const nodeStartTime = performance.now();
+    // ========== 🆕 步骤2：复杂度排序 ==========
+    const sortedNodes = strategy.sortByComplexity
+        ? sortNodesByComplexity(nodes)
+        : nodes;
 
-        // 进度回调
-        onProgress?.(i + 1, total);
+    if (strategy.sortByComplexity) {
+        logger.log('AI服务', `[Executor] 🔄 已按复杂度排序（轻量级在前）`);
+    }
 
-        // 跳过没有代码的节点
-        if (!node.result?.code && !node.promptId) {
-            logger.log('AI服务', `[Executor] ⏭️ 跳过节点 ${i + 1}/${total} (无代码)`, {
-                data: { title: node.title }
-            });
-            continue;
-        }
-
-        logger.log('AI服务', `[Executor] 🔧 执行节点 ${i + 1}/${total}`, {
-            data: { title: node.title, promptId: node.promptId }
+    // ========== 🆕 步骤3：采样处理 ==========
+    if (strategy.enableSampling) {
+        logger.log('AI服务', `[Executor] ⚠️ 启用采样模式`, {
+            data: { originalRows: context.totalRows }
         });
 
-        node.isLoading = true;
+        // 标记所有节点为采样模式
+        sortedNodes.forEach(node => {
+            // @ts-ignore - 临时添加采样标记
+            node.isSampled = true;
+            // @ts-ignore
+            node.sampleSize = 5000;
+            // @ts-ignore
+            node.originalRows = context.totalRows;
+        });
+    }
 
+    // ========== 🆕 步骤4：执行调度 ==========
+    // 节点完成回调包装（集成原有逻辑）
+    const wrappedCallback = async (node: InsightNode) => {
+        // 执行原有的executeAndFillResult逻辑
         const executorResult = await executeAndFillResult(node, {
             ...context,
-            logPrefix: `洞察${i + 1}`
-        });
-
-        node.isLoading = false;
-
-        const nodeDuration = performance.now() - nodeStartTime;
-        logger.log('AI服务', `[Executor] ${executorResult.success ? '✅' : '❌'} 节点 ${i + 1} 完成 (${nodeDuration.toFixed(1)}ms)`, {
-            data: {
-                title: node.title,
-                success: executorResult.success,
-                error: executorResult.error
-            }
+            logPrefix: `洞察-${node.title}`
         });
 
         if (executorResult.success && executorResult.result) {
             node.result = executorResult.result;
+            node.status = 'completed';
         } else {
             node.error = executorResult.error;
+            node.status = 'error';
         }
+
+        // 调用外部回调（用于流式渲染）
+        onNodeComplete?.(node);
+    };
+
+    // 根据策略选择执行模式
+    if (strategy.mode === 'parallel') {
+        await executeParallel(
+            sortedNodes,
+            context,
+            strategy.concurrency,
+            wrappedCallback
+        );
+    } else {
+        await executeSerial(
+            sortedNodes,
+            context,
+            wrappedCallback
+        );
     }
 
+    // ========== 步骤5：统计总结 ==========
     const totalDuration = performance.now() - batchStartTime;
-    logger.log('AI服务', `[Executor] 🏁 批量执行完成 (总耗时: ${totalDuration.toFixed(1)}ms)`, {
+    const successful = nodes.filter(n => n.result && !n.error).length;
+
+    logger.log('AI服务', `[Executor] 🏁 批量执行完成`, {
         data: {
             total,
-            successful: nodes.filter(n => n.result && !n.error).length
+            successful,
+            failed: total - successful,
+            duration: `${totalDuration.toFixed(1)}ms`,
+            avgPerNode: `${(totalDuration / total).toFixed(1)}ms`
         }
     });
+
+    logger.groupEnd();
 }

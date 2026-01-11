@@ -303,6 +303,14 @@ export function useInsightLoaderV2() {
                             logger.warn('AI服务', `内存不足，可能影响后续执行`);
                         }
                     }
+                },
+                // 🆕 流式更新回调：每个节点完成时触发UI更新
+                (node) => {
+                    logger.log('AI洞察', `[流式更新] 节点完成: ${node.title}`, {
+                        data: { status: node.status, hasImage: !!node.chartImage }
+                    });
+                    // 触发React状态更新（通过重新赋值insightNodes引用）
+                    insightNodes = [...insightNodes]; // 强制触发引用变化
                 }
             );
 

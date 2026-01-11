@@ -100,6 +100,10 @@ export interface InsightNode {
     result?: ExecutionResult;
     /** 错误信息 */
     error?: string;
+    /** 🆕 是否采样执行 */
+    isSampled?: boolean;
+    /** 🆕 采样大小（行数） */
+    sampleSize?: number;
 
     // 扩展字段（用于聚焦模式展示）
     /** AI生成的洞察分析文本 */

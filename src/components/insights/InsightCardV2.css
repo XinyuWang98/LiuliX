@@ -123,12 +123,34 @@
     min-width: 0;
 }
 
-/* 标题行 */
+/* 标题行（支持Badge） */
+.card-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .card-title {
     font-weight: 500;
     font-size: 14px;
     color: var(--text-primary);
     line-height: 1.4;
+    flex: 1;
+}
+
+/* 🆕 采样Badge */
+.sampling-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    background: rgba(251, 191, 36, 0.12);
+    color: rgb(251, 191, 36);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    flex-shrink: 0;
 }
 
 /* 数据上下文行（文件名 + 列名 Liuli胶囊）*/

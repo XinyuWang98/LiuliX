@@ -5,7 +5,6 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
     server: {
-        historyApiFallback: true,  // SPA fallback，所有路由返回 index.html
         proxy: {
             '/api': {
                 target: 'http://localhost:3001',
@@ -44,6 +43,7 @@ export default defineConfig({
                 warn(warning);
             },
             output: {
+                format: 'es',  // Worker 使用 ES 模块格式,支持代码分割
                 manualChunks: {
                     // 分离大型库以优化加载
                     'vendor-react': ['react', 'react-dom'],

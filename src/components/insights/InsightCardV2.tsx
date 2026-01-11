@@ -129,8 +129,16 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
 
                 {/* 中间：信息区域 */}
                 <div className="card-info">
-                    {/* 行1：标题 */}
-                    <div className="card-title">{node.title}</div>
+                    {/* 行1：标题 + 采样Badge */}
+                    <div className="card-title-row">
+                        <div className="card-title">{node.title}</div>
+                        {/* 🆕 采样Badge */}
+                        {node.isSampled && (
+                            <span className="sampling-badge" title={`数据已采样 (${node.sampleSize || '未知'}行)`}>
+                                采样
+                            </span>
+                        )}
+                    </div>
 
                     {/* 行2：数据上下文（文件名 + 所有列名）*/}
                     {(node.fileName || node.columnsUsed.length > 0) && (
