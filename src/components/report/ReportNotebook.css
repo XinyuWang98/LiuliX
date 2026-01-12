@@ -1,169 +1,211 @@
 /**
- * ReportNotebook 主容器样式 - LiuliX 设计系统规范
+ * ReportNotebook Style - Strict Compliance with Doc 33
+ * Target: Zero hardcoding, strictly use design tokens.
  */
 
 .report-notebook {
     width: 100%;
     font-family: var(--font-family);
+    /* No hardcoded background, let it blend or use standard bg */
+    padding: var(--gap-xl);
+    padding-bottom: 60px;
 }
 
-/* Signed Status */
-.signed-status {
-    margin-bottom: var(--gap-m);
-    padding: var(--gap-m);
-    background: rgba(34, 197, 94, 0.1);
-    border: 1px solid var(--success);
+/* Notebook Grid Layout */
+.report-notebook-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+    width: 100%;
+}
+
+/* Global Setup Block */
+.global-setup-block {
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-m);
+    background: var(--glass-surface);
+    /* Doc 33: Standard Glass Surface */
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.global-setup-block.collapsed {
+    border-color: transparent;
+    background: transparent;
+}
+
+.global-setup-header {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    padding: var(--gap-s) var(--gap-m);
+    cursor: pointer;
+    user-select: none;
+    color: var(--text-secondary);
+    /* Doc 33 */
+    font-size: var(--fs-sm);
+    transition: background 0.2s;
+}
+
+.global-setup-header:hover {
+    background: var(--glass-hover);
+    /* Doc 33 */
+    color: var(--text-primary);
+}
+
+.global-setup-title {
+    font-weight: var(--fw-medium);
+}
+
+.global-setup-meta {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    opacity: 0.6;
+}
+
+.global-setup-content {
+    border-top: 1px solid var(--glass-border);
+    /* No padding here, CodeBlock handles it or we wrap it */
+}
+
+/* Override CodeBlock background in Global Setup for glass effect */
+.global-setup-content .code-block {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+/* Cell Row Layout */
+.report-cell-row {
+    display: grid;
+    /* 55% Result / 45% Code split */
+    grid-template-columns: 55% 45%;
+    gap: var(--gap-m);
+    align-items: start;
+    min-height: 120px;
+    /* Minimal height to avoid collapse */
+    transition: all 0.3s ease;
+}
+
+.report-cell-row.code-hidden {
+    grid-template-columns: 100%;
+}
+
+/* Also for header row */
+.report-header-row.code-hidden {
+    grid-template-columns: 100%;
+}
+
+/* Responsive: Stack on small screens */
+@media (max-width: 1024px) {
+    .report-cell-row {
+        grid-template-columns: 1fr;
+        gap: var(--gap-l);
+    }
+}
+
+/* Report Status Bar */
+.report-status-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-s);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    font-weight: var(--fw-medium);
+    border: 1px solid transparent;
+}
+
+.status-locked {
+    background: rgba(48, 209, 88, 0.1);
     color: var(--success);
-    font-size: var(--fs-m);
-    text-align: center;
+    border-color: var(--success);
 }
 
-/* Report Mode Notice */
-.report-mode-notice {
+.status-draft {
+    background: var(--glass-surface);
+    color: var(--text-secondary);
+    border-color: var(--glass-border);
+}
+
+.status-details {
+    opacity: 0.8;
+}
+
+/* Header Row */
+.report-header-row {
+    display: grid;
+    grid-template-columns: 55% 45%;
+    gap: var(--gap-m);
+    align-items: start;
+    margin-bottom: var(--gap-l);
+}
+
+.report-meta-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+}
+
+/* Report Title Input */
+.report-title-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-primary);
+    font-size: var(--fs-xxl);
+    font-weight: var(--fw-bold);
+    padding: var(--gap-xs) 0;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.report-title-input:hover {
+    background: var(--glass-hover);
+    border-radius: var(--radius-s);
+    padding-left: var(--gap-s);
+}
+
+.report-title-input:focus {
+    border-bottom-color: var(--primary);
+    padding-left: var(--gap-s);
+}
+
+/* Reusing annotation styling for summary */
+.report-summary-input {
+    /* Ensure it matches CellResult annotation-textarea */
+    width: 100%;
     padding: var(--gap-m);
-    background: rgba(245, 158, 11, 0.1);
-    border: 1px solid var(--warning);
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-m);
-    color: var(--warning);
-    text-align: center;
-    font-size: var(--fs-m);
-    line-height: 1.6;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: var(--fs-md);
+    resize: vertical;
+    outline: none;
+    min-height: 80px;
+    transition: all 0.2s ease;
+}
+
+.report-summary-input:focus {
+    border-color: var(--primary);
+    background: var(--glass-hover);
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.2);
 }
 
 .report-notebook-empty {
     text-align: center;
-    padding: var(--gap-xl);
+    padding: var(--gap-l);
     color: var(--text-secondary);
-    font-size: var(--fs-m);
-}
-
-/* Header */
-.report-header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-m);
-    margin-bottom: var(--gap-l);
-    padding-bottom: var(--gap-m);
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.report-header h2 {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-m);
-}
-
-.btn-export-colab,
-.btn-sign-report {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--gap-xs);
-    padding: var(--gap-s) var(--gap-m);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-m);
-    background: var(--glass-surface);
-    color: var(--text-primary);
-    font-size: var(--fs-m);
-    font-weight: var(--fw-medium);
-    cursor: pointer;
-    transition: all var(--transition-s) var(--ease-out);
-    backdrop-filter: blur(var(--blur-medium));
-}
-
-.btn-export-colab:hover {
-    background: var(--glass-hover);
-    border-color: var(--primary);
-}
-
-.btn-sign-report {
-    background: var(--success);
-    color: var(--text-on-primary);
-    border-color: var(--success);
-}
-
-.btn-sign-report:hover:not(:disabled) {
-    opacity: 0.9;
-}
-
-.btn-sign-report:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Header Progress - 集成到 Header 底部 */
-.header-progress {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-xs);
-}
-
-.progress-label {
-    font-size: var(--fs-s);
-    color: var(--text-secondary);
-    font-weight: var(--fw-medium);
-}
-
-.progress-track {
-    height: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-s);
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--success);
-    transition: width var(--transition-m) var(--ease-out);
-}
-
-/* Signed Status */
-.signed-status {
-    margin-bottom: var(--gap-m);
-    padding: var(--gap-m);
-    background: var(--status-locked-bg);
-    border: 1px solid var(--success);
-    border-radius: var(--radius-m);
-    color: var(--success);
-    font-size: var(--font-size-m);
-    text-align: center;
-}
-
-/* Cells Container */
-.cells-container {
-    margin-bottom: var(--gap-l);
-}
-
-/* Report Mode - 隐藏代码 */
-.cells-container.mode-report .cell-code-area {
-    display: none;
-}
-
-.cells-container.mode-report .cell-audit-controls {
-    display: none;
-}
-
-/* Report Mode Notice */
-.report-mode-notice {
-    padding: var(--gap-m);
-    background: var(--status-warning-bg);
-    border: 1px solid var(--status-warning-color);
-    border-radius: var(--radius-m);
-    color: var(--status-warning-color);
-    text-align: center;
-    font-size: var(--font-size-m);
-    line-height: 1.6;
+    /* Doc 33 */
+    font-size: var(--fs-md);
 }

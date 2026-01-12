@@ -30,6 +30,7 @@ export interface EvidenceStore {
     addRecord: (record: Omit<EvidenceRecord, 'id' | 'timestamp' | 'isPinned'>) => void;
     removeRecord: (id: string) => void;
     togglePin: (id: string) => void;
+    reorderRecord: (fromIndex: number, toIndex: number) => void;
     clearAll: () => void;
     getRecordsByType: (type: EvidenceType) => EvidenceRecord[];
 }

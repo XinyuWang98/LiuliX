@@ -1,66 +1,66 @@
-/**
- * CellCode 组件
- * 右侧代码域：显示去除 import 后的展示代码，支持折叠
- */
-
-import { CodeBlock } from '../common/CodeBlock/CodeBlock';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useI18n } from '@/contexts/I18nContext';
+import React from 'react';
+import { Copy, Check } from 'lucide-react';
 import { ReportCell } from '@/types/report';
+import { CodeBlock } from '@/components/common/CodeBlock/CodeBlock';
+import { useI18n } from '@/contexts/I18nContext';
+import { logger } from '@/utils/logger';
 import './CellCode.css';
 
 interface CellCodeProps {
-    /** Cell 数据 */
     cell: ReportCell;
-    /** 是否折叠 */
-    isCollapsed: boolean;
-    /** 切换折叠状态回调 */
-    onToggleCollapse: () => void;
 }
 
-/**
- * 右侧代码域组件
- * 复用 CodeBlock 组件展示代码高亮
- */
-export function CellCode({ cell, isCollapsed, onToggleCollapse }: CellCodeProps) {
+export function CellCode({ cell }: CellCodeProps) {
     const { t } = useI18n();
-    // 优先使用 presentationCode（去除 import），否则使用原始 code
-    const code = cell.presentationCode || cell.code;
+    const [copied, setCopied] = React.useState(false);
 
-    // 计算代码行数
-    const lineCount = code.split('\n').length;
+    // CRITICAL: Display pure code (cleansed, no imports)
+    // Use cell.code (which comes from presentationCode) for display
+    // Fallback to rawCode only if code is empty
+    const codeToDisplay = cell.code || cell.rawCode || '';
+
+    const handleCopy = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            await navigator.clipboard.writeText(codeToDisplay);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+            logger.log('UI', '代码已复制', { data: { cellId: cell.id } });
+        } catch (err) {
+            logger.error('UI', '复制失败', err);
+        }
+    };
 
     return (
-        <div className="cell-code">
-            {/* 折叠头部 */}
-            <div
-                className="cell-code-header"
-                onClick={onToggleCollapse}
-                role="button"
-                tabIndex={0}
-                aria-expanded={!isCollapsed}
-            >
-                <span className="cell-code-icon">
-                    {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-                </span>
-                <span className="cell-code-title">{t('report.code.title')}</span>
-                <span className="cell-code-meta">
-                    {lineCount} {t('report.code.lines')}
-                </span>
+        <div className="cell-code-container">
+            <div className="cell-code-header">
+                <div className="header-left">
+                    <span className="code-lang-tag">{cell.language.toUpperCase()}</span>
+                    <span className="code-meta">Cell #{cell.id.slice(0, 6)}</span>
+                </div>
+
+                <div className="header-actions">
+                    <button
+                        className="btn-icon-action"
+                        onClick={handleCopy}
+                        title={t('report.notebook.copyCode')}
+                    >
+                        {copied ? <Check size={14} /> : <Copy size={14} />}
+                    </button>
+                    {/* Placeholder for future audit status icon */}
+                </div>
             </div>
 
-            {/* 代码内容（非折叠时显示） */}
-            {!isCollapsed && (
-                <div className="cell-code-content">
-                    <CodeBlock
-                        code={code}
-                        language={cell.language}
-                        copyable={true}
-                        formatted={false}
-                        showLineNumbers={true}
-                    />
-                </div>
-            )}
+            <div className="cell-code-body">
+                <CodeBlock
+                    code={codeToDisplay}
+                    language={cell.language}
+                    copyable={false} // We have our own copy button in header
+                    formatted={false}
+                    showLineNumbers={false}
+                // Ensure we rely on global CodeBlock styles but wrapped in our container
+                />
+            </div>
         </div>
     );
 }

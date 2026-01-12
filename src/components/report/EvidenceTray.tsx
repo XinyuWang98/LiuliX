@@ -3,6 +3,8 @@ import { useEvidence } from '@/contexts/EvidenceContext';
 import { useI18n } from '@/contexts/I18nContext';
 import { ChevronDown, Database, TrendingUp, Lightbulb, BarChart3, Network, Trash2 } from 'lucide-react';
 import { EvidenceType } from '@/types/evidence';
+import { LiuliGlass } from '@/components/common/liulix/LiuliGlass';
+import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import './EvidenceTray.css';
 
 const ICON_SIZE_SMALL = 14;
@@ -17,8 +19,9 @@ const EvidenceTypeIcon: Record<EvidenceType, typeof Database> = {
 
 export function EvidenceTray() {
     const { t } = useI18n();
-    const { records, removeRecord } = useEvidence();
+    const { records, removeRecord, reorderRecord } = useEvidence();
     const [isExpanded, setIsExpanded] = useState(false);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
     const getTypeLabel = (type: EvidenceType): string => {
         const typeMap: Record<EvidenceType, string> = {
@@ -29,6 +32,26 @@ export function EvidenceTray() {
             insightChain: t('evidence.type.insightChain'),
         };
         return typeMap[type];
+    };
+
+    const handleDragStart = (e: React.DragEvent, index: number) => {
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+        // Hack to make drag image transparent or invisible if custom drag preview is needed
+        // but for now default ghost image is fine.
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+        reorderRecord(draggedIndex, targetIndex);
+        setDraggedIndex(null);
     };
 
     return (
@@ -53,31 +76,49 @@ export function EvidenceTray() {
                     </div>
                 ) : (
                     <div className="et-scroll-area">
-                        {records.map(record => {
+                        {records.map((record, index) => {
                             const IconComponent = EvidenceTypeIcon[record.type];
                             return (
-                                <div key={record.id} className="et-card">
-                                    <div className="et-card-header">
-                                        <div className="et-type">
-                                            <IconComponent size={ICON_SIZE_SMALL} />
-                                            <span>{getTypeLabel(record.type)}</span>
+                                <div
+                                    key={record.id}
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, index)}
+                                    onDragOver={(e) => handleDragOver(e, index)}
+                                    onDrop={(e) => handleDrop(e, index)}
+                                    style={{
+                                        opacity: draggedIndex === index ? 0.5 : 1,
+                                        cursor: 'move',
+                                        transition: 'transform 0.2s cubic-bezier(0.2, 0, 0, 1)'
+                                    }}
+                                >
+                                    <LiuliGlass
+                                        className="et-card"
+                                        padding="small"
+                                        interactive
+                                    >
+                                        <div className="et-card-header">
+                                            <div className="et-type">
+                                                <IconComponent size={ICON_SIZE_SMALL} />
+                                                <span>{getTypeLabel(record.type)}</span>
+                                            </div>
+                                            <div className="et-action-group">
+                                                <LiuliButton
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeRecord(record.id);
+                                                    }}
+                                                    title={t('evidence.delete')}
+                                                    style={{ width: '20px', height: '20px', padding: 0 }}
+                                                >
+                                                    <Trash2 size={12} color="var(--text-tertiary)" />
+                                                </LiuliButton>
+                                            </div>
                                         </div>
-                                        {/* Simplified Actions for Tray - Keep it clean */}
-                                        <div className="et-action-group">
-                                            <button
-                                                className="btn-icon-tiny"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeRecord(record.id);
-                                                }}
-                                                title={t('evidence.delete')}
-                                            >
-                                                <Trash2 size={12} color="var(--text-tertiary)" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <h5 className="et-title-text" title={record.title}>{record.title}</h5>
-                                    <p className="et-desc" title={record.description}>{record.description}</p>
+                                        <h5 className="et-title-text" title={record.title}>{record.title}</h5>
+                                        <p className="et-desc" title={record.description}>{record.description}</p>
+                                    </LiuliGlass>
                                 </div>
                             );
                         })}

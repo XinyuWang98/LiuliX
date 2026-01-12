@@ -15,7 +15,7 @@ import './ReportWorkbench.css';
 
 export function ReportWorkbench() {
     const { t } = useI18n();
-    const { document, mode, handleCellUpdate } = useReport();
+    const { document, mode, handleCellUpdate, handleReportUpdate } = useReport();
 
     // 空状态
     if (!document || document.cells.length === 0) {
@@ -36,13 +36,11 @@ export function ReportWorkbench() {
             </div>
 
             {/* 主编辑区域 */}
-            <div className="rw-editor-area">
-                <ReportNotebook
-                    document={document}
-                    onCellUpdate={handleCellUpdate}
-                    mode={mode}
-                />
-            </div>
+            <ReportNotebook
+                document={document}
+                onCellUpdate={handleCellUpdate}
+                onReportUpdate={handleReportUpdate}
+            />
         </div>
     );
 }

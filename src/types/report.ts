@@ -103,6 +103,9 @@ export interface ReportDocument {
     /** 报告标题 */
     title: string;
 
+    /** 报告摘要/业务背景 */
+    summary?: string;
+
     /** Cell列表 */
     cells: ReportCell[];
 

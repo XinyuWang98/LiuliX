@@ -80,6 +80,9 @@ export interface LanguageConfig {
             initializing: string;
         };
 
+        // 分析报告 (New) - Merged into line 1012
+
+
         progress: {
             generatingPrompt: string;
             sendingRequest: string;
@@ -1064,7 +1067,9 @@ export interface LanguageConfig {
             };
 
             export: {
+                download: string;
                 downloadIpynb: string;
+                successIpynb: string;
                 uploadToColab: string;
                 exportDisabled: string;
                 exportPDF: string;
@@ -1080,7 +1085,12 @@ export interface LanguageConfig {
                 notebook: string;
                 report: string;
                 switchTo: string;
-            };
+            },
+
+            actions: {
+                showCode: string;
+                hideCode: string;
+            },
 
             status: {
                 notSignedYet: string;

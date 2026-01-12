@@ -18,7 +18,8 @@
     padding: var(--spacing-xs) var(--spacing-s);
     border-radius: var(--radius-s);
     font-weight: var(--fw-medium);
-    font-feature-settings: 'tnum'; /* 等宽数字 */
+    font-feature-settings: 'tnum';
+    /* 等宽数字 */
 }
 
 .status-draft {
@@ -43,59 +44,18 @@
     gap: var(--spacing-s);
 }
 
-.action-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-s);
-    background: var(--glass-surface);
-    border: var(--glass-border);
-    border-radius: var(--radius-s);
-    color: var(--text-primary);
-    font-size: var(--fs-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
 
-.action-btn:hover {
-    background: var(--glass-surface-hover);
-    border-color: var(--accent);
-    transform: translateY(-1px);
-}
-
-.action-btn:active {
-    transform: translateY(0);
-}
-
-.action-btn svg {
-    flex-shrink: 0;
-}
-
-/* 主要操作按钮 */
-.btn-primary {
-    background: var(--accent);
-    color: var(--text-on-accent);
-    border-color: transparent;
-    font-weight: var(--fw-medium);
-}
-
-.btn-primary:hover:not(.btn-disabled) {
-    background: color-mix(in srgb, var(--accent) 90%, white);
-    box-shadow: var(--shadow-m);
-}
-
-.btn-disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.btn-disabled:hover {
-    transform: none;
-}
 
 /* 分隔符 */
 .btn-separator {
     width: 1px;
     height: 20px;
     background: var(--glass-border-color);
+}
+
+/* 导出下拉菜单按钮 */
+.menu-item-btn {
+    justify-content: flex-start !important;
+    /* LiuliButton 默认为 center */
+    width: 100%;
 }

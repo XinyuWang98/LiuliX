@@ -96,12 +96,11 @@
     /* 微弱深色背景区分 */
 }
 
-/* 报告编辑区 */
-.rw-editor-area {
+/* 报告编辑区 (Migrated to ReportNotebook.css) */
+/* .rw-editor-area {
     padding: var(--gap-xl);
-    /* 给予底部一定的空间，避免被最后的内容截断 */
     padding-bottom: 60px;
-}
+} */
 
 /* Empty State */
 .rw-empty-state {

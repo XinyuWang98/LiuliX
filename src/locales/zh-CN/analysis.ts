@@ -244,7 +244,9 @@ export const report = {
     },
 
     export: {
-        downloadIpynb: '已下载.ipynb文件',
+        download: '下载',
+        downloadIpynb: '下载 .ipynb 文件',
+        successIpynb: '已下载.ipynb文件',
         uploadToColab: '请前往 colab.research.google.com 上传',
         exportDisabled: '需要签字后才能导出',
         exportPDF: '导出PDF',
@@ -265,6 +267,11 @@ export const report = {
     status: {
         notSignedYet: '报告尚未签字审计',
         canPreviewNoExport: '可查看Report预览，但无法导出'
+    },
+
+    actions: {
+        showCode: '显示代码',
+        hideCode: '隐藏代码',
     },
 
     // Phase 1: 左右分栏新增

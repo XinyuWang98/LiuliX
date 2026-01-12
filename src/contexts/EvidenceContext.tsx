@@ -16,7 +16,8 @@ export function EvidenceProvider({ children }: { children: ReactNode }) {
             timestamp: Date.now(),
             isPinned: false,
         };
-        setRecords(prev => [newRecord, ...prev]); // 新记录放在最前面（时间降序）
+        // F-CK: 用户要求按操作时间正序排列 (Oldest First)
+        setRecords(prev => [...prev, newRecord]);
     };
 
     // 删除证据记录
@@ -33,8 +34,8 @@ export function EvidenceProvider({ children }: { children: ReactNode }) {
                 // 置顶的记录排在前面
                 if (a.isPinned && !b.isPinned) return -1;
                 if (!a.isPinned && b.isPinned) return 1;
-                // 相同置顶状态按时间降序
-                return b.timestamp - a.timestamp;
+                // 相同置顶状态按时间正序 (Oldest First)
+                return a.timestamp - b.timestamp;
             })
         );
     };
@@ -49,11 +50,22 @@ export function EvidenceProvider({ children }: { children: ReactNode }) {
         return records.filter(record => record.type === type);
     };
 
+    // 重新排序证据记录
+    const reorderRecord = (fromIndex: number, toIndex: number) => {
+        setRecords(prev => {
+            const result = Array.from(prev);
+            const [removed] = result.splice(fromIndex, 1);
+            result.splice(toIndex, 0, removed);
+            return result;
+        });
+    };
+
     const store: EvidenceStore = {
         records,
         addRecord,
         removeRecord,
         togglePin,
+        reorderRecord, // Added method
         clearAll,
         getRecordsByType,
     };

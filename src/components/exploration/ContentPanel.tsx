@@ -170,7 +170,7 @@ export function ContentPanel({
                 <div ref={reportRef} id="report" className="content-section">
                     <LiuliGlass className="content-module-container">
                         {/* ✅ 用 ReportProvider 包裹整个报告模块 */}
-                        <ReportProvider>
+                        <ReportProvider files={project.files}>
                             {/* ✅ 恢复 Section Header，与其他模块保持一致 */}
                             <div className="section-header">
                                 <h2 className="section-title">{t('exploration.sections.report')}</h2>

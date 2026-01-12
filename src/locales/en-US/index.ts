@@ -578,7 +578,9 @@ export const enUS: LanguageConfig = {
                 submit: 'Submit'
             },
             export: {
+                download: 'Download',
                 downloadIpynb: 'Download .ipynb',
+                successIpynb: 'Downloaded .ipynb file',
                 uploadToColab: 'Upload to Colab',
                 exportDisabled: 'Sign first',
                 exportPDF: 'Export PDF',
@@ -597,6 +599,10 @@ export const enUS: LanguageConfig = {
             status: {
                 notSignedYet: 'Not signed yet',
                 canPreviewNoExport: 'Preview only, no export'
+            },
+            actions: {
+                showCode: 'Show Code',
+                hideCode: 'Hide Code'
             },
             // Phase 1: 左右分栏新增字段
             annotation: {

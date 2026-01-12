@@ -1,99 +1,120 @@
 /**
- * CellResult 样式
- * 左侧结论域：使用 CSS 变量
+ * CellResult Style - Strict Compliance with Doc 33
  */
 
-.cell-result {
+.cell-result-container {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-s);
-    padding: var(--spacing-m);
-}
-
-/* 标题 */
-.cell-result-title {
-    margin: 0;
-    font-size: var(--font-size-m);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-}
-
-/* 图表区 */
-.cell-result-chart {
+    gap: var(--gap-m);
     width: 100%;
-    border-radius: var(--radius-m);
+}
+
+/* Chart Wrapper */
+.result-chart-wrapper {
+    width: 100%;
+    /* Image spec from Doc 33 */
+    border-radius: var(--radius-l);
     overflow: hidden;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
 }
 
-/* AI 摘要 */
-.cell-result-summary {
-    margin: 0;
+/* AI Summary Block */
+.result-summary {
+    display: flex;
+    gap: var(--gap-s);
+    padding: var(--gap-m);
+    background: var(--glass-surface);
+    border-left: 3px solid var(--primary);
+    /* Accent color */
+    border-radius: var(--radius-m);
+    color: var(--text-primary);
+    font-size: var(--fs-md);
+    line-height: 1.6;
 }
 
-.cell-result-summary blockquote {
-    margin: 0;
-    padding: var(--spacing-s) var(--spacing-m);
-    border-left: 3px solid var(--accent-primary);
-    background: var(--surface-muted);
-    border-radius: 0 var(--radius-s) var(--radius-s) 0;
+.summary-icon {
+    font-size: var(--fs-lg);
+}
+
+.summary-content {
+    flex: 1;
+}
+
+/* Standard Output */
+.result-stdout {
+    padding: var(--gap-s) var(--gap-m);
+    background: rgba(0, 0, 0, 0.2);
+    /* Acceptable for terminal output to be darker */
+    border-radius: var(--radius-m);
     color: var(--text-secondary);
-    font-style: italic;
-}
-
-/* stdout 输出 */
-.cell-result-stdout {
-    margin: 0;
-    padding: var(--spacing-s) var(--spacing-m);
-    background: var(--code-bg);
-    border-radius: var(--radius-s);
     font-family: var(--font-mono);
-    font-size: var(--font-size-s);
-    color: var(--text-primary);
+    font-size: var(--fs-min);
     white-space: pre-wrap;
-    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
-/* 用户注解区 */
-.cell-result-annotation {
-    margin-top: var(--spacing-s);
+/* Error Block */
+.result-error {
+    display: flex;
+    gap: var(--gap-s);
+    padding: var(--gap-m);
+    background: rgba(255, 69, 58, 0.1);
+    /* --error with opacity */
+    border: 1px solid var(--error);
+    border-radius: var(--radius-m);
+    color: var(--error);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
 }
 
-.annotation-text {
+/* Annotation Section */
+.result-annotation {
+    margin-top: var(--gap-s);
+}
+
+.annotation-read {
+    padding: var(--gap-m);
+    background: var(--glass-surface);
+    /* Doc 33 */
+    border-radius: var(--radius-m);
+    border: 1px dashed var(--glass-border);
+}
+
+.annotation-label {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--gap-xs);
+}
+
+.annotation-read p {
     margin: 0;
-    padding: var(--spacing-s);
-    color: var(--text-primary);
-    line-height: 1.6;
+    color: var(--text-secondary);
+    font-size: var(--fs-md);
 }
 
-.annotation-placeholder {
-    padding: var(--spacing-s);
-    color: var(--text-muted);
-    cursor: pointer;
-    border: 1px dashed var(--border-color);
-    border-radius: var(--radius-s);
-    transition: all var(--transition-fast);
-}
-
-.annotation-placeholder:hover {
-    border-color: var(--accent-primary);
-    background: var(--surface-muted);
-}
-
-.annotation-editor {
+.annotation-textarea {
     width: 100%;
-    min-height: 80px;
-    padding: var(--spacing-s);
-    border: 1px solid var(--accent-primary);
-    border-radius: var(--radius-s);
-    background: var(--bg-primary);
+    padding: var(--gap-m);
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-m);
     color: var(--text-primary);
-    font-family: inherit;
-    font-size: var(--font-size-s);
-    line-height: 1.6;
+    font-family: var(--font-family);
+    font-size: var(--fs-md);
     resize: vertical;
+    transition: all 0.2s ease;
+    outline: none;
 }
 
-.annotation-editor:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--accent-primary-alpha);
+.annotation-textarea:focus {
+    background: var(--glass-hover);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.2);
+}
+
+.annotation-textarea::placeholder {
+    color: var(--text-dim);
 }
