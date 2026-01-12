@@ -65,8 +65,8 @@ export function BottomPanel({
             {/* 标签页导航 */}
             <div className="bottomModuleHeader">
                 <LiuliButton
-                    variant="ghost"
-                    size="sm"
+                    variant={bottomPanelTab === 'suggestions' ? 'secondary' : 'ghost'}
+                    size="md"
                     className={`bottomModuleTab ${bottomPanelTab === 'suggestions' ? 'active' : ''}`}
                     onClick={() => setBottomPanelTab('suggestions')}
                     leftIcon={<Sparkles size={16} />}
@@ -75,8 +75,8 @@ export function BottomPanel({
                     {suggestions.length > 0 && <span className="tabBadge">{suggestions.length}</span>}
                 </LiuliButton>
                 <LiuliButton
-                    variant="ghost"
-                    size="sm"
+                    variant={bottomPanelTab === 'history' ? 'secondary' : 'ghost'}
+                    size="md"
                     className={`bottomModuleTab ${bottomPanelTab === 'history' ? 'active' : ''}`}
                     onClick={() => setBottomPanelTab('history')}
                     leftIcon={<History size={16} />}

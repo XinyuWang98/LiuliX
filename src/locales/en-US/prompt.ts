@@ -5,6 +5,8 @@ export const prompt = {
         description: 'Collection of high-quality analysis strategies and prompts',
         searchPlaceholder: 'Search prompts...',
         trending: 'Trending Top {count}',
+        noResults: 'No prompts match filters',
+        noPromptsFound: 'No Prompts Found',
         allPrompts: 'All Prompts',
         totalPrompts: '{count} Prompts',
         filter: {
@@ -33,6 +35,7 @@ export const prompt = {
         card: {
             official: 'Official',
             usage: '{{count}} uses',
+            usageTooltip: 'Usage Count',
             version: 'v{{version}}',
             updated: 'Updated {{date}}',
         },
@@ -59,6 +62,7 @@ export const prompt = {
         python: 'Python',
         sql: 'SQL',
         officialTitle: 'Official Prompt',
+        info: 'Info',
     },
     category: {
         analysis: 'Data Analysis',

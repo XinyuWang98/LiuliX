@@ -24,23 +24,23 @@
 }
 
 .stat-row:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 2px;
+    background: var(--bg-hover);
+    border-radius: var(--radius-xs);
 }
 
 /* Numeric Panel Specific */
 .numeric-panel {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--gap-xxs);
 }
 
 .stat-label {
     color: var(--text-tertiary);
     font-weight: 500;
     text-transform: uppercase;
-    font-size: 11px;
-    /* 统一字号为 11px */
+    font-size: var(--fs-xs);
+    /* 统一字号为 11px -> 12px (var(--fs-xs)) */
     letter-spacing: 0.5px;
     font-family: var(--font-sans);
     /* 统一字体 */
@@ -51,7 +51,7 @@
     /* 降低亮度，避免晃眼 */
     font-family: var(--font-sans);
     /* 统一使用 Sans 字体 */
-    font-size: 11px;
+    font-size: var(--fs-xs);
     /* 调小字号 */
     font-weight: 500;
     /* 减细字重 */
@@ -62,7 +62,7 @@
 
 .separator {
     height: 1px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--border-light);
     /* 提高不透明度让分隔符可见 */
     margin: 6px 0;
     /* 增加间距突出标题 */
@@ -77,7 +77,7 @@
 .categorical-panel {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--gap-xxs);
 }
 
 /* panel-header 作为标题，字体应比下方统计信息（stat-label: 11px）略大 */
@@ -85,8 +85,8 @@
     color: var(--text-tertiary);
     font-weight: 500;
     text-transform: uppercase;
-    font-size: 12px;
-    /* 从 10px 增加到 12px，确保标题层次 */
+    font-size: var(--fs-xs);
+    /* 从 10px 增加到 12px (var(--fs-xs))，确保标题层次 */
     letter-spacing: 0.5px;
     margin-bottom: 4px;
     /* 添加底部间距 */
@@ -95,7 +95,7 @@
 .panel-body {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--gap-xxs);
 }
 
 /* categorical 中的 stat-label 需要左对齐（显示文本），且覆盖默认的 uppercase */
@@ -108,7 +108,7 @@
     /* 恢复为 Label 颜色，消除视觉差距 */
     font-family: var(--font-sans);
     /* 统一字体 */
-    font-size: 11px;
+    font-size: var(--fs-xs);
     /* 统一字号 */
     font-feature-settings: 'tnum';
     /* 等宽数字 */

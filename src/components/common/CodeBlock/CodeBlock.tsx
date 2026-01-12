@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Prism from 'prismjs';
 import { Copy, Check } from 'lucide-react';
 import { formatCode } from '@/utils/codeFormatter';
+import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import { useI18n } from '@/contexts/I18nContext';
 import 'prismjs/themes/prism-tomorrow.css';
 import 'prismjs/components/prism-python';
@@ -64,13 +65,15 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     return (
         <div className={`code-block ${className}`}>
             {copyable && (
-                <button
+                <LiuliButton
+                    variant="ghost"
+                    size="icon"
                     className="code-block-copy"
                     onClick={handleCopy}
                     title={t('prompt.detail.copyCode')}
                 >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
-                </button>
+                </LiuliButton>
             )}
             <pre className={showLineNumbers ? 'line-numbers' : ''}>
                 <code className={`language-${language}`}>

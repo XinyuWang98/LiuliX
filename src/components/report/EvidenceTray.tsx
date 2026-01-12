@@ -41,7 +41,7 @@ export function EvidenceTray() {
         // but for now default ghost image is fine.
     };
 
-    const handleDragOver = (e: React.DragEvent, index: number) => {
+    const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
     };
@@ -83,7 +83,7 @@ export function EvidenceTray() {
                                     key={record.id}
                                     draggable
                                     onDragStart={(e) => handleDragStart(e, index)}
-                                    onDragOver={(e) => handleDragOver(e, index)}
+                                    onDragOver={(e) => handleDragOver(e)}
                                     onDrop={(e) => handleDrop(e, index)}
                                     style={{
                                         opacity: draggedIndex === index ? 0.5 : 1,

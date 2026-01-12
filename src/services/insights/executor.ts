@@ -277,7 +277,7 @@ export async function executeAndFillResult(
 export async function executeBatchNodes(
     nodes: InsightNode[],
     context: ExecutionContext,
-    onProgress?: (current: number, total: number) => void,
+    _onProgress?: (current: number, total: number) => void,
     onNodeComplete?: (node: InsightNode) => void
 ): Promise<void> {
     const total = nodes.length;

@@ -25,6 +25,17 @@ export const common = {
     totalColumns: '总列数',
     none: '无',
     rename: '重命名',
+    avgLength: '平均长度',
+    format: '格式化',
+    range: '范围',
+    median: '中位数',
+    sample: '样本',
+    sensitive: '敏感',
+    high: '高',
+    medium: '中',
+    low: '低',
+    noData: '暂无数据',
+    expand: '展开',
     // 智能加载提示
     initCore: '正在初始化 Python 核心环境 ({current}/{total})...',
     loadPandas: '正在加载 Pandas 数据分析库...',
@@ -38,6 +49,8 @@ export const data = {
     min: '最小值',
     max: '最大值',
     mean: '平均值',
+    rows: '行',
+    columns: '列',
 };
 
 export const nav = {

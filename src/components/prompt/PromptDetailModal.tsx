@@ -65,7 +65,7 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                         {prompt.isOfficial && (
                             <div className="official-badge small" title={t('prompt.detail.officialTitle')}>
                                 <Medal size={14} color="var(--primary)" />
-                                <span>{t('prompt.card.official').toUpperCase()}</span>
+                                <span>{t('prompt.library.card.official').toUpperCase()}</span>
                             </div>
                         )}
                     </div>
@@ -141,30 +141,33 @@ export const PromptDetailModal: React.FC<PromptDetailModalProps> = ({ prompt, op
                     <div className="detail-right-col">
                         <div className="code-tabs">
                             {hasPython && (
-                                <button
-                                    className={`code-tab ${activeTab === 'python' ? 'active' : ''}`}
+                                <LiuliButton
+                                    variant={activeTab === 'python' ? 'secondary' : 'ghost'}
+                                    size="sm"
                                     onClick={() => setActiveTab('python')}
+                                    leftIcon={<Terminal size={14} />}
                                 >
-                                    <Terminal size={14} />
                                     {t('prompt.detail.python')}
-                                </button>
+                                </LiuliButton>
                             )}
                             {hasSql && (
-                                <button
-                                    className={`code-tab ${activeTab === 'sql' ? 'active' : ''}`}
+                                <LiuliButton
+                                    variant={activeTab === 'sql' ? 'secondary' : 'ghost'}
+                                    size="sm"
                                     onClick={() => setActiveTab('sql')}
+                                    leftIcon={<Database size={14} />}
                                 >
-                                    <Database size={14} />
                                     {t('prompt.detail.sql')}
-                                </button>
+                                </LiuliButton>
                             )}
-                            <button
-                                className={`code-tab ${activeTab === 'json' ? 'active' : ''}`}
+                            <LiuliButton
+                                variant={activeTab === 'json' ? 'secondary' : 'ghost'}
+                                size="sm"
                                 onClick={() => setActiveTab('json')}
+                                leftIcon={<FileJson size={14} />}
                             >
-                                <FileJson size={14} />
                                 {t('prompt.detail.sourceJson')}
-                            </button>
+                            </LiuliButton>
                         </div>
 
                         <div className="code-content">

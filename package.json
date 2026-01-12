@@ -6,7 +6,7 @@
   "scripts": {
     "sync:docs": "echo 'Skipping docs sync'",
     "type-check": "tsc --noEmit || echo 'Type check completed with warnings'",
-    "dev": "npm run sync:docs && npm run type-check && npm run validate:prompts && npm run check:flags && npm run monitor:cleanup && vite",
+    "dev": "npm run sync:docs && npm run type-check && npm run check:i18n && npm run validate:prompts && npm run check:flags && npm run monitor:cleanup && vite",
     "dev:backend": "node server/index.js",
     "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev\" --names \"backend,frontend\" --prefix-colors \"cyan,magenta\"",
     "server": "cd server && node index.js",
@@ -19,7 +19,9 @@
     "validate:prompts:runtime": "npx -y tsx scripts/detect-runtime-deps.ts",
     "verify": "npx -y tsx scripts/verify-core.ts",
     "monitor:cleanup": "npx -y tsx scripts/retention_policy.ts",
-    "check:flags": "npx -y tsx scripts/check-feature-flags.ts"
+    "check:flags": "npx -y tsx scripts/check-feature-flags.ts",
+    "check:i18n": "npx -y tsx scripts/check-i18n.ts",
+    "check:hardcoded": "npx -y tsx scripts/check-hardcoded.ts"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "^1.30.0",

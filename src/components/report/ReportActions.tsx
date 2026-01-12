@@ -30,22 +30,7 @@ export function ReportActions() {
 
     return (
         <div className="report-actions">
-            {/* 状态指示器 */}
-            <div className="report-status-indicator">
-                <span className={`status-badge ${document.isSigned ? 'status-locked' : 'status-draft'}`}>
-                    {document.isSigned ? '🔒 已锁定' : '📝 草稿'}
-                </span>
-                {document.isSigned && (
-                    <span className="status-details">
-                        {document.signedBy} • {new Date(document.signedAt!).toLocaleString('zh-CN', {
-                            month: 'numeric',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}
-                    </span>
-                )}
-            </div>
+
 
             {/* 操作按钮组 */}
             <div className="report-action-buttons">

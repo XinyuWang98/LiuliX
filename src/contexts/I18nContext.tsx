@@ -2,6 +2,7 @@ import { useState, createContext, useContext, ReactNode } from 'react';
 import { LanguageConfig } from '../types/i18n';
 import { zhCN } from '../locales/zh-CN';
 import { enUS } from '../locales/en-US';
+import { parseTimestamp } from '@/utils/dateUtils';
 
 // 可用语言列表
 const AVAILABLE_LANGUAGES: LanguageConfig[] = [zhCN, enUS];
@@ -104,8 +105,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     };
 
     const formatDate = (date: number | string | Date): string => {
+        // 使用 unified date utils 解析时间戳 (支持 Float Timestamp)
+        const d = parseTimestamp(date);
+        if (!d) return String(date);
+
         try {
-            return new Date(date).toLocaleDateString(currentLanguage.code, {
+            return d.toLocaleDateString(currentLanguage.code, {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'

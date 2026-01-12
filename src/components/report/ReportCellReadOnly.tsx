@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Copy, Check, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Copy, Check, AlertCircle } from 'lucide-react';
 import { ReportCell, AuditStatus } from '@/types/report';
 import { useI18n } from '@/contexts/I18nContext';
 import { logger } from '@/utils/logger';
@@ -49,7 +49,8 @@ export function ReportCellReadOnly({
     // };
 
     // 审计状态徽章
-    const getAuditBadge = () => {
+    /*
+    const _getAuditBadge = () => {
         switch (cell.auditStatus) {
             case AuditStatus.Approved:
                 return (
@@ -74,6 +75,7 @@ export function ReportCellReadOnly({
                 );
         }
     };
+    */
 
     return (
         <div

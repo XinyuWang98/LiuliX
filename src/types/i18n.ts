@@ -24,6 +24,24 @@ export interface LanguageConfig {
             collapse: string;  // 新增：收起/折叠
             verifying?: string; // 验证中...
             pageTitle: string; // 页面标题
+            column: string;
+            type: string;
+            table: string;
+            totalRows: string;
+            totalColumns: string;
+            none: string;
+            rename: string;
+            avgLength: string;
+            format: string;
+            range: string;
+            median: string;
+            sample: string;
+            sensitive: string;
+            high: string;
+            medium: string;
+            low: string;
+            noData: string;
+            expand: string;
         };
 
         // 数据统计
@@ -33,6 +51,8 @@ export interface LanguageConfig {
             min: string;
             max: string;
             mean: string;
+            rows: string;
+            columns: string;
         };
 
         // 导航栏
@@ -368,6 +388,11 @@ export interface LanguageConfig {
             library: {
                 title: string;
                 description: string;
+                noPromptsFound: string;
+                card: {
+                    usageTooltip: string;
+                    official: string;
+                };
             };
             sidebar: {
                 all: string;
@@ -386,6 +411,7 @@ export interface LanguageConfig {
                 copyCode: string;
                 tryIt: string;
                 sourceJson: string;
+                info: string;
             };
             category: {
                 analysis: string;
@@ -431,6 +457,8 @@ export interface LanguageConfig {
             noProjects: string;
             uploadHint: string;
             uploadFile: string;
+            connectDatabase: string;
+            createProject: string;
             project: {
                 untitled: string;
                 rename: string;
@@ -448,6 +476,9 @@ export interface LanguageConfig {
                     user: string;
                     data: string;
                 };
+                recentProjects: string;
+                selectProject: string;
+                noProjects: string;
             };
         };
 
@@ -596,6 +627,7 @@ export interface LanguageConfig {
             cleaningDesc: string;
             exploration: string;
             explorationDesc: string;
+            dataExploration: string;
             hypothesis: string;
             hypothesisDesc: string;
             suggestions: string;
@@ -645,6 +677,10 @@ export interface LanguageConfig {
             intentFillNull: string;
             intentNormalize: string;
             intentDropEmpty: string;
+            defaultReason: string;
+            ignore: string;
+            requirements: string;
+            moreFiles: string;
 
             // DataCleaner 增强功能键
             aiSuggestions: string;
@@ -822,6 +858,7 @@ export interface LanguageConfig {
             adopt: string;
             ignore: string;
             adopted: string;
+            ignored: string;
             viewCode: string;
             copyCode: string;
             codeCopied: string;
@@ -986,6 +1023,9 @@ export interface LanguageConfig {
             cleaningOps: string;
             insights: string;
             evidenceAdopted: string;
+            hideNotebook: string;
+            showNotebook: string;
+            useNewWorkbench: string;
             previewHint: string;
             aiAssistant: string;
             evidenceCollected: string;

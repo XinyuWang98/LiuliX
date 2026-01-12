@@ -12,6 +12,7 @@ export const prompt = {
         trending: '热门前 {count}',
         allPrompts: '全部提示词',
         noResults: '未找到匹配的 Prompt',
+        noPromptsFound: '暂无 Prompt', // ✅ 新增
         totalPrompts: '{count} 个 Prompt',
         filter: {
             all: '全部',
@@ -42,6 +43,7 @@ export const prompt = {
             usageTooltip: '使用次数',
             version: 'v{{version}}',
             updated: '更新于 {{date}}',
+
         },
     },
     sidebar: {
@@ -66,6 +68,7 @@ export const prompt = {
         python: 'Python',
         sql: 'SQL',
         officialTitle: '官方 Prompt',
+        info: '基本信息',
     },
     category: {
         analysis: '数据分析',

@@ -10,9 +10,12 @@
  * @param includeTime 是否包含时间部分 (默认 true)
  * @returns 格式化后的日期字符串，无法解析则返回原值
  */
-export function formatTimestamp(value: any, includeTime: boolean = true): string {
-    if (value === null || value === undefined) return '-';
-
+/**
+ * 解析各种格式的时间戳为 Date 对象
+ * 特别处理 DuckDB 返回的浮点型时间戳
+ */
+export function parseTimestamp(value: any): Date | null {
+    if (value === null || value === undefined) return null;
     let date: Date;
 
     // 预处理：如果是字符串但内容纯数字（可能是浮点数字符串 '1730527156391.819'）
@@ -25,14 +28,9 @@ export function formatTimestamp(value: any, includeTime: boolean = true): string
         // 取整处理
         let ts = Math.floor(value);
 
-        // 启发式判断单位
-        // 2000年: 946684800 (秒, 10位)
-        // 2000年: 946684800000 (毫秒, 13位)
-        // 2000年: 946684800000000 (微秒, 16位)
-
         if (ts > 1000000000000000) { // 微秒
             date = new Date(ts / 1000);
-        } else if (ts > 1000000000000) { // 毫秒 (13位 ~ 16位之间通常是微秒，但这里给毫秒留宽一点范围)
+        } else if (ts > 1000000000000) { // 毫秒
             date = new Date(ts);
         } else { // 秒
             date = new Date(ts * 1000);
@@ -43,8 +41,14 @@ export function formatTimestamp(value: any, includeTime: boolean = true): string
 
     // 检查是否有效
     if (isNaN(date.getTime())) {
-        return String(value);
+        return null;
     }
+    return date;
+}
+
+export function formatTimestamp(value: any, includeTime: boolean = true): string {
+    const date = parseTimestamp(value);
+    if (!date) return String(value ?? '-'); // Fallback to string representation
 
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');

@@ -21,6 +21,24 @@ export const common = {
     featureInDev: 'Feature in development...',
     collapse: 'Collapse',
     verifying: 'Verifying...',
+    column: 'Column',
+    type: 'Type',
+    table: 'Table',
+    totalRows: 'Total Rows',
+    totalColumns: 'Total Columns',
+    none: 'None',
+    rename: 'Rename',
+    avgLength: 'Avg Length',
+    format: 'Format',
+    range: 'Range',
+    median: 'Median',
+    sample: 'Sample',
+    sensitive: 'Sensitive',
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
+    noData: 'No Data',
+    expand: 'Expand',
 };
 
 export const data = {
@@ -29,6 +47,8 @@ export const data = {
     min: 'Min',
     max: 'Max',
     mean: 'Mean',
+    rows: 'Rows',
+    columns: 'Columns',
 };
 
 export const nav = {

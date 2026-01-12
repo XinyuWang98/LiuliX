@@ -67,6 +67,8 @@ export const enUS: LanguageConfig = {
 
         dataSource: {
             title: 'Data Sources',
+            connectDatabase: 'Connect DB',
+            createProject: 'New Project',
             noProjects: 'No Projects',
             uploadHint: 'Upload CSV/Excel files to start analysis',
             uploadFile: 'Upload File',
@@ -85,7 +87,10 @@ export const enUS: LanguageConfig = {
                     analytics: 'Analytics',
                     user: 'User Research',
                     data: 'Data Science',
-                }
+                },
+                recentProjects: 'Recent Projects',
+                selectProject: 'Select Project',
+                noProjects: 'No Projects Created',
             },
         },
         fileUpload: {
@@ -132,6 +137,7 @@ export const enUS: LanguageConfig = {
             cleaningDesc: 'Smart Cleaning Suggestions',
             exploration: 'Exploration',
             explorationDesc: 'Data Exploration',
+            dataExploration: 'Data Exploration',
             hypothesis: 'Hypothesis',
             hypothesisDesc: 'Generate Hypotheses',
             suggestions: 'Suggestions',
@@ -179,6 +185,10 @@ export const enUS: LanguageConfig = {
             intentFillNull: 'Fill missing values',
             intentNormalize: 'Standardize format',
             intentDropEmpty: 'Drop empty columns',
+            defaultReason: 'Default Reason',
+            ignore: 'Ignore',
+            requirements: 'Requirements',
+            moreFiles: 'More Files',
 
             // DataCleaner Keys
             aiSuggestions: 'AI Suggestions',
@@ -348,6 +358,7 @@ export const enUS: LanguageConfig = {
             adopt: 'Adopt',
             ignore: 'Ignore',
             adopted: 'Adopted',
+            ignored: 'Ignored',
             viewCode: 'View Code',
             copyCode: 'Copy Code',
             codeCopied: 'Copied!',
@@ -500,6 +511,9 @@ export const enUS: LanguageConfig = {
             cleaningOps: 'Cleaning Ops',
             insights: 'Key Insights',
             evidenceAdopted: '{count} Adopted',
+            hideNotebook: 'Hide Notebook',
+            showNotebook: 'Show Notebook',
+            useNewWorkbench: 'Use New Workbench',
             previewHint: 'Copy or download report',
             aiAssistant: 'AI Report Assistant',
             evidenceCollected: 'Evidence #{start} - #{end} collected:',

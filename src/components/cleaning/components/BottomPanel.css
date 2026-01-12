@@ -22,12 +22,7 @@
     /* 移除硬编码的灰色背景 */
 }
 
-/* 标签页按钮 active 状态 - 扩展 liuli-button */
-.liuli-button.bottomModuleTab.active {
-    background: var(--text-accent);
-    color: var(--liuli-bg);
-    border-color: var(--text-accent);
-}
+
 
 /* Badge 徽章 - 使用 CSS 变量 */
 .tabBadge {

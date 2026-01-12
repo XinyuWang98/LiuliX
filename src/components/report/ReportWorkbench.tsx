@@ -15,7 +15,7 @@ import './ReportWorkbench.css';
 
 export function ReportWorkbench() {
     const { t } = useI18n();
-    const { document, mode, handleCellUpdate, handleReportUpdate } = useReport();
+    const { document, handleCellUpdate, handleReportUpdate } = useReport();
 
     // 空状态
     if (!document || document.cells.length === 0) {

@@ -111,4 +111,11 @@ export default {
         largeFileDetection: 'Large file detection',
         sampleRatio: 'Sample ratio configuration',
     },
+    // Compatibility for EmptyStateWelcome.tsx
+    prefix: 'LiuliX',
+    subtitle: 'Local-First · Strictly Validated · Fully Transparent',
+    uploadButton: 'Upload Your First File',
+    feature1: 'Local Privacy Computing Engine',
+    feature2: 'Intelligent Data Cleaning',
+    feature3: 'Interactive Insight Report',
 };

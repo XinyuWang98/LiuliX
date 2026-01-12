@@ -194,7 +194,7 @@ export function useInsightLoaderV2() {
             let insightNodes: InsightNode[] = [];
 
             // 🆕 获取已采纳的洞察用于 Context 注入 (EDA闭环暂未启用,保留以便后续使用)
-            const _adoptedInsights = getAdoptedInsights();
+            // const _adoptedInsights = getAdoptedInsights();
 
             if (USE_ROUTER_MODE) {
                 // ✅ Router 模式：解析轻量 JSON → 膨胀为完整节点

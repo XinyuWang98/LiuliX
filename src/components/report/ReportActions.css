@@ -6,36 +6,7 @@
     gap: var(--spacing-l);
 }
 
-/* 状态指示器 */
-.report-status-indicator {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-s);
-    font-size: var(--fs-sm);
-}
 
-.status-badge {
-    padding: var(--spacing-xs) var(--spacing-s);
-    border-radius: var(--radius-s);
-    font-weight: var(--fw-medium);
-    font-feature-settings: 'tnum';
-    /* 等宽数字 */
-}
-
-.status-draft {
-    background: rgba(var(--accent-rgb), 0.1);
-    color: var(--accent);
-}
-
-.status-locked {
-    background: rgba(var(--success-rgb), 0.1);
-    color: var(--success);
-}
-
-.status-details {
-    color: var(--text-secondary);
-    font-size: var(--fs-xs);
-}
 
 /* 操作按钮组 */
 .report-action-buttons {

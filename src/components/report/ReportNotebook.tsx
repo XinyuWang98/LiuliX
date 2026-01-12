@@ -1,17 +1,9 @@
-/**
- * ReportNotebook - 报告编辑器组件 (Stateless)
- * 只负责展示 Cells 和传递审计操作，状态由 ReportWorkbench 管理
- */
-
-import { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
 import { ReportDocument, ReportCell } from '@/types/report';
 import { useI18n } from '@/contexts/I18nContext';
 import { useReport } from '@/contexts/ReportContext';
 import { CellResult } from './CellResult';
 import { CellCode } from './CellCode';
 import { CodeBlock } from '@/components/common/CodeBlock/CodeBlock';
-import { logger } from '@/utils/logger';
 import './ReportNotebook.css';
 
 interface ReportNotebookProps {
@@ -23,25 +15,9 @@ interface ReportNotebookProps {
 export function ReportNotebook({ document, onCellUpdate, onReportUpdate }: ReportNotebookProps) {
     const { t } = useI18n();
     const { mode } = useReport(); // Use global mode state
-    const [globalSetupCopied, setGlobalSetupCopied] = useState(false);
 
     // Determine code visibility based on mode
     const showCode = mode === 'notebook';
-
-    // 处理全局 Setup 复制
-    const handleGlobalCopy = async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!document.globalSetup) return;
-
-        try {
-            await navigator.clipboard.writeText(document.globalSetup);
-            setGlobalSetupCopied(true);
-            setTimeout(() => setGlobalSetupCopied(false), 2000);
-            logger.log('UI', 'Global Setup 已复制');
-        } catch (err) {
-            logger.error('UI', 'Global Setup 复制失败', err);
-        }
-    };
 
     // REMOVED local collapsed state in favor of global mode
     // Unused Annotation handler removed (logic moved to CellResult)
@@ -51,7 +27,7 @@ export function ReportNotebook({ document, onCellUpdate, onReportUpdate }: Repor
     if (!document || document.cells.length === 0) {
         return (
             <div className="report-notebook-empty">
-                {t('report.status.noRecordsHint')}
+                {t('report.noRecordsHint')}
             </div>
         );
     }
@@ -69,7 +45,7 @@ export function ReportNotebook({ document, onCellUpdate, onReportUpdate }: Repor
                             className="report-title-input"
                             value={document.title}
                             onChange={(e) => onReportUpdate({ title: e.target.value })}
-                            placeholder={t('report.report.title')}
+                            placeholder={t('report.title')}
                             disabled={document.isSigned}
                         />
 
@@ -103,16 +79,6 @@ export function ReportNotebook({ document, onCellUpdate, onReportUpdate }: Repor
                                     <span className="global-setup-meta">
                                         {document.globalSetup.split('\n').length} {t('report.globalSetup.lines')}
                                     </span>
-                                </div>
-
-                                <div className="header-actions">
-                                    <button
-                                        className="btn-icon-action"
-                                        onClick={handleGlobalCopy}
-                                        title={t('report.notebook.copyCode')}
-                                    >
-                                        {globalSetupCopied ? <Check size={14} /> : <Copy size={14} />}
-                                    </button>
                                 </div>
                             </div>
                             <div className="global-setup-content">

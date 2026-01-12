@@ -21,7 +21,7 @@ export class BrowserAdapter implements PlatformAdapter {
     /**
      * 获取最优并发数
      */
-    getOptimalConcurrency(nodes: InsightNode[]): number {
+    getOptimalConcurrency(_nodes: InsightNode[]): number {
         const memory = this.getAvailableMemory();
 
         // 动态决策并发数

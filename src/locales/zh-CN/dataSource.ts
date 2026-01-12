@@ -1,6 +1,8 @@
 // 数据源模块翻译
 export const dataSource = {
     title: '数据源',
+    connectDatabase: '连接数据库',
+    createProject: '新建项目',
     noProjects: '暂无项目',
     uploadHint: '点击上方按钮上传数据文件',
     uploadFile: '上传文件',
@@ -15,10 +17,13 @@ export const dataSource = {
         themes: {
             game: '游戏',
             sales: '销售',
-            finance: '财务',
+            finance: '金融',
             analytics: '分析',
             user: '用户',
             data: '数据',
         },
+        recentProjects: '最近项目',
+        selectProject: '选择项目',
+        noProjects: '暂无项目',
     },
 };
