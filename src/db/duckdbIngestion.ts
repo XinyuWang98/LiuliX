@@ -69,8 +69,8 @@ export async function analyzeCSV(
         logger.warn('DuckDB', '获取列信息失败，使用降级策略', error);
 
         // 降级策略：纯行数判断
-        if (count > 200000) return { strategy: 'FORCE_SAMPLE', rowCount: count };
-        if (count > 100000) return { strategy: 'WARN', rowCount: count };
+        if (count > 2000000) return { strategy: 'FORCE_SAMPLE', rowCount: count }; // 2M+ 强制采样
+        if (count > 1000000) return { strategy: 'WARN', rowCount: count }; // 1M+ 警告
         return { strategy: 'SAFE', rowCount: count };
     }
 }

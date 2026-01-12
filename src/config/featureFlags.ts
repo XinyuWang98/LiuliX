@@ -36,6 +36,7 @@ export interface FeatureFlags {
 
     // 智能闭环
     ENABLE_EDA_CONTEXT_LOOP: boolean;    // EDA 闭环与 Context 回流（开发中）
+    ENABLE_UPLOAD_ROW_LIMIT: boolean;    // MVP 强制限制上传文件行数
 }
 
 /**
@@ -75,6 +76,9 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 
     // 智能闭环
     ENABLE_EDA_CONTEXT_LOOP: false,     // EDA闭环功能(暂时关闭,L2未生成需排查+P1拦截率50%<70%)
+
+    // MVP 数据限制
+    ENABLE_UPLOAD_ROW_LIMIT: true,       // 强制限制上传文件行数 < 100万行
 };
 
 /**

@@ -53,7 +53,7 @@ export class DataLoadingService {
         const result = await engine.ingestCSV(rawFile, {
             sampleSize: options?.sampleSize ?? (file.data.isSampled ? 200000 : -1),
             sampleRate: options?.sampleRate ?? 0.2,
-            autoSampleThreshold: options?.autoSampleThreshold ?? 200000
+            autoSampleThreshold: options?.autoSampleThreshold ?? 1000000 // 提升至 100万行
         });
 
         return {

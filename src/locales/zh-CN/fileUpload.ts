@@ -22,6 +22,7 @@ export const fileUpload = {
     filesUploaded: '成功上传 {count} 个文件',
     maxFilesExceeded: '最多只能同时上传 10 个文件,请减少文件数量。',
     filesFailed: '{count} 个文件解析失败',
+    rowLimitExceeded: '文件行数超过 1,000,000 行限制，请先拆分文件或联系管理员。',
     errorUnsupportedType: '请使用 CSV、XLSX 或 JSON 格式。',
     errorCorrupted: '文件可能已损坏或格式不正确。',
     errorGeneric: '请检查文件后重试。',
