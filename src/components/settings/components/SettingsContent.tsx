@@ -313,40 +313,8 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         <DataPrivacySection />
                     </SettingsGroup>
 
-                    <SettingsGroup title={t('settings.dataProcessing')}>
-                        <SettingsRow
-                            label={t('config.maxColumns')}
-                            description={t('config.maxColumnsDesc')}
-                            action={
-                                <input
-                                    type="number"
-                                    value={props.analysisConfig.maxColumns}
-                                    onChange={(e) => props.onPerformanceChange('maxColumns', parseInt(e.target.value))}
-                                    min={10}
-                                    max={100}
-                                    className="setting-number-input"
-                                />
-                            }
-                        />
-                        <SettingsRow
-                            label={t('config.timeout')}
-                            description={t('config.timeoutDesc')}
-                            action={
-                                <div className="setting-number-group">
-                                    <input
-                                        type="number"
-                                        value={props.analysisConfig.timeout / 1000}
-                                        onChange={(e) => props.onPerformanceChange('timeout', parseInt(e.target.value) * 1000)}
-                                        min={30}
-                                        max={300}
-                                        step={10}
-                                        className="setting-number-input"
-                                    />
-                                    <span className="setting-unit-label">{t('settings.performanceTimeoutUnit')}</span>
-                                </div>
-                            }
-                        />
-                    </SettingsGroup>
+
+                    {/* Data Processing区块已移除（2026-01-14简化） */}
                 </>
             )}
 

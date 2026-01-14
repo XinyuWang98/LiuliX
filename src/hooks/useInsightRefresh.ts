@@ -23,8 +23,8 @@ export function useInsightRefresh({
 }: UseInsightRefreshOptions) {
     // Strict Mode 防重
     const loadedOnceRef = useRef(false);
-    const prevTableNameRef = useRef<string | undefined>(tableName);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);  // 🆕 追踪timer，防止Strict Mode清理
+    const prevTableNameRef = useRef<string | undefined>(undefined);  // 不使用初始tableName，确保首次变化能被检测
+    const timerRef = useRef<NodeJS.Timeout | null>(null);  // 用于500ms延迟，确保表创建完成
 
     const prevDepsRef = useRef({
         hypotheses: hypothesesLength,
@@ -35,34 +35,67 @@ export function useInsightRefresh({
         logger.log('AI洞察', 'InsightChainFlow挂载/更新', { data: { hypothesesCount: hypothesesLength } });
 
         // tableName变化时重置loadedOnceRef（表重建后重新加载）
-        if (prevTableNameRef.current !== tableName) {
+        const tableNameChanged = prevTableNameRef.current !== tableName;
+        if (tableNameChanged) {
             logger.log('AI洞察', 'tableName变化，重置状态', {
                 data: { prev: prevTableNameRef.current, current: tableName }
             });
-            loadedOnceRef.current = false;
+
+            const wasUndefined = prevTableNameRef.current === undefined;
+            const nowHasValue = tableName !== undefined;
+
             prevTableNameRef.current = tableName;
-            // 🆕 清理旧timer
+            loadedOnceRef.current = false; // 重置，允许重新加载
+
+            // 清理旧timer
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
                 timerRef.current = null;
             }
+
+            // ✅ 优化：如果从undefined变为有效值，立即触发（不再延迟500ms）
+            // 理由：AI 调用只需 DuckDB 数据，不需要等待 Pyodide/UI 初始化
+            if (wasUndefined && nowHasValue) {
+                logger.log('AI洞察', '检测到tableName从空变为有效，立即触发加载（并发优化）');
+                onRefresh(); // 立即触发，不再延迟
+                return;
+            }
+
+            // 🔥 如果tableName变为undefined，也提前退出
+            if (!nowHasValue) {
+                logger.log('AI洞察', 'tableName变为undefined，跳过刷新');
+                return;
+            }
         }
 
         // 判断是否需要刷新
-        const 需要刷新 =
-            hypothesesLength === 0 ||  // 场景1：无缓存假设
-            (insightCache?.isStale === true);  // 场景2：数据已清洗，标记为过时
+        const shouldRefresh =
+            (hypothesesLength === 0 ||  // 场景1：无缓存假设
+                (insightCache?.isStale === true)) &&  // 场景2：数据已清洗，标记为过时
+            tableName !== undefined;  // ⚠️ 关键：只有tableName有效时才刷新
 
         // 防重复：检查status不为pending（但如果是Stale状态，说明数据变了，必须强制刷新）
-        const 可以执行 = (insightCache?.isStale === true) || (insightCache?.status !== 'pending');
+        const canExecute = (insightCache?.isStale === true) || (insightCache?.status !== 'pending');
 
-        if (需要刷新 && 可以执行) {
+        // 🔍 调试日志
+        logger.log('AI洞察', '刷新条件检查', {
+            data: {
+                shouldRefresh,
+                canExecute,
+                hypothesesLength,
+                tableName,
+                isStale: insightCache?.isStale,
+                status: insightCache?.status
+            }
+        });
+
+        if (shouldRefresh && canExecute) {
             // 检测依赖是否真正变化
             const depsChanged =
                 prevDepsRef.current.hypotheses !== hypothesesLength ||
                 prevDepsRef.current.isStale !== insightCache?.isStale;
 
-            // 🆕 修复：只在依赖未变且已有timer时跳过
+            // 🆕 修复：只在依赖未变且已加载或已有timer时跳过（防止Strict Mode重复）
             if (!depsChanged && loadedOnceRef.current && timerRef.current) {
                 logger.warn('AI洞察', 'Strict Mode重复调用已拦截（timer已设置）');
                 return;
@@ -72,7 +105,7 @@ export function useInsightRefresh({
                 data: { tableName, hypothesesCount: hypothesesLength, hasExistingTimer: !!timerRef.current }
             });
 
-            // 清理旧timer（如果有）
+            // 清理旧timer
             if (timerRef.current) {
                 logger.log('AI洞察', '清理旧timer');
                 clearTimeout(timerRef.current);
@@ -84,13 +117,9 @@ export function useInsightRefresh({
                 isStale: insightCache?.isStale
             };
 
-            // ⚡ 延迟 3000ms 触发，确保高优先级的 DataCleaner (数据清洗) 能优先抢占本地模型
-            logger.log('AI洞察', '延迟触发刷新 (等待DataCleaner优先)...');
-            timerRef.current = setTimeout(() => {
-                logger.log('AI洞察', '延迟结束，执行刷新');
-                timerRef.current = null;
-                onRefresh();
-            }, 3000);
+            // ✅ 优化：立即触发（移除延迟），实现与 Pyodide 并发
+            logger.log('AI洞察', '立即触发刷新（并发优化）');
+            onRefresh(); // 立即执行，不再延迟
 
             return () => {
                 if (timerRef.current) {
@@ -99,7 +128,7 @@ export function useInsightRefresh({
                     timerRef.current = null;
                 }
             };
-        } else if (需要刷新 && !可以执行) {
+        } else if (shouldRefresh && !canExecute) {
             logger.warn('AI洞察', '刷新被阻止（防重复）', { data: { status: insightCache?.status } });
         }
 

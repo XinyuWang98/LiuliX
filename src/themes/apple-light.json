@@ -9,8 +9,8 @@
         "--bg-hover": "rgba(255, 255, 255, 0.8)",
         "--hover-bg": "rgba(255, 255, 255, 0.8)",
         "--text-primary": "#1d1d1f",
-        "--text-secondary": "rgba(60, 60, 67, 0.6)",
-        "--text-tertiary": "rgba(60, 60, 67, 0.3)",
+        "--text-secondary": "#6c6c70",
+        "--text-tertiary": "#8e8e93",
         "--primary": "#007aff",
         "--primary-light": "rgba(0, 122, 255, 0.1)",
         "--primary-hover": "#0051d5",
@@ -70,6 +70,7 @@
         "--grid-header-z": "10",
         "--scrollbar-thumb": "rgba(0, 122, 255, 0.3)",
         "--scrollbar-thumb-hover": "rgba(0, 122, 255, 0.5)",
-        "--scrollbar-track": "rgba(0, 0, 0, 0.05)"
+        "--scrollbar-track": "rgba(0, 0, 0, 0.05)",
+        "--bg-code-block": "#f5f5f7"
     }
 }

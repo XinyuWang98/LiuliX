@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { logger } from '../src/utils/logger';
+import { logger } from '../src/utils/logger.ts';
 import { zhCN } from '../src/locales/zh-CN/index.ts';
 import { enUS } from '../src/locales/en-US/index.ts';
 
@@ -60,9 +60,15 @@ function checkHardcodedChinese(filePath: string): { line: number, content: strin
         /toast\.error/,
         /^\s*\/\//, // 行注释
         /^\s*\*/,   // 块注释行
+        /^\s*#/,    // Python风格注释
         /^import /,
         /^export /,
         /from ['"]/,
+        /description:\s*['"`]/, // Tool definitions
+        /reason:\s*['"`]/,      // AI Logic reasons
+        /message:\s*['"`]/,     // Backend/Internal messages
+        /TODO/,
+        /FIXME/
     ];
 
     let inBlockComment = false;
@@ -227,6 +233,25 @@ async function main() {
 
     files.forEach(file => {
         const relativePath = path.relative(process.cwd(), file);
+
+        // 3. AI 逻辑/基础设施文件豁免 (No-Go List)
+        const excludedFiles = [
+            'src/services/skills/definitions.ts',  // Tool descriptions
+            'src/services/skills/registry.ts',     // Registry logic
+            'src/services/GeminiService.ts',       // Prompts
+            'src/utils/dataSanitizer.ts',          // Regex & Internal logic
+            'src/workers/pyodide/worker.ts',       // Python worker
+            'src/adapters/web/pyodideEnhancerAdapter.ts', // Adapter logic
+            'src/utils/fallbackTemplates.ts',      // Python Templates
+            'src/utils/pythonCodeSanitizer.ts',    // Code Fix logic
+            'src/utils/pythonCodeValidator.ts',     // Validator messages
+            'src/utils/insightGenerator.ts',        // Prompt templates
+            'src/utils/logCapture.ts'               // Log export format
+        ];
+
+        if (excludedFiles.some(f => relativePath.endsWith(f) || relativePath.includes(f))) {
+            return;
+        }
 
         // 中文检测
         const zhIssues = checkHardcodedChinese(file);

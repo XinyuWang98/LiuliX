@@ -24,13 +24,23 @@ export async function queryChunk(
 
 /**
  * 零拷贝导出 Arrow Table (用于 Pyodide)
+ * @param conn DuckDB连接
+ * @param tableName 表名
+ * @param maxRows 最大行数限制（可选），用于内存优化
  */
 export async function exportArrowTable(
     conn: duckdb.AsyncDuckDBConnection,
-    tableName: string
+    tableName: string,
+    maxRows?: number
 ): Promise<Uint8Array> {
     if (!conn) throw new Error('No connection');
-    const result = await conn.query(`SELECT * FROM ${tableName}`);
+
+    let query = `SELECT * FROM ${tableName}`;
+    if (maxRows) {
+        query += ` LIMIT ${maxRows}`;
+    }
+
+    const result = await conn.query(query);
     // DuckDB-WASM Arrow Table directly supports toIPCStream() in recent versions
     // If strict types complain, we can cast to any or use a polyfill
     return (result as any).toIPCStream();

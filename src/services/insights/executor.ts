@@ -23,10 +23,14 @@ export interface ExecutionContext {
     tableName: string;
     /** 总行数（用于内存评估） */
     totalRows?: number;
+    /** 🆕 列数（用于动态采样评估） */
+    columnCount?: number;
     /** 是否启用质量门控 */
     enableQualityGate?: boolean;
     /** 日志前缀（用于区分调用来源） */
     logPrefix?: string;
+    /** 🆕 预加载的数据（用于性能优化） */
+    preloadedData?: import('./dataPreloader').PreloadedData;
 }
 
 /**
@@ -189,7 +193,7 @@ export async function executeAndFillResult(
             },
             assessment.mode,
             tableName,
-            node.promptId  // ✅ 传递 promptId 用于自动查询库依赖
+            node.promptId
         );
 
         if (!execResult.success) {
@@ -290,7 +294,7 @@ export async function executeBatchNodes(
     const { sortNodesByComplexity } = await import('@/utils/insightComplexity');
     const { executeSerial, executeParallel } = await import('./scheduler');
 
-    const strategy = assessExecutionStrategy(nodes, context.totalRows || 0);
+    const strategy = await await assessExecutionStrategy(nodes, context.totalRows || 0, context.columnCount || 1);
 
     logger.log('AI服务', `[Executor] 📊 策略评估完成`, {
         data: {
@@ -312,6 +316,16 @@ export async function executeBatchNodes(
         logger.log('AI服务', `[Executor] 🔄 已按复杂度排序（轻量级在前）`);
     }
 
+    // ========== 🚀步骤2.5：数据预加载（并行） ==========
+    logger.log('AI服务', '[Executor] 🔄 开始数据预加载（并行）');
+
+    const { dataPreloader } = await import('./dataPreloader');
+
+    // 异步触发预加载（不等待，与Worker初始化并行）
+    const preloadPromise = context.tableName
+        ? dataPreloader.preload(context.tableName)
+        : Promise.resolve(null);
+
     // ========== 🆕 步骤3：采样处理 ==========
     if (strategy.enableSampling) {
         logger.log('AI服务', `[Executor] ⚠️ 启用采样模式`, {
@@ -327,6 +341,17 @@ export async function executeBatchNodes(
             // @ts-ignore
             node.originalRows = context.totalRows;
         });
+    }
+
+    // ========== 步骤4.1：等待预加载完成 ==========
+    try {
+        const preloadedData = await preloadPromise;
+        if (preloadedData) {
+            context.preloadedData = preloadedData;
+            logger.log('AI服务', '[Executor] ✅ 预加载完成');
+        }
+    } catch (error) {
+        logger.warn('AI服务', '[Executor] 预加载失败，将在执行时回退', error);
     }
 
     // ========== 🆕 步骤4：执行调度 ==========

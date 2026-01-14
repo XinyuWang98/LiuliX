@@ -63,6 +63,7 @@ export const nav = {
     theme: '切换主题',
     help: '帮助文档', // 新增
     docs: '用户手册', // 新增
+    whitepaper: '白皮书',
 };
 
 // 侧边栏
@@ -79,6 +80,8 @@ export const chat = {
 export const language = {
     title: '语言',
     priority: '优先级',
+    zh: '中文',
+    en: 'English',
 };
 
 // 硬件检测
@@ -135,4 +138,9 @@ export const hardware = {
     reasonGood: '硬件配置优秀，本地AI性能良好',
     reasonMedium: '硬件配置中等，建议使用云端AI以获得更好体验',
     reasonLow: '硬件配置较低，强烈建议使用云端AI',
+};
+
+export const footer = {
+    resources: '资源',
+    community: '社区',
 };

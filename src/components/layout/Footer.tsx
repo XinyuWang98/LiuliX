@@ -1,6 +1,6 @@
 
 import { useI18n } from '@/contexts/I18nContext';
-import { Twitter } from 'lucide-react';
+import { Twitter, FileText } from 'lucide-react';
 // import { Github } from 'lucide-react';
 import { DiscordIcon } from '@/components/common/DiscordIcon';
 import './Footer.css';
@@ -25,7 +25,13 @@ export function Footer() {
 
                 <div className="footer-links">
                     <div className="footer-col">
-                        <h4>Community</h4>
+                        <h4>{t('footer.resources') || 'Resources'}</h4>
+                        <a href="/whitepaper" target="_blank" rel="noopener noreferrer">
+                            <FileText size={16} /> {t('nav.whitepaper') || 'Whitepaper'}
+                        </a>
+                    </div>
+                    <div className="footer-col">
+                        <h4>{t('footer.community')}</h4>
                         <a href="https://discord.gg/RnDvjtrs72" target="_blank" rel="noopener noreferrer">
                             <DiscordIcon size={16} /> Discord
                         </a>

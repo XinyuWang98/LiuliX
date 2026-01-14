@@ -526,8 +526,8 @@
 /* 序号列专属样式 - Row Number Column */
 .enhancedHeaderCell.row-number-col,
 .enhancedGridCell.row-number,
-.enhancedHeaderCell序号列,
-.enhancedGridCell序号 {
+.enhancedHeaderCell-index,
+.enhancedGridCell-index {
     position: sticky;
     left: 0;
     z-index: 2;

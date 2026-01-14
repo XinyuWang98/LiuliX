@@ -60,6 +60,9 @@ export interface ParsedFileData {
     /** 原始文件大小（未抽样前） */
     originalSize?: number;
 
+    /** 🆕 原始行数（未采样前） */
+    originalRowCount?: number;
+
     /** DuckDB表名（ingest后由DataViewer填充） */
     tableName?: string;
 

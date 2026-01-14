@@ -7,6 +7,7 @@ import { loadProjects, saveProjects, deleteProject as deleteProjectFromDB } from
 import { pyodideManager } from '../../services/PyodideManager';
 import { DuckDBEngine } from '../../db/duckdbEngine';
 import { logger } from '@/utils/logger';
+import { toast } from 'react-hot-toast';
 import { SidebarHeader } from './sidebar/SidebarHeader';
 import { DataSourceToolbar } from './sidebar/DataSourceToolbar';
 import { ProjectTreeItem } from './sidebar/ProjectTreeItem';
@@ -17,7 +18,7 @@ interface LeftSidebarProps {
 }
 
 export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
-    const { t, language } = useI18n();
+    const { t } = useI18n();
     const [projects, setProjects] = useState<Project[]>([]);
 
     // 统一选中状态：可以是项目或文件
@@ -90,6 +91,14 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
                         isSampled: result.isSampled
                     };
                     fileData.tableName = result.tableName;
+
+                    // 🆕 显示采样Toast
+                    if (result.isSampled && result.originalRowCount) {
+                        toast.success(
+                            `📊 ${fileData.fileName}: 已采样 ${result.rowCount.toLocaleString()} / ${result.originalRowCount.toLocaleString()} 行`,
+                            { duration: 4000 }
+                        );
+                    }
                 } catch (err) {
                     logger.error('DuckDB', 'CSV导入失败', err);
                 }
@@ -104,16 +113,22 @@ export function LeftSidebar({ onProjectSelect, onClose }: LeftSidebarProps) {
             }
         }
 
-        const themeTranslations = {
-            game: t('dataSource.project.themes.game'),
-            sales: t('dataSource.project.themes.sales'),
-            finance: t('dataSource.project.themes.finance'),
-            analytics: t('dataSource.project.themes.analytics'),
-            user: t('dataSource.project.themes.user'),
-            data: t('dataSource.project.themes.data'),
+        const projectTranslations = {
+            suffix: t('dataSource.project.suffix'),
+            dataProject: t('dataSource.project.dataProject'),
+            untitled: t('dataSource.project.untitled'),
+            defaultData: t('dataSource.project.themes.data'),
+            themes: {
+                game: t('dataSource.project.themes.game'),
+                sales: t('dataSource.project.themes.sales'),
+                finance: t('dataSource.project.themes.finance'),
+                analytics: t('dataSource.project.themes.analytics'),
+                user: t('dataSource.project.themes.user'),
+                data: t('dataSource.project.themes.data'),
+            }
         };
 
-        const newProject = createProject(filesData, sampledFlags, language.code, themeTranslations);
+        const newProject = createProject(filesData, sampledFlags, projectTranslations);
         setProjects(prev => [...prev, newProject]);
 
         // 选中新项目

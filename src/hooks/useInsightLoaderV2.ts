@@ -5,7 +5,7 @@
 import { useState, useRef } from 'react';
 import { InsightNode } from '@/types/insightTree';
 import { ProjectFile } from '@/utils/projectUtils';
-import { sampleDataForAI } from '@/utils/sampleData';
+// ✅ 已移除sampleDataForAI，直接查询working表
 import { DuckDBEngine } from '@/db/duckdbEngine';
 import { generateBatchInsightsPrompt, parseBatchInsightsResponse } from '@/services/prompts/library/insight';
 // 🆕 Router 模式导入
@@ -17,7 +17,7 @@ import { executeBatchNodes } from '@/services/insights/executor';
 import { getFallbackInsights } from '@/utils/fallbackTemplates';
 import { RESOURCE_LIMITS, checkAvailableMemory } from '@/utils/resourceLimits';
 import { CacheManager } from '../utils/cacheManager';
-import { getAnalysisConfig } from '@/config/analysisConfig';
+// ✅ 已移除getAnalysisConfig，角色配置samplingRows和maxColumns已废弃
 import { buildEDAExecutionContext } from '@/services/insights/executionContextBuilder';
 
 // 🆕 EDA 闭环依赖
@@ -63,57 +63,65 @@ export function useInsightLoaderV2() {
             logger.group('AI洞察', '批量洞察生成流程（双模式）');
 
             // ========== 步骤1：获取列信息 ==========
-            let 有效列名: string[] = columns || [];
+            let validColumns: string[] = columns || [];
             let totalRows = rowCount || 0;
 
-            if (有效列名.length === 0 && tableName) {
+            if (validColumns.length === 0 && tableName) {
                 const engine = DuckDBEngine.getInstance();
                 await engine.init();
+
+                // ⚠️ 表存在性验证（方案C核心）
+                const tableExists = await engine.tableExists(tableName);
+                if (!tableExists) {
+                    logger.warn('AI洞察', `表 ${tableName} 不存在，跳过洞察生成`);
+                    throw new Error(`Table ${tableName} does not exist. 数据表尚未ready，请稍候再试`);
+                }
+
                 const describeResult = await engine.runQuery(`DESCRIBE ${tableName}`);
-                有效列名 = describeResult.map((row: any) => row.column_name);
+                validColumns = describeResult.map((row: any) => row.column_name);
 
                 // 获取总行数
                 const countResult = await engine.runQuery(`SELECT COUNT(*) as cnt FROM ${tableName}`);
                 totalRows = countResult[0]?.cnt || 0;
             }
 
-            logger.log('AI洞察', '数据规模', { data: { columns: 有效列名.length, totalRows } });
+            logger.log('AI洞察', '数据规模', { data: { columns: validColumns.length, totalRows } });
+            // ========== 🆕 步骤1.5：使用所有有效列（动态评估会根据列数自动调整行数）==========
+            const selectedColumns = validColumns;  // ✅ 不限制列数，内存评估会自动平衡
 
-            // ========== 🆕 步骤1.5：列数限制（应用角色配置）==========
-            const analysisConfig = getAnalysisConfig();
-            const MAX_COLUMNS = analysisConfig.maxColumns; // 数据分析师50列，业务专家20列
-            let 选中列名 = 有效列名;
-            if (有效列名.length > MAX_COLUMNS) {
-                选中列名 = 有效列名.slice(0, MAX_COLUMNS);
-                logger.warn('AI洞察', `列数过多，限制到${MAX_COLUMNS}列`, {
-                    data: { original: 有效列名.length, limited: 选中列名.length }
-                });
-            }
-
-            // ========== 步骤2：数据采样（应用角色配置）==========
-            let 采样数据: any[] = [];
+            // ========== 步骤2：直接加载working表数据（上传时已优化）==========
+            let sampledDataLocal: any[] = [];
             if (tableName) {
-                const SAMPLE_ROWS = analysisConfig.samplingRows; // 数据分析师100行，业务专家30行
-                const { sampledData } = await sampleDataForAI(tableName, SAMPLE_ROWS);
-                采样数据 = sampledData;
+                const SAMPLE_ROWS = 100;  // ✅ 不再区分角色，Router统一100行。TODO: 设置页移除"采样行数"组件
+                // ✅ 直接查询working表（上传时已按内存评估采样）
+                const db = DuckDBEngine.getInstance();
+                const allData = await db.runQuery(`SELECT * FROM ${tableName}`);
+                sampledDataLocal = allData.slice(0, SAMPLE_ROWS);
+
+                logger.log('AI洞察', `✅ 加载working表数据`, {
+                    data: {
+                        working表行数: allData.length,
+                        Router用行数: sampledDataLocal.length
+                    }
+                });
             }
 
 
             // ========== 步骤2.5：数据脱敏（使用统一工具） ==========
             // 获取列信息用于脱敏
-            let 列信息: any[] = [];
-            let 统计信息: any[] = [];
+            let columnInfo: any[] = [];
+            let statistics: any[] = [];
             if (tableName) {
                 try {
                     const engine = DuckDBEngine.getInstance();
                     const describeResult = await engine.runQuery(`DESCRIBE ${tableName}`);
-                    列信息 = describeResult.map((row: any) => ({
+                    columnInfo = describeResult.map((row: any) => ({
                         name: row.column_name,
                         type: row.column_type
                     }));
                     // 从采样数据构造基础统计
-                    统计信息 = 列信息.map((col: any) => {
-                        const values = 采样数据.map((row: any) => row[col.name]);
+                    statistics = columnInfo.map((col: any) => {
+                        const values = sampledDataLocal.map((row: any) => row[col.name]);
                         return {
                             sampleData: values.slice(0, 3)
                         };
@@ -125,9 +133,9 @@ export function useInsightLoaderV2() {
 
             const { unifiedSanitize } = await import('@/utils/unifiedDataSanitizer');
             const { privacyMode } = await unifiedSanitize(
-                列信息,
-                统计信息,
-                采样数据,
+                columnInfo,
+                statistics,
+                sampledDataLocal,
                 {
                     respectUserSettings: true,
                     intelligentDetection: true,
@@ -136,7 +144,7 @@ export function useInsightLoaderV2() {
             );
 
             logger.log('数据隐私', `脱敏完成 模式=${privacyMode}`, {
-                data: { columns: 列信息.length, mode: privacyMode }
+                data: { columns: columnInfo.length, mode: privacyMode }
             });
 
             // ========== 步骤3：AI生成洞察（双模式） ==========
@@ -159,18 +167,18 @@ export function useInsightLoaderV2() {
             let prompt: string;
             if (USE_ROUTER_MODE) {
                 prompt = buildRouterPrompt(
-                    选中列名,
-                    privacyMode === 'sanitized' ? [] : 采样数据,
+                    selectedColumns,
+                    privacyMode === 'sanitized' ? [] : sampledDataLocal,
                     columnTypes
                 );
                 logger.log('AI服务', '[Router] 使用 Router Prompt 模式');
             } else {
                 // 旧版 Coder Prompt（保留兼容）
                 prompt = generateBatchInsightsPrompt(
-                    选中列名,
-                    采样数据.length,
+                    selectedColumns,
+                    sampledDataLocal.length,
                     totalRows,
-                    privacyMode === 'sanitized' ? [] : 采样数据
+                    privacyMode === 'sanitized' ? [] : sampledDataLocal
                 );
                 logger.log('AI服务', '[Coder] 使用传统 Coder Prompt 模式');
             }
@@ -198,7 +206,7 @@ export function useInsightLoaderV2() {
 
             if (USE_ROUTER_MODE) {
                 // ✅ Router 模式：解析轻量 JSON → 膨胀为完整节点
-                const recommendations = parseRouterResponse(aiResponse, 选中列名); // 🆕 传递columns用于校验
+                const recommendations = parseRouterResponse(aiResponse, selectedColumns); // 🆕 传递columns用于校验
 
                 logger.log('AI服务', `[LoadInsights] 🔍 准备膨胀推荐`, {
                     data: { count: recommendations.length, tableName: tableName! }
@@ -206,7 +214,7 @@ export function useInsightLoaderV2() {
 
                 if (recommendations.length === 0) {
                     logger.warn('AI服务', '[Router] AI未返回推荐，使用规则层兜底');
-                    const fallbackRecs = buildFallbackRecommendations(选中列名, columnTypes);
+                    const fallbackRecs = buildFallbackRecommendations(selectedColumns, columnTypes);
                     insightNodes = await inflateRecommendations(fallbackRecs as any, tableName!);  // 🆕 传递tableName（非空断言）
                 } else {
                     logger.log('AI服务', '[Router] 解析成功', { data: { count: recommendations.length } });
@@ -265,11 +273,11 @@ export function useInsightLoaderV2() {
                     }
                 }
 
-                const validationResult = validateColumnsExist(paramsToValidate, 有效列名);
+                const validationResult = validateColumnsExist(paramsToValidate, validColumns);
 
                 if (!validationResult.valid) {
                     logger.warn('AI洞察', `跳过无效列名的洞察: ${node.title}`, {
-                        data: { invalidColumns: validationResult.invalidColumns, validColumns: 有效列名 }
+                        data: { invalidColumns: validationResult.invalidColumns, validColumns: validColumns }
                     });
                     node.result = {
                         code: '',
@@ -289,6 +297,7 @@ export function useInsightLoaderV2() {
                 {
                     tableName: tableName || '',
                     totalRows,
+                    columnCount: validColumns.length,  // 🆕 传递列数用于动态采样评估
                     enableQualityGate: true,
                     logPrefix: '批量洞察'
                 },
@@ -477,9 +486,14 @@ export function useInsightLoaderV2() {
                 });
 
                 // 5. 执行代码获取结果 (✅ 使用工具函数构建ExecutionContext)
+                // ❌ 移除 'uploaded_data' 降级值 - 如果缺少tableName应该抛出错误
+                if (!currentFile.tableName) {
+                    throw new Error('[SilentTrigger] currentFile.tableName 为空，无法继续');
+                }
+
                 await executeBatchNodes(
                     newNodes,
-                    buildEDAExecutionContext(currentFile.tableName || 'uploaded_data'),
+                    buildEDAExecutionContext(currentFile.tableName),
                     (current, total) => {
                         logger.log('AI洞察', `[SilentTrigger] 执行进度 ${current}/${total}`);
                     }

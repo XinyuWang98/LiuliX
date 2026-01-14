@@ -1,0 +1,78 @@
+.doc-toc {
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+.toc-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-left: 1px solid var(--border);
+}
+
+.toc-item {
+    position: relative;
+}
+
+.toc-item a {
+    display: block;
+    padding: 6px 0 6px 16px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+    border-left: 2px solid transparent;
+    margin-left: -1px; /* Align border with list border */
+}
+
+.toc-item.level-1 a {
+    font-weight: 600;
+}
+
+.toc-item.level-2 a {
+    padding-left: 24px;
+}
+
+.toc-item.level-3 a {
+    padding-left: 36px;
+}
+
+.toc-item a:hover {
+    color: var(--text-primary);
+}
+
+.toc-item.active a {
+    color: var(--primary);
+    border-left-color: var(--primary);
+    font-weight: 500;
+}
+
+/* Scrollbar Styling */
+.doc-toc::-webkit-scrollbar {
+    width: 4px;
+}
+
+.doc-toc::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.doc-toc::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.doc-toc::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}

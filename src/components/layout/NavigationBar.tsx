@@ -9,7 +9,7 @@ import './NavigationBar.css';
 interface NavigationBarProps {
     onOpenAPISettings?: () => void;
     backendStatus?: 'connected' | 'disconnected' | 'checking';
-    activeView?: 'dashboard' | 'library' | 'v2' | 'design' | 'welcome';
+    activeView?: 'dashboard' | 'library' | 'v2' | 'design' | 'welcome' | 'whitepaper';
 }
 
 export function NavigationBar({
@@ -50,6 +50,7 @@ export function NavigationBar({
                     >
                         {t('nav.promptLibrary')}
                     </button>
+
                 </nav>
             </div>
 

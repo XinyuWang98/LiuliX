@@ -110,6 +110,17 @@ export class PyodideWorkerManager {
     }
 
     /**
+     * 加载Python包
+     * @param packages 包名列表，如 ['scipy', 'statsmodels']
+     */
+    async loadPackages(packages: string[]): Promise<void> {
+        if (!packages || packages.length === 0) {
+            return;
+        }
+        await this.sendMessage('LOAD_PACKAGES', { packages });
+    }
+
+    /**
      * 终止 Worker
      */
     terminate(): void {

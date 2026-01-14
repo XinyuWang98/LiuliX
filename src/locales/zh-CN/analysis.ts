@@ -58,6 +58,11 @@ export const insight = {
     viewCode: '查看代码',
     drillDown: '下钻分析',
     maxDepthReached: '已达到最大下钻深度',
+    sampling: {
+        badge: '采样',
+        tooltip: '数据已采样 ({{count}}行)',
+        unknown: '未知',
+    },
 };
 
 export const exploration = {

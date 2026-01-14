@@ -168,3 +168,26 @@
     background: var(--primary-bg);
     border-radius: var(--radius-s);
 }
+
+/* Beta 标识（报告模块） */
+.beta-badge {
+    display: inline-block;
+    margin-left: var(--gap-xs);
+    padding: var(--gap-xxs) var(--gap-xs);
+    background: rgba(0, 242, 254, 0.1);
+    /* 基于 --text-accent (#00f2fe) 的玻璃态 */
+    color: var(--text-accent);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+    transition: all var(--transition-s) var(--ease-out);
+}
+
+.beta-badge:hover {
+    background: rgba(0, 242, 254, 0.2);
+    border-color: rgba(0, 242, 254, 0.5);
+}

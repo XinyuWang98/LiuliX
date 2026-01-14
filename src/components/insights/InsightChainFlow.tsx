@@ -73,7 +73,13 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
     const handleLoadInsights = async () => {
         // ✅ 优先级：传入的 tableName > file.data.tableName > file.tableName
         // 遵循与 useDataLoader.ts 一致的模式
-        const effectiveTableName = tableName || file?.data?.tableName || file?.tableName || 'uploaded_data';
+        const effectiveTableName = tableName || file?.data?.tableName || file?.tableName;
+
+        // ❌ 移除 'uploaded_data' 降级值 - 会导致DuckDB查询失败
+        if (!effectiveTableName) {
+            logger.error('AI洞察', '无法获取有效的tableName，跳过洞察加载');
+            return;
+        }
 
         // ✅ 使用工具函数增强file对象 (替换原有13行手动逻辑)
         const enhancedFile = enhanceProjectFile(file, effectiveTableName, rowCount);
@@ -221,8 +227,12 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
             return;
         }
 
+        // ⚠️ Feature Flag检查: ENABLE_EDA_CONTEXT_LOOP
+        const { isFeatureEnabled } = await import('@/config/featureFlags');
+        const edaEnabled = isFeatureEnabled('ENABLE_EDA_CONTEXT_LOOP');
+
         // 触发EDA闭环 (仅L0和L1节点触发,避免层级过深)
-        if (adoptedNode.depth <= 1) {
+        if (edaEnabled && adoptedNode.depth <= 1) {
             logger.log('AI洞察', '触发EDA闭环', {
                 data: {
                     nodeId: adoptedNode.id,
@@ -237,6 +247,8 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
             } catch (error) {
                 logger.error('AI洞察', 'EDA闭环触发失败', error);
             }
+        } else if (!edaEnabled) {
+            logger.log('AI洞察', 'EDA闭环已禁用 (ENABLE_EDA_CONTEXT_LOOP=false)');
         }
 
         // 保留原有的跳转逻辑

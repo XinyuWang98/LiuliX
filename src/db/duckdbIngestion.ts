@@ -6,11 +6,36 @@ import { assessMemoryBeforeExecution } from '../utils/memoryAssessment';
 
 // 🔧 DuckDB CSV 配置常量
 const MAX_CSV_LINE_SIZE = 50 * 1024 * 1024; // 50MB
+// TODO (P2): 改为可配置 options.maxLineSize || MAX_CSV_LINE_SIZE
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB 浏览器安全上限
 
 /**
  * CSV数据摄入相关功能
  * 职责：文件分析、CSV流式导入、自动抽样
  */
+
+/**
+ * 🆕 文件校验（防止非CSV/空文件/超大文件导致崩溃）
+ */
+function validateCSVFile(file: File): void {
+    // 1. 文件类型校验
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+        throw new Error(globalT('errors.invalidFileType') || `Invalid file type. Expected CSV, got ${file.name}`);
+    }
+
+    // 2. 空文件校验
+    if (file.size === 0) {
+        throw new Error(globalT('errors.emptyFile') || 'File is empty');
+    }
+
+    // 3. 文件大小校验
+    if (file.size > MAX_FILE_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(0);
+        const maxMB = (MAX_FILE_SIZE / (1024 * 1024)).toFixed(0);
+        throw new Error(globalT('errors.fileTooLarge') || `File too large (${sizeMB}MB). Maximum ${maxMB}MB allowed`);
+    }
+}
 
 /**
  * 快速分析 CSV 文件，返回抽样建议
@@ -24,6 +49,9 @@ export async function analyzeCSV(
     rowCount: number;
 }> {
     if (!db || !conn) throw new Error(globalT('settings.dbNotReady'));
+
+    // 🆕 文件校验（P0）
+    validateCSVFile(file);
 
     // 注册临时句柄用于分析
     await db.registerFileHandle(file.name, file, duckdb.DuckDBDataProtocol.BROWSER_FILEREADER, true);
@@ -68,9 +96,16 @@ export async function analyzeCSV(
     } catch (error) {
         logger.warn('DuckDB', '获取列信息失败，使用降级策略', error);
 
-        // 降级策略：纯行数判断
-        if (count > 2000000) return { strategy: 'FORCE_SAMPLE', rowCount: count }; // 2M+ 强制采样
-        if (count > 1000000) return { strategy: 'WARN', rowCount: count }; // 1M+ 警告
+        // 🔧 降级策略：假设平均列数，使用动态评估
+        const { calculateMaxRowsForPyodide } = await import('../utils/memoryAssessment');
+        const estimatedColumns = 10;  // 保守估计10列
+        const maxRows = calculateMaxRowsForPyodide(estimatedColumns);
+
+        if (count > maxRows * 2) {
+            return { strategy: 'FORCE_SAMPLE', rowCount: count };  // 超过2倍阈值，强制采样
+        } else if (count > maxRows) {
+            return { strategy: 'WARN', rowCount: count };  // 超过阈值，警告
+        }
         return { strategy: 'SAFE', rowCount: count };
     }
 }
@@ -82,18 +117,20 @@ export async function ingestCSV(
     db: duckdb.AsyncDuckDB,
     conn: duckdb.AsyncDuckDBConnection,
     file: File,
-    options: IngestionOptions = {},
+    _options: IngestionOptions = {},  // 🔧 保留参数以兼容API，但已不使用硬编码阈值
     onProgress?: (percent: number) => void
 ): Promise<IngestionResult> {
     if (!db || !conn) throw new Error(globalT('settings.dbNotReady'));
 
-    // 生成文件唯一标识（基于时间戳）
-    const fileId = `${Date.now()}`;
+    // 🆕 文件校验（P0）
+    validateCSVFile(file);
+
+    // 🆕 生成文件唯一标识（UUID防并发冲突）
+    const fileId = crypto.randomUUID().replace(/-/g, '_');
     const originalTable = `t_${fileId}_original`; // 原始数据表（只读）
     const workingTable = `t_${fileId}_working`;  // 工作表（可清洗）
 
-    const autoSampleThreshold = options.autoSampleThreshold || 100000;
-    const sampleRate = options.sampleRate || 0.2;
+    // ✅ 删除硬编码阈值，改为动态计算
 
     // 清理可能存在的同名表
     try {
@@ -107,48 +144,86 @@ export async function ingestCSV(
     // 1. 注册文件句柄（零拷贝）
     await db.registerFileHandle(file.name, file, duckdb.DuckDBDataProtocol.BROWSER_FILEREADER, true);
 
-    // 2. 预检：判断是否需要抽样
-    const fileSizeMB = file.size / (1024 * 1024);
-    let shouldSample = false;
-
-    if (fileSizeMB > 20) {
-        // 对于大文件，先获取总行数判断是否需要抽样
-        const countResult = await conn.query(`SELECT count(*) as c FROM read_csv_auto('${file.name}', ignore_errors=true)`);
-        const row = countResult.get(0);
-        const totalRows = row ? Number(row['c']) : 0;
-        if (totalRows > autoSampleThreshold) {
-            shouldSample = true;
-        }
-    }
-
-    // 3. 构建SQL - 先创建 original 表（原始数据，只读）
-    let sql = `CREATE TABLE ${originalTable} AS SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=${MAX_CSV_LINE_SIZE})`;
-
-    if (shouldSample && options.sampleSize !== -1) {
-        sql += ` USING SAMPLE ${Math.floor(sampleRate * 100)}%`;
-    }
-
-    // 4. 执行解析 - 创建原始表
+    // 2. 创建 original 表（完整数据）
+    // TODO (P2): onProgress可以更均匀，避免40%→100%卡很久，但需DuckDB streaming API支持
     if (onProgress) onProgress(10);
     const start = performance.now();
 
-    await conn.query(sql);
+    await conn.query(`
+        CREATE TABLE ${originalTable} AS 
+        SELECT * FROM read_csv_auto('${file.name}', ignore_errors=true, max_line_size=${MAX_CSV_LINE_SIZE})
+    `);
 
-    if (onProgress) onProgress(50);
+    if (onProgress) onProgress(40);
 
-    // 5. 从 original 复制数据到 working 表
-    await conn.query(`CREATE TABLE ${workingTable} AS SELECT * FROM ${originalTable}`);
+    // 3. 🆕 纯内存评估采样策略
+    // Step 3.1: 获取总行数和列数
+    const countResult = await conn.query(`SELECT COUNT(*) as total FROM ${originalTable}`);
+    const countRow = countResult.get(0);
+    const totalRows = countRow ? Number(countRow['total']) : 0;
+
+    const schemaResult = await conn.query(`DESCRIBE ${originalTable}`);
+    const columnCount = schemaResult.numRows;
+
+    // Step 3.2: 固定最大行数（Web版MVP策略：2026-01-14）
+    // 注：动态评估已废弃，Native版可恢复calculateMaxRowsForPyodide
+    const MAX_PYODIDE_ROWS = 100000;  // Pyodide内存限制，固定10万行上限
+    const maxRows = MAX_PYODIDE_ROWS;
+
+    // Step 3.3: 判断是否需要采样（纯行数比较，无文件大小条件）
+    const shouldSample = totalRows > maxRows;
+
+    logger.log('DuckDB', `采样决策（纯内存评估）`, {
+        data: {
+            原始行数: totalRows,
+            列数: columnCount,
+            内存评估最大行数: maxRows,
+            是否采样: shouldSample,
+            决策依据: '基于设备内存动态计算'
+        }
+    });
+
+    let actualRows = totalRows;
+    let sampleStrategy: 'memory-based' | 'full' = 'full';
+
+    if (shouldSample) {
+        // Step 3.4: 采样到maxRows行（精确行数，非百分比）
+        await conn.query(`
+            CREATE TABLE ${workingTable} AS 
+            SELECT * FROM ${originalTable} 
+            LIMIT ${maxRows}
+        `);
+
+        const sampledResult = await conn.query(`SELECT COUNT(*) as count FROM ${workingTable}`);
+        const sampledRow = sampledResult.get(0);
+        actualRows = sampledRow ? Number(sampledRow['count']) : 0;
+        sampleStrategy = 'memory-based';
+
+        logger.log('DuckDB', `✅ 采样完成`, {
+            data: {
+                原始: totalRows,
+                采样后: actualRows,
+                采样率: `${((actualRows / totalRows) * 100).toFixed(1)}%`
+            }
+        });
+    } else {
+        // Step 3.5: 不需要采样，创建working表（完整副本）
+        await conn.query(`CREATE TABLE ${workingTable} AS SELECT * FROM ${originalTable}`);
+
+        logger.log('DuckDB', `✅ 无需采样`, {
+            data: {
+                行数: totalRows,
+                列数: columnCount,
+                原因: '数据量在内存评估范围内'
+            }
+        });
+    }
 
     if (onProgress) onProgress(100);
     const time = (performance.now() - start).toFixed(2);
     logger.log('DuckDB', '双表创建完成', { data: `${file.name}`, duration: Number(time) });
 
-    // 6. 获取 Schema 和行数（从 working 表查询）
-    const info = await conn.query(`SELECT count(*) as c FROM ${workingTable}`);
-    const infoRow = info.get(0);
-    const actualRows = infoRow ? Number(infoRow['c']) : 0;
-
-    // 获取列信息
+    // 4. 获取列信息（从 working 表）
     const schemaWait = await conn.query(`DESCRIBE ${workingTable}`);
     const columns: ColumnMetadata[] = [];
     for (let i = 0; i < schemaWait.numRows; i++) {
@@ -163,9 +238,11 @@ export async function ingestCSV(
 
     // 返回 working 表名（所有后续操作都使用 working 表）
     return {
-        tableName: workingTable, // 重要：返回 working 表名
+        tableName: workingTable,
         rowCount: actualRows,
+        originalRowCount: totalRows,  // 🆕 保留原始行数
         isSampled: shouldSample,
+        sampleStrategy,  // 🆕 标记策略
         columns
     };
 }

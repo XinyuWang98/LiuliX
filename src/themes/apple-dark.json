@@ -9,8 +9,8 @@
         "--bg-hover": "rgba(58, 58, 60, 0.5)",
         "--hover-bg": "rgba(255, 255, 255, 0.1)",
         "--text-primary": "#FFFFFF",
-        "--text-secondary": "#8E8E93",
-        "--text-tertiary": "#48484A",
+        "--text-secondary": "#A1A1A6",
+        "--text-tertiary": "#6C6C70",
         "--primary": "#0A84FF",
         "--primary-light": "rgba(10, 132, 255, 0.15)",
         "--primary-hover": "#409CFF",
@@ -70,6 +70,7 @@
         "--grid-header-z": "10",
         "--scrollbar-thumb": "rgba(100, 100, 100, 0.4)",
         "--scrollbar-thumb-hover": "rgba(120, 120, 120, 0.6)",
-        "--scrollbar-track": "rgba(50, 50, 50, 0.3)"
+        "--scrollbar-track": "rgba(50, 50, 50, 0.3)",
+        "--bg-code-block": "#1C1C1E"
     }
 }

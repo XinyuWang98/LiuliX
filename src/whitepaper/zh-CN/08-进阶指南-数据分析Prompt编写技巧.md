@@ -1,10 +1,12 @@
-# 🧠 进阶指南：数据分析 Prompt 编写技巧
+# 8. 进阶指南：数据分析 Prompt 编写技巧
+
+> **最后更新**: 2026-01-13
 
 虽然 LiuliX 的 AI 能够自动理解数据，但高质量的 Prompt (提示词) 能显著提升分析的深度与准确性。
 
 ---
 
-## 💡 编写原则
+## 编写原则
 
 要让 AI 生成准确的 SQL 或 Pandas 代码，遵循 **"Context-Task-Constraint"** 框架：
 
@@ -14,15 +16,15 @@
 
 ### 示例对比
 
-❌ **Bad Prompt:**
+**Bad Prompt:**
 "分析一下销售额。"
 
-✅ **Good Prompt:**
+**Good Prompt:**
 "作为电商分析师 (Context)，请计算各地区的月度销售总额和环比增长率 (Task)。结果请保留两位小数，并按销售额降序排列 (Constraint)。"
 
 ---
 
-## 🧩 反幻觉机制 (Anti-Hallucination)
+## 反幻觉机制 (Anti-Hallucination)
 
 LiuliX 在系统层面设计了多重防护网来减少 AI 幻觉：
 
@@ -35,7 +37,7 @@ LiuliX 在系统层面设计了多重防护网来减少 AI 幻觉：
 
 ---
 
-## 📝 常用 Prompt 模板
+## 常用 Prompt 模板
 
 ### 异常检测
 > "请扫描 `amount` 列，找出超出 3 倍标准差的异常交易记录，并列出其 `transaction_id` 和发生时间。"

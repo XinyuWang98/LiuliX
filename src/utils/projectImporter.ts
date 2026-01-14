@@ -3,20 +3,17 @@ import { createProject, Project } from './projectUtils';
 import { DuckDBEngine } from '../db/duckdbEngine';
 import { pyodideManager } from '../services/PyodideManager';
 import { logger } from './logger';
+import { globalT } from '@/contexts/I18nContext';
 
 /**
  * 处理上传的文件数据，执行 DuckDB/Pyodide 摄取，并创建项目对象
  * @param filesData 解析后的文件数据
  * @param sampledFlags 采样标记
- * @param languageCode 当前语言
- * @param themeTranslations 主题翻译
  * @returns 创建的项目对象
  */
 export async function ingestFilesAndCreateProject(
     filesData: ParsedFileData[],
-    sampledFlags: boolean[],
-    languageCode: 'zh-CN' | 'en-US',
-    themeTranslations: Record<string, string>
+    sampledFlags: boolean[]
 ): Promise<Project> {
     const engine = DuckDBEngine.getInstance();
 
@@ -40,13 +37,20 @@ export async function ingestFilesAndCreateProject(
                     autoSampleThreshold: 200000
                 });
 
-                // 更新文件数据中的表信息
+                // 更新文件数据中的表信息（采样信息需要在顶层才能被ProjectCard读取）
                 (fileData as any).data = {
                     tableName: result.tableName,
                     columns: result.columns || [],
                     rowCount: result.rowCount,
-                    isSampled: result.isSampled
+                    isSampled: result.isSampled,
+                    originalRowCount: result.originalRowCount
                 };
+
+                // 🔧 关键修复：同时更新fileData顶层的采样信息（ProjectCard从这里读取）
+                (fileData as any).isSampled = result.isSampled;
+                (fileData as any).rowCount = result.rowCount;
+                (fileData as any).originalRowCount = result.originalRowCount;
+
                 fileData.tableName = result.tableName;
 
                 logger.log('DuckDB', 'CSV导入成功', { data: { table: result.tableName, rows: result.rowCount } });
@@ -57,7 +61,23 @@ export async function ingestFilesAndCreateProject(
     }
 
     // 创建项目对象（不等待Pyodide）
-    const newProject = createProject(filesData, sampledFlags, languageCode, themeTranslations);
+    // 使用 globalT 构建翻译对象，忽略传入的旧参数
+    const projectTranslations = {
+        suffix: globalT('dataSource.project.suffix'),
+        dataProject: globalT('dataSource.project.dataProject'),
+        untitled: globalT('dataSource.project.untitled'),
+        defaultData: globalT('dataSource.project.themes.data'),
+        themes: {
+            game: globalT('dataSource.project.themes.game'),
+            sales: globalT('dataSource.project.themes.sales'),
+            finance: globalT('dataSource.project.themes.finance'),
+            analytics: globalT('dataSource.project.themes.analytics'),
+            user: globalT('dataSource.project.themes.user'),
+            data: globalT('dataSource.project.themes.data'),
+        }
+    };
+
+    const newProject = createProject(filesData, sampledFlags, projectTranslations);
 
     // 2. Pyodide Loading - 后台异步加载（不阻塞返回）
     loadFilesToPyodideAsync(filesData).catch(err => {

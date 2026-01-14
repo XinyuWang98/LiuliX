@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ThemeSchema } from '@/types/theme';
 
+// Force HMR update
+
 // 导入主题配置
 import appleDarkTheme from '../themes/apple-dark.json';
 import appleLightTheme from '../themes/apple-light.json';

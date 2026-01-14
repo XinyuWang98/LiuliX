@@ -64,6 +64,14 @@ export interface LanguageConfig {
             settings: string;
             user: string;
             theme: string;
+            whitepaper: string;
+            help?: string; // 暂时可选（en-US 可能暂缺）
+            docs?: string; // 可选
+        };
+
+        footer: {
+            resources: string;
+            community: string;
         };
 
         // Header (New)
@@ -114,6 +122,8 @@ export interface LanguageConfig {
         language: {
             title: string;
             priority: string;
+            zh: string;
+            en: string;
         };
 
 
@@ -308,6 +318,7 @@ export interface LanguageConfig {
                 balancedMode: string;
                 balancedModeBadge: string;
                 balancedModeDesc: string;
+                balancedModeDynamic: string;
                 preciseMode: string;
                 preciseModeBadge: string;
                 preciseModeDesc: string;
@@ -378,9 +389,27 @@ export interface LanguageConfig {
             // MVP阶段功能限制
             mvpNotAvailable: string;
 
-            // 语言名称
             langZhCN: string;
             langEnUS: string;
+
+            // 通用标签
+            common: {
+                default: string;
+            };
+        };
+
+        // 白皮书
+        whitepaper: {
+            nav: {
+                intro: string;
+                ollamaGuide: string;
+                apiKey: string;
+                dataSanitization: string;
+                architecture: string;
+                localFirst: string;
+                writingGuide: string;
+                promptEngineering: string;
+            };
         };
 
         // Prompt 库
@@ -460,6 +489,8 @@ export interface LanguageConfig {
             connectDatabase: string;
             createProject: string;
             project: {
+                suffix: string;
+                dataProject: string;
                 untitled: string;
                 rename: string;
                 delete: string;
@@ -491,6 +522,8 @@ export interface LanguageConfig {
             uploading: string;
             uploadingProgress: string;
             supportedFormats: string;
+            supportedFormatsWithLimit: string;
+            deviceAdaptive: string;
             largeFileTitle: string;
             largeFileMessage: string;
             batchLargeFiles: string;
@@ -512,6 +545,25 @@ export interface LanguageConfig {
             errorCorrupted: string;
             errorGeneric: string;
             inputPlaceholder: string;
+
+            // 设备策略展示
+            deviceStrategy: {
+                title: string;
+                memoryTier: string;
+                fileLimit: string;
+                maxRows: string;
+                concurrency: string;
+                tierLow: string;
+                tierStandard: string;
+                tierMainstream: string;
+                tierHighPerf: string;
+                tierFlagship: string;
+                tierUltimate: string;
+                maxRowsValue: string;
+                concurrencyValue: string;
+                inferenceTime: string;
+                estimatedTime: string;
+            };
         };
 
         // 主题
@@ -530,831 +582,900 @@ export interface LanguageConfig {
                 title: string;
                 subtitle: string;
                 uploadButton: string;
-                trustBadges: {
-                    local: string;
-                    offline: string;
-                    desktop: string;
-                };
-            };
-            // Trust & Safety Cards
-            valueProps: {
-                privacy: { title: string; desc: string };
-                safety: { title: string; desc: string };
-                control: { title: string; desc: string };
-            };
-            // Feature Highlights
-            featureHighlights: {
-                sectionTitle: string;
-                zeroSetup: { title: string; desc: string; label: string };
-                audit: { title: string; desc: string; label: string };
-                report: { title: string; desc: string; label: string };
-            };
-            // Roadmap
-            roadmap: {
-                sectionTitle: string;
-                sectionDescription: string;
-                v1: {
-                    version: string;
-                    label: string;
-                    subtitle: string;
-                    feature1: string;
-                    feature2: string;
-                    feature3: string;
-                };
-                v15: {
-                    version: string;
-                    label: string;
-                    subtitle: string;
-                    feature1: string;
-                    feature2: string;
-                    feature3: string;
-                };
-                v2: {
-                    version: string;
-                    label: string;
-                    subtitle: string;
-                    feature1: string;
-                    feature2: string;
-                    feature3: string;
-                };
-            };
-
-            // Community - 社区互动区域
-            community: {
-                title: string;
-                subtitle: string;
-                discordTitle: string;
-                discordDesc: string;
-                joinDiscord: string;
-                githubTitle: string;
-                githubDesc: string;
-                starGithub: string;
-            };
-
-            // Legacy fields
-            heroTitle?: string;
-            heroSubtitle?: string;
-            title: string;
-            prefix?: string;
-            subtitle?: string;
-            p0Completed: string;
-            features: {
-                typeSystem: string;
-                cssVariables: string;
-                themes: string;
-                promptLibrary: string;
-                projectConfig: string;
-                themeSwitch: string;
-                fileUpload: string;
-            };
-            functionsTitle: string;
-            functions: {
-                supportFormats: string;
-                dragUpload: string;
-                largeFileDetection: string;
+                uploadingProgress: string;
+                supportedFormats: string;
+                supportedFormatsWithLimit: string;
+                deviceAdaptive: string;
+                largeFileTitle: string;
+                largeFileMessage: string;
+                batchLargeFiles: string;
+                batchSampleHint: string;
                 sampleRatio: string;
-            };
-            uploadButton?: string;
-            feature1?: string;
-            feature2?: string;
-            feature3?: string;
-        };
+                sampleResult: string;
+                forceImport: string;
+                startSample: string;
+                applyToAll: string;
+                processingFile: string;
+                rows: string;
+                columns: string;
+                sampled: string;
+                parseError: string;
+                filesUploaded: string;
+                maxFilesExceeded: string;
+                filesFailed: string;
+                errorUnsupportedType: string;
+                errorCorrupted: string;
+                errorGeneric: string;
+                inputPlaceholder: string;
 
-        // AI工坊
-        workshop: {
-            title: string;
-            cleaning: string;
-            cleaningDesc: string;
-            exploration: string;
-            explorationDesc: string;
-            dataExploration: string;
-            hypothesis: string;
-            hypothesisDesc: string;
-            suggestions: string;
-            suggestionsDesc: string;
-            tools: {
-                cleaning: {
+                // 设备策略展示
+                deviceStrategy: {
                     title: string;
-                    desc: string;
-                    action: string;
-                };
-                exploration: {
-                    title: string;
-                    desc: string;
-                    action: string;
-                };
-                hypothesis: {
-                    title: string;
-                    desc: string;
-                    action: string;
-                };
-                suggestions: {
-                    title: string;
-                    desc: string;
-                    action: string;
+                    memoryTier: string;
+                    fileLimit: string;
+                    maxRows: string;
+                    concurrency: string;
+                    tierLow: string;
+                    tierStandard: string;
+                    tierMainstream: string;
+                    tierHighPerf: string;
+                    tierFlagship: string;
+                    tierUltimate: string;
+                    maxRowsValue: string;
+                    concurrencyValue: string;
+                    推理时间: string;
+                    inferenceTime: string;
+                    estimatedTime: string;
                 };
             };
-            mindMap: string;
-            mindMapDesc: string;
-            voiceReport: string;
-            voiceReportDesc: string;
-            pptReport: string;
-            pptReportDesc: string;
-            assessment: string;
-        };
 
-        // 数据清洗
-        cleaning: {
-            title: string;
-            currentTable: string;
-            dedup: string;
-            fillNull: string;
-            normalize: string;
-            dropEmpty: string;
-            sqlPlaceholder: string;
-            runSQL: string;
-            intentDedup: string;
-            intentFillNull: string;
-            intentNormalize: string;
-            intentDropEmpty: string;
-            defaultReason: string;
-            ignore: string;
-            requirements: string;
-            moreFiles: string;
-
-            // DataCleaner 增强功能键
-            aiSuggestions: string;
-            cleaningSuggestions: string;
-            collapse: string;
-            expandMore: string;
-            expandSql: string;
-            collapseSql: string;
-            applySelected: string;
-            analyzing: string;
-            noSuggestions: string;
-            promptLib: string;
-            recommend: string;
-            promptStandardizeDate: string;
-            reasonDate: string;
-            removeDuplicates: string;
-            history: string;
-            noHistory: string;
-            applied: string;
-            unknownAction: string;
-            unknownColumn: string;
-            currentFile: string;
-            switchFile: string;
-            noData: string;
-            rowsCount: string;
-            columnFilter: string;
-            statsDistribution: string;
-
-            // 清洗操作描述文本
-            actionDropColumn: string;
-            actionDedup: string;
-            actionFillMissing: string;
-
-            // AI建议文本
-            suggFillMissing: string;
-            suggFillReason: string;
-            suggDropColumn: string;
-            suggDropReason: string;
-            suggDedup: string;
-            suggDedupReason: string;
-
-            // 证据池标签
-            tagDedup: string;
-            tagFillMissing: string;
-            tagDropColumn: string;
-            tagPromptLib: string;
-            tagRuleSuggestion: string;
-
-            // 重新开始功能
-            resetAll: string;
-            resetConfirm: string;
-            resetSuccess: string;
-            resetting: string;
-            resetConfirmTitle: string;
-            resetConfirmMessage: string;
-            resetConfirmOk: string;
-            resetConfirmCancel: string;
-            searchColumns: string;
-            // 建议类型名称
-            catDeduplication: string;
-            catDropEmpty: string;
-            catFillMissing: string;
-            catTypeConversion: string;
-            catNormalize: string;
-            catFill: string;
-            catExperimental: string;
-            applySuccess: string;
-            // 展开按钮
-            showMore: string;
-            showLess: string;
-            moreCount: string;
-            selectAll: string;
-            deselectAll: string;
-
-            // AI清洗建议
-            aiMode: string;
-            ruleMode: string;
-            desensitizing: string;
-            generatingSuggestions: string;
-            validatingSuggestions: string;
-            aiFailed: string;
-            suggestionValidated: string;
-            suggestionFiltered: string;
-            expectedImpact: string;
-            affectedRows: string;
-            qualityScore: string;
-
-            // 校验错误提示
-            validationError: {
-                jsonFormat: string;
-                missingSuggestions: string;
-                missingField: string;
-                invalidType: string;
-                confidenceOutOfRange: string;
-                forbiddenKeyword: string;
-                tableNotReferenced: string;
-                invalidSqlType: string;
-                syntaxError: string;
-                dryRunFailed: string;
+            // 主题
+            themes: {
+                "apple-dark": string;
+                "apple-light": string;
+                neufuture: string;
+                professional: string;
+                minimal: string;
             };
 
-            // Prompt模板
-            datasetOverview: string;
-            columnDetails: string;
-            qualityIssues: string;
-            dataIntegrity: string;
-            dataConsistency: string;
-            dataFormat: string;
-            outputFormat: string;
+            // 欢迎页面
+            welcome: {
+                // Hero Section
+                hero: {
+                    title: string;
+                    subtitle: string;
+                    uploadButton: string;
+                    trustBadges: {
+                        local: string;
+                        offline: string;
+                        desktop: string;
+                    };
+                };
+                // Trust & Safety Cards
+                valueProps: {
+                    privacy: { title: string; desc: string };
+                    safety: { title: string; desc: string };
+                    control: { title: string; desc: string };
+                };
+                // Feature Highlights
+                featureHighlights: {
+                    sectionTitle: string;
+                    zeroSetup: { title: string; desc: string; label: string };
+                    audit: { title: string; desc: string; label: string };
+                    report: { title: string; desc: string; label: string };
+                };
+                // Roadmap
+                roadmap: {
+                    sectionTitle: string;
+                    sectionDescription: string;
+                    v1: {
+                        version: string;
+                        label: string;
+                        subtitle: string;
+                        feature1: string;
+                        feature2: string;
+                        feature3: string;
+                    };
+                    v15: {
+                        version: string;
+                        label: string;
+                        subtitle: string;
+                        feature1: string;
+                        feature2: string;
+                        feature3: string;
+                    };
+                    v2: {
+                        version: string;
+                        label: string;
+                        subtitle: string;
+                        feature1: string;
+                        feature2: string;
+                        feature3: string;
+                    };
+                };
 
-            // 自动预加载相关
-            checkDataQuality: string;
-            largeFileHint: string;
-            suggRemoveDuplicates: string;
-            tagAISuggestion: string;
-            recommendPercent: string;
-            generateAI: string;
-            refreshAI: string;
-            suggDropColumnSimple: string;
-            suggFillZero: string;
-            suggFillUnknown: string;
-            suggFillMedian: string;
-            suggFillMode: string;
-            // ✅ 新增字段（修复英语环境显示中文问题）
-            tryAI: string;
-            dataGood: string;
-            allApplied: string;
-            serviceUnavailable: string;
-            aiProgressThink: string;
-            aiProgressAnalyzing: string;
-            aiProgressGenerating: string;
-            aiProgressValidating: string;
-            aiProgressFinalizing: string;
-            processing: string;
-            sqlWarning: string;
-        };
+                // Community - 社区互动区域
+                community: {
+                    title: string;
+                    subtitle: string;
+                    discordTitle: string;
+                    discordDesc: string;
+                    joinDiscord: string;
+                    githubTitle: string;
+                    githubDesc: string;
+                    starGithub: string;
+                };
 
-        quality: {
-            title: string;
-            score: string;
-            issues: string;
-            noData: string;
-            missingValues: string;
-            duplicates: string;
-            good: string;
-            needsReviews: string;
-            criticalIssues: string;
-            clickToImprove: string;
-            healthScore: string;
-        };
-
-        // 工作流
-        workflow: {
-            upload: string;
-            cleaning: string;
-            hypothesis: string;
-            insights: string;
-            report: string;
-        };
-
-        // 洞察链
-        insightChain: {
-            title: string;
-            loading: string;
-            loadingHypothesis: string;
-            noHypotheses: string;
-            noInsights: string;
-            initializing: string;
-            waitingForData: string;
-            readyHint: string;
-            generateHypothesis: string;
-            customHypothesis: string;
-            customPlaceholder: string;
-            submit: string;
-            adopt: string;
-            ignore: string;
-            adopted: string;
-            ignored: string;
-            viewCode: string;
-            copyCode: string;
-            codeCopied: string;
-            conclusion: string;
-            analysisMethod: string;
-            dataSource: string;
-            selectHypothesis: string;
-            or: string;
-            analyzing: string;  // 正在执行洞察分析
-            results: string;    // 洞察结果标题
-            generatingInsight?: string; // 正在生成洞察
-        };
-
-        // 森林式下钻交互
-        insight: {
-            recommendedAction: string;   // AI推荐
-            recommendedActions: string;  // 推荐分析
-            customAnalysis: string;      // 自选分析
-            selectMethod: string;        // 选择分析方法
-            selectColumn: string;        // 选择列
-            selectColumn2: string;       // 选择第二列
-            pleaseSelect: string;        // 请选择
-            execute: string;             // 执行
-            analyzing: string;           // 正在分析
-            viewCode: string;            // 查看代码
-            drillDown: string;           // 下钻分析
-            maxDepthReached: string;     // 已达到最大下钻深度
-        };
-
-        // 数据表格
-        grid: {
-            loading: string;
-            loadStatsFailed: string;
-            loadDataFailed: string;
-            nullRate: string;
-            uniqueValues: string;
-            missingPercent: string;
-            selectedColumns: string;
-            selectColumns: string;
-            clickToExpand: string;
-            clickToCollapse: string;
-            distribution: string;
-            value: string;
-            count: string;
-            selectAll: string;
-            deselectAll: string;
-            dataType: {
-                setAs: string;
-                integer: string;
-                double: string;
-                string: string;
-                boolean: string;
-                date: string;
-                timestamp: string;
-                modifying: string;
-                success: string;
-                failed: string;
+                // Legacy fields
+                heroTitle?: string;
+                heroSubtitle?: string;
+                title: string;
+                prefix?: string;
+                subtitle?: string;
+                p0Completed: string;
+                features: {
+                    typeSystem: string;
+                    cssVariables: string;
+                    themes: string;
+                    promptLibrary: string;
+                    projectConfig: string;
+                    themeSwitch: string;
+                    fileUpload: string;
+                };
+                functionsTitle: string;
+                functions: {
+                    supportFormats: string;
+                    dragUpload: string;
+                    largeFileDetection: string;
+                    sampleRatio: string;
+                };
+                uploadButton?: string;
+                feature1?: string;
+                feature2?: string;
+                feature3?: string;
             };
-        };
 
-        // 分页器
-        pagination: {
-            prev: string;
-            next: string;
-            page: string;
-            of: string;
-            totalPages: string;
-            totalRows: string;
-            rows: string;
-        };
+            // AI工坊
+            workshop: {
+                title: string;
+                cleaning: string;
+                cleaningDesc: string;
+                exploration: string;
+                explorationDesc: string;
+                dataExploration: string;
+                hypothesis: string;
+                hypothesisDesc: string;
+                suggestions: string;
+                suggestionsDesc: string;
+                tools: {
+                    cleaning: {
+                        title: string;
+                        desc: string;
+                        action: string;
+                    };
+                    exploration: {
+                        title: string;
+                        desc: string;
+                        action: string;
+                    };
+                    hypothesis: {
+                        title: string;
+                        desc: string;
+                        action: string;
+                    };
+                    suggestions: {
+                        title: string;
+                        desc: string;
+                        action: string;
+                    };
+                };
+                mindMap: string;
+                mindMapDesc: string;
+                voiceReport: string;
+                voiceReportDesc: string;
+                pptReport: string;
+                pptReportDesc: string;
+                assessment: string;
+            };
 
-        // 数据探索流
-        exploration: {
-            title: string;
-            addBlock: string;
-            placeholder: string;
-            searchPlaceholder: string;
-            chatPlaceholder: string;
-            noContent: string;
-            actions: {
+            // 数据清洗
+            cleaning: {
+                title: string;
+                currentTable: string;
+                dedup: string;
+                fillNull: string;
+                normalize: string;
+                dropEmpty: string;
+                sqlPlaceholder: string;
+                runSQL: string;
+                intentDedup: string;
+                intentFillNull: string;
+                intentNormalize: string;
+                intentDropEmpty: string;
+                defaultReason: string;
+                ignore: string;
+                requirements: string;
+                moreFiles: string;
+
+                // DataCleaner 增强功能键
+                aiSuggestions: string;
+                cleaningSuggestions: string;
                 collapse: string;
-                expand: string;
-                collapseNotebook: string;
-                expandNotebook: string;
-                pin: string;
-                unpin: string;
-                quote: string;
-                addToEvidence: string;
-                moveUp: string;
-                delete: string;
+                expandMore: string;
+                expandSql: string;
+                collapseSql: string;
+                applySelected: string;
+                analyzing: string;
+                noSuggestions: string;
+                promptLib: string;
+                recommend: string;
+                promptStandardizeDate: string;
+                reasonDate: string;
+                removeDuplicates: string;
+                history: string;
+                noHistory: string;
+                applied: string;
+                unknownAction: string;
+                unknownColumn: string;
+                currentFile: string;
+                switchFile: string;
+                noData: string;
+                rowsCount: string;
+                columnFilter: string;
+                statsDistribution: string;
+
+                // 清洗操作描述文本
+                actionDropColumn: string;
+                actionDedup: string;
+                actionFillMissing: string;
+
+                // AI建议文本
+                suggFillMissing: string;
+                suggFillReason: string;
+                suggDropColumn: string;
+                suggDropReason: string;
+                suggDedup: string;
+                suggDedupReason: string;
+
+                // 证据池标签
+                tagDedup: string;
+                tagFillMissing: string;
+                tagDropColumn: string;
+                tagPromptLib: string;
+                tagRuleSuggestion: string;
+
+                // 重新开始功能
+                resetAll: string;
+                resetConfirm: string;
+                resetSuccess: string;
+                resetting: string;
+                resetConfirmTitle: string;
+                resetConfirmMessage: string;
+                resetConfirmOk: string;
+                resetConfirmCancel: string;
+                searchColumns: string;
+                // 建议类型名称
+                catDeduplication: string;
+                catDropEmpty: string;
+                catFillMissing: string;
+                catTypeConversion: string;
+                catNormalize: string;
+                catFill: string;
+                catExperimental: string;
+                applySuccess: string;
+                // 展开按钮
+                showMore: string;
+                showLess: string;
+                moreCount: string;
+                selectAll: string;
+                deselectAll: string;
+
+                // AI清洗建议
+                aiMode: string;
+                ruleMode: string;
+                desensitizing: string;
+                generatingSuggestions: string;
+                validatingSuggestions: string;
+                aiFailed: string;
+                suggestionValidated: string;
+                suggestionFiltered: string;
+                expectedImpact: string;
+                affectedRows: string;
+                qualityScore: string;
+
+                // 校验错误提示
+                validationError: {
+                    jsonFormat: string;
+                    missingSuggestions: string;
+                    missingField: string;
+                    invalidType: string;
+                    confidenceOutOfRange: string;
+                    forbiddenKeyword: string;
+                    tableNotReferenced: string;
+                    invalidSqlType: string;
+                    syntaxError: string;
+                    dryRunFailed: string;
+                };
+
+                // Prompt模板
+                datasetOverview: string;
+                columnDetails: string;
+                qualityIssues: string;
+                dataIntegrity: string;
+                dataConsistency: string;
+                dataFormat: string;
+                outputFormat: string;
+
+                // 自动预加载相关
+                checkDataQuality: string;
+                largeFileHint: string;
+                suggRemoveDuplicates: string;
+                tagAISuggestion: string;
+                recommendPercent: string;
+                generateAI: string;
+                refreshAI: string;
+                suggDropColumnSimple: string;
+                suggFillZero: string;
+                suggFillUnknown: string;
+                suggFillMedian: string;
+                suggFillMode: string;
+                // ✅ 新增字段（修复英语环境显示中文问题）
+                tryAI: string;
+                dataGood: string;
+                allApplied: string;
+                serviceUnavailable: string;
+                aiProgressThink: string;
+                aiProgressAnalyzing: string;
+                aiProgressGenerating: string;
+                aiProgressValidating: string;
+                aiProgressFinalizing: string;
+                processing: string;
+                sqlWarning: string;
             };
-            blocks: {
+
+            quality: {
+                title: string;
+                score: string;
+                issues: string;
+                noData: string;
+                missingValues: string;
+                duplicates: string;
+                good: string;
+                needsReviews: string;
+                criticalIssues: string;
+                clickToImprove: string;
+                healthScore: string;
+            };
+
+            // 工作流
+            workflow: {
                 upload: string;
                 cleaning: string;
                 hypothesis: string;
                 insights: string;
                 report: string;
-                chat: string;
             };
-            sections: {
-                projects: string;
+
+            // 洞察链
+            insightChain: {
+                title: string;
+                loading: string;
+                loadingHypothesis: string;
+                noHypotheses: string;
+                noInsights: string;
+                initializing: string;
+                waitingForData: string;
+                readyHint: string;
+                generateHypothesis: string;
+                customHypothesis: string;
+                customPlaceholder: string;
+                submit: string;
+                adopt: string;
+                ignore: string;
+                adopted: string;
+                ignored: string;
+                viewCode: string;
+                copyCode: string;
+                codeCopied: string;
+                conclusion: string;
+                analysisMethod: string;
+                dataSource: string;
+                selectHypothesis: string;
+                or: string;
+                analyzing: string;  // 正在执行洞察分析
+                results: string;    // 洞察结果标题
+                generatingInsight?: string; // 正在生成洞察
+            };
+
+            // 森林式下钻交互
+            insight: {
+                recommendedAction: string;   // AI推荐
+                recommendedActions: string;  // 推荐分析
+                sampling?: {
+                    badge: string;
+                    tooltip: string;
+                    unknown: string;
+                };
+                customAnalysis: string;      // 自选分析
+                selectMethod: string;        // 选择分析方法
+                selectColumn: string;        // 选择列
+                selectColumn2: string;       // 选择第二列
+                pleaseSelect: string;        // 请选择
+                execute: string;             // 执行
+                analyzing: string;           // 正在分析
+                viewCode: string;            // 查看代码
+                drillDown: string;           // 下钻分析
+                maxDepthReached: string;     // 已达到最大下钻深度
+            };
+
+            // 数据表格
+            grid: {
+                loading: string;
+                loadStatsFailed: string;
+                loadDataFailed: string;
+                nullRate: string;
+                uniqueValues: string;
+                missingPercent: string;
+                selectedColumns: string;
+                selectColumns: string;
+                clickToExpand: string;
+                clickToCollapse: string;
+                distribution: string;
+                value: string;
+                count: string;
+                selectAll: string;
+                deselectAll: string;
+                dataType: {
+                    setAs: string;
+                    integer: string;
+                    double: string;
+                    string: string;
+                    boolean: string;
+                    date: string;
+                    timestamp: string;
+                    modifying: string;
+                    success: string;
+                    failed: string;
+                };
+            };
+
+            // 分页器
+            pagination: {
+                prev: string;
+                next: string;
+                page: string;
+                of: string;
+                totalPages: string;
+                totalRows: string;
+                rows: string;
+            };
+
+            // 数据探索流
+            exploration: {
+                title: string;
+                addBlock: string;
+                placeholder: string;
+                searchPlaceholder: string;
+                chatPlaceholder: string;
+                noContent: string;
+                actions: {
+                    collapse: string;
+                    expand: string;
+                    collapseNotebook: string;
+                    expandNotebook: string;
+                    pin: string;
+                    unpin: string;
+                    quote: string;
+                    addToEvidence: string;
+                    moveUp: string;
+                    delete: string;
+                };
+                blocks: {
+                    upload: string;
+                    cleaning: string;
+                    hypothesis: string;
+                    insights: string;
+                    report: string;
+                    chat: string;
+                };
+                sections: {
+                    projects: string;
+                    cleaning: string;
+                    insights: string;
+                    report: string;
+                };
+                project: {
+                    grid: {
+                        title: string;
+                    };
+                    context: {
+                        rename: string;
+                        delete: string;
+                    };
+                    card: {
+                        fileCount: string;
+                        filesLabel: string;
+                        nearLimit: string;
+                        uploadNew: string;
+                    };
+                };
+            };
+
+            // 证据池
+            evidence: {
+                title: string;
+                noRecords: string;
+                noRecordsHint: string;
+                clearAll: string;
+                pin: string;
+                unpin: string;
+                delete: string;
+                adopt: string;
+                adopted: string;
+                affectedRows: string;
+                rowsChanged: string;
+                type: {
+                    cleaning: string;
+                    analysis: string;
+                    insight: string;
+                    visualization: string;
+                    insightChain: string;
+                };
+            };
+
+            // 报告生成器
+            report: {
+                title: string;
+                tabs: {
+                    notebook: string;
+                    evidence: string;
+                };
+                copy: string;
+                copied: string;
+                download: string;
+                copyToClipboard: string;
+                downloadMarkdown: string;
+                downloadPdf: string;
+                noRecords: string;
+                noRecordsHint: string;
+                noInsightChain: string;
+                totalRecords: string;
+                cleaningOps: string;
+                insights: string;
+                evidenceAdopted: string;
+                hideNotebook: string;
+                showNotebook: string;
+                useNewWorkbench: string;
+                previewHint: string;
+                aiAssistant: string;
+                evidenceCollected: string;
+                hypothesis: string;
+                conclusion: string;
+                viewCode: string;
+                overallConclusion: string;
+                basedOnInsights: string;
+                suggestion1: string;
+                suggestion2: string;
+                suggestion3: string;
+                // Markdown 报告生成相关
+                generatedAt: string;
+                dataSource: string;
+                sampleData: string;
+                recordsUnit: string;
+                cleaningSection: string;
+                analysisSection: string;
+                insightsSection: string;
+                visualizationSection: string;
+                timestamp: string;
+                operationType: string;
+                description: string;
+                tags: string;
+                analysisResult: string;
+                analysisSql: string;
+                detailInfo: string;
+                nextSteps: string;
+                upgradeRoadmap: string;
+                roadmapHtml: string;
+                roadmapCharts: string;
+                roadmapThemes: string;
+                roadmapExport: string;
+                generatedBy: string;
+
+                // V0 双角色报告新增
+                notebook: {
+                    title: string;
+                    copyCell: string;
+                    copyAllToColab: string;
+                    runDisabled: string;
+                    runDisabledTip: string;
+                    copyCode: string;
+                    codeCopied: string;
+                    defaultTitle: string;
+                    defaultSigner: string;
+                    viewMode: {
+                        pure: string;
+                        enhanced: string;
+                        pureHint: string;
+                        enhancedHint: string;
+                    };
+                };
+
+                audit: {
+                    pending: string;
+                    approved: string;
+                    rejected: string;
+                    markApproved: string;
+                    markRejected: string;
+                    addNote: string;
+                    progress: string;
+                    signReport: string;
+                    reportSigned: string;
+                    signedBy: string;
+                    signedAt: string;
+                    reportLocked: string;
+                    unlockAndReaudit: string;
+                    confirmSign: string;
+                    signConfirmMessage: string;
+                    allCellsReviewed: string;
+                    issueType: string;
+                    issueSqlLogic: string;
+                    issueDataAnomaly: string;
+                    issueChartInaccurate: string;
+                    issueConclusion: string;
+                    note: string;
+                    submit: string;
+                };
+
+                export: {
+                    download: string;
+                    downloadIpynb: string;
+                    successIpynb: string;
+                    uploadToColab: string;
+                    exportDisabled: string;
+                    exportPDF: string;
+                    exportMarkdown: string;
+                    needSignFirst: string;
+                    colabInstructions: string;
+                    downloadHTML: string;
+                    successMarkdown: string;
+                    successHTML: string;
+                };
+
+                mode: {
+                    notebook: string;
+                    report: string;
+                    switchTo: string;
+                },
+
+                actions: {
+                    showCode: string;
+                    hideCode: string;
+                },
+
+                status: {
+                    notSignedYet: string;
+                    canPreviewNoExport: string;
+                };
+                // Phase 1: 左右分栏新增
+                annotation: {
+                    placeholder: string;
+                };
+                code: {
+                    title: string;
+                    lines: string;
+                };
+                cell: {
+                    defaultTitle: string;
+                };
+                globalSetup: {
+                    title: string;
+                    collapsed: string;
+                    lines: string;
+                };
+            };
+
+            // AI成本提示
+            aiCost: {
+                title: string;
+                fileCount: string;
+                estimatedCalls: string;
+                quotaInsufficient: string;
+                quotaRemaining: string;
+                configureAPI: string;
+                confirmProceed: string;
+                costSavingTip: string;
+            };
+
+            // AI重试
+            aiRetry: {
+                title: string;
+                retryButton: string;
+                retrying: string;
+                failed: string;
+                staleHint: string;
+                noSuggestionsHint: string;
+            };
+
+            // 本地模型进度
+            localModel: {
+                init: string;
+                downloadHint: string;
+                status: {
+                    loading: string;
+                    fetching: string;
+                    processing: string;
+                    ready: string;
+                    unknown: string;
+                    loadingFromCache: string;
+                    downloading: string;
+                    finish: string;
+                };
+            };
+
+            // 分析能力包
+            packages: {
+                basic: {
+                    name: string;
+                    sizeEstimate: string;
+                    methods: {
+                        distribution: { name: string; desc: string };
+                        correlation: { name: string; desc: string };
+                        trend: { name: string; desc: string };
+                        stats: { name: string; desc: string };
+                        groupby: { name: string; desc: string };
+                        topn: { name: string; desc: string };
+                        missing: { name: string; desc: string };
+                        outlier: { name: string; desc: string };
+                        crosstab: { name: string; desc: string };
+                    };
+                };
+                sklearn: {
+                    name: string;
+                    sizeEstimate: string;
+                    methods: {
+                        cluster: { name: string; desc: string };
+                        decisionTree: { name: string; desc: string };
+                    };
+                };
+                statsmodels: {
+                    name: string;
+                    sizeEstimate: string;
+                    methods: {
+                        regression: { name: string; desc: string };
+                    };
+                };
+                charts: {
+                    histogram: string;
+                    bar: string;
+                    scatter: string;
+                    box: string;
+                    heatmap: string;
+                    line: string;
+                    movingAvg: string;
+                    statsSummaryBar: string;
+                    groupedBar: string;
+                    rankingBar: string;
+                    missingMatrix: string;
+                    scatterAnnotated: string;
+                    stacked: string;
+                    pcaScatter: string;
+                    clusterDist: string;
+                    decisionTreeVis: string;
+                    coefficientPlot: string;
+                    wordcloud: string;
+                    wordFreqBar: string;
+                    wordFreqTable: string;
+                };
+                fonts: {
+                    simhei: string;
+                    msgothic: string;
+                    malgun: string;
+                };
+            };
+
+            // 缓存/采样标记
+            cache: {
+                basedOnSample: {
+                    hint: string;
+                    sampleSize: string;
+                    totalSize: string;
+                    note: string;
+                };
+            };
+
+            // 分析配置翻译
+            config: {
+                performanceQuality: string;
+                maxColumns: string;
+                maxColumnsDesc: string;
+                timeout: string;
+                timeoutDesc: string;
+                samplingRows: string;
+                samplingRowsDesc: string;
+            };
+
+            // 错误提示文案
+            errors: {
+                tableNotFound: string;
+                autoRecovering: string;
+                loadFailed: string;
+                retry: string;
+                cancel: string;
+                close: string;
+            };
+
+            // 硬件检测与推荐
+            hardware: {
+                detection: string;
+                detecting: string;
+                detectionFailed: string;
+                platform: string;
+                gpu: string;
+                memory: string;
+                score: string;
+                recommendation: string;
+
+                // 平台描述
+                macM1Plus: string;
+                macIntel: string;
+                windows: string;
+                linux: string;
+                unknown: string;
+
+                // GPU描述
+                gpuNotDetected: string;
+                gpuSoftware: string;
+                gpuHigh: string;
+                gpuMedium: string;
+                gpuIntegrated: string;
+
+                // 推荐模式
+                recommendedMode: string;
+                localMode: string;
+                apiMode: string;
+                confidence: string;
+                confidenceHigh: string;
+                confidenceMedium: string;
+                confidenceLow: string;
+
+                // 推荐理由
+                reason: string;
+                reasonMacPlus: string;
+                reasonGood: string;
+                reasonMedium: string;
+                reasonLow: string;
+                technicalDetails: string;
+                expectedLoadTime: string;
+                expectedInferenceTime: string;
+
+                // 优缺点
+                pros: string;
+                cons: string;
+
+                // 按钮
+                useRecommended: string;
+                keepCurrent: string;
+                redetect: string;
+            };
+
+            // 工作台侧边栏
+            workbench: {
+                projectSelection: string;
                 cleaning: string;
                 insights: string;
                 report: string;
-            };
-            project: {
-                grid: {
-                    title: string;
+                promptLibrary: string;
+                toggleSidebar: string;
+                backToWelcome: string;
+                localModel: string;
+                apiModel: string;
+                collapsed: {
+                    tooltip: string;
                 };
-                context: {
-                    rename: string;
-                    delete: string;
-                };
-                card: {
-                    fileCount: string;
-                    filesLabel: string;
-                    nearLimit: string;
-                    uploadNew: string;
+                external: {
+                    hint: string;
                 };
             };
         };
-
-        // 证据池
-        evidence: {
-            title: string;
-            noRecords: string;
-            noRecordsHint: string;
-            clearAll: string;
-            pin: string;
-            unpin: string;
-            delete: string;
-            adopt: string;
-            adopted: string;
-            affectedRows: string;
-            rowsChanged: string;
-            type: {
-                cleaning: string;
-                analysis: string;
-                insight: string;
-                visualization: string;
-                insightChain: string;
-            };
-        };
-
-        // 报告生成器
-        report: {
-            title: string;
-            tabs: {
-                notebook: string;
-                evidence: string;
-            };
-            copy: string;
-            copied: string;
-            download: string;
-            copyToClipboard: string;
-            downloadMarkdown: string;
-            downloadPdf: string;
-            noRecords: string;
-            noRecordsHint: string;
-            noInsightChain: string;
-            totalRecords: string;
-            cleaningOps: string;
-            insights: string;
-            evidenceAdopted: string;
-            hideNotebook: string;
-            showNotebook: string;
-            useNewWorkbench: string;
-            previewHint: string;
-            aiAssistant: string;
-            evidenceCollected: string;
-            hypothesis: string;
-            conclusion: string;
-            viewCode: string;
-            overallConclusion: string;
-            basedOnInsights: string;
-            suggestion1: string;
-            suggestion2: string;
-            suggestion3: string;
-            // Markdown 报告生成相关
-            generatedAt: string;
-            dataSource: string;
-            sampleData: string;
-            recordsUnit: string;
-            cleaningSection: string;
-            analysisSection: string;
-            insightsSection: string;
-            visualizationSection: string;
-            timestamp: string;
-            operationType: string;
-            description: string;
-            tags: string;
-            analysisResult: string;
-            analysisSql: string;
-            detailInfo: string;
-            nextSteps: string;
-            upgradeRoadmap: string;
-            roadmapHtml: string;
-            roadmapCharts: string;
-            roadmapThemes: string;
-            roadmapExport: string;
-            generatedBy: string;
-
-            // V0 双角色报告新增
-            notebook: {
-                title: string;
-                copyCell: string;
-                copyAllToColab: string;
-                runDisabled: string;
-                runDisabledTip: string;
-                copyCode: string;
-                codeCopied: string;
-                defaultTitle: string;
-                defaultSigner: string;
-                viewMode: {
-                    pure: string;
-                    enhanced: string;
-                    pureHint: string;
-                    enhancedHint: string;
-                };
-            };
-
-            audit: {
-                pending: string;
-                approved: string;
-                rejected: string;
-                markApproved: string;
-                markRejected: string;
-                addNote: string;
-                progress: string;
-                signReport: string;
-                reportSigned: string;
-                signedBy: string;
-                signedAt: string;
-                reportLocked: string;
-                unlockAndReaudit: string;
-                confirmSign: string;
-                signConfirmMessage: string;
-                allCellsReviewed: string;
-                issueType: string;
-                issueSqlLogic: string;
-                issueDataAnomaly: string;
-                issueChartInaccurate: string;
-                issueConclusion: string;
-                note: string;
-                submit: string;
-            };
-
-            export: {
-                download: string;
-                downloadIpynb: string;
-                successIpynb: string;
-                uploadToColab: string;
-                exportDisabled: string;
-                exportPDF: string;
-                exportMarkdown: string;
-                needSignFirst: string;
-                colabInstructions: string;
-                downloadHTML: string;
-                successMarkdown: string;
-                successHTML: string;
-            };
-
-            mode: {
-                notebook: string;
-                report: string;
-                switchTo: string;
-            },
-
-            actions: {
-                showCode: string;
-                hideCode: string;
-            },
-
-            status: {
-                notSignedYet: string;
-                canPreviewNoExport: string;
-            };
-            // Phase 1: 左右分栏新增
-            annotation: {
-                placeholder: string;
-            };
-            code: {
-                title: string;
-                lines: string;
-            };
-            cell: {
-                defaultTitle: string;
-            };
-            globalSetup: {
-                title: string;
-                collapsed: string;
-                lines: string;
-            };
-        };
-
-        // AI成本提示
-        aiCost: {
-            title: string;
-            fileCount: string;
-            estimatedCalls: string;
-            quotaInsufficient: string;
-            quotaRemaining: string;
-            configureAPI: string;
-            confirmProceed: string;
-            costSavingTip: string;
-        };
-
-        // AI重试
-        aiRetry: {
-            title: string;
-            retryButton: string;
-            retrying: string;
-            failed: string;
-            staleHint: string;
-            noSuggestionsHint: string;
-        };
-
-        // 本地模型进度
-        localModel: {
-            init: string;
-            downloadHint: string;
-            status: {
-                loading: string;
-                fetching: string;
-                processing: string;
-                ready: string;
-                unknown: string;
-                loadingFromCache: string;
-                downloading: string;
-                finish: string;
-            };
-        };
-
-        // 分析能力包
-        packages: {
-            basic: {
-                name: string;
-                sizeEstimate: string;
-                methods: {
-                    distribution: { name: string; desc: string };
-                    correlation: { name: string; desc: string };
-                    trend: { name: string; desc: string };
-                    stats: { name: string; desc: string };
-                    groupby: { name: string; desc: string };
-                    topn: { name: string; desc: string };
-                    missing: { name: string; desc: string };
-                    outlier: { name: string; desc: string };
-                    crosstab: { name: string; desc: string };
-                };
-            };
-            sklearn: {
-                name: string;
-                sizeEstimate: string;
-                methods: {
-                    cluster: { name: string; desc: string };
-                    decisionTree: { name: string; desc: string };
-                };
-            };
-            statsmodels: {
-                name: string;
-                sizeEstimate: string;
-                methods: {
-                    regression: { name: string; desc: string };
-                };
-            };
-            charts: {
-                histogram: string;
-                bar: string;
-                scatter: string;
-                box: string;
-                heatmap: string;
-                line: string;
-                movingAvg: string;
-                statsSummaryBar: string;
-                groupedBar: string;
-                rankingBar: string;
-                missingMatrix: string;
-                scatterAnnotated: string;
-                stacked: string;
-                pcaScatter: string;
-                clusterDist: string;
-                decisionTreeVis: string;
-                coefficientPlot: string;
-                wordcloud: string;
-                wordFreqBar: string;
-                wordFreqTable: string;
-            };
-            fonts: {
-                simhei: string;
-                msgothic: string;
-                malgun: string;
-            };
-        };
-
-        // 缓存/采样标记
-        cache: {
-            basedOnSample: {
-                hint: string;
-                sampleSize: string;
-                totalSize: string;
-                note: string;
-            };
-        };
-
-        // 分析配置翻译
-        config: {
-            performanceQuality: string;
-            maxColumns: string;
-            maxColumnsDesc: string;
-            timeout: string;
-            timeoutDesc: string;
-            samplingRows: string;
-            samplingRowsDesc: string;
-        };
-
-        // 错误提示文案
-        errors: {
-            tableNotFound: string;
-            autoRecovering: string;
-            loadFailed: string;
-            retry: string;
-            cancel: string;
-            close: string;
-        };
-
-        // 硬件检测与推荐
-        hardware: {
-            detection: string;
-            detecting: string;
-            detectionFailed: string;
-            platform: string;
-            gpu: string;
-            memory: string;
-            score: string;
-            recommendation: string;
-
-            // 平台描述
-            macM1Plus: string;
-            macIntel: string;
-            windows: string;
-            linux: string;
-            unknown: string;
-
-            // GPU描述
-            gpuNotDetected: string;
-            gpuSoftware: string;
-            gpuHigh: string;
-            gpuMedium: string;
-            gpuIntegrated: string;
-
-            // 推荐模式
-            recommendedMode: string;
-            localMode: string;
-            apiMode: string;
-            confidence: string;
-            confidenceHigh: string;
-            confidenceMedium: string;
-            confidenceLow: string;
-
-            // 推荐理由
-            reason: string;
-            reasonMacPlus: string;
-            reasonGood: string;
-            reasonMedium: string;
-            reasonLow: string;
-            technicalDetails: string;
-            expectedLoadTime: string;
-            expectedInferenceTime: string;
-
-            // 优缺点
-            pros: string;
-            cons: string;
-
-            // 按钮
-            useRecommended: string;
-            keepCurrent: string;
-            redetect: string;
-        };
-
-        // 工作台侧边栏
-        workbench: {
-            projectSelection: string;
-            cleaning: string;
-            insights: string;
-            report: string;
-            promptLibrary: string;
-            toggleSidebar: string;
-            backToWelcome: string;
-            localModel: string;
-            apiModel: string;
-            collapsed: {
-                tooltip: string;
-            };
-            external: {
-                hint: string;
-            };
-        };
-    };
+    }
 }

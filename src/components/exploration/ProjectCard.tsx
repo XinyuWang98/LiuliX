@@ -96,7 +96,20 @@ export const ProjectCard = forwardRef<ProjectCardHandle, ProjectCardProps>(
                     {project.files.map(file => (
                         <div key={file.id} className="file-preview-item">
                             <FileText size={14} />
-                            <span>{file.name}</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span>{file.name}</span>
+                                    {file.data?.isSampled && file.data?.originalRowCount && (
+                                        <span
+                                            className="beta-badge"
+
+                                            title={`${t('fileUpload.sampled')}: ${file.data.rowCount?.toLocaleString()} / ${file.data.originalRowCount.toLocaleString()}`}
+                                        >
+                                            📊 {t('fileUpload.sampled')}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>

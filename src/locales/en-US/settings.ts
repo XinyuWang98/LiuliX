@@ -232,14 +232,16 @@ export const settings = {
         samplingHint: 'Select AI sampling rows (affects speed and accuracy)',
         fastMode: 'Fast Mode',
         fastModeBadge: 'Coming Soon',
-        fastModeDesc: 'AI Sample: 500 rows | Inference: ~2s',
+        fastModeDesc: 'Max Rows: 100,000 | Fixed Sampling Strategy',
         balancedMode: 'Balanced Mode (MVP)',
         balancedModeBadge: 'Default',
         balancedModeDesc: 'AI Sample: 1000 rows | Inference: ~5s',
+        balancedModeDynamic: 'AI Sample: {rows} | Inference: {time}',
         preciseMode: 'Precise Mode',
         preciseModeBadge: 'Coming Soon',
         preciseModeDesc: 'AI Sample: 5000 rows (Dynamic) | Inference: ~10s',
     },
+
 
     // Loading State
     loadingState: {
@@ -263,4 +265,9 @@ export const settings = {
     // Language Names
     langZhCN: '中文',
     langEnUS: 'English',
+
+    // Common labels
+    common: {
+        default: 'Default',
+    },
 };

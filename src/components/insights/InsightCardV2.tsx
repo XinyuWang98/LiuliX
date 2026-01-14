@@ -134,8 +134,8 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                         <div className="card-title">{node.title}</div>
                         {/* 🆕 采样Badge */}
                         {node.isSampled && (
-                            <span className="sampling-badge" title={`数据已采样 (${node.sampleSize || '未知'}行)`}>
-                                采样
+                            <span className="sampling-badge" title={t('insight.sampling.tooltip', { count: node.sampleSize || t('insight.sampling.unknown') })}>
+                                {t('insight.sampling.badge')}
                             </span>
                         )}
                     </div>

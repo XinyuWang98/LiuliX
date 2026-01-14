@@ -81,16 +81,40 @@ export async function executeParallel(
         logger.log('AI服务', `执行批次: ${batch.map(n => n.title).join(', ')}`);
 
         await Promise.all(
-            batch.map(async (node) => {
+            batch.map(async (node, index) => {
+                // 🎬 节点执行计时
+                const nodeStartTime = performance.now();
+                const batchIndex = batches.indexOf(batch) + 1;
+
+                logger.log('AI服务', `[Scheduler] 🚀 洞察开始执行`, {
+                    data: {
+                        洞察: node.title,
+                        批次: `${batchIndex}/${batches.length}`,
+                        索引: index,
+                        promptId: node.promptId || 'N/A'
+                    }
+                });
+
                 try {
                     node.status = 'loading';
                     onNodeComplete?.(node);
 
+                    // ⏱️ 代码执行计时
+                    const execStartTime = performance.now();
                     const result = await adapter.executeCode(node.code || '', context);
+                    const execDuration = performance.now() - execStartTime;
 
                     node.status = 'completed';
                     node.result = result;
                     onNodeComplete?.(node);
+
+                    logger.log('AI服务', `[Scheduler] ✅ 洞察执行成功`, {
+                        data: {
+                            洞察: node.title,
+                            执行耗时: `${execDuration.toFixed(0)}ms`,
+                            总耗时: `${(performance.now() - nodeStartTime).toFixed(0)}ms`
+                        }
+                    });
 
                 } catch (error) {
                     node.status = 'error';

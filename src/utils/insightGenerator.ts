@@ -133,14 +133,14 @@ export async function generateInsightSuggestions(
         logger.group('AI洞察预加载', '批量生成流程');
 
         // 步骤1：获取列信息（如果未提供）
-        let 有效列名 = columns;
-        if (有效列名.length === 0) {
+        let validColumns = columns;
+        if (validColumns.length === 0) {
             logger.log('DuckDB', `从DESCRIBE获取列信息 表:${tableName}`);
             const engine = DuckDBEngine.getInstance();
             await engine.init();
             const describeResult = await engine.runQuery(`DESCRIBE ${tableName}`);
-            有效列名 = describeResult.map((row: any) => row.column_name);
-            logger.log('DuckDB', `DESCRIBE成功`, { count: 有效列名.length });
+            validColumns = describeResult.map((row: any) => row.column_name);
+            logger.log('DuckDB', `DESCRIBE成功`, { count: validColumns.length });
         }
 
         // 步骤2：采样数据
@@ -150,7 +150,7 @@ export async function generateInsightSuggestions(
 
         // 步骤3：调用AI生成
         logger.log('AI洞察', '调用AI生成洞察建议');
-        const prompt = generateBatchInsightsPrompt(有效列名, rowCount, sampledData);
+        const prompt = generateBatchInsightsPrompt(validColumns, rowCount, sampledData);
         const aiResult = await askAIInsight(prompt);
         const aiResponse = aiResult.content;
 

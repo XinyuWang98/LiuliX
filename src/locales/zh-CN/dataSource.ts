@@ -7,6 +7,8 @@ export const dataSource = {
     uploadHint: '点击上方按钮上传数据文件',
     uploadFile: '上传文件',
     project: {
+        suffix: '项目',
+        dataProject: '数据项目',
         untitled: '未命名项目',
         rename: '重命名',
         delete: '删除项目',

@@ -44,22 +44,61 @@ export const RESOURCE_LIMITS = {
 
 /**
  * 获取浏览器可用内存（字节）
- * 共享给memoryAssessment和文件上传使用
+ * 使用多重检测策略应对 navigator.deviceMemory 的隐私保护机制
+ * 
+ * 已知问题：navigator.deviceMemory 返回 2 的幂次方近似值
+ * - 12GB 设备 → 返回 8GB ❌
+ * - 24GB 设备 → 返回 8GB 或 16GB ❌
  */
 export function getBrowserMemory(): number {
+    let detectedMemoryGB = 4; // 默认降级值
+    let detectionMethod = '降级假设';
+
     try {
-        if ('memory' in performance && (performance as any).memory) {
-            const memory = (performance as any).memory;
-            // jsHeapSizeLimit 是V8分配的最大内存
-            return memory.jsHeapSizeLimit || RESOURCE_LIMITS.MIN_BROWSER_MEMORY;
+        // 方法 1: navigator.deviceMemory (主要方法，但有隐私保护限制)
+        if ('deviceMemory' in navigator) {
+            const deviceMemoryGB = (navigator as any).deviceMemory;
+            if (deviceMemoryGB && typeof deviceMemoryGB === 'number') {
+                detectedMemoryGB = deviceMemoryGB;
+                detectionMethod = 'navigator.deviceMemory';
+
+                // 🛠️ 修正策略：使用 jsHeapSizeLimit 作为辅助判断
+                // 如果堆限制 > 2GB，但 deviceMemory 只有 4/8GB，可能是低估了
+                if ('memory' in performance && (performance as any).memory) {
+                    const heapLimitGB = (performance as any).memory.jsHeapSizeLimit / (1024 ** 3);
+
+                    // Chrome 在高内存设备上会分配更大的堆
+                    // 如果堆限制接近 4GB，但 deviceMemory 只有 8GB，实际可能是 16GB+
+                    if (heapLimitGB >= 3.5 && deviceMemoryGB === 8) {
+                        logger.warn('资源管理', `检测到堆限制${heapLimitGB.toFixed(1)}GB，但 deviceMemory=8GB，可能低估了，尝试修正为16GB`);
+                        detectedMemoryGB = 16; // 修正为更高档位
+                        detectionMethod += ' (修正)';
+                    }
+                }
+            }
+        }
+
+        // 方法 2: 降级使用 performance.memory.jsHeapSizeLimit
+        if (detectedMemoryGB === 4 && 'memory' in performance && (performance as any).memory) {
+            const heapLimitBytes = (performance as any).memory.jsHeapSizeLimit;
+            if (heapLimitBytes) {
+                const heapLimitGB = heapLimitBytes / (1024 ** 3);
+                logger.warn('资源管理', `仅检测到V8堆限制: ${heapLimitGB.toFixed(2)}GB (可能不准确)`);
+                // 堆限制通常是实际内存的 1/2 到 1/4，但至少不低于此
+                detectedMemoryGB = Math.max(4, heapLimitGB);
+                detectionMethod = 'jsHeapSizeLimit (降级)';
+            }
         }
     } catch (error) {
-        logger.warn('资源管理', 'performance.memory不可用', error);
+        logger.warn('资源管理', 'memory检测失败', error);
     }
 
-    // 降级：假设4GB
-    return 4 * 1024 * 1024 * 1024;
+    const finalMemoryBytes = detectedMemoryGB * 1024 * 1024 * 1024;
+    logger.log('资源管理', `内存检测完成: ${detectedMemoryGB}GB (${detectionMethod})`);
+
+    return finalMemoryBytes;
 }
+
 
 /**
  * 获取当前内存使用率（0-1）
@@ -89,13 +128,15 @@ export function getFileSizeLimit(): number {
         data: { memoryGB: memoryGB.toFixed(1) }
     });
 
-    // 基于内存分级
-    if (memoryGB >= 16) return 500 * 1024 * 1024;  // 16GB+ → 500MB
-    if (memoryGB >= 8) return 200 * 1024 * 1024;  // 8GB  → 200MB
-    if (memoryGB >= 4) return 100 * 1024 * 1024;  // 4GB  → 100MB
+    // 6档精细化分级（严格遵循55-专题-内存评估与采样策略规范）
+    if (memoryGB >= 32) return 1200 * 1024 * 1024; // 🟣 极致 32GB+   → 1.2GB
+    if (memoryGB >= 24) return 800 * 1024 * 1024;  // 🔵 旗舰 24-32GB → 800MB
+    if (memoryGB >= 16) return 500 * 1024 * 1024;  // 🟢 高性能 16-24GB → 500MB
+    if (memoryGB >= 8) return 200 * 1024 * 1024;  // 🟡 主流 8-16GB  → 200MB
+    if (memoryGB >= 4) return 100 * 1024 * 1024;  // 🟠 标准 4-8GB   → 100MB
 
-    // 低内存设备
-    return 50 * 1024 * 1024;  // <4GB → 50MB
+    // 🔴 低配 <4GB → 50MB
+    return 50 * 1024 * 1024;
 }
 
 /**

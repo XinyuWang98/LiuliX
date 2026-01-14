@@ -62,13 +62,23 @@ function capitalize(str: string): string {
 /**
  * 生成项目名称(国际化)
  */
+export interface ProjectTranslations {
+    suffix: string;
+    dataProject: string;
+    untitled: string;
+    defaultData: string;
+    themes: Record<string, string>;
+}
+
+/**
+ * 生成项目名称(国际化)
+ */
 export function generateProjectName(
     files: ParsedFileData[],
-    languageCode: 'zh-CN' | 'en-US',
-    themeTranslations: Record<string, string>
+    translations: ProjectTranslations
 ): string {
     if (files.length === 0) {
-        return languageCode === 'zh-CN' ? '未命名项目' : 'Untitled Project';
+        return translations.untitled;
     }
 
     const fileNames = files.map(f => f.fileName);
@@ -77,24 +87,21 @@ export function generateProjectName(
     const commonPrefix = findCommonPrefix(fileNames);
     if (commonPrefix && commonPrefix.length > 3) {
         const cleanName = commonPrefix.replace(/[_-]/g, ' ').trim();
-        const suffix = languageCode === 'zh-CN' ? '项目' : 'Project';
-        return capitalize(cleanName) + ' ' + suffix;
+        return capitalize(cleanName) + ' ' + translations.suffix;
     }
 
     // 策略2: 基于关键词识别主题(国际化)
     const themeKey = detectTheme(fileNames);
     if (themeKey) {
-        const themeName = themeTranslations[themeKey] || (languageCode === 'zh-CN' ? '数据' : 'Data');
-        const suffix = languageCode === 'zh-CN' ? '数据项目' : 'Data Project';
-        return `${themeName}${suffix}`;
+        const themeName = translations.themes[themeKey] || translations.defaultData;
+        return `${themeName} ${translations.dataProject}`;
     }
 
     // 策略3: 使用时间戳
     const now = new Date();
-    const dateStr = now.toLocaleDateString(languageCode, { month: '2-digit', day: '2-digit' });
-    const timeStr = now.toLocaleTimeString(languageCode, { hour: '2-digit', minute: '2-digit', hour12: false });
-    const prefix = languageCode === 'zh-CN' ? '项目' : 'Project';
-    return `${prefix} ${dateStr} ${timeStr}`;
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString();
+    return `${translations.suffix} ${dateStr} ${timeStr}`;
 }
 
 /**
@@ -113,7 +120,6 @@ export interface ProjectFile {
     tableName?: string;
     originalName?: string;
 
-    /** 预处理分析缓存 */
     /** 预处理分析缓存 */
     analysisCache?: {
         /** 数据质量评分 */
@@ -199,12 +205,11 @@ export interface Project {
 export function createProject(
     files: ParsedFileData[],
     sampledFlags: boolean[],
-    languageCode: 'zh-CN' | 'en-US',
-    themeTranslations: Record<string, string>
+    translations: ProjectTranslations
 ): Project {
     return {
         id: generateId(),
-        name: generateProjectName(files, languageCode, themeTranslations),
+        name: generateProjectName(files, translations),
         createdAt: new Date(),
         isExpanded: true,  // 新创建的项目默认展开
         files: files.map((data, index) => ({

@@ -1,0 +1,22 @@
+{
+    "REAL_AI_INSIGHT": false,
+    "REAL_AI_CLEANING": false,
+    "AI_CHAT_PANEL": false,
+    "LOCAL_AI_MODEL": false,
+    "PDF_EXPORT": false,
+    "INTERACTIVE_HTML": false,
+    "AUTO_REPORT": false,
+    "GOOGLE_SHEETS": false,
+    "DATABASE_CONNECT": false,
+    "API_IMPORT": false,
+    "AGENT_MODE": false,
+    "ADVANCED_VIZ": false,
+    "COLLABORATION": false,
+    "SKILLS_ARCHITECTURE": false,
+    "PYODIDE_OFFLINE": false,
+    "USE_AST_CODE_ENHANCER": true,
+    "ENABLE_ADVANCED_API_CONFIG": false,
+    "ENABLE_INVITE_CODE_GATE": false,
+    "ENABLE_EDA_CONTEXT_LOOP": false,
+    "ENABLE_UPLOAD_ROW_LIMIT": true
+}

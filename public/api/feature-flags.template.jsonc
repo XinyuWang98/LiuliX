@@ -1,0 +1,76 @@
+{
+    // ============================================================
+    // Feature Flags 远程配置
+    // 
+    // 维护规范：
+    // 1. 所有修改必须同步更新 src/config/featureFlags.ts
+    // 2. 添加新 Flag 请遵循 /new_flag workflow
+    // 3. 生产环境部署前务必检查所有值
+    // ============================================================
+    // ========== AI 功能模块 ==========
+    // 真实 AI 洞察生成（当前为 Mock 数据）
+    // 使用位置：src/services/insights/
+    "REAL_AI_INSIGHT": false,
+    // 真实 AI 清洗建议（当前为 Mock 数据）
+    // 使用位置：src/services/cleaning/
+    "REAL_AI_CLEANING": false,
+    // AI 聊天面板（MVP 阶段未实现）
+    // 使用位置：暂无
+    "AI_CHAT_PANEL": false,
+    // 本地 AI 模型（MVP 阶段禁用，质量未达标）
+    // 使用位置：src/services/aiService.ts
+    "LOCAL_AI_MODEL": false,
+    // ========== 报告导出模块 ==========
+    // PDF 导出功能（当前仅支持 HTML）
+    // 使用位置：src/components/report/
+    "PDF_EXPORT": false,
+    // 交互式 HTML 报告（开发中）
+    // 使用位置：src/components/report/
+    "INTERACTIVE_HTML": false,
+    // 自动报告生成
+    // 使用位置：src/config/skillsConfig.ts
+    "AUTO_REPORT": false,
+    // ========== 数据源集成模块 ==========
+    // Google Sheets 集成（未实现）
+    // 使用位置：暂无
+    "GOOGLE_SHEETS": false,
+    // 数据库连接（未实现）
+    // 使用位置：暂无
+    "DATABASE_CONNECT": false,
+    // API 数据导入（未实现）
+    // 使用位置：暂无
+    "API_IMPORT": false,
+    // ========== 高级功能模块 ==========
+    // 本地 Agent 模式（未实现）
+    // 使用位置：暂无
+    "AGENT_MODE": false,
+    // 高级可视化（未实现）
+    // 使用位置：暂无
+    "ADVANCED_VIZ": false,
+    // 协作功能（未实现）
+    // 使用位置：暂无
+    "COLLABORATION": false,
+    // ========== 实验性功能模块 ==========
+    // Skills 架构（已实现，默认关闭）
+    // 使用位置：src/config/skillsConfig.ts
+    "SKILLS_ARCHITECTURE": false,
+    // Pyodide 离线模式（未实现）
+    // 使用位置：暂无
+    "PYODIDE_OFFLINE": false,
+    // AST 代码增强器（v3.0，默认开启）
+    // 使用位置：src/services/prompts/guards/codeEnhancer.ts
+    "USE_AST_CODE_ENHANCER": true,
+    // ========== 系统控制模块 ==========
+    // 高级 API 配置界面（MVP 阶段隐藏）
+    // 使用位置：src/components/settings/APISettings.tsx
+    "ENABLE_ADVANCED_API_CONFIG": false,
+    // 邀请码前置验证（开发阶段关闭，上线时开启）
+    // 使用位置：src/components/data/FileUploader.tsx, src/components/settings/APISettingsSimple.tsx
+    "ENABLE_INVITE_CODE_GATE": false,
+    // EDA 闭环与 Context 回流（已关闭，等待进一步优化）
+    // 使用位置：src/contexts/InsightChainContext.tsx
+    "ENABLE_EDA_CONTEXT_LOOP": false,
+    // MVP 强制限制上传文件行数 < 100万行
+    // 使用位置：src/services/duckdb/ingestion.ts
+    "ENABLE_UPLOAD_ROW_LIMIT": true
+}

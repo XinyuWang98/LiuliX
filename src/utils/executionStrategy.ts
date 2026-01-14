@@ -33,10 +33,12 @@ export interface ExecutionStrategy {
 /**
  * 评估执行策略
  */
-export function assessExecutionStrategy(
+export async function assessExecutionStrategy(
     nodes: InsightNode[],
-    totalRows: number
-): ExecutionStrategy {
+    totalRows: number,
+    // @ts-expect-error - 保留参数以兼容调用方，Native版恢复动态评估时会用到
+    columnCount: number
+): Promise<ExecutionStrategy> {
     const adapter = getPlatformAdapter();
     const config = getPlatformConfig();
 
@@ -59,50 +61,60 @@ export function assessExecutionStrategy(
     // 决策逻辑
     const { thresholds } = config;
 
-    // 策略1：高性能并行
+    // 🆕 判断是否需要采样（固定上限策略，Web版MVP：2026-01-14）
+    // 注：动态评估已废弃，详见docs/01-架构设计/05-架构-动态内存评估与采样策略.md
+    const MAX_PYODIDE_ROWS = 100000;  // Pyodide内存限制，固定10万行上限
+    const maxRows = MAX_PYODIDE_ROWS;
+    const needsSampling = totalRows > maxRows;
+    const effectiveRows = needsSampling ? maxRows : totalRows;
+
+    // ========== 策略1：高性能并行（优先级1）==========
     if (
         ratio3 < thresholds.highPerfMemoryRatio &&
-        totalRows < thresholds.highPerfRowLimit &&
         browserMemory >= thresholds.minMemoryForParallel
     ) {
         return {
             mode: 'parallel',
             concurrency: optimalConcurrency,
             sortByComplexity: true,
-            enableSampling: false,
-            estimatedTime: estimateTotalTime(nodes, optimalConcurrency, totalRows),
-            reason: `高性能模式：内存充足(${browserMemory}MB)，全并发执行`
+            enableSampling: needsSampling,  // 🆕 大数据集也支持并行+采样
+            estimatedTime: estimateTotalTime(nodes, optimalConcurrency, effectiveRows),
+            reason: needsSampling
+                ? `高性能并行+采样：内存${browserMemory}MB充足，${optimalConcurrency}并发，采样${effectiveRows}行`
+                : `高性能并行：内存${browserMemory}MB充足，${optimalConcurrency}并发`
         };
     }
 
-    // 策略2：半并行
+    // ========== 策略2：半并行+采样（优先级2）==========
     if (
         ratio2 < 0.5 &&
-        totalRows < thresholds.highPerfRowLimit
+        browserMemory >= 8000  // 至少8GB
     ) {
         return {
             mode: 'parallel',
             concurrency: 2,
             sortByComplexity: true,
-            enableSampling: false,
-            estimatedTime: estimateTotalTime(nodes, 2, totalRows),
-            reason: `平衡模式：并发2个任务`
+            enableSampling: needsSampling,
+            estimatedTime: estimateTotalTime(nodes, 2, effectiveRows),
+            reason: needsSampling
+                ? `平衡并行+采样：2并发，采样${effectiveRows}行`
+                : `平衡并行：2并发`
         };
     }
 
-    // 策略3：串行 + 采样
-    if (totalRows > thresholds.samplingThreshold) {
+    // ========== 策略3：串行+采样（内存不足时）==========
+    if (needsSampling) {
         return {
             mode: 'serial',
             concurrency: 1,
             sortByComplexity: true,
             enableSampling: true,
-            estimatedTime: estimateTotalTime(nodes, 1, thresholds.samplingThreshold),
-            reason: `采样模式：数据量过大(${totalRows}行)，采样到${thresholds.samplingThreshold}行`
+            estimatedTime: estimateTotalTime(nodes, 1, effectiveRows),
+            reason: `串行+采样：内存有限(${browserMemory}MB)，采样${effectiveRows}行`
         };
     }
 
-    // 策略4：串行
+    // ========== 策略4：串行（兜底）==========
     return {
         mode: 'serial',
         concurrency: 1,

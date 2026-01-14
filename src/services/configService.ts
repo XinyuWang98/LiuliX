@@ -10,47 +10,42 @@
 import { logger } from '@/utils/logger';
 import type { FeatureFlags } from '@/config/featureFlags';
 
-interface ConfigResponse {
-    success: boolean;
-    data: {
-        featureFlags: Partial<FeatureFlags>; // 后端只返回3个核心Flag
-        timestamp: number;
-        version: string;
-    };
-}
-
 /**
- * 从后端加载核心Feature Flags配置
+ * 从静态 JSON 文件加载 Feature Flags 配置
  * 
  * @returns 远程配置对象，失败返回null
  */
 export async function fetchRemoteConfig(): Promise<Partial<FeatureFlags> | null> {
     try {
-        // 后端API地址（支持环境变量配置）
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        logger.log('系统', '开始加载远程 Feature Flags 配置');
 
-        const response = await fetch(`${API_URL}/api/config`, {
+        // 从静态 JSON 文件加载（Vite 开发服务器和生产环境都支持）
+        const response = await fetch('/api/feature-flags.json', {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            cache: 'no-cache', // 禁用浏览器缓存，确保获取最新配置
             signal: AbortSignal.timeout(3000), // 3秒超时
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        const data: ConfigResponse = await response.json();
+        const flags: Partial<FeatureFlags> = await response.json();
+
+        // 验证响应格式
+        if (typeof flags !== 'object' || flags === null) {
+            throw new Error('配置文件格式错误：非对象');
+        }
 
         logger.log('系统', '远程配置加载成功', {
             data: {
-                version: data.data.version,
-                flagsCount: Object.keys(data.data.featureFlags).length,
+                flagsCount: Object.keys(flags).length,
+                ENABLE_EDA_CONTEXT_LOOP: flags.ENABLE_EDA_CONTEXT_LOOP,
+                ENABLE_UPLOAD_ROW_LIMIT: flags.ENABLE_UPLOAD_ROW_LIMIT,
             }
         });
 
-        return data.data.featureFlags;
+        return flags;
     } catch (error: any) {
         logger.warn('系统', '远程配置加载失败，使用本地默认值', {
             error: error.message
@@ -77,6 +72,26 @@ export async function initializeConfig(): Promise<void> {
                 flags: Object.keys(remoteFlags),
             }
         });
+
+        // 🆕 上报当前所有 Feature Flags 状态（用于问题追踪）
+        const { getFeatureFlags } = await import('@/config/featureFlags');
+        logger.group('系统', 'Feature Flags 状态快照');
+
+        const currentFlags = getFeatureFlags();
+        const enabledFlags = Object.entries(currentFlags)
+            .filter(([_, value]) => value === true)
+            .map(([key]) => key);
+        const disabledFlags = Object.entries(currentFlags)
+            .filter(([_, value]) => value === false)
+            .map(([key]) => key);
+
+        logger.log('系统', `✅ 已启用 (${enabledFlags.length}/${Object.keys(currentFlags).length})`, {
+            data: enabledFlags.length > 0 ? enabledFlags : ['无']
+        });
+        logger.log('系统', `❌ 已禁用 (${disabledFlags.length}/${Object.keys(currentFlags).length})`, {
+            data: disabledFlags.length > 0 ? disabledFlags : ['无']
+        });
+        logger.groupEnd();
     } else {
         logger.warn('系统', '配置初始化失败，将使用本地默认配置');
     }

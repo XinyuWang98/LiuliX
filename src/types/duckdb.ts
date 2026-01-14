@@ -20,7 +20,9 @@ export interface IngestionOptions {
 export interface IngestionResult {
     tableName: string;
     rowCount: number;
+    originalRowCount?: number;  // 🆕 原始总行数（采样前）
     isSampled: boolean;
+    sampleStrategy?: 'memory-based' | 'full';  // 🆕 采样策略标记
     columns: ColumnMetadata[];
 }
 

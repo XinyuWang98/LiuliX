@@ -5,6 +5,8 @@ export const fileUpload = {
     uploading: '正在解析文件...',
     uploadingProgress: '正在上传 {current}/{total} 个文件...',
     supportedFormats: '支持 CSV、XLSX、JSON 格式',
+    supportedFormatsWithLimit: '支持 CSV、Excel、JSON (最大 {limit})',
+    deviceAdaptive: 'ℹ️ 根据您的设备内存自动调整',
     largeFileTitle: '数据集较大',
     largeFileMessage: '您上传的文件包含 {rows} 行数据,文件大小为 {size}。处理大文件可能影响性能,建议进行抽样。',
     batchLargeFiles: '检测到 {count} 个大文件',
@@ -30,4 +32,27 @@ export const fileUpload = {
     clickOrDragShort: '点击/拖拽文件',
     dropHere: '释放以上传',
     processingInCard: '正在处理 {filename} ({current}/{total})',  // F-18
+
+    // 设备策略展示
+    deviceStrategy: {
+        title: '您的设备配置',
+        memoryTier: '内存档位',
+        fileLimit: '文件限制',
+        maxRows: 'AI采样',
+        concurrency: '并发数',
+
+        // 6档内存等级
+        tierLow: '🔴 低配',
+        tierStandard: '🟠 标准',
+        tierMainstream: '🟡 主流',
+        tierHighPerf: '🟢 高性能',
+        tierFlagship: '🔵 旗舰',
+        tierUltimate: '🟣 极致',
+
+        // 单位
+        maxRowsValue: '最多 {rows} 行',
+        concurrencyValue: '{count} 个洞察同时执行',
+        inferenceTime: '推理时间',
+        estimatedTime: '约 {time}',
+    },
 };

@@ -194,19 +194,20 @@ export const settings = {
         localModelHint: '使用本地模型时，数据完全不会离开浏览器',
     },
 
-    // 数据分析策略选项
     dataAnalysis: {
         samplingHint: '选择 AI 采样行数（影响分析速度和准确性）',
         fastMode: '快速模式',
         fastModeBadge: '敬请期待',
-        fastModeDesc: 'AI采样：500行 | 推理时间：~2秒',
+        fastModeDesc: '最大行数：10万 | 固定采样策略',
         balancedMode: '平衡模式（当前MVP）',
         balancedModeBadge: '默认',
         balancedModeDesc: 'AI采样：1000行 | 推理时间：~5秒',
+        balancedModeDynamic: 'AI采样：{rows} | 推理时间：{time}',
         preciseMode: '精确模式',
         preciseModeBadge: '敬请期待',
         preciseModeDesc: 'AI采样：5000行（动态计算） | 推理时间：~10秒',
     },
+
 
     // 加载状态
     loadingState: {
@@ -265,4 +266,9 @@ export const settings = {
     // 语言名称
     langZhCN: '中文',
     langEnUS: 'English',
+
+    // 通用标签
+    common: {
+        default: '默认',
+    },
 };

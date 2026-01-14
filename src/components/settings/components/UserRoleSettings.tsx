@@ -128,20 +128,22 @@ export const UserRoleSettings = () => {
 
             {/* 洞察分析配置 */}
             <SettingsGroup title={t('settings.skillsModuleInsightChain')}>
+                {/* ❌ 已废弃：maxColumns和samplingRows配置（改为纯内存动态评估）
                 <SettingsRow
                     label={t('config.maxColumns')}
                     description={t('config.maxColumnsDesc')}
                     action={<span className="config-value-badge">{config.insights.maxColumns}</span>}
                 />
                 <SettingsRow
-                    label={t('config.timeout')}
-                    description={t('config.timeoutDesc')}
-                    action={<span className="config-value-badge">{config.insights.timeout}s</span>}
-                />
-                <SettingsRow
                     label={t('config.samplingRows')}
                     description={t('config.samplingRowsDesc')}
                     action={<span className="config-value-badge">{config.insights.samplingRows}</span>}
+                />
+                */}
+                <SettingsRow
+                    label={t('config.timeout')}
+                    description={t('config.timeoutDesc')}
+                    action={<span className="config-value-badge">{config.insights.timeout}s</span>}
                 />
             </SettingsGroup>
 

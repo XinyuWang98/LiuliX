@@ -1,10 +1,12 @@
-# 📊 性能白皮书：WASM 数据处理边界
+# 6. 性能白皮书：WASM 数据处理边界
+
+> **最后更新**: 2026-01-13
 
 本文档说明 LiuliX 基于浏览器端 WASM (WebAssembly) 架构的性能特征与物理限制。
 
 ---
 
-## ⚡ 核心机制说明
+## 核心机制说明
 
 LiuliX 不依赖后台数据库，而是通过 **DuckDB WASM** 和 **Pyodide** 将分析引擎直接植入浏览器。这意味着：
 - **算力来源**：你的本地 CPU
@@ -12,7 +14,7 @@ LiuliX 不依赖后台数据库，而是通过 **DuckDB WASM** 和 **Pyodide** �
 
 ---
 
-## 📏 数据规模建议
+## 数据规模建议
 
 由于浏览器沙箱 (Sandbox) 的内存限制，我们建议的数据规模如下：
 
@@ -26,7 +28,7 @@ LiuliX 不依赖后台数据库，而是通过 **DuckDB WASM** 和 **Pyodide** �
 
 ---
 
-## 🧠 内存占用与崩溃机制
+## 内存占用与崩溃机制
 
 ### 为什么会"崩溃" (Aw, Snap!)？
 当网页占用的内存超过浏览器单标签页限制（通常为 4GB 或物理内存的限制）时，浏览器会强制终止进程以保护系统稳定性。
@@ -44,29 +46,29 @@ LiuliX 不依赖后台数据库，而是通过 **DuckDB WASM** 和 **Pyodide** �
 
 ---
 
-## 🧭 浏览器兼容性与推荐
+## 浏览器兼容性与推荐
 
-由于 Wasm/Pyodide 的运行效率高度依赖浏览器的 JavaScript 引擎 (V8,已 SpiderMonkey, JavaScriptCore)，不同浏览器的表现存在显著差异。
+由于 Wasm/Pyodide 的运行效率高度依赖浏览器的 JavaScript 引擎 (V8, SpiderMonkey, JavaScriptCore)，不同浏览器的表现存在显著差异。
 
-### 1. 🥇 推荐 (Tier 1)
+### 1. 推荐 (Tier 1)
 **Google Chrome / Microsoft Edge (Chromium 内核)**
 - **引擎**：V8
 - **表现**：对大内存 (4GB+) WASM 堆的支持最好，Pyodide 初始化速度最快。
 - **推荐版本**：最新稳定版 (64位)
 
-### 2. 🥈 可用 (Tier 2)
+### 2. 可用 (Tier 2)
 **Mozilla Firefox**
 - **引擎**：SpiderMonkey
 - **表现**：WASM 执行效率很高，但在处理超大 DataFrames 时 GC (垃圾回收) 可能会导致短暂卡顿。
 
-### 3. 🥉 谨慎使用 (Tier 3)
+### 3. 谨慎使用 (Tier 3)
 **Apple Safari**
 - **引擎**：JavaScriptCore
 - **表现**：对单 tab 页的内存限制极其严格 (通常严于 Chrome)。在处理 >200MB 的文件时更容易触发页面重载 (Reload)。
 
 ---
 
-## 🚀 性能基准测试 (Benchmark)
+## 性能基准测试 (Benchmark)
 
 *测试环境：MacBook Pro M1, 16GB RAM, Chrome 120*
 

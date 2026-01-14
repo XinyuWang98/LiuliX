@@ -10,6 +10,13 @@ export default defineConfig({
                 target: 'http://localhost:3001',
                 changeOrigin: true,
                 secure: false,
+                // 🔧 排除静态配置文件，避免代理到后端
+                bypass(req, res, options) {
+                    // feature-flags.json 从 public 目录提供，不走代理
+                    if (req.url === '/api/feature-flags.json') {
+                        return req.url; // 返回原始 URL，跳过代理
+                    }
+                },
             },
         },
     },

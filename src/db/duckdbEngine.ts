@@ -123,10 +123,12 @@ export class DuckDBEngine {
 
     /**
      * 零拷贝导出 Arrow Table (用于 Pyodide)
+     * @param tableName 表名
+     * @param maxRows 最大行数限制（可选）
      */
-    public async exportArrowTable(tableName: string): Promise<Uint8Array> {
+    public async exportArrowTable(tableName: string, maxRows?: number): Promise<Uint8Array> {
         if (!this.conn) throw new Error('No connection');
-        return QueryModule.exportArrowTable(this.conn, tableName);
+        return QueryModule.exportArrowTable(this.conn, tableName, maxRows);
     }
 
     /**
@@ -143,6 +145,19 @@ export class DuckDBEngine {
     public async runQuery(sql: string): Promise<any[]> {
         if (!this.conn) throw new Error('DB not ready');
         return QueryModule.runQuery(this.conn, sql);
+    }
+
+    /**
+     * 检查表是否存在
+     */
+    public async tableExists(tableName: string): Promise<boolean> {
+        if (!this.conn) return false;
+        try {
+            await this.runQuery(`DESCRIBE ${tableName}`);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     // ==================== 统计模块 ====================

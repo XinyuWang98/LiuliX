@@ -91,17 +91,17 @@ export function ExplorationFlowV2({
                     localStorage.setItem('app_has_run_before', 'true');
                 }
 
-                // --- Phase 2: 扩展包后台加载 ---
-                setTimeout(async () => {
-                    try {
-                        await pyodideManager.loadUserConfigExtensions((msg) => {
-                            logger.log('Python', `[扩展] ${msg}`);
-                        });
-                    } catch (extErr) {
-                        logger.warn('Python', '扩展包加载部分失败', extErr);
-                    }
+                // --- Phase 2: 扩展包后台加载（✅ 立即触发） ---
+                pyodideManager.loadUserConfigExtensions((msg) => {
+                    logger.log('Python', `[扩展] ${msg}`);
+                }).then(() => {
+                    logger.log('Python', '✅ 用户配置的扩展包预加载完成');
+                }).catch(extErr => {
+                    logger.warn('Python', '扩展包加载部分失败（不影响使用）', extErr);
+                });
 
-                    // 本地模型预加载
+                // 本地模型预加载（延迟2秒，避免资源竞争）
+                setTimeout(() => {
                     const shouldPreload = localStorage.getItem('use_local_model') === 'true';
                     if (shouldPreload) {
                         import('@/services/localLLMService').then(({ localLLMService, SUPPORTED_MODELS }) => {
@@ -110,7 +110,7 @@ export function ExplorationFlowV2({
                             );
                         });
                     }
-                }, 1000);
+                }, 2000);
 
             } catch (err) {
                 logger.error('Python', 'Pyodide 初始化失败', err);

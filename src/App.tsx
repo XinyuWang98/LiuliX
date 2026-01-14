@@ -19,6 +19,7 @@ import { useResizable } from '@/hooks/useResizable';
 import { logger } from './utils/logger';
 import { LiuliShowcase } from './pages/LiuliShowcase'; // [NEW] Design System
 import { initializeConfig } from './services/configService'; // [NEW 2026-01-08] Feature Flags配置
+import { WhitepaperLayout } from './components/whitepaper/WhitepaperLayout'; // [NEW] Whitepaper
 import './App.css';
 import { ingestFilesAndCreateProject } from './utils/projectImporter';
 import { saveProjects, loadProjects } from './utils/indexedDB';
@@ -33,7 +34,7 @@ function AppContent() {
     }, [language, t]);
 
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'workbench' | 'design' | 'welcome'>('workbench');
+    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'workbench' | 'design' | 'welcome' | 'whitepaper'>('workbench');
     const [cleaningTrigger, setCleaningTrigger] = useState(0);
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
     const [showRight, setShowRight] = useState(() => localStorage.getItem('layout.showRight') !== 'false');
@@ -59,6 +60,8 @@ function AppContent() {
                 setActiveView('workbench'); // 工作台页面
             } else if (pathname === '/design') {
                 setActiveView('design'); // Design System
+            } else if (pathname.startsWith('/whitepaper')) {
+                setActiveView('whitepaper'); // Whitepaper Portal
             } else if (pathname === '/') {
                 // 重定向到工作台页面（废弃旧 dashboard）
                 navigateTo('/workbench');
@@ -172,21 +175,13 @@ function AppContent() {
             logger.log('UI', '欢迎界面上传文件处理开始');
             logger.log('UI', 'Step 1: 准备themeMap');
 
-            const themeMap = {
-                game: t('dataSource.project.themes.game'),
-                sales: t('dataSource.project.themes.sales'),
-                finance: t('dataSource.project.themes.finance'),
-                analytics: t('dataSource.project.themes.analytics'),
-                user: t('dataSource.project.themes.user'),
-            };
+
 
             logger.log('UI', 'Step 2: 调用ingestFilesAndCreateProject');
             // 1. 创建新项目对象
             const newProject = await ingestFilesAndCreateProject(
                 files,
-                sampledFlags,
-                'zh-CN', // 强制中文活 MVP 默认
-                themeMap
+                sampledFlags
             );
             logger.log('UI', 'Step 3: ingestFilesAndCreateProject完成', { data: { id: newProject?.id } });
 
@@ -218,8 +213,8 @@ function AppContent() {
 
     return (
         <div className={`app-container ${(isLeftResizing || isRightResizing) ? 'resizing' : ''}`}>
-            {/* 工作台页面不显示顶部导航栏 */}
-            {activeView !== 'workbench' && (
+            {/* 工作台页面和白皮书不显示顶部导航栏 */}
+            {(activeView !== 'workbench' && activeView !== 'whitepaper') && (
                 <NavigationBar
                     onOpenAPISettings={() => setShowAPISettings(true)}
                     backendStatus={backendStatus}
@@ -254,6 +249,12 @@ function AppContent() {
             ) : activeView === 'design' ? (
                 /* [NEW] Design System Showcase */
                 <LiuliShowcase />
+            ) : activeView === 'whitepaper' ? (
+                /* [NEW] Whitepaper Portal */
+                <WhitepaperLayout onBack={() => {
+                    navigateTo('/welcome');
+                    setActiveView('welcome');
+                }} />
             ) : selectedProject === null ? (
                 /* [NEW] 独立产品首页 (无侧边栏) */
                 <LandingPage onFilesUploaded={handleWelcomeUpload} />

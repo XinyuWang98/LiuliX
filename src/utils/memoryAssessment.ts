@@ -173,45 +173,60 @@ export function calculateRecommendedSampleRows(
 }
 
 /**
- * 计算Pyodide可安全加载的最大行数
- * 根据列数和浏览器实际内存动态计算，避免硬编码魔法数字
+ * 🚫 已废弃（Web版MVP）- 改为固定10万行上限（2026-01-14）
  * 
- * @param columnCount 列数
- * @returns 最大行数
+ * Pyodide专用：根据设备内存和列数动态计算最大安全行数
+ * 
+ * @deprecated Web版MVP已改为固定常量MAX_PYODIDE_ROWS=100000
+ * @reason Pyodide WASM内存限制导致动态评估收益有限，复杂度与稳定性不成正比
+ * @preserve 保留此函数作为未来Native离线版参考（CPython无WASM限制）
+ * 
+ * @param columnCount 数据列数
+ * @returns 最大行数（考虑Pyodide内存开销和安全系数）
+ * 
+ * @example Native版使用示例（未来）
+ * ```typescript
+ * const maxRows = calculateMaxRowsForPyodide(columnCount);
+ * ```
  */
 export function calculateMaxRowsForPyodide(columnCount: number): number {
     // 动态获取浏览器内存
     const browserMemory = getBrowserMemory();
     const memoryGB = browserMemory / (1024 ** 3);
 
-    // 根据内存分层调整预算比例
-    let budgetRatio = 0.2; // 默认20%
-    if (memoryGB >= 16) {
-        budgetRatio = 0.25; // 16GB+ → 25%
+    // 6档精细化预算比例（严格遵循55-专题-内存评估与采样策略规范）
+    let budgetRatio = 0.1; // 默认10% (低配)
+    if (memoryGB >= 32) {
+        budgetRatio = 0.4;  // 🟣 极致 32GB+    → 40%
+    } else if (memoryGB >= 24) {
+        budgetRatio = 0.35; // 🔵 旗舰 24-32GB → 35%
+    } else if (memoryGB >= 16) {
+        budgetRatio = 0.3;  // 🟢 高性能 16-24GB → 30%
     } else if (memoryGB >= 8) {
-        budgetRatio = 0.2;  // 8GB  → 20%
+        budgetRatio = 0.2;  // 🟡 主流 8-16GB  → 20%
     } else if (memoryGB >= 4) {
-        budgetRatio = 0.15; // 4GB  → 15%
-    } else {
-        budgetRatio = 0.1;  // <4GB → 10%
+        budgetRatio = 0.15; // 🟠 标准 4-8GB   → 15%
     }
+    // <4GB 保持默认10%
 
-    const availableMemoryMB = (browserMemory / (1024 * 1024)) * budgetRatio;
+    // 🔧 Pyodide绝对内存上限：Worker进程限制，不管设备多大都不超过256MB
+    const PYODIDE_MAX_MEMORY_MB = 256;  // 保守值，确保不会MemoryError
+    const dynamicMemoryMB = (browserMemory / (1024 * 1024)) * budgetRatio;
+    const availableMemoryMB = Math.min(dynamicMemoryMB, PYODIDE_MAX_MEMORY_MB);
 
-    // 每个数据点：8 bytes (number) × 3 (pandas开销系数)
-    const BYTES_PER_DATAPOINT = 8 * 3;
-    const SAFETY_MARGIN = 0.7; // 安全系数70%，保留30%缓冲
+    // 每个数据点：8 bytes (number) × 6-8 (pandas+matplotlib+临时变量开销)
+    // 🔧 修复：原3倍系数导致MemoryError，基于实际测试调整为6-8倍
+    const OVERHEAD_MULTIPLIER = columnCount > 10 ? 8 : 6;  // 列多时更保守
+    const BYTES_PER_DATAPOINT = 8 * OVERHEAD_MULTIPLIER;
+    const SAFETY_MARGIN = 0.6; // 安全系数60%，保留40%缓冲（更保守）
 
     const availableBytes = availableMemoryMB * 1024 * 1024 * SAFETY_MARGIN;
     const maxDataPoints = availableBytes / BYTES_PER_DATAPOINT;
     const maxRows = Math.floor(maxDataPoints / columnCount);
 
-    // 动态边界：根据内存调整
-    const MIN_ROWS = 1000;
-    const MAX_ROWS = memoryGB >= 16 ? 200000 :
-        memoryGB >= 8 ? 100000 :
-            memoryGB >= 4 ? 50000 : 30000;
+    // ✅ 信任动态计算作为唯一真理来源（6-8倍系数+60%安全系数已足够保守）
+    const MIN_ROWS = 1000;  // 最小保护：避免极端情况下行数过少
 
-    return Math.max(MIN_ROWS, Math.min(maxRows, MAX_ROWS));
+    return Math.max(MIN_ROWS, maxRows);
 }
 

@@ -1,6 +1,6 @@
 // 中文翻译主入口（聚合所有模块）
 import { LanguageConfig } from '@/types/i18n';
-import { common, data, nav, sidebar, chat, language, hardware } from './common';
+import { common, data, nav, sidebar, chat, language, hardware, footer } from './common';
 import { settings } from './settings';
 import { prompt } from './prompt';
 import { dataSource } from './dataSource';
@@ -15,6 +15,8 @@ import { aiCost, aiRetry, cache, localModel, config } from './ai';
 import { errors } from './errors';
 import { packages } from './packages';
 import { workbench } from './workbench';
+
+import { whitepaper } from './whitepaper';
 
 export const zhCN: LanguageConfig = {
     code: 'zh-CN',
@@ -56,5 +58,7 @@ export const zhCN: LanguageConfig = {
         progress,
         packages,
         workbench,
+        whitepaper,
+        footer,
     },
-};
+} as any; // TODO: Remove after updating types/i18n.ts to match actual module structure

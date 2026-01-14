@@ -6,6 +6,7 @@
 import { PyodideWorkerManager } from '@/utils/pyodideWorker';
 import { getBrowserMemory } from '@/utils/resourceLimits';
 import { logger } from '@/utils/logger';
+import { getEnabledLibraries } from '@/config/libraryStorage';
 
 /**
  * 任务队列项
@@ -70,6 +71,11 @@ export class BrowserWorkerPool {
 
             this.initialized = true;  // 标记为已初始化，首个Worker可用
 
+            // 🚀 第1.5步：预加载用户配置的Python包（后台异步，不阻塞）
+            this.preloadUserPackages(firstWorker).catch(err => {
+                logger.warn('AI服务', '[WorkerPool] 包预加载失败（不影响功能）', err);
+            });
+
             // 第2步：后台异步初始化其余Worker（不阻塞）
             if (this.poolSize > 1) {
                 Promise.all(
@@ -88,6 +94,39 @@ export class BrowserWorkerPool {
         })();
 
         return this.initPromise;
+    }
+
+    /**
+     * 预加载用户配置的Python包（后台异步）
+     */
+    private async preloadUserPackages(worker: PyodideWorkerManager): Promise<void> {
+        try {
+            // 读取用户启用的库列表（扁平化）
+            const enabledLibraries = getEnabledLibraries();
+
+            // 过滤出非必需库（必需库已在Worker初始化时加载）
+            const requiredLibraries = ['pandas', 'numpy', 'matplotlib'];
+            const extensionLibraries = enabledLibraries.filter(
+                lib => !requiredLibraries.includes(lib)
+            );
+
+            if (extensionLibraries.length === 0) {
+                logger.log('AI服务', '[WorkerPool] 无需预加载扩展包（仅必需包）');
+                return;
+            }
+
+            logger.log('AI服务', `[WorkerPool] 📦 开始预加载用户配置的包: ${extensionLibraries.join(', ')}`);
+            const preloadStart = performance.now();
+
+            // 调用Worker的包加载方法
+            await worker.loadPackages(extensionLibraries);
+
+            const preloadDuration = performance.now() - preloadStart;
+            logger.log('AI服务', `[WorkerPool] ✅ 包预加载完成，耗时 ${preloadDuration.toFixed(0)}ms`);
+        } catch (error) {
+            // 预加载失败不影响功能，首次执行时会自动加载
+            logger.warn('AI服务', '[WorkerPool] 包预加载失败，将在首次执行时加载', error);
+        }
     }
 
     /**

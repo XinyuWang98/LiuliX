@@ -24,8 +24,21 @@ async function initializePyodide() {
                 indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
             });
 
-            // 加载常用的 Python 包
-            await pyodide.loadPackage(['numpy', 'pandas']);
+            // 🚀 预加载所有必需的 Python 包（避免执行时动态加载，节省~45秒）
+            // 包括：numpy, pandas, matplotlib（绘图）, scipy（科学计算）, scikit-learn（机器学习）
+            // 注意：所有依赖会自动安装（如 joblib、openblas、threadpoolctl等）
+            await pyodide.loadPackage([
+                'numpy',
+                'pandas',
+                'python-dateutil',  // pandas依赖
+                'pytz',             // pandas依赖
+                'six',              // pandas依赖
+                'matplotlib',
+                'matplotlib-pyodide',
+                'Pillow',           // matplotlib依赖
+                'scipy',
+                'scikit-learn'
+            ]);
 
             console.log('Pyodide initialized successfully');
             return pyodide;
@@ -189,6 +202,27 @@ ${variableName}.describe().to_dict()
                         id,
                         type: 'GET_STATS_SUCCESS',
                         payload: { stats },
+                    });
+                }
+                break;
+
+            case 'LOAD_PACKAGES':
+                {
+                    if (!pyodide) {
+                        await initializePyodide();
+                    }
+
+                    const { packages } = payload;
+
+                    // 加载指定的Python包
+                    console.log('[Pyodide Worker] Loading packages:', packages);
+                    await pyodide.loadPackage(packages);
+                    console.log('[Pyodide Worker] Packages loaded successfully:', packages);
+
+                    self.postMessage({
+                        id,
+                        type: 'LOAD_PACKAGES_SUCCESS',
+                        payload: { message: `Packages loaded: ${packages.join(', ')}` },
                     });
                 }
                 break;

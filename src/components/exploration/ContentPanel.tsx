@@ -153,7 +153,7 @@ export function ContentPanel({
                             <InsightChainFlow
                                 columns={activeFile.columns?.map(c => c.name) || []}
                                 rowCount={activeFile.rowCount || 0}
-                                tableName={activeFile.tableName}
+                                tableName={activeFile.data?.tableName}
                                 file={activeFile}
                                 fileName={activeFile.originalName || activeFile.name}
                                 hideTitle={true}
@@ -173,7 +173,10 @@ export function ContentPanel({
                         <ReportProvider files={project.files}>
                             {/* ✅ 恢复 Section Header，与其他模块保持一致 */}
                             <div className="section-header">
-                                <h2 className="section-title">{t('exploration.sections.report')}</h2>
+                                <h2 className="section-title">
+                                    {t('exploration.sections.report')}
+                                    <span className="beta-badge">Beta</span>
+                                </h2>
                                 {/* ✅ 新增操作按钮区域 */}
                                 <div className="section-actions">
                                     <ReportActions />

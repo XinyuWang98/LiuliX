@@ -22,13 +22,13 @@ interface VirtualDataGridProps {
 }
 
 // 常量定义（符合规则4：禁止魔法数字）
-const 每页行数 = 10; // 固定值：每页显示行数
-const 最小列宽 = 120; // 最小列宽（px）
-const 最大列宽 = 300; // 最大列宽（px）
-const 列名字符宽度系数 = 10; // 每个字符占用的像素宽度
-const 列宽基础偏移 = 60; // 列宽计算的基础偏移量
-const 序号列宽度 = 60; // 序号列固定宽度（px）
-const 最大文本长度 = 100; // 单元格文本最大长度
+const PAGE_SIZE = 10; // 固定值：每页显示行数
+const MIN_COLUMN_WIDTH = 120; // 最小列宽（px）
+const MAX_COLUMN_WIDTH = 300; // 最大列宽（px）
+const CHAR_WIDTH_COEFFICIENT = 10; // 每个字符占用的像素宽度
+const COLUMN_WIDTH_BASE_OFFSET = 60; // 列宽计算的基础偏移量
+const INDEX_COLUMN_WIDTH = 60; // 序号列固定宽度（px）
+const MAX_TEXT_LENGTH = 100; // 单元格文本最大长度
 
 /**
  * 格式化单元格值（类型感知）
@@ -60,7 +60,7 @@ const formatCellValue = (value: any, type: string, t: (key: string) => string): 
     if (typeUpper === 'BOOLEAN' || typeUpper === 'BOOL') return value ? t('common.yes') : t('common.no');
 
     const str = String(value);
-    if (str.length > 最大文本长度) return str.substring(0, 最大文本长度) + '...';
+    if (str.length > MAX_TEXT_LENGTH) return str.substring(0, MAX_TEXT_LENGTH) + '...';
     return str;
 };
 
@@ -107,7 +107,7 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
 
     const engine = DuckDBEngine.getInstance();
     const rowCountNum = typeof rowCount === 'bigint' ? Number(rowCount) : rowCount;
-    const totalPages = Math.ceil(rowCountNum / 每页行数);
+    const totalPages = Math.ceil(rowCountNum / PAGE_SIZE);
 
     // 监听滚动或窗口大小变化，关闭下拉菜单
     useEffect(() => {
@@ -140,10 +140,10 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
     // 计算列宽逻辑
     useEffect(() => {
         if (containerWidth === 0 || visibleColumns.length === 0) return;
-        let totalBaseWidth = 序号列宽度;
+        let totalBaseWidth = INDEX_COLUMN_WIDTH;
         const baseWidths = visibleColumns.map(col => {
             const nameLength = col.name.length;
-            return Math.max(最小列宽, Math.min(最大列宽, nameLength * 列名字符宽度系数 + 列宽基础偏移));
+            return Math.max(MIN_COLUMN_WIDTH, Math.min(MAX_COLUMN_WIDTH, nameLength * CHAR_WIDTH_COEFFICIENT + COLUMN_WIDTH_BASE_OFFSET));
         });
         totalBaseWidth += baseWidths.reduce((a, b) => a + b, 0);
         const availableSpace = containerWidth - 20;
@@ -157,7 +157,7 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
 
     const getColumnWidth = useCallback((col: ColumnMetadata) => {
         const nameLength = col.name.length;
-        const baseWidth = Math.max(最小列宽, Math.min(最大列宽, nameLength * 列名字符宽度系数 + 列宽基础偏移));
+        const baseWidth = Math.max(MIN_COLUMN_WIDTH, Math.min(MAX_COLUMN_WIDTH, nameLength * CHAR_WIDTH_COEFFICIENT + COLUMN_WIDTH_BASE_OFFSET));
         return baseWidth + bonusWidth;
     }, [bonusWidth]);
 
@@ -180,8 +180,8 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
     const loadPage = useCallback(async (page: number) => {
         setLoading(true);
         try {
-            const offset = page * 每页行数;
-            const rows = await engine.queryChunk(tableName, offset, 每页行数);
+            const offset = page * PAGE_SIZE;
+            const rows = await engine.queryChunk(tableName, offset, PAGE_SIZE);
             setData(rows);
         } catch (err) {
             console.error(t('grid.loadDataFailed'), err);
@@ -227,8 +227,8 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
             {/* 表头区 */}
             <div className="enhancedGridHeader" ref={headerRef} style={{ overflowX: 'hidden' }}>
                 <div
-                    className="enhancedHeaderCell enhancedHeaderCell序号列"
-                    style={{ minWidth: `${序号列宽度}px`, maxWidth: `${序号列宽度}px` }}
+                    className="enhancedHeaderCell enhancedHeaderCell-index"
+                    style={{ minWidth: `${INDEX_COLUMN_WIDTH}px`, maxWidth: `${INDEX_COLUMN_WIDTH}px` }}
                 >
                     <div className="headerCellTop">
                         <span className="headerCellName">#</span>
@@ -344,11 +344,11 @@ export const VirtualDataGrid: React.FC<VirtualDataGridProps> = ({ tableName, row
                         return (
                             <div key={rowIdx} className="simpleTableRow">
                                 <div
-                                    className={`enhancedGridCell enhancedGridCell序号 ${isSelectedRow ? 'highlightRow' : ''}`}
-                                    style={{ minWidth: `${序号列宽度}px`, maxWidth: `${序号列宽度}px` }}
+                                    className={`enhancedGridCell enhancedGridCell-index ${isSelectedRow ? 'highlightRow' : ''}`}
+                                    style={{ minWidth: `${INDEX_COLUMN_WIDTH}px`, maxWidth: `${INDEX_COLUMN_WIDTH}px` }}
                                     onClick={() => setSelectedCell({ rowIdx, colName: '' })}
                                 >
-                                    {currentPage * 每页行数 + rowIdx + 1}
+                                    {currentPage * PAGE_SIZE + rowIdx + 1}
                                 </div>
                                 {visibleColumns.map((col, colIdx) => {
                                     const isSelectedCol = selectedCell?.colName === col.name;
