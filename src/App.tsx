@@ -34,7 +34,7 @@ function AppContent() {
     }, [language, t]);
 
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'workbench' | 'design' | 'welcome' | 'whitepaper'>('workbench');
+    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'workbench' | 'design' | 'welcome' | 'whitepaper'>('welcome');
     const [cleaningTrigger, setCleaningTrigger] = useState(0);
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
     const [showRight, setShowRight] = useState(() => localStorage.getItem('layout.showRight') !== 'false');
@@ -63,9 +63,9 @@ function AppContent() {
             } else if (pathname.startsWith('/whitepaper')) {
                 setActiveView('whitepaper'); // Whitepaper Portal
             } else if (pathname === '/') {
-                // 重定向到工作台页面（废弃旧 dashboard）
-                navigateTo('/workbench');
-                setActiveView('workbench'); // 立即更新状态，防止闪烁
+                // 重定向到欢迎页
+                navigateTo('/welcome');
+                setActiveView('welcome');
             }
         };
 
