@@ -515,7 +515,7 @@ app.use('/api', apiRouter);
 app.use('/', apiRouter);
 
 // [Debug] 如果上述路由都未匹配，打印日志并返回 404 (帮助调试 Vercel 路径问题)
-app.use('*', (req, res) => {
+app.use((req, res) => {
     console.error(`[404 Debug] 未找到路由: ${req.method} ${req.url} (Original: ${req.originalUrl})`);
     res.status(404).json({
         error: 'Route Not Found (Backend)',
