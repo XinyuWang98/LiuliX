@@ -63,6 +63,9 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// 🆕 Vercel 兼容性路由重构
+const apiRouter = express.Router();
+
 /**
  * 免费试用计数器中间件
  * @param {string} type -类型 'cleaning' | 'insight'
@@ -173,7 +176,7 @@ function checkFreeTrialLimit(type) {
 
 // 🆕 Feature Flags 配置路由（2026-01-08 新增）
 const { registerConfigRoutes } = require('./configRoutes');
-registerConfigRoutes(app);
+registerConfigRoutes(apiRouter);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -189,7 +192,7 @@ function injectUsageHeader(res) {
 }
 
 // 🆕 清洗建议专用通道（快速响应）
-app.post('/api/proxy/deepseek-cleaning', checkFreeTrialLimit('cleaning'), async (req, res) => {
+apiRouter.post('/proxy/deepseek-cleaning', checkFreeTrialLimit('cleaning'), async (req, res) => {
     const { data } = req.body;
     const clientKey = req.headers['x-api-key'];
     // 逻辑：如果客户端传了真实Key则用客户端的，否则用服务端的。排除 'default'。
@@ -232,7 +235,7 @@ app.post('/api/proxy/deepseek-cleaning', checkFreeTrialLimit('cleaning'), async 
 });
 
 // 🆕 洞察建议专用通道（深度分析）
-app.post('/api/proxy/deepseek-insight', checkFreeTrialLimit('insight'), async (req, res) => {
+apiRouter.post('/proxy/deepseek-insight', checkFreeTrialLimit('insight'), async (req, res) => {
     const { data } = req.body;
     // 优先使用客户端Key
     const clientKey = req.headers['x-api-key'];
@@ -275,7 +278,7 @@ app.post('/api/proxy/deepseek-insight', checkFreeTrialLimit('insight'), async (r
 });
 
 // 🆕 Skills模式专用通道（Function Calling）
-app.post('/api/proxy/deepseek-skills', async (req, res) => {
+apiRouter.post('/proxy/deepseek-skills', async (req, res) => {
     const { data } = req.body;
     // 优先使用客户端Key
     const clientKey = req.headers['x-api-key'];
@@ -316,7 +319,7 @@ app.post('/api/proxy/deepseek-skills', async (req, res) => {
 });
 
 // 通用代理接口
-app.post('/api/proxy', async (req, res) => {
+apiRouter.post('/proxy', async (req, res) => {
     const { targetUrl, method = 'POST', headers = {}, data } = req.body;
 
     if (!targetUrl) {
@@ -378,7 +381,7 @@ app.post('/api/proxy', async (req, res) => {
 const modelService = require('./modelService');
 
 // 模型加载
-app.post('/api/model/load', async (req, res) => {
+apiRouter.post('/model/load', async (req, res) => {
     try {
         const { modelId } = req.body;
         const result = await modelService.loadModel(modelId);
@@ -390,7 +393,7 @@ app.post('/api/model/load', async (req, res) => {
 });
 
 // 文本生成（应用免费试用限制）
-app.post('/api/model/generate', async (req, res) => {
+apiRouter.post('/model/generate', async (req, res) => {
     try {
         const { prompt, maxTokens, temperature, type = 'insight' } = req.body;
 
@@ -414,13 +417,13 @@ app.post('/api/model/generate', async (req, res) => {
 });
 
 // 模型状态查询
-app.get('/api/model/status', (req, res) => {
+apiRouter.get('/model/status', (req, res) => {
     const status = modelService.getStatus();
     res.json(status);
 });
 
 // 🆕 获取已安装的 Ollama 模型列表
-app.get('/api/model/list', async (req, res) => {
+apiRouter.get('/model/list', async (req, res) => {
     try {
         const response = await axios.get('http://localhost:11434/api/tags');
         const models = response.data.models || [];
@@ -446,7 +449,7 @@ app.get('/api/model/list', async (req, res) => {
 });
 
 // 🆕 邀请码验证接口
-app.post('/api/validate-invite-code', (req, res) => {
+apiRouter.post('/validate-invite-code', (req, res) => {
     const { code } = req.body;
 
     if (!code) {
@@ -502,6 +505,10 @@ app.post('/api/validate-invite-code', (req, res) => {
         valid: false
     });
 });
+
+// 注册 Router (顺序很重要：先 /api 匹配完整路径，再 / 匹配 Stripped 路径)
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 // Export app for Vercel Serverless
 module.exports = app;

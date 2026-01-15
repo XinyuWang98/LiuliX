@@ -14,10 +14,10 @@ function getCoreFlags() {
     return {
         // 🔴 P0: 邀请码前置验证（生产环境必须远程控制）
         ENABLE_INVITE_CODE_GATE: process.env.ENABLE_INVITE_CODE_GATE === 'true',
-        
+
         // 🟡 P1: 高级API配置界面（MVP阶段建议隐藏）
         ENABLE_ADVANCED_API_CONFIG: process.env.ENABLE_ADVANCED_API_CONFIG === 'true',
-        
+
         // 🟢 P2: AST代码增强器（紧急回滚开关）
         USE_AST_CODE_ENHANCER: process.env.USE_AST_CODE_ENHANCER !== 'false', // 默认true
     };
@@ -25,16 +25,16 @@ function getCoreFlags() {
 
 /**
  * 注册Feature Flags路由
- * @param {express.Application} app - Express应用实例
+ * @param {express.Router} router - Express Router实例
  */
-function registerConfigRoutes(app) {
+function registerConfigRoutes(router) {
     /**
-     * GET /api/config
+     * GET /config
      * 获取核心Feature Flags配置
      */
-    app.get('/api/config', (req, res) => {
+    router.get('/config', (req, res) => {
         const flags = getCoreFlags();
-        
+
         console.log('[Feature Flags] 配置请求:', {
             ENABLE_INVITE_CODE_GATE: flags.ENABLE_INVITE_CODE_GATE,
             ENABLE_ADVANCED_API_CONFIG: flags.ENABLE_ADVANCED_API_CONFIG,
@@ -51,7 +51,7 @@ function registerConfigRoutes(app) {
         });
     });
 
-    console.log('✅ Feature Flags 路由已注册: GET /api/config');
+    console.log('✅ Feature Flags 路由已注册: GET /config');
 }
 
 module.exports = { registerConfigRoutes, getCoreFlags };
