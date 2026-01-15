@@ -23,3 +23,5 @@
 [代理-洞察] 转发请求至 DeepSeek
 [计数] 用户: user_1767099609395_yvu27q4s0, 类型: invite, Code: VIP20260115, Total: 6, Cleaning: undefined, Insight: undefined
 [代理-清洗] 转发请求至 DeepSeek
+[验证] 收到: "TEST", 白名单: [ 'XINYU2026', 'DEFAULT-LIULIX-VIP' ]
+[验证] 失败: "TEST" 不在白名单且不符合动态规则 (今日后缀: 20260115)

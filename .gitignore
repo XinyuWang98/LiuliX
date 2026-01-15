@@ -49,3 +49,4 @@ models_cache/
 
 # Ollama Setup Executable
 OllamaSetup.exe
+.vercel

@@ -1,7 +1,5 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
-    "buildCommand": "npm run build",
-    "outputDirectory": "dist",
     "cleanUrls": true,
     "trailingSlash": false,
     "functions": {
@@ -11,16 +9,8 @@
     },
     "rewrites": [
         {
-            "source": "/api/:path*",
-            "destination": "/api/index.js"
-        },
-        {
             "source": "/health",
-            "destination": "/api/index.js"
-        },
-        {
-            "source": "/:path*",
-            "destination": "/index.html"
+            "destination": "/api/health"
         }
     ],
     "headers": [
