@@ -175,7 +175,7 @@ function checkFreeTrialLimit(type) {
 }
 
 // 🆕 Feature Flags 配置路由（2026-01-08 新增）
-const { registerConfigRoutes } = require('./configRoutes');
+const { registerConfigRoutes } = require('./configRoutes.cjs');
 registerConfigRoutes(apiRouter);
 
 app.get('/health', (req, res) => {
@@ -378,7 +378,7 @@ apiRouter.post('/proxy', async (req, res) => {
 });
 
 // 🆕 本地模型服务 API
-const modelService = require('./modelService');
+const modelService = require('./modelService.cjs');
 
 // 模型加载
 apiRouter.post('/model/load', async (req, res) => {

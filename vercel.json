@@ -48,11 +48,11 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "/api/index.js"
+            "destination": "/api/index.cjs"
         },
         {
             "source": "/health",
-            "destination": "/api/index.js"
+            "destination": "/api/index.cjs"
         },
         {
             "source": "/(.*)",
@@ -60,7 +60,7 @@
         }
     ],
     "functions": {
-        "api/index.js": {
+        "api/index.cjs": {
             "maxDuration": 60,
             "memory": 1024
         }
