@@ -40,17 +40,23 @@
             "headers": [
                 {
                     "key": "Cache-Control",
-                    "value": "public, max-age=86400, s-maxage=86400"
+                    "value": "public, max-age=0, s-maxage=0"
                 }
             ]
         }
     ],
     "rewrites": [
         {
-            "source": "/api/:path*",
-            "destination": "https://your-backend-api.vercel.app/api/:path*"
+            "source": "/api/(.*)",
+            "destination": "/api/index.cjs"
         }
     ],
+    "functions": {
+        "api/index.cjs": {
+            "maxDuration": 60,
+            "memory": 1024
+        }
+    },
     "routes": [
         {
             "src": "/assets/(.*)",

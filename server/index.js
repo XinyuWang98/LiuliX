@@ -503,10 +503,16 @@ app.post('/api/validate-invite-code', (req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`\n🚀 后端代理服务器运行于 http://localhost:${port}`);
-    console.log(`   - 健康检查: http://localhost:${port}/health`);
-    console.log(`   - Feature Flags: http://localhost:${port}/api/config`);
-    console.log(`   - 代理端点: http://localhost:${port}/api/proxy`);
-    console.log(`   - 模型服务: http://localhost:${port}/api/model/*\n`);
-});
+// Export app for Vercel Serverless
+module.exports = app;
+
+// Only start server if run directly (local dev or traditional hosting)
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`\n🚀 后端代理服务器运行于 http://localhost:${port}`);
+        console.log(`   - 健康检查: http://localhost:${port}/health`);
+        console.log(`   - Feature Flags: http://localhost:${port}/api/config`);
+        console.log(`   - 代理端点: http://localhost:${port}/api/proxy`);
+        console.log(`   - 模型服务: http://localhost:${port}/api/model/*\n`);
+    });
+}

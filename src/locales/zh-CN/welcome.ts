@@ -9,7 +9,7 @@ export default {
         uploadButton: '上传第一个文件', // CTA按钮文案
         trustBadges: {
             local: '本地执行',
-            offline: '离线可用*',
+            offline: '端侧计算',
             desktop: 'PC端优化',
         },
     },
@@ -18,7 +18,7 @@ export default {
     valueProps: {
         privacy: {
             title: '数据隐形衣',
-            desc: '您的数据从未离开这台电脑。我们把最先进的AI模型搬进了您的浏览器，让您在断网环境下也能处理敏感财务数据。',
+            desc: '原始数据从未离开这台电脑。我们采用**自动脱敏技术**，仅将必要的统计元数据（Schema）发送给云端 AI，确保敏感明细数据永不出域。',
         },
         safety: {
             title: '先预演，再执行',
@@ -47,12 +47,12 @@ export default {
         sectionTitle: '为私有化数据分析设计的全栈方案',
         zeroSetup: {
             title: '开箱即用 · 零配置',
-            desc: '内置 Python 与 DuckDB 引擎。新人入职无需配置环境，点开浏览器即可工作。即使在飞机/高铁断网环境，也能流畅处理百万级数据。',
+            desc: '内置 Python 与 DuckDB 引擎。新人入职无需配置环境，点开浏览器即可工作。基于浏览器 WASM 算力，无需上传服务器即可流畅处理百万级数据。',
             label: '全栈集成',
         },
         audit: {
             title: '数据隐形衣 · 本地优先',
-            desc: '深度集成本地 AI 链路，数据永不出域。支持纯本地运行 (Qwen/Llama)，亦可平滑切换 API 模式。丰俭由人，合规尽在掌握。',
+            desc: '默认采用**云端隐私模式**，开箱即用。需要完全离线运行本地模型 (Ollama)？敬请期待 **LiuliX Desktop** 桌面版。',
             label: '隐私安全',
         },
         report: {
