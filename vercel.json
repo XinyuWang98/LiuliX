@@ -9,8 +9,12 @@
     },
     "rewrites": [
         {
+            "source": "/api/:path(.*)",
+            "destination": "/api/[...path]"
+        },
+        {
             "source": "/health",
-            "destination": "/api/health"
+            "destination": "/api/[...path]"
         }
     ],
     "headers": [
