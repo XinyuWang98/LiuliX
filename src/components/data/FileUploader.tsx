@@ -5,7 +5,7 @@ import { AlertCircle, X } from 'lucide-react';
 import { parseFile, ParsedFileData } from '@utils/fileParser';
 import { formatFileSize, formatLargeNumber } from '@utils/formatters';
 import { DuckDBEngine } from '../../db/duckdbEngine';
-import { isFeatureEnabled, setFeatureFlags } from '@/config/featureFlags';
+import { isFeatureEnabled } from '@/config/featureFlags';
 import { hasInviteCode } from '@/utils/userIdManager';
 import { InviteCodeModal } from '@/components/InviteCodeModal/InviteCodeModal';
 import './FileUploader.css';
