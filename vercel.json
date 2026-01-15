@@ -56,20 +56,5 @@
             "maxDuration": 60,
             "memory": 1024
         }
-    },
-    "routes": [
-        {
-            "src": "/assets/(.*)",
-            "headers": {
-                "Cache-Control": "public, max-age=31536000, immutable"
-            }
-        },
-        {
-            "handle": "filesystem"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/index.html"
-        }
-    ]
+    }
 }

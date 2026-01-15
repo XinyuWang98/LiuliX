@@ -32,17 +32,29 @@
 1.  **Project Name**: 保持默认 (如 `liulix`)。
 2.  **Framework**: 会自动识别为 `Vite`，**不用改**。
 3.  **Root Directory**: 保持默认 `./`，**不用改**。
-4.  **Environment Variables** (环境变量):
-    *   点击展开这一项。
-    *   我们需要填入 `.env.local` 里的关键信息。
-    *   请逐条添加以下变量 (复制 Key 和 Value，点击 Add):
+4.  **Build and Output Settings** (构建与输出设置):
+    *   **保持默认，不要修改**。
+    *   Build Command: `npm run build` (正确)
+    *   Output Directory: `dist` (正确)
+    *   Install Command: (留空即可)
 
-| Variable Name (Key)       | Value (参考值)     | 说明                               |
-| :------------------------ | :----------------- | :--------------------------------- |
-| `DEEPSEEK_API_KEY`        | `sk-xxxxxxxx`      | **必须**。你的 DeepSeek API 密钥。 |
-| `ENABLE_FREE_TRIAL_LIMIT` | `true`             | 防止被滥用，建议开启。             |
-| `INVITE_CODE_TOTAL_LIMIT` | `20`               | 每天最多允许多少次邀请码使用。     |
-| `VALID_INVITE_CODES`      | `TEST001,ADMIN888` | 你设定的邀请码，逗号分隔。         |
+5.  **Environment Variables** (环境变量):
+    *   点击展开这一项。
+    *   **快捷技巧**: 你有两种方式批量导入！
+        *   **方式A (推荐)**: 如图所示，点击 **"Import .env"** 按钮。
+            *   *⚠️ 注意*: 如果在 Mac 文件选择框里找不到 `.env.local`，请按键盘 **`Command + Shift + .`** (点) 来显示隐藏文件。
+        *   **方式B**: 复制 `.env.local` 的全部内容，直接**粘贴**到 Key 输入框中。
+    *   Vercel 会自动解析并填充所有行。🎉
+    *   (如果有需要补充的 Key，参考下表手动添加)
+
+| Variable Name (Key)         | Value (参考值)     | 说明                                                |
+| :-------------------------- | :----------------- | :-------------------------------------------------- |
+| `DEEPSEEK_API_KEY`          | `sk-xxxxxxxx`      | **基础**。若只填此项，清洗和洞察共用此 Key。        |
+| `DEEPSEEK_API_KEY_CLEANING` | `sk-yyyyyyyy`      | [可选] **清洗专用** Key。若填写，清洗任务优先用它。 |
+| `DEEPSEEK_API_KEY_INSIGHT`  | `sk-zzzzzzzz`      | [可选] **洞察专用** Key。若填写，分析任务优先用它。 |
+| `ENABLE_FREE_TRIAL_LIMIT`   | `true`             | 防止被滥用，建议开启。                              |
+| `INVITE_CODE_TOTAL_LIMIT`   | `20`               | 每天最多允许多少次邀请码使用。                      |
+| `VALID_INVITE_CODES`        | `TEST001,ADMIN888` | 你设定的邀请码，逗号分隔。                          |
 
 > [!IMPORTANT]
 > **不要填写** `VITE_API_URL`。

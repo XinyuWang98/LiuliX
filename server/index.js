@@ -22,7 +22,7 @@ const INVITE_CODE_TOTAL_LIMIT = parseInt(process.env.INVITE_CODE_TOTAL_LIMIT) ||
 
 // 邀请码白名单
 const validInviteCodes = new Set(
-    (process.env.VALID_INVITE_CODES || '').split(',').map(c => c.trim()).filter(c => c)
+    (process.env.VALID_INVITE_CODES || '').split(',').map(c => c.trim().toUpperCase()).filter(c => c)
 );
 
 // 用户使用计数器（内存存储，重启重置）

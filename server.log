@@ -1,6 +1,6 @@
 正在加载环境变量: /Users/catherinewang/Documents/GitHub/LiuliX/.env.local
 ✅ 清洗建议 API Key: sk-a4a76be...
-🎁 免费试用限制: 关闭（测试模式）
+🎁 免费试用限制: 启用
 🔑 邀请码数量: 2
 ✅ Feature Flags 路由已注册: GET /api/config
 
@@ -10,10 +10,16 @@
    - 代理端点: http://localhost:3001/api/proxy
    - 模型服务: http://localhost:3001/api/model/*
 
+[计数] 新邀请码用户: user_1767099609395_yvu27q4s0, 码: VIP20260115
+[计数] 用户: user_1767099609395_yvu27q4s0, 类型: invite, Code: VIP20260115, Total: 1, Cleaning: undefined, Insight: undefined
 [代理-洞察] 转发请求至 DeepSeek
+[计数] 用户: user_1767099609395_yvu27q4s0, 类型: invite, Code: VIP20260115, Total: 2, Cleaning: undefined, Insight: undefined
 [代理-清洗] 转发请求至 DeepSeek
-[代理-清洗] 转发请求至 DeepSeek
+[计数] 用户: user_1767099609395_yvu27q4s0, 类型: invite, Code: VIP20260115, Total: 3, Cleaning: undefined, Insight: undefined
 [代理-洞察] 转发请求至 DeepSeek
+[计数] 用户: user_1767099609395_yvu27q4s0, 类型: invite, Code: VIP20260115, Total: 4, Cleaning: undefined, Insight: undefined
 [代理-清洗] 转发请求至 DeepSeek
+[计数] 用户: user_1767099609395_yvu27q4s0, 类型: invite, Code: VIP20260115, Total: 5, Cleaning: undefined, Insight: undefined
 [代理-洞察] 转发请求至 DeepSeek
+[计数] 用户: user_1767099609395_yvu27q4s0, 类型: invite, Code: VIP20260115, Total: 6, Cleaning: undefined, Insight: undefined
 [代理-清洗] 转发请求至 DeepSeek
