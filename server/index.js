@@ -531,7 +531,6 @@ export default app;
 
 // Only start server if run directly (local dev or traditional hosting)
 // ESM alternative to if (require.main === module)
-import { fileURLToPath } from 'url';
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     app.listen(port, () => {
         console.log(`\n🚀 后端代理服务器运行于 http://localhost:${port}`);
