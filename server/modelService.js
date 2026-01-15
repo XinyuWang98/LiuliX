@@ -3,7 +3,7 @@
  * 提供模型加载和推理功能
  */
 
-const axios = require('axios');
+import axios from 'axios';
 
 /**
  * 模型服务类
@@ -123,4 +123,5 @@ class ModelService {
 }
 
 // 导出单例
-module.exports = new ModelService();
+export default new ModelService();
+

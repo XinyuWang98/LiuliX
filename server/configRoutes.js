@@ -10,7 +10,7 @@
  * 核心Feature Flags配置（仅3个）
  * 从环境变量读取，支持生产/开发环境切换
  */
-function getCoreFlags() {
+export function getCoreFlags() {
     return {
         // 🔴 P0: 邀请码前置验证（生产环境必须远程控制）
         ENABLE_INVITE_CODE_GATE: process.env.ENABLE_INVITE_CODE_GATE === 'true',
@@ -27,7 +27,7 @@ function getCoreFlags() {
  * 注册Feature Flags路由
  * @param {express.Router} router - Express Router实例
  */
-function registerConfigRoutes(router) {
+export function registerConfigRoutes(router) {
     /**
      * GET /config
      * 获取核心Feature Flags配置
@@ -54,4 +54,3 @@ function registerConfigRoutes(router) {
     console.log('✅ Feature Flags 路由已注册: GET /config');
 }
 
-module.exports = { registerConfigRoutes, getCoreFlags };

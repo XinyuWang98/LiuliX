@@ -1,11 +1,13 @@
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
 // 尝试从根目录加载 .env.local (假设 CWD 是根目录)
 const envPath = path.resolve(process.cwd(), '.env.local');
 console.log('正在加载环境变量:', envPath);
-require('dotenv').config({ path: envPath });
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
+import dotenv from 'dotenv';
+dotenv.config({ path: envPath });
+import express from 'express';
+import cors from 'cors';
+import axios from 'axios';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -44,7 +46,9 @@ const allowedOrigins = [
     'http://localhost:5173',  // Vite 开发服务器
     'http://localhost:4173',  // 🆕 Vite 生产预览服务器
     'https://liulix.vercel.app',
-    'https://dataprism.vercel.app'
+    'https://dataprism.vercel.app',
+    'https://liulix.com',
+    'https://www.liulix.com'
 ];
 
 app.use(cors({
@@ -175,7 +179,7 @@ function checkFreeTrialLimit(type) {
 }
 
 // 🆕 Feature Flags 配置路由（2026-01-08 新增）
-const { registerConfigRoutes } = require('./configRoutes.cjs');
+import { registerConfigRoutes } from './configRoutes.js';
 registerConfigRoutes(apiRouter);
 
 app.get('/health', (req, res) => {
@@ -378,7 +382,7 @@ apiRouter.post('/proxy', async (req, res) => {
 });
 
 // 🆕 本地模型服务 API
-const modelService = require('./modelService.cjs');
+import modelService from './modelService.js';
 
 // 模型加载
 apiRouter.post('/model/load', async (req, res) => {
@@ -523,10 +527,12 @@ app.use('*', (req, res) => {
 });
 
 // Export app for Vercel Serverless
-module.exports = app;
+export default app;
 
 // Only start server if run directly (local dev or traditional hosting)
-if (require.main === module) {
+// ESM alternative to if (require.main === module)
+import { fileURLToPath } from 'url';
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     app.listen(port, () => {
         console.log(`\n🚀 后端代理服务器运行于 http://localhost:${port}`);
         console.log(`   - 健康检查: http://localhost:${port}/health`);
@@ -535,3 +541,4 @@ if (require.main === module) {
         console.log(`   - 模型服务: http://localhost:${port}/api/model/*\n`);
     });
 }
+
