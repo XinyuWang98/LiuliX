@@ -8,7 +8,7 @@ import { parseTimestamp } from '@/utils/dateUtils';
 const AVAILABLE_LANGUAGES: LanguageConfig[] = [zhCN, enUS];
 
 // 默认语言
-const DEFAULT_LANGUAGE = 'zh-CN';
+const DEFAULT_LANGUAGE = 'en-US';
 
 // localStorage 键名
 const LANGUAGE_STORAGE_KEY = 'dataprism_language';
