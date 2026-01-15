@@ -51,13 +51,26 @@ const allowedOrigins = [
     'https://www.liulix.com'
 ];
 
+// 检查是否是 Vercel 预览部署 URL
+const isVercelPreview = (origin) => {
+    if (!origin) return false;
+    // 匹配 liulix-*.vercel.app 格式的预览 URL
+    return /^https:\/\/liulix(-[a-z0-9]+)?(-excelsiors-projects-[a-z0-9]+)?\.vercel\.app$/.test(origin);
+};
+
 app.use(cors({
     origin: (origin, callback) => {
         // 允许无 origin 的请求（如 Postman、curl）
         if (!origin) return callback(null, true);
+        // 允许白名单内的 origin
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
-        } else {
+        }
+        // 允许 Vercel 预览部署
+        else if (isVercelPreview(origin)) {
+            callback(null, true);
+        }
+        else {
             console.warn(`[CORS] 拒绝来自 ${origin} 的请求`);
             callback(new Error('Not allowed by CORS'));
         }
