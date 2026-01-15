@@ -1,0 +1,626 @@
+正在加载环境变量: /Users/catherinewang/Documents/GitHub/LiuliX/server/.env.local
+✅ 清洗建议 API Key: sk-88f24b3...
+🎁 免费试用限制: 关闭（测试模式）
+🔑 邀请码数量: 2
+✅ Feature Flags 路由已注册: GET /api/config
+
+🚀 后端代理服务器运行于 http://localhost:3001
+   - 健康检查: http://localhost:3001/health
+   - Feature Flags: http://localhost:3001/api/config
+   - 代理端点: http://localhost:3001/api/proxy
+   - 模型服务: http://localhost:3001/api/model/*
+
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[模型服务] 正在连接 Ollama 服务: http://localhost:11434
+[模型服务] 检查模型: qwen2.5-coder:7b
+[模型服务] ✅ Ollama 模型就绪: qwen2.5-coder:7b
+[代理-清洗] 转发请求至 DeepSeek
+[模型服务] 生成完成，耗时 35456ms，长度 1500字符
+[模型服务] 生成完成，耗时 13652ms，长度 731字符
+[模型服务] 正在连接 Ollama 服务: http://localhost:11434
+[模型服务] 检查模型: qwen2.5-coder:7b
+[模型服务] ✅ Ollama 模型就绪: qwen2.5-coder:7b
+[模型服务] 正在连接 Ollama 服务: http://localhost:11434
+[模型服务] 检查模型: qwen2.5-coder:7b
+[模型服务] ✅ Ollama 模型就绪: qwen2.5-coder:7b
+[代理-清洗] 转发请求至 DeepSeek
+[模型服务] 生成完成，耗时 13002ms，长度 834字符
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察错误] Client network socket disconnected before secure TLS connection was established
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察错误] aborted
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[代理-清洗] 转发请求至 DeepSeek
+[代理-清洗错误] aborted
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[CORS] 拒绝来自 http://localhost:5175 的请求
+Error: Not allowed by CORS
+    at origin (/Users/catherinewang/Documents/GitHub/LiuliX/server/index.js:58:22)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:328:13)
+    at /Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/router/index.js:280:10)
+    at expressInit (/Users/catherinewang/Documents/GitHub/LiuliX/server/node_modules/express/lib/middleware/init.js:40:5)
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek
+[代理-洞察] 转发请求至 DeepSeek
+[代理-清洗] 转发请求至 DeepSeek

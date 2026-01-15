@@ -85,6 +85,27 @@ export interface UserPrompt {
     // 告诉调用者需要传入哪些变量 (e.g., "column_name", "df_summary")
     inputVariables: string[];
 
+    /**
+     * 🆕 输出列名定义 (可选)
+     * 
+     * 用途：声明此 prompt 执行后会在 DataFrame 中**动态生成**的列名
+     * 
+     * 使用场景：
+     * 1. 列名校验：执行阶段校验时，这些列会被加入白名单（因为它们在代码运行前不存在于原始数据中）
+     * 2. 依赖追踪：后续 prompt 可以引用这些生成列（未来功能）
+     * 3. 文档生成：自动生成 prompt 的输入输出说明
+     * 
+     * 示例：
+     * - worker-cluster-v1: ['Cluster']  → KMeans 聚类后生成 Cluster 列
+     * - worker-outlier-v1: []           → 不生成新列，仅绘图（可省略此字段）
+     * 
+     * 架构扩展点（预留）：
+     * - 未来可扩展为对象数组: { name: string, type: 'numeric'|'categorical', description: string }
+     * - 支持用户编辑界面的输入提示
+     * - 支持版本管理时的 schema diff 对比
+     */
+    outputColumns?: string[];
+
     // ========== Router 模式扩展 (L1 推荐式) ==========
 
     /**

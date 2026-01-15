@@ -76,28 +76,56 @@ export const WhitepaperLayout: React.FC<WhitepaperLayoutProps> = ({ initialDocId
                 // 注意：Vite 要求 glob 模式必须是字符串字面量，不能注入变量。
                 // 我们加载 whitepaper/ 下的所有 md 文件，然后按路径过滤。
                 const modules = import.meta.glob('/src/whitepaper/**/*.md', { as: 'raw' });
-                console.log('Whitepaper: Loaded modules keys:', Object.keys(modules));
+
 
                 // 构建映射 key: /src/whitepaper/{zh-CN|en-US}/{relativePath}
                 const langCode = language.code;
                 const targetKey = `/src/whitepaper/${langCode}/${relativePath}`;
 
                 // 如果特定语言文件丢失，回退到另一种语言（反之亦然）
-                const fallbackKey = `/src/whitepaper/${langCode === 'zh-CN' ? 'en-US' : 'zh-CN'}/${relativePath}`;
 
-                let loader = modules[targetKey];
-                if (!loader && modules[fallbackKey]) {
-                    console.warn(`Missing translation for ${targetKey}, using fallback.`);
-                    loader = modules[fallbackKey];
+
+                // 辅助函数：标准化路径匹配 (处理 macOS NFD/NFC 问题及 URL 编码问题)
+                const findLoaderByKey = (key: string) => {
+                    // 1. 直接匹配
+                    if (modules[key]) return modules[key];
+
+                    const normalize = (str: string) => str.normalize('NFC');
+                    const target = normalize(decodeURIComponent(key));
+
+                    // 2. 遍历 key 进行归一化匹配
+                    const foundKey = Object.keys(modules).find(k => {
+                        const current = normalize(decodeURIComponent(k));
+                        return current === target;
+                    });
+
+                    if (foundKey) {
+                        /* console.log(`[Whitepaper] Fuzzy matched: ${key} -> ${foundKey}`); */
+                        return modules[foundKey];
+                    }
+                    return null;
+                };
+
+                let loader = findLoaderByKey(targetKey);
+
+                // 如果当前语言未找到，尝试回退语言
+                if (!loader) {
+                    const fallbackKey = `/src/whitepaper/${langCode === 'zh-CN' ? 'en-US' : 'zh-CN'}/${relativePath}`;
+                    const fallbackLoader = findLoaderByKey(fallbackKey);
+
+                    if (fallbackLoader) {
+                        console.warn(`Missing translation for ${targetKey}, using fallback: ${fallbackKey}`);
+                        loader = fallbackLoader;
+                    }
                 }
 
                 if (!loader) {
-                    // 尝试精确匹配（防止路径包含目录的情况）
-                    const exactKey = `/src/whitepaper/${langCode}/${relativePath}`;
-                    if (!modules[exactKey]) {
-                        throw new Error(`File not found: ${targetKey}`);
-                    }
-                    loader = modules[exactKey];
+                    // 打印详细调试信息
+                    /* console.error('Whitepaper Load Failed:', {
+                        targetKey,
+                        availableKeys: Object.keys(modules)
+                    }); */
+                    throw new Error(`File not found: ${targetKey}`);
                 }
 
                 const rawContent = await loader();

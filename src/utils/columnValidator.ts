@@ -33,6 +33,15 @@ export function validateColumnsExist(
 ): ColumnValidationResult {
     const invalidColumns: string[] = [];
 
+    // 🆕 调试日志：记录校验开始
+    logger.log('列名校验', '开始校验参数列名', {
+        data: {
+            params,
+            validColumns,
+            validColumnsCount: validColumns.length
+        }
+    });
+
     // 常见的列名参数键
     const columnKeys = [
         'column_name',
@@ -48,13 +57,28 @@ export function validateColumnsExist(
         if (params[key]) {
             const paramValue = params[key];
 
+            // 🆕 调试日志：记录当前检查的参数
+            logger.log('列名校验', `检查参数键: ${key}`, {
+                data: { key, value: paramValue, type: typeof paramValue }
+            });
+
             // 处理数组参数（如 feature_cols: ['col1', 'col2']）
             if (Array.isArray(paramValue)) {
                 const invalid = paramValue.filter(col => !validColumns.includes(String(col)));
+                if (invalid.length > 0) {
+                    // 🆕 调试日志：记录数组中的无效列
+                    logger.warn('列名校验', `数组参数 ${key} 包含无效列`, {
+                        data: { invalid, total: paramValue }
+                    });
+                }
                 invalidColumns.push(...invalid.map(String));
             }
             // 处理字符串参数（如 column_name: 'Price'）
             else if (typeof paramValue === 'string' && !validColumns.includes(paramValue)) {
+                // 🆕 调试日志：记录字符串无效列
+                logger.warn('列名校验', `字符串参数 ${key} 无效`, {
+                    data: { key, value: paramValue }
+                });
                 invalidColumns.push(paramValue);
             }
         }
@@ -62,9 +86,14 @@ export function validateColumnsExist(
 
     const valid = invalidColumns.length === 0;
 
+    // 🆕 调试日志：记录最终结果
+    logger.log('列名校验', `校验完成: ${valid ? '✅ 通过' : '❌ 失败'}`, {
+        data: { valid, invalidColumns, totalChecked: Object.keys(params).length }
+    });
+
     if (!valid) {
         logger.warn('列名校验', '检测到无效列名', {
-            data: { invalidColumns, validColumns }
+            data: { invalidColumns, validColumns, params }
         });
     }
 

@@ -21,7 +21,9 @@ export function DataAnalysisSection() {
                 <div className="option-content">
                     <div className="option-label">
                         {t('settings.dataAnalysis.fastMode')}
-                        <span className="badge default">{t('settings.common.default')}</span>
+                        {strategy === 'fast' && ( // Conditionally render badge for 'fast' mode
+                            <span className="badge default">{t('settings.common.default')}</span>
+                        )}
                     </div>
                     <div className="option-desc">
                         {t('settings.dataAnalysis.fastModeDesc')}

@@ -213,15 +213,34 @@ export const InsightCardV2: React.FC<InsightCardV2Props> = ({
                     }}
                 >
                     {/* 图表区域 */}
-                    {node.result?.image && (
-                        <ChartImage
-                            src={node.result.image}
-                            alt={node.title}
-                            variant="card"
-                            clickable={true}
-                            downloadable={true}
-                        />
-                    )}
+                    {(() => {
+                        // 🔍 调试日志：检查图片数据
+                        if (node.result) {
+                            const hasImage = !!node.result.image;
+                            const imagePrefix = hasImage && node.result.image ? node.result.image.substring(0, 50) : 'null';
+                            logger.log('UI', 'InsightCardV2 图片渲染检查', {
+                                data: {
+                                    nodeId: node.id,
+                                    depth: node.depth,
+                                    title: node.title,
+                                    hasResult: true,
+                                    hasImage,
+                                    imagePrefix,
+                                    isExpanded: node.isExpanded
+                                }
+                            });
+                        }
+
+                        return node.result?.image ? (
+                            <ChartImage
+                                src={node.result.image}
+                                alt={node.title}
+                                variant="card"
+                                clickable={true}
+                                downloadable={true}
+                            />
+                        ) : null;
+                    })()}
 
                     {/* 结论区域 */}
                     {node.result?.summary && (

@@ -42,8 +42,13 @@ export const InviteCodeModal = ({ onClose, onSuccess }: InviteCodeModalProps) =>
                 // const data = await response.json(); // 暂时未使用
                 saveInviteCode(code);
 
-                // 清空当前使用记录，下次刷新会以邀请码用户身份计数
-                localStorage.removeItem('free_trial_usage');
+                // 初始化使用记录 (避免徽章消失)
+                const initialUsage = {
+                    type: 'invite',
+                    inviteCode: code.toUpperCase(),
+                    total: 0
+                };
+                localStorage.setItem('free_trial_usage', JSON.stringify(initialUsage));
 
                 // 触发UI更新
                 window.dispatchEvent(new Event('free-trial-update'));
@@ -52,7 +57,11 @@ export const InviteCodeModal = ({ onClose, onSuccess }: InviteCodeModalProps) =>
                 onClose();
             } else {
                 const data = await response.json();
-                setError(data.error || t('inviteCode.invalidError'));
+                if (data.error === 'INVITE_CODE_INVALID') {
+                    setError(t('inviteCode.invalidError'));
+                } else {
+                    setError(data.error || t('inviteCode.invalidError'));
+                }
             }
         } catch (err) {
             console.error('邀请码验证失败', err);
@@ -70,7 +79,7 @@ export const InviteCodeModal = ({ onClose, onSuccess }: InviteCodeModalProps) =>
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="invite-code-modal" onClick={e => e.stopPropagation()}>
+            <div className="liuli-glass intensity-medium padding-large invite-code-modal" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <div className="modal-title-group">
                         <Sparkles size={24} style={{ color: '#ffc107' }} />

@@ -24,6 +24,7 @@ export interface FeatureFlags {
     AGENT_MODE: boolean;                // 本地Agent模式
     ADVANCED_VIZ: boolean;              // 高级可视化
     COLLABORATION: boolean;             // 协作功能
+    ENABLE_DRILL_DOWN_NODE_CACHE: boolean; // 下钻节点缓存功能
 
     // 实验性功能
     SKILLS_ARCHITECTURE: boolean;       // Skills架构（已实现，默认关闭）
@@ -64,6 +65,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
     AGENT_MODE: false,
     ADVANCED_VIZ: false,
     COLLABORATION: false,
+    ENABLE_DRILL_DOWN_NODE_CACHE: false,  // MVP开发中，默认禁用
 
     // 实验性功能
     SKILLS_ARCHITECTURE: false,  // 已实现，默认关闭

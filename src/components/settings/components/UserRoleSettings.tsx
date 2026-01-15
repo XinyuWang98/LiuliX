@@ -115,12 +115,9 @@ export const UserRoleSettings = () => {
                         label={t('settings.showSQL')}
                         description={t('settings.showSQL')}
                         action={
-                            <div className="config-badge-wrapper">
-                                <span className="setting-badge-hint">P1</span>
-                                <span className="config-value-badge">
-                                    {config.cleaning.showSQL ? t('settings.defaultExpanded') : t('settings.defaultCollapsed')}
-                                </span>
-                            </div>
+                            <span className="config-value-badge">
+                                {config.cleaning.showSQL ? t('settings.defaultExpanded') : t('settings.defaultCollapsed')}
+                            </span>
                         }
                     />
                 )}
@@ -154,12 +151,9 @@ export const UserRoleSettings = () => {
                         label={t('settings.reportTemplate')}
                         description={t('settings.reportTemplate')}
                         action={
-                            <div className="config-badge-wrapper">
-                                <span className="setting-badge-hint">P2</span>
-                                <span className="config-value-badge">
-                                    {config.reports.template === 'business' ? t('settings.templateBusiness') : t('settings.templateTechnical')}
-                                </span>
-                            </div>
+                            <span className="config-value-badge">
+                                {config.reports.template === 'business' ? t('settings.templateBusiness') : t('settings.templateTechnical')}
+                            </span>
                         }
                     />
                 </SettingsGroup>

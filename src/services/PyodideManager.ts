@@ -53,6 +53,14 @@ class PyodideManager {
             } else {
                 // Handle request responses
                 if (data.id && this.listeners.has(data.id)) {
+                    // 🔍 性能埋点日志透传
+                    if (data.type === 'SUCCESS' && data.result?.textOutput) {
+                        const text = data.result.textOutput as string;
+                        // 提取所有 [Perf] 开头的行并打印
+                        const perfLines = text.split('\n').filter(line => line.trim().startsWith('[Perf]'));
+                        perfLines.forEach(line => logger.log('Python', line.trim()));
+                    }
+
                     this.listeners.get(data.id)!(data);
                     this.listeners.delete(data.id);
                 }

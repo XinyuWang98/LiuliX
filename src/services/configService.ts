@@ -20,7 +20,7 @@ export async function fetchRemoteConfig(): Promise<Partial<FeatureFlags> | null>
         logger.log('系统', '开始加载远程 Feature Flags 配置');
 
         // 从静态 JSON 文件加载（Vite 开发服务器和生产环境都支持）
-        const response = await fetch('/api/feature-flags.json', {
+        const response = await fetch('/config/feature-flags.json', {
             method: 'GET',
             cache: 'no-cache', // 禁用浏览器缓存，确保获取最新配置
             signal: AbortSignal.timeout(3000), // 3秒超时

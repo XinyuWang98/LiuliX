@@ -99,7 +99,14 @@ export async function checkGPUCapability(): Promise<GPUCheckResult> {
  */
 export async function invokeAI(prompt: string, options: AIInvokeOptions): Promise<string> {
     const { type, priority = 'normal', forceAPI = false } = options;
-    const useLocalModel = localStorage.getItem('use_local_model') === 'true';
+
+
+    // 🛡️ P0 Fix: 强制检查 Feature Flag (MVP阶段禁用本地模型)
+    const isLocalModelFeatureEnabled = localStorage.getItem('feature_LOCAL_AI_MODEL') === 'true';
+    const userPrefersLocal = localStorage.getItem('use_local_model') === 'true';
+
+    // 只有当 Feature Flag 开启 且 用户在设置中开启时，才认为启用了本地模型
+    const useLocalModel = isLocalModelFeatureEnabled && userPrefersLocal;
 
     console.group(`[AI调用] ${type === 'cleaning' ? '清洗建议' : '洞察分析'}`);
 

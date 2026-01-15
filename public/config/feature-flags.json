@@ -12,11 +12,12 @@
     "AGENT_MODE": false,
     "ADVANCED_VIZ": false,
     "COLLABORATION": false,
+    "ENABLE_DRILL_DOWN_NODE_CACHE": false,
     "SKILLS_ARCHITECTURE": false,
     "PYODIDE_OFFLINE": false,
     "USE_AST_CODE_ENHANCER": true,
     "ENABLE_ADVANCED_API_CONFIG": false,
-    "ENABLE_INVITE_CODE_GATE": false,
+    "ENABLE_INVITE_CODE_GATE": true,
     "ENABLE_EDA_CONTEXT_LOOP": false,
     "ENABLE_UPLOAD_ROW_LIMIT": true
 }

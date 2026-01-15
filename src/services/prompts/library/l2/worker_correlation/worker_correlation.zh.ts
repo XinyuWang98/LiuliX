@@ -40,12 +40,12 @@ import json
 
 plt.switch_backend('Agg')
 
-col_x = {{col_x}}
-col_y = {{col_y}}
+x_column = {{x_column}}
+y_column = {{y_column}}
 
 # 提取数据并转换为数值类型
-x_data = pd.to_numeric(df[col_x], errors='coerce')
-y_data = pd.to_numeric(df[col_y], errors='coerce')
+x_data = pd.to_numeric(df[x_column], errors='coerce')
+y_data = pd.to_numeric(df[y_column], errors='coerce')
 
 # 移除缺失值
 valid_mask = x_data.notna() & y_data.notna()
@@ -58,9 +58,9 @@ corr_coef = x_clean.corr(y_clean)
 # 创建散点图
 fig, ax = plt.subplots(figsize=(10, 6), dpi=72)
 ax.scatter(x_clean, y_clean, alpha=0.6, color='#3498db')
-ax.set_xlabel(col_x, fontsize=12)
-ax.set_ylabel(col_y, fontsize=12)
-ax.set_title(f'相关性分析: {col_x} vs {col_y}\\n(r = {corr_coef:.3f})', fontsize=14)
+ax.set_xlabel(x_column, fontsize=12)
+ax.set_ylabel(y_column, fontsize=12)
+ax.set_title(f'相关性分析: {x_column} vs {y_column}\\n(r = {corr_coef:.3f})', fontsize=14)
 ax.grid(alpha=0.3)
 
 # 添加回归线
@@ -87,7 +87,7 @@ else:
     strength = '弱'
 
 direction = '正' if corr_coef > 0 else '负'
-summary = f"{col_x} 与 {col_y}: {strength}{direction}相关 (r={corr_coef:.3f})"
+summary = f"{x_column} 与 {y_column}: {strength}{direction}相关 (r={corr_coef:.3f})"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
 print(json.dumps(result))`,
@@ -124,7 +124,7 @@ print(json.dumps(result))`,
 }
 `,
 
-    inputVariables: ['col_x', 'col_y'],
+    inputVariables: ['x_column', 'y_column'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Sparkles, Star } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
 import { getInviteCode } from '@/utils/userIdManager';
+import { InviteCodeModal } from '@/components/InviteCodeModal/InviteCodeModal';
 
 interface UsageData {
     type?: 'free' | 'invite';
@@ -19,6 +20,7 @@ export const FreeTrialBadge = () => {
     const [usage, setUsage] = useState<UsageData | null>(null);
     const [showBadge, setShowBadge] = useState(false);
     const [userType, setUserType] = useState<'free' | 'invite'>('free');
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         // 检查是否使用兜底Key（没有配置自己的API Key）
@@ -57,25 +59,34 @@ export const FreeTrialBadge = () => {
 
     if (!showBadge || !usage) return null;
 
-    // 邀请码用户
-    if (userType === 'invite') {
-        const usedCount = usage.total || 0;
-        return (
-            <div className="free-trial-badge invite">
-                <Star size={14} />
-                <span>{t('header.inviteCodeTrial')}</span>
-                <span className="usage-count">{usedCount}/20</span>
-            </div>
-        );
-    }
-
     // 免费用户
     const totalUsed = (usage.cleaning || 0) + (usage.insight || 0);
     return (
-        <div className="free-trial-badge free">
-            <Sparkles size={14} />
-            <span>{t('header.freeTrial')}</span>
-            <span className="usage-count">{totalUsed}/10</span>
-        </div>
+        <>
+            {userType === 'invite' ? (
+                <div className="free-trial-badge invite" onClick={() => setShowModal(true)}>
+                    <Star size={14} />
+                    <span>{t('header.inviteCodeTrial')}</span>
+                    <span className="usage-count">{usage.total || 0}/20</span>
+                </div>
+            ) : (
+                <div className="free-trial-badge free" onClick={() => setShowModal(true)}>
+                    <Sparkles size={14} />
+                    <span>{t('header.freeTrial')}</span>
+                    <span className="usage-count">{totalUsed}/10</span>
+                </div>
+            )}
+
+            {showModal && (
+                <InviteCodeModal
+                    onClose={() => setShowModal(false)}
+                    onSuccess={() => {
+                        setShowModal(false);
+                        // 刷新用户类型
+                        setUserType(getInviteCode() ? 'invite' : 'free');
+                    }}
+                />
+            )}
+        </>
     );
 };

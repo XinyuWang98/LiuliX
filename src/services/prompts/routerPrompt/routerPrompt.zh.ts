@@ -8,6 +8,7 @@ import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { PROMPT_IDS } from '@/constants/promptIds';
 import { formatSchemaForPrompt, type ColumnSchema } from '@/services/schemaService';  // 🆕 使用SchemaService
+import { getPromptIdByName } from '@/services/promptIdMap';  // 🆕 导入映射工具
 
 /**
  * 构建 Router Prompt（中文）
@@ -21,10 +22,15 @@ export function buildRouterPromptInternal(
     const l2Prompts = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
         .filter(p => !p.id.startsWith('cleaner-'));
 
-    // 构建可用模板清单
+    // 🆕 构建可用模板清单（使用数字 ID + outputColumns）
     const promptList = l2Prompts.map(p => {
+        const numId = getPromptIdByName(p.id) || 0;  // 获取数字 ID
         const params = p.inputVariables.join(', ');
-        return `- ${p.id}: ${p.title} (参数: ${params})`;
+        // 🆕 如果有 outputColumns，显示生成的列名（方案D：让AI知道会生成哪些列）
+        const outputs = p.outputColumns && p.outputColumns.length > 0
+            ? ` → 生成列: ${p.outputColumns.join(', ')}`
+            : '';
+        return `- ${numId}: ${p.title} (参数: ${params}${outputs})`;
     }).join('\n');
 
     // 🆕 使用 SchemaService 构建列信息 (带约束说明)
@@ -91,8 +97,9 @@ ${promptList}
 
 ## 重要约束（3B模型优化）
 ⚠️ **promptId约束**:
-- 必须严格从上述模板列表中选择（包括版本号，如 -v1）
-- 禁止自创promptId或省略版本号
+- 必须使用数字ID（如 1, 2, 3），不要使用字符串ID
+- 数字ID必须严格从上述模板列表中选择
+- 禁止自创ID或使用不存在的数字
 
 ⚠️ **params约束**:
 - **必须填写真实列名**: params中的列名必须从【列信息】中选择
@@ -101,8 +108,8 @@ ${promptList}
 - **示例**:
   - ❌ 错误: {"column_name": "value"}
   - ✅ 正确: {"column_name": "median_income"}
-- 示例正确: "worker-distribution-v1"
-- 示例错误: "distribution", "worker-distribution" (缺少-v1)
+- 示例正确: "promptId": 1
+- 示例错误: "promptId": "worker-distribution-v1", "promptId": 999
 
 ⚠️ **params约束**:
 - column_name 必须是实际存在的列名
@@ -122,16 +129,16 @@ ${promptList}
 {
   "recommendations": [
     {
-      "promptId": "worker-distribution-v1",
+      "promptId": 1,
       "params": {"column_name": "age"},
       "reason": "查看客户年龄分布"
     },
     {
-      "promptId": "worker-correlation-v1",
+      "promptId": 2,
       "params": {"col_x": "age", "col_y": "salary"},
       "reason": "分析年龄与收入的关系",
       "drillHint": {
-        "promptId": "worker-groupby-v1",
+        "promptId": 3,
         "params": {"group_col": "age", "agg_col": "salary"},
         "label": "按年龄段分组"
       }

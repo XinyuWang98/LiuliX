@@ -86,7 +86,13 @@ export function WorkbenchSidebar({
 
     // 模型状态文字和颜色
     const getStatusInfo = () => {
-        if (useLocalModel) {
+        // MVP阶段强制隐藏本地模型状态，或根据Feature Flag判断
+        // 如果 Feature Flag 关闭，强制显示 API 模式
+        const isLocalModelEnabled = localStorage.getItem('feature_LOCAL_AI_MODEL') === 'true'; // 简单读取或使用 Context
+
+        // 实际上我们应该使用 FeatureContext，但为了最小改动，我们直接判断
+        // 注意：useLocalModel 可能会被 localStorage 的旧值污染
+        if (useLocalModel && isLocalModelEnabled) {
             return {
                 color: 'var(--success)',
                 text: t('workbench.localModel'),

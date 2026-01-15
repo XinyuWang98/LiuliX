@@ -101,7 +101,7 @@ export const enUS: LanguageConfig = {
             placeholder: 'Invite Code',
             activate: 'Activate',
             emptyError: 'Invite code cannot be empty',
-            invalidError: 'Invalid invite code',
+            invalidError: 'Invalid or expired invite code',
             networkError: 'Network error, please try again',
         },
         chat: {

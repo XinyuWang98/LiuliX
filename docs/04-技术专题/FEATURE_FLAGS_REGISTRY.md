@@ -148,6 +148,20 @@
 - **Owner**: Product Team
 - **备注**: 未实现
 
+### ENABLE_DRILL_DOWN_NODE_CACHE
+- **分类**: BACKEND_CONTROLLED
+- **状态**: Development
+- **创建时间**: 2026-01-15
+- **使用位置**: 
+  - `src/components/insights/InsightChainFlow.tsx` (下钻触发)
+  - `src/workers/pyodide/worker.ts` (Python缓存写入)
+  - `src/services/insights/executor.ts` (缓存表名记录)
+  - `src/services/insights/inflater.ts` (下钻卡片显示控制)
+- **业务价值**: 解决下钻失败问题（父节点生成的列未持久化），提升下钻可靠性
+- **降级策略**: 禁用时隐藏所有下钻卡片
+- **Owner**: Catherine Wang
+- **备注**: MVP开发中，预计01/18上线
+
 ---
 
 ## 实验性功能模块
@@ -223,12 +237,13 @@
 
 ## 📊 统计
 
-- **总计**: 20 个 Feature Flags
+- **总计**: 21 个 Feature Flags
 - **Active**: 2 个
 - **Inactive**: 18 个
+- **Development**: 1 个
 - **Deprecated**: 0 个
 
 ---
 
-**最后更新**: 2026-01-14  
+**最后更新**: 2026-01-15  
 **维护者**: Agent + Catherine Wang

@@ -245,7 +245,8 @@ export const askAICleaning = async (prompt: string) => {
         // ⏱️ 阶段2：网络请求
         logger.log('AI服务', '发送请求到DeepSeek API');
         const networkStart = performance.now();
-        const res = await ky.post('/api/proxy/deepseek-cleaning', requestPayload).json<any>();
+        const response = await ky.post('/api/proxy/deepseek-cleaning', requestPayload);
+        const res = await response.json<any>();
         const networkTime = performance.now() - networkStart;
         perfMarks.push({ phase: '网络请求+响应', duration: networkTime });
 
@@ -257,8 +258,17 @@ export const askAICleaning = async (prompt: string) => {
             throw new Error(res.message || '免费试用次数已用完');
         }
 
-        // ✅ 更新本地使用次数
-        if (res.usage) {
+        // ✅ 更新本地使用次数 (优先从Header读取)
+        const usageHeader = response.headers.get('X-Liuli-Usage');
+        if (usageHeader) {
+            try {
+                localStorage.setItem('free_trial_usage', usageHeader);
+                window.dispatchEvent(new Event('free-trial-update'));
+            } catch (e) {
+                console.error('Failed to parse usage header', e);
+            }
+        } else if (res.usage && res.usage.total !== undefined) {
+            // Fallback to body usage if valid (check usage.total to assume it's our structure, not OpenAI's token usage)
             localStorage.setItem('free_trial_usage', JSON.stringify(res.usage));
             window.dispatchEvent(new Event('free-trial-update'));
         }
@@ -298,7 +308,7 @@ export const askAICleaning = async (prompt: string) => {
 export const askAIInsight = async (prompt: string) => {
     try {
         const key = CONFIG.deepseek.key();
-        const res = await ky.post('/api/proxy/deepseek-insight', {
+        const response = await ky.post('/api/proxy/deepseek-insight', {
             headers: {
                 'x-api-key': key,
                 'x-user-id': getUserId(),                    // ✅ 免费试用计数
@@ -312,15 +322,25 @@ export const askAIInsight = async (prompt: string) => {
                 }
             },
             timeout: 180000  // ✅ 增加到3分钟，支持大数据集
-        }).json<any>();
+        });
+        const res = await response.json<any>();
 
         // ✅ 处理超限错误
         if (res.error && res.userType) {
             throw new Error(res.message || '免费试用次数已用完');
         }
 
-        // ✅ 更新本地使用次数
-        if (res.usage) {
+        // ✅ 更新本地使用次数 (优先从Header读取)
+        const usageHeader = response.headers.get('X-Liuli-Usage');
+        if (usageHeader) {
+            try {
+                localStorage.setItem('free_trial_usage', usageHeader);
+                window.dispatchEvent(new Event('free-trial-update'));
+            } catch (e) {
+                console.error('Failed to parse usage header', e);
+            }
+        } else if (res.usage && res.usage.total !== undefined) {
+            // Fallback
             localStorage.setItem('free_trial_usage', JSON.stringify(res.usage));
             window.dispatchEvent(new Event('free-trial-update'));
         }

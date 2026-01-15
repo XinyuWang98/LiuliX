@@ -76,7 +76,7 @@ export const settings = {
         cloudModeDesc: 'Use Cloud AI, consumes invite code quota',
         cloudModeDescNew: 'Use platform-provided AI service, no API Key needed',
         cloudModeHint: 'Cloud mode uses built-in DeepSeek API, consuming your invite code quota',
-        cloudTrialHint: 'Currently using trial quota for testing only. For production, please use local Ollama or configure your own API Key',
+        cloudTrialHint: 'Currently using trial quota for testing only. For production, please configure your own API Key',
         localPriorityHint: 'Local model (Ollama) is prioritized - data stays offline',
         unlockFirst: 'Please activate with invite code first',
         modeLocal: 'Local Mode',

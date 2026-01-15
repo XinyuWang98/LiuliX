@@ -1,0 +1,64 @@
+Re-optimizing dependencies because lockfile has changed
+
+  VITE v5.4.21  ready in 206 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+The glob option "as" has been deprecated in favour of "query". Please update `as: 'raw'` to `query: '?raw', import: 'default'`.
+Sourcemap for "/Users/catherinewang/Documents/GitHub/LiuliX/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js" points to missing source files
+9:12:19 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+9:15:39 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+9:17:08 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+9:45:52 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+9:45:53 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+9:46:32 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+9:46:33 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+10:07:26 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+10:33:00 PM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+11:08:12 PM [vite] page reload src/services/prompts/library/l2/worker_distribution/worker_distribution.zh.ts
+11:08:47 PM [vite] page reload src/services/prompts/library/l2/worker_distribution/worker_distribution.en.ts
+12:12:13 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+12:12:53 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+12:25:53 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+12:28:45 AM [vite] hmr update /src/App.tsx, /src/components/layout/LeftSidebar.tsx, /src/components/ExplorationFlowV2.tsx, /src/components/data/DataViewerV2.tsx, /src/components/insights/InsightChainFlow.tsx, /src/components/cleaning/DataCleaner.tsx
+12:28:47 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+12:31:17 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+12:31:29 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+12:36:51 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+12:49:36 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+2:15:28 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+2:34:49 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+2:34:53 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+2:34:55 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+2:43:04 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+2:44:32 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:11:33 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:12:00 AM [vite] ✨ new dependencies optimized: p-limit
+3:12:00 AM [vite] ✨ optimized dependencies changed. reloading
+The glob option "as" has been deprecated in favour of "query". Please update `as: 'raw'` to `query: '?raw', import: 'default'`.
+3:14:43 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:14:55 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:22:20 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:22:22 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:22:47 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:22:48 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:23:20 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:38:21 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:38:48 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:38:49 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+3:47:36 AM [vite] vite.config.ts changed, restarting server...
+3:47:36 AM [vite] server restarted.
+3:47:56 AM [vite] vite.config.ts changed, restarting server...
+3:47:56 AM [vite] server restarted.
+The glob option "as" has been deprecated in favour of "query". Please update `as: 'raw'` to `query: '?raw', import: 'default'`.
+Sourcemap for "/Users/catherinewang/Documents/GitHub/LiuliX/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js" points to missing source files
+3:54:57 AM [vite] vite.config.ts changed, restarting server...
+3:54:57 AM [vite] server restarted.
+The glob option "as" has been deprecated in favour of "query". Please update `as: 'raw'` to `query: '?raw', import: 'default'`.
+Sourcemap for "/Users/catherinewang/Documents/GitHub/LiuliX/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js" points to missing source files
+4:19:22 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+4:19:42 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+4:23:26 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+10:30:57 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+10:35:38 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx
+10:36:06 AM [vite] hmr update /src/components/insights/InsightChainFlow.tsx

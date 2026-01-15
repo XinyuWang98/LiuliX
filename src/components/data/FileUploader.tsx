@@ -46,12 +46,7 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
     // DuckDB singleton
     const engine = DuckDBEngine.getInstance();
 
-    // 🔧 开发阶段：强制关闭邀请码门槛
-    // TODO: 生产环境部署时移除此代码块
-    if (isFeatureEnabled('ENABLE_INVITE_CODE_GATE')) {
-        console.warn('[FileUploader] 检测到邀请码门槛已启用，开发阶段强制关闭');
-        setFeatureFlags({ ENABLE_INVITE_CODE_GATE: false });
-    }
+
 
     // 检查邀请码门槛
     const checkInviteCodeGate = (): boolean => {
@@ -303,15 +298,16 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
                 document.body
             )}
 
-            {/* 邀请码门槛弹窗 */}
-            {showInviteModal && (
+            {/* 邀请码门槛弹窗 (使用 Portal 确保在 hidden container 中也能显示) */}
+            {showInviteModal && createPortal(
                 <InviteCodeModal
                     onClose={() => {
                         setShowInviteModal(false);
                         setPendingFiles(null);
                     }}
                     onSuccess={handleInviteCodeSuccess}
-                />
+                />,
+                document.body
             )}
         </>
     );

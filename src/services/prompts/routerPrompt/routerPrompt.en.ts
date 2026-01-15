@@ -8,6 +8,7 @@ import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { PROMPT_IDS } from '@/constants/promptIds';
 import { formatSchemaForPrompt, type ColumnSchema } from '@/services/schemaService';  // 🆕 Use SchemaService
+import { getPromptIdByName } from '@/services/promptIdMap';  // 🆕 Import mapping utils
 
 /**
  * Build Router Prompt (English)
@@ -21,10 +22,15 @@ export function buildRouterPromptInternal(
     const l2Prompts = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
         .filter(p => !p.id.startsWith('cleaner-'));
 
-    // Build available template list
+    // 🆕 Build available template list (with numeric IDs + outputColumns)
     const promptList = l2Prompts.map(p => {
+        const numId = getPromptIdByName(p.id) || 0;  // Get numeric ID
         const params = p.inputVariables.join(', ');
-        return `- ${p.id}: ${p.title} (params: ${params})`;
+        // 🆕 If outputColumns exist, show generated column names (Solution D: let AI know what columns will be generated)
+        const outputs = p.outputColumns && p.outputColumns.length > 0
+            ? ` → Generates: ${p.outputColumns.join(', ')}`
+            : '';
+        return `- ${numId}: ${p.title} (Params: ${params}${outputs})`;
     }).join('\n');
 
     // 🆕 Use SchemaService to format column info (with constraints)
@@ -91,12 +97,19 @@ ${promptList}
 
 ## Important Constraints (3B Model Optimization)
 ⚠️ **promptId constraints**:
-- Must strictly select from the template list above (including version number like -v1)
-- Do not create custom promptId or omit version number
-- Correct example: "worker-distribution-v1"
-- Wrong example: "distribution", "worker-distribution" (missing -v1)
+- Must use numeric IDs (e.g., 1, 2, 3), not string IDs
+- Numeric ID must be strictly selected from the template list above
+- Do not create custom IDs or use non-existent numbers
+- Correct example: "promptId": 1
+- Wrong example: "promptId": "worker-distribution-v1", "promptId": 999
 
 ⚠️ **params constraints**:
+- **Must use real column names**: column names in params must be selected from [Column Information]
+- **No placeholders**: Strictly no generic names like 'value', 'date', 'category'
+- **Exact match**: Column names must exactly match dataset columns (case-sensitive)
+- **Examples**:
+  - ❌ Wrong: {"column_name": "value"}
+  - ✅ Correct: {"column_name": "median_income"}
 - column_name must be an actual existing column name
 - Numeric parameters must be number type (no quotes)
 - Correct: {"column_name": "age", "threshold": 100}
@@ -114,16 +127,16 @@ Correct output:
 {
   "recommendations": [
     {
-      "promptId": "worker-distribution-v1",
+      "promptId": 1,
       "params": {"column_name": "age"},
       "reason": "View customer age distribution"
     },
     {
-      "promptId": "worker-correlation-v1",
+      "promptId": 2,
       "params": {"col_x": "age", "col_y": "salary"},
       "reason": "Analyze relationship between age and income",
       "drillHint": {
-        "promptId": "worker-groupby-v1",
+        "promptId": 3,
         "params": {"group_col": "age", "agg_col": "salary"},
         "label": "Group by age range"
       }

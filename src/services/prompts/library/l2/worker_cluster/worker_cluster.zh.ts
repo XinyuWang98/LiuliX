@@ -116,6 +116,10 @@ print(json.dumps(result))`,
 `,
 
     inputVariables: ['feature_cols', 'n_clusters'],
+
+    // 🆕 声明生成的列名（用于列名校验白名单）
+    outputColumns: ['Cluster'],  // KMeans聚类后会在DataFrame中添加Cluster列
+
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

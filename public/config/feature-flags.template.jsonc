@@ -50,6 +50,12 @@
     // 协作功能（未实现）
     // 使用位置：暂无
     "COLLABORATION": false,
+    // 下钻节点缓存功能（MVP开发中）
+    // 功能说明：将父节点生成的列（如Cluster）缓存到DuckDB，供子节点下钻复用
+    // 业务价值：解决下钻失败问题（列不存在错误），提升下钻可靠性
+    // 降级策略：禁用时隐藏所有下钻卡片
+    // 使用位置：src/components/insights/InsightChainFlow.tsx, src/workers/pyodide/worker.ts, src/services/insights/executor.ts, src/services/insights/inflater.ts
+    "ENABLE_DRILL_DOWN_NODE_CACHE": false,
     // ========== 实验性功能模块 ==========
     // Skills 架构（已实现，默认关闭）
     // 使用位置：src/config/skillsConfig.ts
@@ -66,7 +72,7 @@
     "ENABLE_ADVANCED_API_CONFIG": false,
     // 邀请码前置验证（开发阶段关闭，上线时开启）
     // 使用位置：src/components/data/FileUploader.tsx, src/components/settings/APISettingsSimple.tsx
-    "ENABLE_INVITE_CODE_GATE": false,
+    "ENABLE_INVITE_CODE_GATE": true,
     // EDA 闭环与 Context 回流（已关闭，等待进一步优化）
     // 使用位置：src/contexts/InsightChainContext.tsx
     "ENABLE_EDA_CONTEXT_LOOP": false,

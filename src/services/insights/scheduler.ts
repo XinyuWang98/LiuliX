@@ -4,10 +4,13 @@
  */
 
 import type { InsightNode } from '@/types/insightTree';
-import type { ExecutionContext } from '@/platforms/types';
-import { getPlatformAdapter } from '@/platforms';
 import { sortNodesByComplexity } from '@/utils/insightComplexity';
 import { logger } from '@/utils/logger';
+
+/**
+ * 任务执行器类型定义 (返回 Promise)
+ */
+export type TaskRunner = (node: InsightNode) => Promise<void>;
 
 /**
  * 进度回调函数
@@ -24,29 +27,24 @@ export type NodeCompleteCallback = (node: InsightNode) => void;
  */
 export async function executeSerial(
     nodes: InsightNode[],
-    context: ExecutionContext,
-    onNodeComplete?: NodeCompleteCallback
+    taskRunner: TaskRunner
 ): Promise<void> {
-    const adapter = getPlatformAdapter();
 
     logger.group('AI服务', `串行执行 ${nodes.length} 个洞察`);
 
     for (const node of nodes) {
         try {
             node.status = 'loading';
-            onNodeComplete?.(node);
 
             logger.log('AI服务', `执行: ${node.title}`);
-            const result = await adapter.executeCode(node.code || '', context);
 
-            node.status = 'completed';
-            node.result = result;
-            onNodeComplete?.(node);
+            // ✅ 使用传入的 taskRunner 执行任务
+            await taskRunner(node);
 
         } catch (error) {
             node.status = 'error';
             node.error = error instanceof Error ? error.message : String(error);
-            onNodeComplete?.(node);
+            // onNodeComplete 已移除，由 taskRunner 内部处理或忽略
 
             logger.error('AI服务', `执行失败: ${node.title}`, error);
         }
@@ -60,11 +58,9 @@ export async function executeSerial(
  */
 export async function executeParallel(
     nodes: InsightNode[],
-    context: ExecutionContext,
     concurrency: number,
-    onNodeComplete?: NodeCompleteCallback
+    taskRunner: TaskRunner
 ): Promise<void> {
-    const adapter = getPlatformAdapter();
 
     logger.group('AI服务', `并发执行 ${nodes.length} 个洞察 (并发数: ${concurrency})`);
 
@@ -97,16 +93,14 @@ export async function executeParallel(
 
                 try {
                     node.status = 'loading';
-                    onNodeComplete?.(node);
 
                     // ⏱️ 代码执行计时
                     const execStartTime = performance.now();
-                    const result = await adapter.executeCode(node.code || '', context);
-                    const execDuration = performance.now() - execStartTime;
 
-                    node.status = 'completed';
-                    node.result = result;
-                    onNodeComplete?.(node);
+                    // ✅ 使用传入的 taskRunner 执行任务
+                    await taskRunner(node);
+
+                    const execDuration = performance.now() - execStartTime;
 
                     logger.log('AI服务', `[Scheduler] ✅ 洞察执行成功`, {
                         data: {
@@ -119,7 +113,7 @@ export async function executeParallel(
                 } catch (error) {
                     node.status = 'error';
                     node.error = error instanceof Error ? error.message : String(error);
-                    onNodeComplete?.(node);
+                    // onNodeComplete 已移除
 
                     logger.error('AI服务', `执行失败: ${node.title}`, error);
                 }

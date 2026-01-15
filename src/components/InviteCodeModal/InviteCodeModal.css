@@ -25,12 +25,10 @@
 }
 
 .invite-code-modal {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-accent);
-    border-radius: var(--radius-l);
+    /* Background and border handled by liuli-glass */
     max-width: 480px;
     width: 90%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    /* box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); - Handled by liuli-glass or kept if stronger shadow needed? Glass has shadow-lv2. Let's keep specific shadow if we want it "pop" more, or trust glass. Use glass shadow first. */
     animation: slideUp 0.3s ease;
 }
 

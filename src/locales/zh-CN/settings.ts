@@ -78,7 +78,7 @@ export const settings = {
         cloudModeDesc: '使用云端 AI，消耗邀请码额度',
         cloudModeDescNew: '使用平台提供的 AI 服务，无需配置 API Key',
         cloudModeHint: '云端模式使用平台内置的 DeepSeek API，会消耗您的邀请码额度',
-        cloudTrialHint: '当前使用试用配额，仅供体验。生产环境请使用本地 Ollama 或配置自己的 API Key',
+        cloudTrialHint: 'Currently using trial quota for testing only. For production, please configure your own API Key',
         localPriorityHint: '优先使用本地模型（Ollama），数据完全离线不上传',
         unlockFirst: '请先输入邀请码激活',
         modeLocal: '本地模式',

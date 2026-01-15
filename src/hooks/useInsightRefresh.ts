@@ -95,9 +95,9 @@ export function useInsightRefresh({
                 prevDepsRef.current.hypotheses !== hypothesesLength ||
                 prevDepsRef.current.isStale !== insightCache?.isStale;
 
-            // 🆕 修复：只在依赖未变且已加载或已有timer时跳过（防止Strict Mode重复）
-            if (!depsChanged && loadedOnceRef.current && timerRef.current) {
-                logger.warn('AI洞察', 'Strict Mode重复调用已拦截（timer已设置）');
+            // 🆕 修复：只在依赖未变且已加载时跳过（防止Strict Mode + 重复状态更新）
+            if (!depsChanged && loadedOnceRef.current) {
+                logger.warn('AI洞察', 'Strict Mode或重复状态更新已拦截');
                 return;
             }
 

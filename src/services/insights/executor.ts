@@ -121,29 +121,35 @@ export async function executeAndFillResult(
             const schema = await getTableSchema(tableName);
             const actualColumns = schema.map(col => col.name);
 
-            const validation = validateColumnReferences(code, actualColumns);
+            const validation = validateColumnReferences(code, actualColumns, node.promptId);  // 🆕 传入promptId用于获取outputColumns
 
             if (!validation.isValid) {
                 if (validation.placeholderColumns.length > 0) {
-                    logger.error('AI服务', `[${logPrefix}] 列名验证失败: 检测到占位符`, {
+                    const errorMsg = `[${logPrefix}] [${node.promptId || 'UnknownPrompt'}] 列名验证失败: 检测到占位符 [${validation.placeholderColumns.join(', ')}]`;
+
+                    logger.error('AI服务', errorMsg, {
                         data: {
                             placeholderColumns: validation.placeholderColumns,
                             invalidColumns: validation.invalidColumns,
-                            usedColumns: validation.usedColumns
+                            usedColumns: validation.usedColumns,
+                            promptId: node.promptId
                         }
                     });
 
                     return {
                         success: false,
-                        error: `代码包含占位符列名: ${validation.placeholderColumns.join(', ')}。这是AI生成错误,请重新生成代码。\n可用列: ${actualColumns.join(', ')}`
+                        error: `${errorMsg}。这是AI生成错误,请重新生成代码。\n可用列: ${actualColumns.join(', ')}`
                     };
                 }
 
-                logger.error('AI服务', `[${logPrefix}] 列名验证失败: 列不存在`, {
+                const errorMsg = `[${logPrefix}] [${node.promptId || 'UnknownPrompt'}] 列名验证失败: 列不存在 [${validation.invalidColumns.join(', ')}]`;
+
+                logger.error('AI服务', errorMsg, {
                     data: {
                         invalidColumns: validation.invalidColumns,
                         availableColumns: actualColumns,
-                        usedColumns: validation.usedColumns
+                        usedColumns: validation.usedColumns,
+                        promptId: node.promptId
                     }
                 });
 
@@ -207,8 +213,10 @@ export async function executeAndFillResult(
         }
 
         // ========== 步骤4：质量门控（可选）==========
+        let postScore: import('@/utils/postExecutionGate').PostExecutionScore | undefined;
+
         if (enableQualityGate) {
-            const postScore = validateExecutionResult(
+            postScore = validateExecutionResult(
                 {
                     title: node.title,
                     description: '',
@@ -245,6 +253,20 @@ export async function executeAndFillResult(
             summary: execResult.data?.summary || '',
             columnsUsed: node.columnsUsed
         };
+
+        // 🧪 测试探针：专门为自动化测试脚本提供的结构化日志
+        // 用于 batch_test_insights.ts 抓取 metrics
+        const probeData = {
+            promptId: node.promptId,
+            title: node.title,
+            score: enableQualityGate ? (postScore?.total || 0) : 0,
+            status: enableQualityGate ? (postScore?.passed ? 'Pass' : 'Fail') : 'Unknown',
+            params: node.params,
+            executionTime: 0, // 可以补充执行耗时
+            error: null
+        };
+        // ✅ 使用原生 console.log 确保在所有环境（包括非以 Dev 模式启动的 Puppeteer）都能输出
+        console.log(`[TestProbe] InsightExecution ${JSON.stringify(probeData)}`);
 
         logger.log('AI服务', `[${logPrefix}] 执行成功`, {
             data: {
@@ -379,15 +401,13 @@ export async function executeBatchNodes(
     if (strategy.mode === 'parallel') {
         await executeParallel(
             sortedNodes,
-            context,
             strategy.concurrency,
-            wrappedCallback
+            wrappedCallback // ✅ 作为 taskRunner 传递
         );
     } else {
         await executeSerial(
             sortedNodes,
-            context,
-            wrappedCallback
+            wrappedCallback // ✅ 作为 taskRunner 传递
         );
     }
 

@@ -9,17 +9,22 @@ export default defineConfig({
             '/api': {
                 target: 'http://localhost:3001',
                 changeOrigin: true,
-                secure: false,
-                // 🔧 排除静态配置文件，避免代理到后端
-                bypass(req, res, options) {
-                    // feature-flags.json 从 public 目录提供，不走代理
-                    if (req.url === '/api/feature-flags.json') {
-                        return req.url; // 返回原始 URL，跳过代理
-                    }
-                },
             },
         },
     },
+
+    // 🆕 Preview 服务器配置（用于生产构建测试）
+    preview: {
+        port: 4173,
+        proxy: {
+            // 复用与开发环境相同的代理配置
+            '/api': {
+                target: 'http://localhost:3001',
+                changeOrigin: true,
+            },
+        },
+    },
+
     plugins: [react()],
     resolve: {
         alias: {

@@ -1,18 +1,17 @@
 
 import { useI18n } from '@/contexts/I18nContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { SettingsGroup, SettingsRow } from './SettingsSection';
 import Switch from './Switch';
 import { LiuliButton } from '@/components/common/liulix/LiuliButton';
-import { Loader, Monitor, Globe } from 'lucide-react';
+import { Globe, Monitor } from 'lucide-react';
 import '../SettingsPage.css';
-import { SUPPORTED_MODELS } from '@/services/localLLMService';
+
 import { LogDownloadButton } from './LogDownloadButton';
 import { AnalysisPackagesSettings } from './AnalysisPackagesSettings';
 import { UserRoleSettings } from './UserRoleSettings';
 import { DataPrivacySection } from '../DataPrivacySection';
 import { DataAnalysisSection } from '../DataAnalysisSection';
-import { LocalModelSelector } from './LocalModelSelector';
+
 
 // Import Types
 import { type AIModel } from '@/services/aiService';
@@ -43,10 +42,8 @@ interface SettingsContentProps {
 
 export const SettingsContent = (props: SettingsContentProps) => {
     const { t, language, setLanguage } = useI18n();
-    const { currentTheme, setTheme } = useTheme();
 
     const { activeCategory } = props;
-    const hardwareScore = props.hardwareDetection?.overallScore;
 
     return (
         <main className="settings-content">
@@ -81,6 +78,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                                 </div>
                             }
                         />
+                        {/* MVP版本暂未开放主题切换 (2026-01-15)
                         <div className="theme-grid-wrapper">
                             <div className="theme-grid">
                                 {['apple-dark', 'apple-light', 'neufuture'].map(themeId => {
@@ -99,6 +97,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                                 })}
                             </div>
                         </div>
+                        */}
                     </SettingsGroup>
 
 
@@ -155,7 +154,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         </div>
                     </div>
 
-                    {/* 硬件环境检测 */}
+                    {/* MVP版本暂不开放本地模型 (2026-01-15)
                     <SettingsGroup title={t('settings.hardwareEnvironment')}>
                         {props.isDetecting ? (
                             <div className="hardware-detection-row">
@@ -184,7 +183,6 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         )}
                     </SettingsGroup>
 
-                    {/* 简化的模式切换 */}
                     <SettingsGroup>
                         <div style={{
                             display: 'flex',
@@ -214,7 +212,6 @@ export const SettingsContent = (props: SettingsContentProps) => {
                                 </div>
                             </div>
 
-                            {/* Toggle Switch */}
                             <Switch
                                 checked={props.useLocalModel}
                                 onChange={props.onAIModeChange}
@@ -222,7 +219,6 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         </div>
                     </SettingsGroup>
 
-                    {/* 本地模型选择器（仅在启用本地模式时显示） */}
                     {props.useLocalModel && (
                         <SettingsGroup>
                             <LocalModelSelector
@@ -234,6 +230,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                             />
                         </SettingsGroup>
                     )}
+                    */}
 
                     {/* API Keys - MVP阶段隐藏，用户使用内置API */}
                     {/* <SettingsGroup title={t('settings.apiPriorityAndKeys')}>

@@ -12,10 +12,77 @@ import { useNotebookLayout } from '@/hooks/useNotebookLayout';  // ✅ 新Hook
 import { useInsightNodeManager } from '@/hooks/useInsightNodeManager';  // ✅ 新Hook
 import { executeAndFillResult } from '@/services/insights/executor';
 import { extractColumnsUsed } from '@/services/insights/inflater';  // 🆕 复用列名提取函数
+import { promptRegistry } from '@/services/promptRegistry';  // ✅ 用于获取 prompt 配置
+import { getTableSchema } from '@/services/schemaService';  // 🆕 用于列名规范化
 import { ProjectFile } from '@/utils/projectUtils';
 import './InsightChainFlow.css';
 
 const INIT_DELAY_MS = 800;
+
+/**
+ * 参数规范化：修正列名大小写
+ * 
+ * 问题：AI返回的drillHint.params可能使用小写列名（如'cluster'），
+ * 但DataFrame中实际是大写（如'Cluster'），导致下钻执行失败。
+ * 
+ * 解决方案：查询实际的表Schema，进行大小写不敏感匹配，使用正确的列名。
+ */
+async function normalizeParams(
+    params: Record<string, unknown>,
+    tableName: string,
+    inputVariables?: string[]
+): Promise<Record<string, unknown>> {
+    if (!inputVariables || inputVariables.length === 0) {
+        return params;  // 无法确定哪些字段是列名，直接返回
+    }
+
+    try {
+        // 查询实际的表Schema
+        const schema = await getTableSchema(tableName);
+        const actualColumns = schema.map(col => col.name);
+
+        // 创建大小写不敏感的映射
+        const columnMap = new Map<string, string>();
+        for (const col of actualColumns) {
+            columnMap.set(col.toLowerCase(), col);
+        }
+
+        // 规范化params
+        const normalized: Record<string, unknown> = { ...params };
+        let hasChanges = false;
+
+        for (const key of inputVariables) {
+            const value = params[key];
+
+            if (typeof value === 'string') {
+                // 单列参数
+                const actualName = columnMap.get(value.toLowerCase());
+                if (actualName && actualName !== value) {
+                    normalized[key] = actualName;
+                    hasChanges = true;
+                }
+            } else if (Array.isArray(value)) {
+                // 数组参数（如 feature_cols）
+                const normalizedArray = value.map(item => {
+                    if (typeof item === 'string') {
+                        const actualName = columnMap.get(item.toLowerCase());
+                        if (actualName && actualName !== item) {
+                            hasChanges = true;
+                            return actualName;
+                        }
+                    }
+                    return item;
+                });
+                normalized[key] = normalizedArray;
+            }
+        }
+
+        return hasChanges ? normalized : params;
+    } catch (error) {
+        logger.warn('UI', '参数规范化失败，使用原始参数', error);
+        return params;
+    }
+}
 
 interface InsightChainFlowProps {
     columns: string[];
@@ -141,11 +208,14 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
         }
 
         // 创建子节点
+        // ✅ 获取 prompt 以使用 inputVariables（配置驱动）
+        const prompt = promptRegistry.getPrompt(action.promptId);
+
         const childNode: InsightNodeType = {
             id: `drill-${Date.now()}-${Math.random()}`,
             depth: parentNode.depth + 1,
             title: action.label || t('insight.drillDown'),
-            columnsUsed: extractColumnsUsed(action.params),  // ✅ 使用专业提取函数，支持数组参数
+            columnsUsed: extractColumnsUsed(action.params, prompt?.inputVariables),  // ✅ 使用配置驱动
             promptId: action.promptId,
             params: action.params,
             isLoading: true,
@@ -170,6 +240,19 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
                 throw new Error('无法获取有效的 tableName，请检查数据加载状态');
             }
 
+            // 🆕 参数规范化：修正列名大小写（解决AI返回小写但DataFrame是大写的问题）
+            const normalizedParams = await normalizeParams(action.params, effectiveTableName, prompt?.inputVariables);
+            if (normalizedParams !== action.params) {
+                logger.log('UI', '下钻参数规范化', {
+                    data: {
+                        original: action.params,
+                        normalized: normalizedParams
+                    }
+                });
+                // 更新 childNode 的 params
+                childNode.params = normalizedParams;
+            }
+
             // ✅ 使用公共执行器（统一处理 rawCode + 内存评估）
             const executorResult = await executeAndFillResult(childNode, {
                 tableName: effectiveTableName,
@@ -182,9 +265,16 @@ export function InsightChainFlow({ columns, rowCount, tableName, file, insightCa
 
             if (executorResult.success && executorResult.result) {
                 childNode.result = executorResult.result;
+
+                // 🐛 调试日志：追踪图片数据
                 logger.log('UI', '下钻成功', {
                     data: {
                         title: childNode.title,
+                        promptId: childNode.promptId,
+                        hasResult: !!executorResult.result,
+                        hasImage: !!executorResult.result.image,
+                        imagePreview: executorResult.result.image?.substring(0, 50),
+                        hasSummary: !!executorResult.result.summary,
                         hasRawCode: !!executorResult.result.rawCode,
                         rawCodeLength: executorResult.result.rawCode?.length || 0
                     }

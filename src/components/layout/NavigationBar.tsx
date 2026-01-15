@@ -31,7 +31,7 @@ export function NavigationBar({
                 <div className="nav-divider" />
 
                 <nav className="nav-tabs">
-                    <button
+                    {/* <button
                         className={`nav-tab ${activeView === 'dashboard' ? 'active' : ''}`}
                         onClick={() => {
                             window.history.pushState(null, '', '/');
@@ -39,7 +39,7 @@ export function NavigationBar({
                         }}
                     >
                         {t('nav.dashboard')}
-                    </button>
+                    </button> */}
 
                     <button
                         className={`nav-tab ${activeView === 'library' ? 'active' : ''}`}

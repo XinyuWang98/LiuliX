@@ -22,7 +22,7 @@ const INVITE_CODE_TOTAL_LIMIT = parseInt(process.env.INVITE_CODE_TOTAL_LIMIT) ||
 
 // 邀请码白名单
 const validInviteCodes = new Set(
-    (process.env.VALID_INVITE_CODES || '').split(',').filter(c => c.trim())
+    (process.env.VALID_INVITE_CODES || '').split(',').map(c => c.trim()).filter(c => c)
 );
 
 // 用户使用计数器（内存存储，重启重置）
@@ -40,9 +40,12 @@ if (validInviteCodes.size > 0) {
 }
 
 // CORS 配置（支持环境变量白名单）
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-    : ['http://localhost:5173', 'http://localhost:5174']; // 默认本地开发地址
+const allowedOrigins = [
+    'http://localhost:5173',  // Vite 开发服务器
+    'http://localhost:4173',  // 🆕 Vite 生产预览服务器
+    'https://liulix.vercel.app',
+    'https://dataprism.vercel.app'
+];
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -57,8 +60,8 @@ app.use(cors({
     },
     credentials: true
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 /**
  * 免费试用计数器中间件
@@ -78,18 +81,43 @@ function checkFreeTrialLimit(type) {
 
         // 获取或初始化用户使用记录
         let usage = userUsageCounter.get(userId);
+        const upperInviteCode = inviteCode ? inviteCode.toUpperCase().trim() : '';
 
-        // 首次访问：判断用户类型
+        // 验证函数 (复用逻辑)
+        const isCodeValid = (code) => {
+            if (!code) return false;
+            // 1. 静态白名单
+            if (validInviteCodes.has(code)) return true;
+            // 2. 动态日期码 (新增 VIP/SPONSOR 前缀)
+            const DYNAMIC_PREFIXES = ['REDDIT', 'LIULI', 'PH', 'VIP', 'SPONSOR'];
+            const now = new Date();
+            // 使用 US Pacific Time (America/Los_Angeles)
+            const formatter = new Intl.DateTimeFormat('en-CA', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                timeZone: 'America/Los_Angeles'
+            });
+            const [yyyy, mm, dd] = formatter.format(now).split('-');
+            const todaySuffix = `${yyyy}${mm}${dd}`;
+            return DYNAMIC_PREFIXES.some(prefix => code === `${prefix}${todaySuffix}`);
+        };
+
+        // 场景 A: 首次访问 (内存中无记录)
         if (!usage) {
-            if (inviteCode && validInviteCodes.has(inviteCode.toUpperCase().trim())) {
-                // 邀请码用户
-                usage = { type: 'invite', inviteCode, total: 0 };
-                console.log(`[计数] 新邀请码用户: ${userId}, 邀请码: ${inviteCode}`);
+            if (isCodeValid(upperInviteCode)) {
+                // 有效邀请码 -> 初始化 invite类型
+                usage = { type: 'invite', inviteCode: upperInviteCode, total: 0 };
+                console.log(`[计数] 新邀请码用户: ${userId}, 码: ${upperInviteCode}`);
             } else {
-                // 免费用户
+                // 无码或无效码 -> 初始化 free类型
                 usage = { type: 'free', cleaning: 0, insight: 0 };
                 console.log(`[计数] 新免费用户: ${userId}`);
             }
+            userUsageCounter.set(userId, usage);
+        }
+        // 场景 B: 已有记录，但用户提供了新的有效邀请码 (如第二天的码) -> 重置额度
+        else if (upperInviteCode && usage.inviteCode !== upperInviteCode && isCodeValid(upperInviteCode)) {
+            console.log(`[计数] 用户 ${userId} 更新邀请码: ${usage.inviteCode} -> ${upperInviteCode}. 重置额度.`);
+            usage = { type: 'invite', inviteCode: upperInviteCode, total: 0 };
             userUsageCounter.set(userId, usage);
         }
 
@@ -99,7 +127,7 @@ function checkFreeTrialLimit(type) {
             if (usage.total >= INVITE_CODE_TOTAL_LIMIT) {
                 return res.status(429).json({
                     error: '邀请码额度已用完',
-                    message: '您的邀请码额度已用完，请配置 API Key 继续使用',
+                    message: '今日额度已用完，请明天获取新邀请码',
                     usage: usage.total,
                     limit: INVITE_CODE_TOTAL_LIMIT,
                     userType: 'invite'
@@ -121,9 +149,21 @@ function checkFreeTrialLimit(type) {
                 });
             }
             usage[type]++;
+            // 同步增加总计数 (用于邀请码用户显示)
+            if (typeof usage.total === 'number') {
+                usage.total++;
+            }
         }
 
         userUsageCounter.set(userId, usage);
+
+        // 调试日志
+        console.log(`[计数] 用户: ${userId}, 类型: ${usage.type}, Code: ${upperInviteCode || 'None'}, Total: ${usage.total}, Cleaning: ${usage.cleaning}, Insight: ${usage.insight}`);
+
+        // 确保 total 字段总是存在 (增强前端兼容性)
+        if (usage.type === 'free' || usage.total === undefined) {
+            usage.total = (usage.cleaning || 0) + (usage.insight || 0);
+        }
 
         // 在响应中返回使用情况
         res.locals.usage = usage;
@@ -138,6 +178,15 @@ registerConfigRoutes(app);
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// 辅助函数：注入使用情况头
+function injectUsageHeader(res) {
+    if (res.locals && res.locals.usage) {
+        res.setHeader('X-Liuli-Usage', JSON.stringify(res.locals.usage));
+        // 暴露自定义头给前端（CORS）
+        res.setHeader('Access-Control-Expose-Headers', 'X-Liuli-Usage');
+    }
+}
 
 // 🆕 清洗建议专用通道（快速响应）
 app.post('/api/proxy/deepseek-cleaning', checkFreeTrialLimit('cleaning'), async (req, res) => {
@@ -157,7 +206,6 @@ app.post('/api/proxy/deepseek-cleaning', checkFreeTrialLimit('cleaning'), async 
     try {
         console.log('[代理-清洗] 转发请求至 DeepSeek');
 
-
         const config = {
             method: 'POST',
             url: 'https://api.deepseek.com/v1/chat/completions',
@@ -170,9 +218,11 @@ app.post('/api/proxy/deepseek-cleaning', checkFreeTrialLimit('cleaning'), async 
         };
 
         const response = await axios(config);
+        injectUsageHeader(res); // 注入使用情况头
         res.status(response.status).json(response.data);
     } catch (error) {
         console.error('[代理-清洗错误]', error.message);
+        injectUsageHeader(res); // 即使出错也尝试返回使用情况
         if (error.response) {
             res.status(error.response.status).json(error.response.data);
         } else {
@@ -211,9 +261,11 @@ app.post('/api/proxy/deepseek-insight', checkFreeTrialLimit('insight'), async (r
         };
 
         const response = await axios(config);
+        injectUsageHeader(res); // 注入使用情况头
         res.status(response.status).json(response.data);
     } catch (error) {
         console.error('[代理-洞察错误]', error.message);
+        injectUsageHeader(res); // 即使出错也尝试返回使用情况
         if (error.response) {
             res.status(error.response.status).json(error.response.data);
         } else {
@@ -352,9 +404,11 @@ app.post('/api/model/generate', async (req, res) => {
         });
 
         const result = await modelService.generate(prompt, { maxTokens, temperature });
+        injectUsageHeader(res); // 注入使用情况头
         res.json(result);
     } catch (error) {
         console.error('[API-Model] 生成失败:', error.message);
+        injectUsageHeader(res); // 即使出错也尝试返回使用情况
         res.status(500).json({ error: error.message });
     }
 });
@@ -401,18 +455,52 @@ app.post('/api/validate-invite-code', (req, res) => {
 
     const upperCode = code.toUpperCase().trim();
 
+    // Debug: 打印验证详情
+    console.log(`[验证] 收到: "${upperCode}", 白名单:`, Array.from(validInviteCodes));
+
+    // 1. 检查静态白名单
     if (validInviteCodes.has(upperCode)) {
-        res.json({
+        return res.json({
             valid: true,
-            message: '邀请码验证成功',
+            message: '邀请码验证成功 (静态)',
             quota: INVITE_CODE_TOTAL_LIMIT
         });
-    } else {
-        res.status(400).json({
-            error: '邀请码无效或已过期',
-            valid: false
+    }
+
+    // 2. 检查动态日期码 (格式: 前缀 + YYYYMMDD, e.g., REDDIT20260115)
+    // 允许的前缀列表 (新增 VIP/SPONSOR)
+    const DYNAMIC_PREFIXES = ['REDDIT', 'LIULI', 'PH', 'VIP', 'SPONSOR'];
+
+    // 获取服务器当前日期 (UTC-8 US Pacific Time)
+    const now = new Date();
+    // 使用 Intl.DateTimeFormat 获取准确的 YYYYMMDD
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        timeZone: 'America/Los_Angeles'
+    });
+    const [yyyy, mm, dd] = formatter.format(now).split('-');
+    const todaySuffix = `${yyyy}${mm}${dd}`;
+
+    // 检查是否匹配任意动态规则
+    const isDynamicValid = DYNAMIC_PREFIXES.some(prefix => {
+        const expectedCode = `${prefix}${todaySuffix}`;
+        return upperCode === expectedCode;
+    });
+
+    if (isDynamicValid) {
+        return res.json({
+            valid: true,
+            message: '邀请码验证成功 (动态)',
+            quota: INVITE_CODE_TOTAL_LIMIT
         });
     }
+
+    console.log(`[验证] 失败: "${upperCode}" 不在白名单且不符合动态规则 (今日后缀: ${todaySuffix})`);
+    res.status(400).json({
+        error: 'INVITE_CODE_INVALID',
+        message: '邀请码无效或已过期',
+        valid: false
+    });
 });
 
 app.listen(port, () => {

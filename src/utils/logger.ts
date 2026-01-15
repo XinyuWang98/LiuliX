@@ -47,13 +47,57 @@ export interface LogOptions {
 }
 
 class Logger {
-    private isDev = (() => {
+    private isDev: boolean;
+    private explicitlyDisabled: boolean = false;
+
+    constructor() {
+        // 1. 默认基于环境
+        let devMode = true;
         try {
-            return (import.meta as any).env?.DEV ?? true;
+            devMode = (import.meta as any).env?.DEV ?? true;
         } catch {
-            return true;
+            devMode = true;
         }
-    })();
+
+        // 2. 允许 localStorage 覆盖 (liulix_debug_mode = 'true' | 'false')
+        try {
+            const stored = localStorage.getItem('liulix_debug_mode');
+            if (stored === 'true') {
+                devMode = true;
+                this.explicitlyDisabled = false;
+            }
+            if (stored === 'false') {
+                devMode = false;
+                this.explicitlyDisabled = true; // 显式关闭时，标记为“完全禁用”
+            }
+        } catch { }
+
+        this.isDev = devMode;
+
+        // 3. 挂载全局控制函数 (增加简单口令验证)
+        if (typeof window !== 'undefined') {
+            (window as any).toggleDebugLogs = (enable?: boolean, secret?: string) => {
+                // 简单的防误触验证
+                if (enable && secret !== 'liulix-dev') {
+                    console.warn('❌ Access Denied: Missing or invalid secret key.');
+                    return false;
+                }
+
+                const newState = enable ?? !this.isDev;
+                this.isDev = newState;
+                this.explicitlyDisabled = !newState; // 同步更新禁用状态
+
+                localStorage.setItem('liulix_debug_mode', String(newState));
+
+                if (newState) {
+                    console.log(`[Logger] Debug logs ENABLED (All logs visible)`);
+                } else {
+                    console.log(`[Logger] Debug logs DISABLED (Errors/Warns hidden)`);
+                }
+                return newState;
+            };
+        }
+    }
 
     /**
      * 获取当前时间戳
@@ -122,9 +166,10 @@ class Logger {
     }
 
     /**
-     * 警告日志(生产环境保留)
+     * 警告日志(生产环境保留，除非显式禁用)
      */
     warn(service: ServiceName, message: string, data?: any) {
+        if (this.explicitlyDisabled) return; // 显式禁用时隐藏
         const timestamp = this.getTimestamp();
         const formatted = `[${timestamp}] [${service}] ${message}`;
         if (data !== undefined) {
@@ -135,9 +180,10 @@ class Logger {
     }
 
     /**
-     * 错误日志(生产环境保留)
+     * 错误日志(生产环境保留，除非显式禁用)
      */
     error(service: ServiceName, message: string, error?: any) {
+        if (this.explicitlyDisabled) return; // 显式禁用时隐藏
         const timestamp = this.getTimestamp();
         const formatted = `[${timestamp}] [${service}] ${message}`;
         if (error !== undefined) {

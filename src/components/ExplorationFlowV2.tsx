@@ -49,11 +49,11 @@ export function ExplorationFlowV2({
                 const { diagnoseWebLLMCache } = await import('@/utils/webllmDiagnostics');
                 diagnoseWebLLMCache().catch(err => logger.error('诊断工具', '诊断失败', err));
 
-                // 自动启用本地模型
-                if (!localStorage.getItem('use_local_model')) {
-                    localStorage.setItem('use_local_model', 'true');
-                    logger.log('系统', '已自动启用本地模型');
-                }
+                // 自动启用本地模型 (MVP阶段禁用: 移除强制开启)
+                // if (!localStorage.getItem('use_local_model')) {
+                //     localStorage.setItem('use_local_model', 'true');
+                //     logger.log('系统', '已自动启用本地模型');
+                // }
 
                 // 💡 检查是否首次运行
                 const isFirstRun = !localStorage.getItem('app_has_run_before');
@@ -102,7 +102,10 @@ export function ExplorationFlowV2({
 
                 // 本地模型预加载（延迟2秒，避免资源竞争）
                 setTimeout(() => {
-                    const shouldPreload = localStorage.getItem('use_local_model') === 'true';
+                    const featureEnabled = localStorage.getItem('feature_LOCAL_AI_MODEL') === 'true';
+                    const userEnabled = localStorage.getItem('use_local_model') === 'true';
+                    const shouldPreload = featureEnabled && userEnabled;
+
                     if (shouldPreload) {
                         import('@/services/localLLMService').then(({ localLLMService, SUPPORTED_MODELS }) => {
                             localLLMService.reload(SUPPORTED_MODELS.QWEN_7B, () => { }).catch(err =>

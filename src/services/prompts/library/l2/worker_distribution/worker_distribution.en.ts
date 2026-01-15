@@ -37,24 +37,55 @@ import json
 plt.switch_backend('Agg')
 
 column_name = {{column_name}}
-col_data = pd.to_numeric(df[column_name], errors='coerce').dropna()
+is_numeric = pd.api.types.is_numeric_dtype(df[column_name])
 
-# Create subplots: histogram + density plot
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5), dpi=72)
+# Create different chart types based on data type
+if is_numeric:
+    col_data = pd.to_numeric(df[column_name], errors='coerce').dropna()
+    
+    # Dual view: Histogram + KDE
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5), dpi=72)
+    
+    # Histogram
+    ax1.hist(col_data, bins=30, color='#3498db', alpha=0.7, edgecolor='black')
+    ax1.set_title(f'{column_name} Distribution Histogram', fontsize=14)
+    ax1.set_xlabel('Value')
+    ax1.set_ylabel('Frequency')
+    ax1.grid(axis='y', alpha=0.3)
+    
+    # KDE
+    try:
+        col_data.plot(kind='density', ax=ax2, color='#e74c3c', linewidth=2)
+    except:
+        ax2.text(0.5, 0.5, 'Not enough data for density plot', ha='center')
+        
+    ax2.set_title(f'{column_name} Density Plot', fontsize=14)
+    ax2.set_xlabel('Value')
+    ax2.set_ylabel('Density')
+    ax2.grid(alpha=0.3)
+    
+    # Statistics
+    mean_val = col_data.mean()
+    median_val = col_data.median()
+    std_val = col_data.std()
+    skew_val = col_data.skew()
+    skew_desc = 'right-skewed' if skew_val > 0.5 else ('left-skewed' if skew_val < -0.5 else 'symmetric')
+    summary = f"{column_name}: Mean={mean_val:.2f}, Median={median_val:.2f}, Std={std_val:.2f}, Distribution is {skew_desc}"
 
-# Histogram
-ax1.hist(col_data, bins=30, color='#3498db', alpha=0.7, edgecolor='black')
-ax1.set_title(f'{column_name} Distribution Histogram', fontsize=14)
-ax1.set_xlabel('Value')
-ax1.set_ylabel('Frequency')
-ax1.grid(axis='y', alpha=0.3)
-
-# Density plot (KDE)
-col_data.plot(kind='density', ax=ax2, color='#e74c3c', linewidth=2)
-ax2.set_title(f'{column_name} Density Plot', fontsize=14)
-ax2.set_xlabel('Value')
-ax2.set_ylabel('Density')
-ax2.grid(alpha=0.3)
+else:
+    # Categorical Data: Bar Chart
+    top_n = df[column_name].value_counts().head(10)
+    
+    fig, ax = plt.subplots(figsize=(10, 6), dpi=72)
+    top_n.plot(kind='bar', ax=ax, color='#3498db', alpha=0.8)
+    
+    ax.set_title(f'{column_name} Top 10 Distribution', fontsize=14)
+    ax.set_xlabel('Category')
+    ax.set_ylabel('Count')
+    ax.grid(axis='y', alpha=0.3)
+    plt.xticks(rotation=45)
+    
+    summary = f"{column_name}: {df[column_name].nunique()} unique categories, Top 1 accounts for {top_n.iloc[0]/len(df):.1%}"
 
 plt.tight_layout()
 
@@ -64,15 +95,6 @@ fig.savefig(buffer, format='png', bbox_inches='tight')
 buffer.seek(0)
 image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
 plt.close(fig)
-
-# Statistics
-mean_val = col_data.mean()
-median_val = col_data.median()
-std_val = col_data.std()
-skew_val = col_data.skew()
-
-skew_desc = 'right-skewed' if skew_val > 0.5 else ('left-skewed' if skew_val < -0.5 else 'symmetric')
-summary = f"{column_name}: mean={mean_val:.2f}, median={median_val:.2f}, std={std_val:.2f}, distribution is {skew_desc}"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
 print(json.dumps(result))`,

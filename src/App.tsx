@@ -150,24 +150,35 @@ function AppContent() {
     }, []);
 
     // 🆕 Feature Flags 配置初始化（2026-01-08 新增）
+    const [configLoaded, setConfigLoaded] = useState(false);
     useEffect(() => {
         const loadRemoteConfig = async () => {
             await initializeConfig();
             logger.log('系统', 'Feature Flags 配置初始化完成');
+            setConfigLoaded(true);
         };
 
         loadRemoteConfig();
     }, []);
 
-    // ⚠️ MVP阶段：免费提供API Key服务，暂时禁用自动弹窗
-    // 等到正式部署上线后再启用此功能，引导用户配置自己的Key
-    // 首次加载检测 - 自动弹出API设置（已禁用）
-    // useEffect(() => {
-    //     const hasConfigured = localStorage.getItem('api_configured');
-    //     if (!hasConfigured && isPyodideReady) {
-    //         setShowAPISettings(true);
-    //     }
-    // }, [isPyodideReady]);
+    // 如果配置未加载完成，显示全屏 Loading
+    if (!configLoaded) {
+        return (
+            <div style={{
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--bg-app)',
+                color: 'var(--text-secondary)',
+                flexDirection: 'column',
+                gap: '16px'
+            }}>
+                <div className="spinner" />
+                <div style={{ fontSize: '14px' }}>Initializing System...</div>
+            </div>
+        );
+    }
 
     // 处理欢迎界面的文件上传
     const handleWelcomeUpload = async (files: any[], sampledFlags: boolean[]) => {

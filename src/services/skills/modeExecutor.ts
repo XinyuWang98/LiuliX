@@ -107,17 +107,16 @@ async function executeFullMode(
         pyodideManager.initialize();
         await pyodideManager.waitForReady();
 
-        // ✅ 上下文检测：检查 Pyodide 中是否已有 df（下钻场景复用父节点数据）
+        // ✅ 上下文检测：检查 Pyodide 中是否已有 _master_df (主副本)
+        // 并行执行时必须使用副本，防止前序任务污染全局 df
         const contextCheckScript = `
 import sys
-has_df = 'df' in globals() and 'pd' in sys.modules
-if has_df:
-    import pandas as pd
-    if isinstance(globals().get('df'), pd.DataFrame):
-        print("[上下文检测] True")
-        print(f"[上下文信息] shape={df.shape}, columns={list(df.columns)}")
-    else:
-        print("[上下文检测] False")
+has_master = '_master_df' in globals() and 'pd' in sys.modules
+if has_master:
+    # 每次执行前重置 df 为主副本的深拷贝
+    df = _master_df.copy(deep=True)
+    print("[上下文检测] True")
+    print(f"[上下文信息] Resetted df from _master_df: shape={df.shape}")
 else:
     print("[上下文检测] False")
 `;
@@ -130,12 +129,11 @@ else:
         const hasExistingDf = resultStr.includes('[上下文检测] True');
 
         if (hasExistingDf) {
-            // 🔄 复用场景：下钻节点直接使用父节点的 DataFrame
-            logger.log('Skills', '检测到父节点上下文，复用已有 DataFrame', {
+            logger.log('Skills', '上下文隔离：已重置 df 为 _master_df 副本', {
                 data: { contextInfo: resultStr }
             });
         } else {
-            // 🆕 全新场景：从 DuckDB 加载数据
+            // 🆕 全新场景：从 DuckDB 加载数据并创建 _master_df
             let query = `SELECT * FROM ${tableName}`;
 
             if (totalRows > maxRows) {
@@ -144,7 +142,9 @@ else:
 
             const data = await db.runQuery(query);
 
-            logger.log('Skills', '全新执行，从 DuckDB 加载数据', {
+            logger.log('Skills', `[Debug] DuckDB查询结果: ${data?.length || 0} 行`);
+
+            logger.log('Skills', '全新执行，创建 _master_df', {
                 data: { rows: data.length, limited: isLimited, maxRows }
             });
 
@@ -159,21 +159,40 @@ else:
             const dataScript = `
 import pandas as pd
 import json
+import time
 
 try:
+    start_time = time.time()
     data_json = '''${safeJsonData}'''
-    df = pd.DataFrame(json.loads(data_json))
+    # 创建主副本
+    t0 = time.time()
+    _master_df = pd.DataFrame(json.loads(data_json))
+    t1 = time.time()
+    print(f"[Perf] JSON Load & DF Create: {t1 - t0:.4f}s")
     
-    # ✅ 自动类型转换：将可转换的列转为数值类型（兜底防御）
-    for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce')
+    # ✅ 智能类型转换：仅转换确实为数值的列，避免破坏有效文本列
+    t2 = time.time()
+    for col in _master_df.columns:
+        converted = pd.to_numeric(_master_df[col], errors='coerce')
+        # 只有当转换后至少有一个有效数值时才应用转换（避免将 'North' 等有效字符串全转为 NaN）
+        if not converted.isna().all():
+            _master_df[col] = converted
+    t3 = time.time()
+    print(f"[Perf] Type Conversion: {t3 - t2:.4f}s")
+
+    # 创建工作副本
+    t4 = time.time()
+    df = _master_df.copy(deep=True)
+    t5 = time.time()
+    print(f"[Perf] Deep Copy: {t5 - t4:.4f}s")
+    print(f"[Perf] Total Python Load Time: {t5 - start_time:.4f}s")
     
 except Exception as e:
     print(f"Error loading JSON data: {str(e)}")
     raise e
 `;
             await pyodideManager.runPython(dataScript);
-            logger.log('Skills', `数据已加载到Pyodide`, { data: { rows: data.length, limited: isLimited, maxRows } });
+            logger.log('Skills', `数据已加载到Pyodide (_master_df created)`, { data: { rows: data.length, limited: isLimited, maxRows } });
         }
 
 

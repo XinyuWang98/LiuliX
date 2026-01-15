@@ -48,7 +48,7 @@ class ExceptionWrapRule(EnhancementRule):
                                 func=ast.Name(id='ValueError', ctx=ast.Load()),
                                 args=[
                                     ast.JoinedStr(values=[
-                                        ast.Constant(value="数据索引越界（可能是过滤后结果为空）: "),
+                                        ast.Constant(value="Data index out of bounds (possibly empty result after filtering): "),
                                         ast.FormattedValue(
                                             value=ast.Call(
                                                 func=ast.Name(id='str', ctx=ast.Load()),
@@ -74,7 +74,7 @@ class ExceptionWrapRule(EnhancementRule):
                                 func=ast.Name(id='ValueError', ctx=ast.Load()),
                                 args=[
                                     ast.JoinedStr(values=[
-                                        ast.Constant(value="列不存在: "),
+                                        ast.Constant(value="Column not found: "),
                                         ast.FormattedValue(
                                             value=ast.Call(
                                                 func=ast.Name(id='str', ctx=ast.Load()),
@@ -98,7 +98,7 @@ class ExceptionWrapRule(EnhancementRule):
                         ast.Raise(
                             exc=ast.Call(
                                 func=ast.Name(id='ValueError', ctx=ast.Load()),
-                                args=[ast.Constant(value="除零错误（可能是分组后某组数据为空）")],
+                                args=[ast.Constant(value="Division by zero error (possibly empty group data)")],
                                 keywords=[]
                             )
                         )

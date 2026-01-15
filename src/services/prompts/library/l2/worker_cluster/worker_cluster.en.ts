@@ -116,6 +116,10 @@ Please perform K-Means clustering analysis on DataFrame \`df\`.
 `,
 
     inputVariables: ['feature_cols', 'n_clusters'],
+
+    // 🆕 Declare generated column names (for column validation whitelist)
+    outputColumns: ['Cluster'],  // K-Means clustering adds a Cluster column to the DataFrame
+
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

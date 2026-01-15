@@ -218,7 +218,31 @@ export function useInsightLoaderV2() {
                     insightNodes = await inflateRecommendations(fallbackRecs as any, tableName!);  // 🆕 传递tableName（非空断言）
                 } else {
                     logger.log('AI服务', '[Router] 解析成功', { data: { count: recommendations.length } });
-                    insightNodes = await inflateRecommendations(recommendations as any, tableName!);  // 🆕 传递tableName（非空断言）
+
+                    // 🆕 使用流式处理器：膨胀完成 → 立即执行
+                    const { processRecommendationsStreaming } = await import('@/services/insights/streamProcessor');
+
+                    insightNodes = await processRecommendationsStreaming(
+                        recommendations as any,
+                        {
+                            tableName: tableName!,
+                            validColumns,
+                            totalRows,
+                            columnCount: validColumns.length
+                        },
+                        {
+                            onProgress: (current, total) => {
+                                setExecutionProgress({ current, total });
+                                setLoadingStage('progress.generatingInsight');
+                            }
+                        },
+                        {
+                            inflateConcurrency: 2,
+                            executeConcurrency: 1,
+                            enableQualityGate: true,
+                            enableColumnValidation: true
+                        }
+                    );
                 }
             } else {
                 // 旧版 Coder 模式（需要转换为 InsightNode）
@@ -251,77 +275,83 @@ export function useInsightLoaderV2() {
             }
 
             // ========== 步骤5：执行代码并填充结果（使用公共执行器）==========
-            setLoadingStage('progress.validating');
+            // 🆕 仅对未执行的节点执行（流式处理分支已在 processRecommendationsStreaming 中执行）
+            const hasUnexecutedNodes = insightNodes.some(node => !node.result);
+            if (hasUnexecutedNodes) {
+                setLoadingStage('progress.validating');
 
-            const maxInsights = Math.min(
-                insightNodes.length,
-                RESOURCE_LIMITS.SAFETY_LIMITS.MAX_INSIGHTS_PER_RUN
-            );
+                const maxInsights = Math.min(
+                    insightNodes.length,
+                    RESOURCE_LIMITS.SAFETY_LIMITS.MAX_INSIGHTS_PER_RUN
+                );
 
-            // 截取需要执行的节点
-            const nodesToExecute = insightNodes.slice(0, maxInsights);
+                // 截取需要执行的节点
+                const nodesToExecute = insightNodes.slice(0, maxInsights);
 
-            // ✅ 列名校验（在执行前过滤无效节点）
-            const { validateColumnsExist } = await import('@/utils/columnValidator');
-            const columnParamKeys = ['column_name', 'col_x', 'col_y', 'date_col', 'value_col', 'group_col'];
+                // ✅ 列名校验（在执行前过滤无效节点）
+                const { validateColumnsExist } = await import('@/utils/columnValidator');
+                const columnParamKeys = ['column_name', 'col_x', 'col_y', 'date_col', 'value_col', 'group_col'];
 
-            for (const node of nodesToExecute) {
-                const paramsToValidate: Record<string, unknown> = {};
-                for (const key of columnParamKeys) {
-                    if (node.params?.[key]) {
-                        paramsToValidate[key] = node.params[key];
-                    }
-                }
-
-                const validationResult = validateColumnsExist(paramsToValidate, validColumns);
-
-                if (!validationResult.valid) {
-                    logger.warn('AI洞察', `跳过无效列名的洞察: ${node.title}`, {
-                        data: { invalidColumns: validationResult.invalidColumns, validColumns: validColumns }
-                    });
-                    node.result = {
-                        code: '',
-                        rawCode: '',
-                        summary: `列名校验失败: 列 ${validationResult.invalidColumns?.join(', ')} 不存在于数据集中`,
-                        columnsUsed: []
-                    };
-                    node.error = '列名校验失败';
-                }
-            }
-
-            // ✅ 使用公共执行器批量执行（统一处理 rawCode）
-            const validNodesToExecute = nodesToExecute.filter(node => !node.error);
-
-            await executeBatchNodes(
-                validNodesToExecute,
-                {
-                    tableName: tableName || '',
-                    totalRows,
-                    columnCount: validColumns.length,  // 🆕 传递列数用于动态采样评估
-                    enableQualityGate: true,
-                    logPrefix: '批量洞察'
-                },
-                (current, total) => {
-                    setExecutionProgress({ current, total });
-                    setLoadingStage('progress.generatingInsight');
-
-                    // 内存监控
-                    if (current % 2 === 0 && current > 1) {
-                        const freeMemory = checkAvailableMemory();
-                        if (freeMemory < RESOURCE_LIMITS.SAFETY_LIMITS.MIN_FREE_MEMORY) {
-                            logger.warn('AI服务', `内存不足，可能影响后续执行`);
+                for (const node of nodesToExecute) {
+                    const paramsToValidate: Record<string, unknown> = {};
+                    for (const key of columnParamKeys) {
+                        if (node.params?.[key]) {
+                            paramsToValidate[key] = node.params[key];
                         }
                     }
-                },
-                // 🆕 流式更新回调：每个节点完成时触发UI更新
-                (node) => {
-                    logger.log('AI洞察', `[流式更新] 节点完成: ${node.title}`, {
-                        data: { status: node.status, hasImage: !!node.chartImage }
-                    });
-                    // 触发React状态更新（通过重新赋值insightNodes引用）
-                    insightNodes = [...insightNodes]; // 强制触发引用变化
+
+                    const validationResult = validateColumnsExist(paramsToValidate, validColumns);
+
+                    if (!validationResult.valid) {
+                        logger.warn('AI洞察', `跳过无效列名的洞察: ${node.title}`, {
+                            data: { invalidColumns: validationResult.invalidColumns, validColumns: validColumns }
+                        });
+                        node.result = {
+                            code: '',
+                            rawCode: '',
+                            summary: `列名校验失败: 列 ${validationResult.invalidColumns?.join(', ')} 不存在于数据集中`,
+                            columnsUsed: []
+                        };
+                        node.error = '列名校验失败';
+                    }
                 }
-            );
+
+                // ✅ 使用公共执行器批量执行（统一处理 rawCode）
+                const validNodesToExecute = nodesToExecute.filter(node => !node.error);
+
+                await executeBatchNodes(
+                    validNodesToExecute,
+                    {
+                        tableName: tableName || '',
+                        totalRows,
+                        columnCount: validColumns.length,
+                        enableQualityGate: true,
+                        logPrefix: '批量洞察'
+                    },
+                    (current, total) => {
+                        setExecutionProgress({ current, total });
+                        setLoadingStage('progress.generatingInsight');
+
+                        // 内存监控
+                        if (current % 2 === 0 && current > 1) {
+                            const freeMemory = checkAvailableMemory();
+                            if (freeMemory < RESOURCE_LIMITS.SAFETY_LIMITS.MIN_FREE_MEMORY) {
+                                logger.warn('AI服务', `内存不足，可能影响后续执行`);
+                            }
+                        }
+                    },
+                    // 🆕 流式更新回调：每个节点完成时触发UI更新
+                    (node) => {
+                        logger.log('AI洞察', `[流式更新] 节点完成: ${node.title}`, {
+                            data: { status: node.status, hasImage: !!node.chartImage }
+                        });
+                        // 触发React状态更新（通过重新赋值insightNodes引用）
+                        insightNodes = [...insightNodes]; // 强制触发引用变化
+                    }
+                );
+            } else {
+                logger.log('AI服务', '[流式处理] 跳过批量执行（已在流式处理器中完成）');
+            }
 
             // 过滤掉失败的节点（可选，保留失败节点可以显示错误信息）
             const validNodes = insightNodes.filter(node => node.result && !node.error);

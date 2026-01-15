@@ -56,17 +56,46 @@ export function renderTemplate(template: string, params: Record<string, unknown>
 /**
  * 从参数中提取使用的列名
  * 
- * 支持以下参数格式：
- * - 单列：column_name, col_x, col_y, target_col等
- * - 数组：feature_cols, group_cols等
+ * 架构改进（v2.0）：
+ * - 🆕 优先使用 inputVariables（配置驱动），避免硬编码
+ * - 🔄 兼容旧版：如果未提供 inputVariables，降级到硬编码 columnKeys
+ * 
+ * @param params 参数对象
+ * @param inputVariables 可选：prompt 的 inputVariables（优先使用）
+ * @returns 提取的列名数组
  */
-export function extractColumnsUsed(params: Record<string, unknown>): string[] {
+export function extractColumnsUsed(
+    params: Record<string, unknown>,
+    inputVariables?: string[]
+): string[] {
     const columns: string[] = [];
 
-    // 🆕 扩展字段列表以覆盖更多模板
+    // 🆕 架构改进：优先使用 prompt.inputVariables（配置驱动）
+    if (inputVariables && inputVariables.length > 0) {
+        // 🎯 核心逻辑：从 params 中提取 inputVariables 对应的列名
+        for (const key of inputVariables) {
+            const value = params[key];
+
+            if (typeof value === 'string') {
+                // 单列参数
+                columns.push(value);
+            } else if (Array.isArray(value)) {
+                // 数组类型的列名参数（如 feature_cols）
+                for (const item of value) {
+                    if (typeof item === 'string') {
+                        columns.push(item);
+                    }
+                }
+            }
+        }
+
+        return columns;
+    }
+
+    // 🔄 降级处理：如果未提供 inputVariables，使用硬编码 columnKeys（向后兼容）
     const columnKeys = [
         // 通用单列字段
-        'column_name', 'col_x', 'col_y',
+        'column_name', 'col_x', 'col_y', 'x_column', 'y_column',  // ✅ 添加 x_column/y_column
         // 特定用途单列
         'date_col', 'value_col', 'group_col', 'category_col', 'metric_col',
         // 回归/ML相关
@@ -87,7 +116,7 @@ export function extractColumnsUsed(params: Record<string, unknown>): string[] {
         }
     }
 
-    // 🆕 提取数组类型的列名参数
+    // 提取数组类型的列名参数
     for (const key of arrayColumnKeys) {
         if (Array.isArray(params[key])) {
             const arr = params[key] as unknown[];
@@ -134,7 +163,8 @@ export async function inflateRecommendation(
 
 
     // 🆕 Task 2.3: 第三道防线 - 列名白名单校验（性能优化版）
-    const extractedColumns = extractColumnsUsed(rec.params);
+    // ✅ 架构改进：使用 prompt.inputVariables 动态提取列名
+    const extractedColumns = extractColumnsUsed(rec.params, prompt.inputVariables);
 
     if (extractedColumns.length > 0) {
         // 有提取到列名 → 使用白名单校验
@@ -146,12 +176,12 @@ export async function inflateRecommendation(
             const invalidColumns = extractedColumns.filter(col => !validColumns.has(col));
 
             if (invalidColumns.length > 0) {
-                logger.warn('AI服务', `[Inflater] 🚫 检测到不存在的列名，拒绝推荐`, {
+                logger.warn('AI服务', `[${rec.promptId}] 列名验证失败: 列不存在 [${invalidColumns.join(', ')}]`, {
                     data: {
                         promptId: rec.promptId,
-                        invalidColumns,
-                        extractedColumns,
-                        params: rec.params
+                        ai_params: rec.params,
+                        required_params: prompt.inputVariables,
+                        invalidColumns
                     }
                 });
                 return null;
@@ -186,7 +216,7 @@ export async function inflateRecommendation(
 
         // ✅ v3.0: 异步自动增强代码（零Token成本）
         const enhanceResult = await CodeEnhancer.enhance(rawCode, {
-            columns: extractColumnsUsed(rec.params),
+            columns: extractColumnsUsed(rec.params, prompt.inputVariables),  // ✅ 使用配置驱动
             dfName: 'df',
             promptType: prompt.name
         });
@@ -211,8 +241,17 @@ export async function inflateRecommendation(
     }
 
     // 4. 构建下钻动作列表
+    // 🆕 Feature Flag控制：ENABLE_DRILL_DOWN_NODE_CACHE
     const drillDownActions: DrillDownAction[] = [];
-    if (rec.drillHint) {
+    const { isFeatureEnabled } = await import('@/config/featureFlags');
+    const drillCacheEnabled = isFeatureEnabled('ENABLE_DRILL_DOWN_NODE_CACHE');
+
+    if (!drillCacheEnabled) {
+        // Feature Flag禁用时，隐藏所有下钻卡片
+        logger.log('AI服务', `[Inflater] 下钻缓存功能已禁用，跳过drillHint`, {
+            data: { nodeTitle: rec.reason || prompt.title }
+        });
+    } else if (rec.drillHint) {
         drillDownActions.push({
             ...rec.drillHint,
             isRecommended: true
@@ -237,7 +276,7 @@ export async function inflateRecommendation(
         id: generateId(),
         depth,
         title: rec.reason || prompt.title,
-        columnsUsed: extractColumnsUsed(rec.params),
+        columnsUsed: extractColumnsUsed(rec.params, prompt.inputVariables),  // ✅ 使用配置驱动
         promptId: rec.promptId,
         params: rec.params,
         isLoading: false,
@@ -249,7 +288,7 @@ export async function inflateRecommendation(
             code,
             rawCode,  // ✅ 同时保存纯净代码
             summary: '',
-            columnsUsed: extractColumnsUsed(rec.params)
+            columnsUsed: extractColumnsUsed(rec.params, prompt.inputVariables)  // ✅ 使用配置驱动
         } : undefined
     };
 
@@ -278,9 +317,10 @@ export async function inflateRecommendations(
     recommendations: L1Recommendation[],
     tableName: string
 ): Promise<InsightNode[]> {
+    const batchId = `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`; // 🆕 批次唯一ID
     const startTime = performance.now();  // 🔍 性能追踪
     logger.log('AI服务', `[Inflater] 🚀 开始批量膨胀`, {
-        data: { count: recommendations.length, tableName }
+        data: { batchId, count: recommendations.length, tableName }
     });
 
     const nodes: InsightNode[] = [];
@@ -296,15 +336,30 @@ export async function inflateRecommendations(
         logger.warn('AI服务', '[Inflater] Schema预加载失败，将逐个查询', { error });
     }
 
-    for (const rec of recommendations) {
-        const node = await inflateRecommendation(rec, tableName, schemaCache, 0);
+    // 🆕 并发优化：使用限流并发（最多2个同时执行）
+    const pLimit = (await import('p-limit')).default;
+    const limit = pLimit(2);  // 最多同时2个
+
+    logger.log('AI服务', `[Inflater] 使用限流并发模式 (并发数: 2)`);
+
+    const nodePromises = recommendations.map(rec =>
+        limit(async () => {
+            const node = await inflateRecommendation(rec, tableName, schemaCache, 0);
+            return node;
+        })
+    );
+
+    const results = await Promise.all(nodePromises);
+
+    // 过滤掉 null 结果
+    for (const node of results) {
         if (node) {
             nodes.push(node);
         }
     }
 
     const totalDuration = performance.now() - startTime;
-    logger.log('AI服务', `[Inflater] 🏁 膨胀完成: ${nodes.length}/${recommendations.length} 个节点 (总耗时: ${totalDuration.toFixed(1)}ms)`);
+    logger.log('AI服务', `[Inflater] 🏁 膨胀完成: ${nodes.length}/${recommendations.length} 个节点 (批次ID: ${batchId}, 总耗时: ${totalDuration.toFixed(1)}ms)`);
     return nodes;
 }
 
