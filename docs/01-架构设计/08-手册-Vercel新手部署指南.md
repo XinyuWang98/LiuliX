@@ -95,3 +95,39 @@
 
 ### Q: 我更新了代码，怎么更新线上？
 **A**: 很简单，你只需要把代码 **Push** (推送) 到 GitHub 的 main 分支。Vercel 会自动检测到变化，并自动开始新一轮部署。无需手动操作。
+
+---
+
+## 进阶：绑定阿里云域名 (如 liulix.com)
+
+如果你在阿里云购买了域名，按照以下 3 步即可绑定，无需迁移域名，完全免费。
+
+### 1. 在 Vercel 添加域名
+1.  进入 Vercel 项目主页 -> **Settings** -> **Domains**。
+2.  在输入框填写 `liulix.com`，点击 **Add**。
+3.  Vercel 会提示 "Invalid Configuration" (无效配置)，这是正常的。
+    *   此时它会给你两个值，请记下来：
+    *   **A Record**: `76.76.21.21` (这是 Vercel 的服务器 IP)
+    *   **CNAME Record**: `cname.vercel-dns.com` (这是别名)
+
+### 2. 在阿里云配置解析
+1.  登录 [阿里云域名控制台](https://dc.console.aliyun.com/)。
+2.  找到 `liulix.com`，点击右侧的 **"解析"**。
+3.  点击 **"添加记录"**，你需要添加两条记录：
+
+#### 第一条：主机记录 (用于 liulix.com)
+*   **记录类型**: `A`
+*   **主机记录**: `@`
+*   **记录值**: `76.76.21.21` (填 Vercel 给你的那个 IP)
+*   **TTL**: 默认 (10分钟)
+
+#### 第二条：子域名记录 (用于 www.liulix.com)
+*   **记录类型**: `CNAME`
+*   **主机记录**: `www`
+*   **记录值**: `cname.vercel-dns.com`
+*   **TTL**: 默认
+
+### 3. 等待生效
+*   回到 Vercel 的 Domains 页面。
+*   通常几分钟内，红色的错误提示会变成绿色的 **"Valid Configuration"**。
+*   一旦变绿，恭喜你！你可以直接访问 [https://liulix.com](https://liulix.com) 了 (HTTPS 证书也会自动签发)。
