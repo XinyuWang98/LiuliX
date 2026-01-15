@@ -4,6 +4,25 @@
     "outputDirectory": "dist",
     "cleanUrls": true,
     "trailingSlash": false,
+    "functions": {
+        "api/**/*.js": {
+            "maxDuration": 60
+        }
+    },
+    "rewrites": [
+        {
+            "source": "/api/(.*)",
+            "destination": "/api/index.js"
+        },
+        {
+            "source": "/health",
+            "destination": "/api/index.js"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ],
     "headers": [
         {
             "source": "/(.*)",
@@ -43,20 +62,6 @@
                     "value": "public, max-age=0, s-maxage=0"
                 }
             ]
-        }
-    ],
-    "rewrites": [
-        {
-            "source": "/api/(.*)",
-            "destination": "/api/index.js"
-        },
-        {
-            "source": "/health",
-            "destination": "/api/index.js"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
         }
     ]
 }
