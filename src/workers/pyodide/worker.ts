@@ -12,12 +12,10 @@ async function loadPyodideAndPackages() {
     try {
         ctx.postMessage({ type: 'STATUS', message: 'Loading Pyodide...' });
 
-        // 🚀 性能优化：环境自适应加载
-        // 开发环境：使用CDN（快速迭代，无需下载离线包）
-        // 生产环境：使用本地路径（10-50倍速度提升，支持离线）
-        const indexURL = import.meta.env.PROD
-            ? '/pyodide/'  // 生产：从 public/pyodide/ 加载
-            : 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';  // 开发：CDN
+        // 🚀 使用 CDN 加载 Pyodide
+        // 注意：public/pyodide/ 不会被部署到 Vercel（在 .gitignore 中）
+        // 因此在所有环境统一使用 CDN
+        const indexURL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
 
         // 动态加载Pyodide（运行时加载，不打包进bundle）
         // @ts-ignore - Pyodide会通过script标签加载到全局
