@@ -20,6 +20,14 @@
             "destination": "/api/[...path]"
         },
         {
+            "source": "/whitepaper",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/whitepaper/(.*)",
+            "destination": "/index.html"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }
