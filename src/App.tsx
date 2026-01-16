@@ -62,9 +62,8 @@ function AppContent() {
                 setActiveView('design'); // Design System
             } else if (pathname.startsWith('/whitepaper')) {
                 setActiveView('whitepaper'); // Whitepaper Portal
-            } else if (pathname === '/') {
-                // 重定向到欢迎页
-                navigateTo('/welcome');
+            } else if (pathname === '/' || pathname === '/welcome') {
+                // 根路径和 /welcome 都显示欢迎页
                 setActiveView('welcome');
             }
         };
