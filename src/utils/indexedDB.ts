@@ -28,6 +28,8 @@ export function initDB(): Promise<IDBDatabase> {
 
 /**
  * 保存所有项目
+ * 注意：Safari + COEP 环境下不支持直接存储 File 对象到 IndexedDB
+ * 因此在存储前需要移除 originalFile 字段
  */
 export async function saveProjects(projects: Project[]): Promise<void> {
     const db = await initDB();
@@ -41,9 +43,21 @@ export async function saveProjects(projects: Project[]): Promise<void> {
         clearRequest.onerror = () => reject(clearRequest.error);
     });
 
-    // 保存所有项目
+    // 保存所有项目（移除 File 对象以兼容 Safari）
     for (const project of projects) {
-        const addRequest = store.add(project);
+        // 深拷贝并移除不可序列化的 File 对象
+        const serializableProject = {
+            ...project,
+            files: project.files.map(file => ({
+                ...file,
+                data: file.data ? {
+                    ...file.data,
+                    originalFile: undefined, // 移除 File 对象
+                } : file.data,
+            })),
+        };
+
+        const addRequest = store.add(serializableProject);
         await new Promise<void>((resolve, reject) => {
             addRequest.onsuccess = () => resolve();
             addRequest.onerror = () => reject(addRequest.error);
@@ -82,12 +96,26 @@ export async function loadProjects(): Promise<Project[]> {
 
 /**
  * 保存单个项目
+ * 注意：同 saveProjects，需要移除 File 对象以兼容 Safari
  */
 export async function saveProject(project: Project): Promise<void> {
     const db = await initDB();
     const transaction = db.transaction([PROJECTS_STORE], 'readwrite');
     const store = transaction.objectStore(PROJECTS_STORE);
-    const request = store.put(project);
+
+    // 深拷贝并移除不可序列化的 File 对象
+    const serializableProject = {
+        ...project,
+        files: project.files.map(file => ({
+            ...file,
+            data: file.data ? {
+                ...file.data,
+                originalFile: undefined,
+            } : file.data,
+        })),
+    };
+
+    const request = store.put(serializableProject);
 
     await new Promise<void>((resolve, reject) => {
         request.onsuccess = () => resolve();
