@@ -9,6 +9,7 @@ import { LeftSidebar } from './components/layout/LeftSidebar';
 import { PromptLibrary } from './components/prompt/PromptLibrary';
 import { AIWorkshopTools } from './components/workshop/AIWorkshopTools';
 import { FeatureFlags } from '@/utils/featureFlags'; // Feature Flag
+import { isFeatureEnabled } from '@/config/featureFlags'; // 邀请码门槛检查
 import { Project } from './utils/projectUtils';
 import { PanelRight, PanelLeft } from 'lucide-react';
 import { ExplorationFlow } from './components/exploration/ExplorationFlow';
@@ -57,7 +58,15 @@ function AppContent() {
             } else if (pathname === '/welcome') {
                 setActiveView('welcome');
             } else if (pathname === '/workbench') {
-                setActiveView('workbench'); // 工作台页面
+                // 邀请码门槛检查：未授权用户重定向到首页
+                const needsInviteCode = isFeatureEnabled('ENABLE_INVITE_CODE_GATE');
+                const userHasCode = localStorage.getItem('liulix_invite_code') !== null;
+                if (needsInviteCode && !userHasCode) {
+                    window.history.replaceState({}, '', '/');
+                    setActiveView('welcome');
+                } else {
+                    setActiveView('workbench');
+                }
             } else if (pathname === '/design') {
                 setActiveView('design'); // Design System
             } else if (pathname.startsWith('/whitepaper')) {
