@@ -3,7 +3,7 @@
     "framework": null,
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
-    "cleanUrls": true,
+    "cleanUrls": false,
     "trailingSlash": false,
     "functions": {
         "api/**/*.js": {
