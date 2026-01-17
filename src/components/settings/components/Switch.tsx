@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import '../SettingsPage.css';
 
 interface SwitchProps {
@@ -10,7 +11,7 @@ const Switch = ({ checked, onChange, id }: SwitchProps) => {
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        console.log('[Switch] Clicked, toggling to:', !checked);
+        logger.debug('UI', 'Switch clicked, toggling', { data: { to: !checked } });
         onChange(!checked);
     };
 

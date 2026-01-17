@@ -48,22 +48,6 @@ export const AILoading: React.FC<AILoadingProps> = ({ visible, message }) => {
 
     return (
         <div className="ai-loading-container">
-            <svg
-                viewBox="0 0 100 100"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="ai-loading-icon"
-                style={{ width: '32px', height: '32px' }}
-            >
-                <path d="M50 15L85 80H15L50 15Z" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
-                <path d="M50 15L50 80" stroke="currentColor" strokeWidth="4" strokeLinecap="round" opacity="0.4" />
-                <path d="M50 45L85 80" stroke="currentColor" strokeWidth="4" strokeLinecap="round" opacity="0.4" />
-                <path d="M50 45L15 80" stroke="currentColor" strokeWidth="4" strokeLinecap="round" opacity="0.4" />
-                <path d="M-10 55L42 55" stroke="currentColor" strokeWidth="4" strokeLinecap="round" opacity="0.6" />
-                <path d="M58 55L110 40" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.5" />
-                <path d="M58 55L110 55" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.5" />
-                <path d="M58 55L110 70" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.5" />
-            </svg>
             <div className="ai-loading-text">
                 {displayMessage}
             </div>

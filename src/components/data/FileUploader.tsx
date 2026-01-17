@@ -1,6 +1,7 @@
 import { useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
 import { useI18n } from '@contexts/I18nContext';
+import { logger } from '@/utils/logger';
 import { AlertCircle, X } from 'lucide-react';
 import { parseFile, ParsedFileData } from '@utils/fileParser';
 import { formatFileSize, formatLargeNumber } from '@utils/formatters';
@@ -53,18 +54,19 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
         const needsInviteCode = isFeatureEnabled('ENABLE_INVITE_CODE_GATE');
         const userHasCode = hasInviteCode();
 
-        console.log('[FileUploader] checkInviteCodeGate Debug:', {
+        // console.log('[FileUploader] checkInviteCodeGate Debug:', { ... });
+        logger.debug('文件管理', 'checkInviteCodeGate Debug', {
             needsInviteCode,
             userHasCode,
             willBlock: needsInviteCode && !userHasCode
         });
 
         if (needsInviteCode && !userHasCode) {
-            console.log('[FileUploader] Blocking: User needs invite code');
+            logger.log('文件管理', 'Blocking: User needs invite code');
             setShowInviteModal(true);
             return false; // 拦截操作
         }
-        console.log('[FileUploader] Allowing: No invite code needed or user has code');
+        logger.debug('文件管理', 'Allowing: No invite code needed or user has code');
         return true; // 允许继续
     };
 

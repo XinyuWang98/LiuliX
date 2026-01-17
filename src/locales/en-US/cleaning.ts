@@ -126,6 +126,7 @@ export const cleaning = {
     allApplied: 'All suggestions applied, data updated.',
     serviceUnavailable: 'AI service temporarily unavailable, please try again later.',
     aiProgressThink: 'AI is thinking about data features...',
+    aiProgressRouter: 'Generating Router suggestions...',
     aiProgressAnalyzing: 'Deeply analyzing data patterns...',
     aiProgressGenerating: 'Building cleaning suggestions...',
     aiProgressValidating: 'Validating SQL safety...',

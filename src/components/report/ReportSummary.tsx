@@ -34,7 +34,7 @@ export function ReportSummary() {
 
         const opt: any = { // 类型断言
             margin: 10,
-            filename: `DataPrism_报告_${new Date().toISOString().split('T')[0]}.pdf`,
+            filename: `LiuliX_报告_${new Date().toISOString().split('T')[0]}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }

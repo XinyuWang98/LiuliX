@@ -33,7 +33,7 @@ function isModelRequest(url) {
  * 安装事件 - 预缓存静态资源
  */
 self.addEventListener('install', (event) => {
-    console.log('[SW] 安装中...');
+    // console.log('[SW] 安装中...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(STATIC_ASSETS))
@@ -45,13 +45,13 @@ self.addEventListener('install', (event) => {
  * 激活事件 - 清理旧缓存
  */
 self.addEventListener('activate', (event) => {
-    console.log('[SW] 激活中...');
+    // console.log('[SW] 激活中...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
                     if (cacheName !== CACHE_NAME && cacheName !== MODEL_CACHE_NAME) {
-                        console.log('[SW] 删除旧缓存:', cacheName);
+                        // console.log('[SW] 删除旧缓存:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
@@ -109,7 +109,7 @@ self.addEventListener('fetch', (event) => {
             // 网络失败，使用缓存
             return caches.match(request).then(cachedResponse => {
                 if (cachedResponse) {
-                    console.log('[SW] 离线模式，使用缓存:', request.url);
+                    console.debug('[SW] 离线模式，使用缓存:', request.url);
                     return cachedResponse;
                 }
                 // 缓存也没有，返回离线页面或错误
@@ -130,7 +130,7 @@ self.addEventListener('message', (event) => {
                     cacheNames.map(cacheName => caches.delete(cacheName))
                 );
             }).then(() => {
-                console.log('[SW] 所有缓存已清除');
+                // console.log('[SW] 所有缓存已清除');
                 event.ports[0].postMessage({ success: true });
             })
         );

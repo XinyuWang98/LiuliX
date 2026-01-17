@@ -52,16 +52,39 @@ export async function saveProjects(projects: Project[]): Promise<void> {
                 ...file,
                 data: file.data ? {
                     ...file.data,
-                    originalFile: undefined, // 移除 File 对象
+                    // ✅ 明确保留关键数据（修复上下文丢失 #12）
+                    data: file.data.data,           // JSON 数组
+                    columns: file.data.columns,     // 列定义
+                    fileName: file.data.fileName,
+                    tableName: file.data.tableName,
+                    rowCount: file.data.rowCount,
+                    columnCount: file.data.columnCount,
+                    fileType: file.data.fileType,
+                    fileSize: file.data.fileSize,
+                    originalSize: file.data.originalSize,
+                    isSampled: file.data.isSampled,
+                    // ❌ 删除不可序列化对象
+                    originalFile: undefined,
+                    rawFile: undefined,
+                    file: undefined,
+                    rawContent: undefined, // 大字符串，节省空间
                 } : file.data,
             })),
         };
 
-        const addRequest = store.add(serializableProject);
-        await new Promise<void>((resolve, reject) => {
-            addRequest.onsuccess = () => resolve();
-            addRequest.onerror = () => reject(addRequest.error);
-        });
+        try {
+            const addRequest = store.add(serializableProject);
+            await new Promise<void>((resolve, reject) => {
+                addRequest.onsuccess = () => resolve();
+                addRequest.onerror = () => reject(addRequest.error);
+            });
+        } catch (error: any) {
+            if (error.name === 'QuotaExceededError') {
+                console.error('❌ IndexedDB 存储空间不足，请删除旧项目');
+                throw new Error('存储空间不足，请删除旧项目');
+            }
+            throw error;
+        }
     }
 
     db.close();
@@ -110,17 +133,40 @@ export async function saveProject(project: Project): Promise<void> {
             ...file,
             data: file.data ? {
                 ...file.data,
+                // ✅ 明确保留关键数据（修复上下文丢失 #12）
+                data: file.data.data,
+                columns: file.data.columns,
+                fileName: file.data.fileName,
+                tableName: file.data.tableName,
+                rowCount: file.data.rowCount,
+                columnCount: file.data.columnCount,
+                fileType: file.data.fileType,
+                fileSize: file.data.fileSize,
+                originalSize: file.data.originalSize,
+                isSampled: file.data.isSampled,
+                // ❌ 删除不可序列化对象
                 originalFile: undefined,
+                rawFile: undefined,
+                file: undefined,
+                rawContent: undefined,
             } : file.data,
         })),
     };
 
-    const request = store.put(serializableProject);
+    try {
+        const request = store.put(serializableProject);
 
-    await new Promise<void>((resolve, reject) => {
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-    });
+        await new Promise<void>((resolve, reject) => {
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    } catch (error: any) {
+        if (error.name === 'QuotaExceededError') {
+            console.error('❌ IndexedDB 存储空间不足，请删除旧项目');
+            throw new Error('存储空间不足，请删除旧项目');
+        }
+        throw error;
+    }
 
     db.close();
 }

@@ -151,7 +151,7 @@ export async function generateCleaningSuggestionsV2(
         // === Layer 2: Router模式（优先） ===
         if (finalConfig.enableRouter) {
             logger.log('AI清洗', 'Layer 2: Router模式');
-            onProgress?.('Router模式生成中...');
+            onProgress?.(t('cleaning.aiProgressRouter'));
 
             try {
                 const routerSuggestions = await executeRouterLayer(tableName, columns, stats);

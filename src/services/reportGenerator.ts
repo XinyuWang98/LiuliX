@@ -18,7 +18,7 @@ export async function generateInteractiveHTML(data: ReportData): Promise<string>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${data.title} - DataPrism分析报告</title>
+    <title>${data.title} - LiuliX分析报告</title>
     <style>
         ${getInlineStyles()}
     </style>
@@ -29,7 +29,7 @@ export async function generateInteractiveHTML(data: ReportData): Promise<string>
             <h1>${data.title}</h1>
             <div class="report-meta">
                 <span>生成时间：${new Date().toLocaleString('zh-CN')}</span>
-                <span>分析引擎：DataPrism v0.9.9</span>
+                <span>分析引擎：LiuliX v0.9.9</span>
             </div>
         </header>
 
@@ -38,7 +38,7 @@ export async function generateInteractiveHTML(data: ReportData): Promise<string>
         </main>
 
         <footer class="report-footer">
-            <p>本报告由 DataPrism 自动生成 | 数据100%真实，非AI幻觉</p>
+            <p>本报告由 LiuliX 自动生成 | 数据100%真实，非AI幻觉</p>
         </footer>
     </div>
 

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { UploadCloud, Lock, Shield, BrainCircuit } from 'lucide-react';
+import { logger } from '@/utils/logger';
 import { FileUploader, FileUploaderRef } from '@/components/data/FileUploader';
 import { Logo } from '@/components/common/Logo/Logo';
 import { TrustBadges } from './TrustBadges';
@@ -28,8 +29,8 @@ export function LandingPage({ onFilesUploaded }: LandingPageProps) {
     const [feedbackRef, feedbackVisible] = useScrollAnimation(0.1);
 
     const handleStartClick = () => {
-        console.log('[LandingPage] Upload button clicked');
-        console.log('[LandingPage] uploaderRef.current:', uploaderRef.current);
+        logger.log('UI', 'Upload button clicked');
+        logger.debug('UI', 'uploaderRef.current:', { ref: uploaderRef.current });
         uploaderRef.current?.triggerUpload();
     };
 

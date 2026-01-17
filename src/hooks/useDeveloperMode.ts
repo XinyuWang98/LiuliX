@@ -37,7 +37,7 @@ export function useDeveloperMode() {
         }
 
         // 联动日志捕获
-        console.log('[useDeveloperMode] Toggling developer mode:', enabled);
+        logger.log('用户设置', 'Toggling developer mode', { data: { enabled } });
         if (enabled) {
             logCapture.start();
             logger.enableCapture();

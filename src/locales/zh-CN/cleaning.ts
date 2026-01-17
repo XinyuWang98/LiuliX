@@ -125,6 +125,7 @@ export const cleaning = {
     serviceUnavailable: 'AI 服务暂时不可用，请稍后重试。',
     // AI Loading States
     aiProgressThink: 'AI 正在思考数据特征...',
+    aiProgressRouter: 'Router模式生成中...',
     aiProgressAnalyzing: '正在深度分析数据模式...',
     aiProgressGenerating: '正在构建清洗建议...',
     aiProgressValidating: '正在验证 SQL 安全性...',

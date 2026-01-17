@@ -4,6 +4,7 @@
  */
 
 import { promptRegistry } from '@/services/promptRegistry';
+import { logger } from '@/utils/logger';
 import type { PyodideLibraryConfig } from '@/types/analysisPackage';
 
 /**
@@ -27,12 +28,14 @@ export function generateLibraryConfigs(): PyodideLibraryConfig[] {
     const libraryMap = new Map<string, Set<string>>(); // libName -> Set<promptId>
 
     // 调试日志
-    console.log('[libraryConfig] 总Prompt数:', allPrompts.length);
-    console.log('[libraryConfig] 前3个Prompt:', allPrompts.slice(0, 3).map(p => ({
-        id: p.id,
-        title: p.title,
-        requiredPackages: p.requiredPackages
-    })));
+    logger.debug('Python库配置', '总Prompt数:', { count: allPrompts.length });
+    logger.debug('Python库配置', '前3个Prompt:', {
+        prompts: allPrompts.slice(0, 3).map(p => ({
+            id: p.id,
+            title: p.title,
+            requiredPackages: p.requiredPackages
+        }))
+    });
 
     // 汇总所有Prompt的requiredPackages
     for (const prompt of allPrompts) {
@@ -72,8 +75,8 @@ export function generateLibraryConfigs(): PyodideLibraryConfig[] {
     });
 
     // 调试日志
-    console.log('[libraryConfig] 生成的库配置数:', sorted.length);
-    console.log('[libraryConfig] 库列表:', sorted.map(c => c.name));
+    logger.debug('Python库配置', '生成的库配置数:', { count: sorted.length });
+    logger.debug('Python库配置', '库列表:', { names: sorted.map(c => c.name) });
 
     return sorted;
 }

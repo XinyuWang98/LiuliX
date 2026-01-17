@@ -26,7 +26,7 @@ function downloadFile(content: string, filename: string, mimeType: string) {
  */
 export async function exportHTMLReport(data: ReportData, filename?: string) {
     const html = await generateInteractiveHTML(data);
-    const finalFilename = filename || `DataPrism报告_${Date.now()}.html`;
+    const finalFilename = filename || `LiuliX报告_${Date.now()}.html`;
     downloadFile(html, finalFilename, 'text/html;charset=utf-8');
 }
 
@@ -48,7 +48,7 @@ export function exportMarkdownReport(data: ReportData, filename?: string) {
         }
     });
 
-    const finalFilename = filename || `DataPrism报告_${Date.now()}.md`;
+    const finalFilename = filename || `LiuliX报告_${Date.now()}.md`;
     downloadFile(markdown, finalFilename, 'text/markdown;charset=utf-8');
 }
 
