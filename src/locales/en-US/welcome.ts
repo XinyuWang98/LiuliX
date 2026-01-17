@@ -9,7 +9,7 @@ export default {
         uploadButton: 'Upload Your First File', // CTA button text
         trustBadges: {
             local: 'Local Execution',
-            offline: 'Local Execution',
+            offline: 'No Privacy Compromise',
             desktop: 'Desktop Optimized',
         },
     },
