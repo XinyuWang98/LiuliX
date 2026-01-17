@@ -8,6 +8,8 @@
  * - 生产环境仅保留error和warn
  */
 
+import { logCapture } from '@/utils/logCapture';
+
 export type ServiceName =
     | 'AI清洗'
     | 'AI洞察'
@@ -49,6 +51,7 @@ export interface LogOptions {
 class Logger {
     private isDev: boolean;
     private explicitlyDisabled: boolean = false;
+    private captureEnabled: boolean = false; // 日志捕获开关
 
     constructor() {
         // 1. 默认基于环境
@@ -100,6 +103,22 @@ class Logger {
     }
 
     /**
+     * 启用日志捕获（由 useDeveloperMode 调用）
+     */
+    enableCapture() {
+        this.captureEnabled = true;
+        // 记录会话开始时的系统状态快照
+        logCapture.addSystemSnapshot('会话开始');
+    }
+
+    /**
+     * 禁用日志捕获
+     */
+    disableCapture() {
+        this.captureEnabled = false;
+    }
+
+    /**
      * 获取当前时间戳
      */
     private getTimestamp(): string {
@@ -131,6 +150,12 @@ class Logger {
      * 普通日志(仅开发环境)
      */
     log(service: ServiceName, message: string, options?: LogOptions) {
+        // ✅ 优先捕获（无论是否 Dev 模式）
+        if (this.captureEnabled) {
+            logCapture.addLog('log', service, message, options?.data);
+        }
+
+        // 再决定是否输出到控制台
         if (!this.isDev) return;
         const formatted = this.format(service, message, options);
         if (options?.data !== undefined) {
@@ -163,12 +188,19 @@ class Logger {
     groupEnd() {
         if (!this.isDev) return;
         console.groupEnd();
+        // group 和 groupEnd 不需要转发到 logCapture
     }
 
     /**
      * 警告日志(生产环境保留，除非显式禁用)
      */
     warn(service: ServiceName, message: string, data?: any) {
+        // ✅ 优先捕获（无论是否 Dev 模式）
+        if (this.captureEnabled) {
+            logCapture.addLog('warn', service, message, data);
+        }
+
+        // 再决定是否输出到控制台
         if (this.explicitlyDisabled) return; // 显式禁用时隐藏
         const timestamp = this.getTimestamp();
         const formatted = `[${timestamp}] [${service}] ${message}`;
@@ -183,6 +215,12 @@ class Logger {
      * 错误日志(生产环境保留，除非显式禁用)
      */
     error(service: ServiceName, message: string, error?: any) {
+        // ✅ 优先捕获（无论是否 Dev 模式）
+        if (this.captureEnabled) {
+            logCapture.addLog('error', service, message, error);
+        }
+
+        // 再决定是否输出到控制台
         if (this.explicitlyDisabled) return; // 显式禁用时隐藏
         const timestamp = this.getTimestamp();
         const formatted = `[${timestamp}] [${service}] ${message}`;

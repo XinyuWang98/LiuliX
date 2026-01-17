@@ -199,7 +199,7 @@ export const askAI = async (
 
             return { content, model, usage };
         } catch (err: any) {
-            console.warn(`[AI服务] ⚠️ ${model} 调用失败:`, err.message);
+            logger.warn('AI服务', `${model} 调用失败`, err.message);
             continue;
         }
     }
@@ -265,7 +265,7 @@ export const askAICleaning = async (prompt: string) => {
                 localStorage.setItem('free_trial_usage', usageHeader);
                 window.dispatchEvent(new Event('free-trial-update'));
             } catch (e) {
-                console.error('Failed to parse usage header', e);
+                logger.error('AI服务', 'Failed to parse usage header', e);
             }
         } else if (res.usage && res.usage.total !== undefined) {
             // Fallback to body usage if valid (check usage.total to assume it's our structure, not OpenAI's token usage)
@@ -291,11 +291,14 @@ export const askAICleaning = async (prompt: string) => {
 
         return { content, model: 'deepseek-cleaning' };
     } catch (err: any) {
-        // ✅ 特殊处理429错误
-        if (err.message.includes('免费试用') || err.message.includes('邀请码')) {
-            throw err; // 直接抛出，让上层显示友好提示
+        // ✅ 检测429错误或配额相关错误
+        if (err.name === 'HTTPError' && err.response?.status === 429) {
+            throw new Error('QUOTA_EXHAUSTED');
         }
-        console.warn('[AI服务-清洗] ⚠️ 调用失败:', err.message);
+        if (err.message.includes('免费试用') || err.message.includes('邀请码') || err.message.includes('配额')) {
+            throw new Error('QUOTA_EXHAUSTED');
+        }
+        logger.warn('AI清洗', '调用失败', err.message);
         throw new Error('清洗建议 AI 调用失败');
     }
 };
@@ -337,7 +340,7 @@ export const askAIInsight = async (prompt: string) => {
                 localStorage.setItem('free_trial_usage', usageHeader);
                 window.dispatchEvent(new Event('free-trial-update'));
             } catch (e) {
-                console.error('Failed to parse usage header', e);
+                logger.error('AI服务', 'Failed to parse usage header', e);
             }
         } else if (res.usage && res.usage.total !== undefined) {
             // Fallback
@@ -350,11 +353,14 @@ export const askAIInsight = async (prompt: string) => {
 
         return { content, model: 'deepseek-insight' };
     } catch (err: any) {
-        // ✅ 特殊处理429错误
-        if (err.message.includes('免费试用') || err.message.includes('邀请码')) {
-            throw err; // 直接抛出，让上层显示友好提示
+        // ✅ 检测429错误或配额相关错误
+        if (err.name === 'HTTPError' && err.response?.status === 429) {
+            throw new Error('QUOTA_EXHAUSTED');
         }
-        console.warn('[AI服务-洞察] ⚠️ 调用失败:', err.message);
+        if (err.message.includes('免费试用') || err.message.includes('邀请码') || err.message.includes('配额')) {
+            throw new Error('QUOTA_EXHAUSTED');
+        }
+        logger.warn('AI洞察', '调用失败', err.message);
         throw new Error('洞察建议 AI 调用失败');
     }
 };

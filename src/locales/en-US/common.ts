@@ -39,6 +39,12 @@ export const common = {
     low: 'Low',
     noData: 'No Data',
     expand: 'Expand',
+    backToHome: 'Back to Home',
+    // Invite Code Quota Exhausted
+    quotaExhausted: 'Invite Code Quota Exhausted',
+    quotaExhaustedMessage: 'Your invite code quota has been exhausted. You can:\n• Join Discord to get a new invite code\n• Wait for tomorrow\'s quota refresh',
+    goToDiscord: 'Go to LiuliX Community Discord',
+    waitForRefresh: 'Wait for Tomorrow\'s Refresh',
 };
 
 export const data = {

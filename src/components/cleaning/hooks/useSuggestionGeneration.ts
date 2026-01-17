@@ -17,9 +17,6 @@ import {
     isCacheFresh
 } from '../utils/suggestionFilters';
 
-// 调试日志：检查 suggestionFilters 导入
-console.log('[DEBUG] useSuggestionGeneration imports:', { mergeSuggestions, filterDuplicateAISuggestions });
-
 /**
  * 建议生成Hook
  * 职责：状态管理、触发生成、缓存管理
@@ -213,7 +210,7 @@ export function useSuggestionGeneration(
                                 }
                             } catch (err: any) {
                                 if (err.name !== 'AbortError') {
-                                    console.warn('[建议生成] AI生成失败:', err);
+                                    logger.warn('数据清洗', 'AI生成失败', err);
                                 }
                             } finally {
                                 setLoading(false);
@@ -269,7 +266,7 @@ export function useSuggestionGeneration(
         setLoading(true);
         setAiProgressMsg(t('cleaning.processing'));
         setError(null);
-        console.log('[建议生成] 手动刷新 AI 建议...');
+        logger.log('数据清洗', '手动刷新 AI 建议');
 
         try {
             // 创建AbortController（手动刷新也支持取消）
@@ -284,7 +281,7 @@ export function useSuggestionGeneration(
             );
 
             if (aiResults.length > 0) {
-                console.log('[建议生成] 刷新完成，获得', aiResults.length, '条AI建议');
+                logger.log('数据清洗', '刷新完成', { count: aiResults.length });
                 setAiGenerated(true);
 
                 setSuggestions(prev => {
@@ -293,7 +290,7 @@ export function useSuggestionGeneration(
                 });
             }
         } catch (err: any) {
-            console.warn('[建议生成] 刷新失败:', err);
+            logger.warn('数据清洗', '刷新失败', err);
             setError(err.message || 'AI Generation Failed');
         } finally {
             setLoading(false);

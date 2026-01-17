@@ -43,7 +43,9 @@ plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示
 
         ctx.postMessage({ type: 'READY' });
     } catch (error) {
-        console.error("Pyodide loading failed:", error);
+        if (import.meta.env.DEV) {
+            console.error("Pyodide loading failed:", error);
+        }
         ctx.postMessage({ type: 'ERROR', error: String(error) });
     }
 }
@@ -99,11 +101,15 @@ _stdout_capture.getvalue()
                         result = JSON.parse(capturedOutput.trim());
                         // stdout解析为JSON成功
                     } catch (e) {
-                        console.warn('[Worker] stdout 不是 JSON，作为文本返回');
+                        if (import.meta.env.DEV) {
+                            console.warn('[Worker] stdout 不是 JSON，作为文本返回');
+                        }
                         result = { textOutput: capturedOutput };
                     }
                 } else {
-                    console.warn('[Worker] stdout 为空，无可用输出');
+                    if (import.meta.env.DEV) {
+                        console.warn('[Worker] stdout 为空，无可用输出');
+                    }
                     result = { error: 'No output captured from Python code' };
                 }
 
@@ -296,7 +302,9 @@ json.dumps(replace_nan(preview))
                 // 1. Fetch字体文件
                 const response = await fetch(url);
                 if (!response.ok) {
-                    console.warn(`Font fetch failed: ${url} (${response.status})`);
+                    if (import.meta.env.DEV) {
+                        console.warn(`Font fetch failed: ${url} (${response.status})`);
+                    }
                     ctx.postMessage({ id, type: 'SUCCESS', result: 'Font fetch failed (skipped)' });
                     return;
                 }
@@ -311,7 +319,9 @@ json.dumps(replace_nan(preview))
                 );
 
                 if (!isFont) {
-                    console.warn(`Invalid font file signature at ${url}. Likely a 404 HTML page.`);
+                    if (import.meta.env.DEV) {
+                        console.warn(`Invalid font file signature at ${url}. Likely a 404 HTML page.`);
+                    }
                     // 不抛出错误，而是作为警告处理，避免打断整体加载流程
                     ctx.postMessage({ id, type: 'SUCCESS', result: 'Invalid font file (skipped)' });
                     return;
@@ -348,7 +358,9 @@ else:
                 await pyodide.runPythonAsync(pythonCode);
                 ctx.postMessage({ id, type: 'SUCCESS', result: 'Font loaded' });
             } catch (err) {
-                console.error("Font loading error:", err);
+                if (import.meta.env.DEV) {
+                    console.error("Font loading error:", err);
+                }
                 ctx.postMessage({ id, type: 'ERROR', error: String(err) });
             }
         } else if (type === 'LOAD_PACKAGES') {
@@ -390,13 +402,17 @@ else:
                 }
                 ctx.postMessage({ id, type: 'SUCCESS', result: 'Packages loaded' });
             } catch (err) {
-                console.error("Package loading error:", err);
+                if (import.meta.env.DEV) {
+                    console.error("Package loading error:", err);
+                }
 
                 // 如果 micropip 失败，可能是网络问题或包名错误
                 // 尝试回退到 pyodide.loadPackage (仅针对内置包) 作为最后的尝试
                 try {
                     if (packages && packages.length > 0) {
-                        console.warn("Micropip failed, trying pyodide.loadPackage as fallback...");
+                        if (import.meta.env.DEV) {
+                            console.warn("Micropip failed, trying pyodide.loadPackage as fallback...");
+                        }
                         await pyodide.loadPackage(packages);
                     }
                     ctx.postMessage({ id, type: 'SUCCESS', result: 'Packages loaded (Fallback)' });

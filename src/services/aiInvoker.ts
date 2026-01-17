@@ -38,7 +38,7 @@ export async function checkGPUCapability(): Promise<GPUCheckResult> {
     try {
         // 检查 WebGPU 支持
         if (!('gpu' in navigator)) {
-            console.warn('[GPU检测] WebGPU 不支持，建议使用云端 API');
+            logger.warn('AI服务', 'WebGPU 不支持，建议使用云端 API');
             return {
                 hasGPU: false,
                 hasEnoughMemory: false,
@@ -75,7 +75,7 @@ export async function checkGPUCapability(): Promise<GPUCheckResult> {
             };
         }
 
-        console.log(`[GPU检测] GPU 检测通过 (${bufferLimitMB.toFixed(0)}MB)`);
+        logger.log('AI服务', `GPU 检测通过 (${bufferLimitMB.toFixed(0)}MB)`);
         return {
             hasGPU: true,
             hasEnoughMemory: true,
@@ -84,7 +84,7 @@ export async function checkGPUCapability(): Promise<GPUCheckResult> {
         };
 
     } catch (err) {
-        console.warn('[GPU检测] GPU 检测失败', err);
+        logger.warn('AI服务', 'GPU 检测失败', err);
         return {
             hasGPU: false,
             hasEnoughMemory: false,
@@ -108,36 +108,36 @@ export async function invokeAI(prompt: string, options: AIInvokeOptions): Promis
     // 只有当 Feature Flag 开启 且 用户在设置中开启时，才认为启用了本地模型
     const useLocalModel = isLocalModelFeatureEnabled && userPrefersLocal;
 
-    console.group(`[AI调用] ${type === 'cleaning' ? '清洗建议' : '洞察分析'}`);
+    logger.group('AI服务', `${type === 'cleaning' ? '清洗建议' : '洞察分析'}`);
 
     try {
         // 1. 如果强制使用 API 或者用户关闭了本地模型
         if (forceAPI || !useLocalModel) {
-            console.log('[AI调用] 使用云端 API');
+            logger.log('AI服务', '使用云端 API');
             const apiResult = await callCloudAPI(prompt, type);
             return apiResult;
         }
 
         // 2. 尝试使用本地模型
-        console.log('[AI调用] 尝试本地模型 (Ollama)');
+        logger.log('AI服务', '尝试本地模型 (Ollama)');
 
         // 检查模型状态
         const status = localLLMService.getStatus();
 
         // 如果模型未加载，尝试加载
         if (!status.isReady && !status.isInitializing) {
-            console.log('[AI调用] 本地模型未加载，启动加载流程');
+            logger.log('AI服务', '本地模型未加载，启动加载流程');
             try {
                 await localLLMService.reload(SUPPORTED_MODELS.QWEN_7B);
             } catch (loadError) {
-                console.warn('[AI调用] 本地模型加载失败，降级到 API', loadError);
+                logger.warn('AI服务', '本地模型加载失败，降级到 API', loadError);
                 return await callCloudAPI(prompt, type);
             }
         }
 
         // 如果正在加载，等待最多 30 秒
         if (status.isInitializing) {
-            console.log('[AI调用] 等待本地模型加载完成（最多30秒）');
+            logger.log('AI服务', '等待本地模型加载完成（最多30秒）');
             const maxWaitTime = 30000;
             const checkInterval = 1000;
             const startTime = Date.now();
@@ -145,7 +145,7 @@ export async function invokeAI(prompt: string, options: AIInvokeOptions): Promis
             while (Date.now() - startTime < maxWaitTime) {
                 const currentStatus = localLLMService.getStatus();
                 if (currentStatus.isReady) {
-                    console.log('[AI调用] 本地模型加载完成');
+                    logger.log('AI服务', '本地模型加载完成');
                     break;
                 }
                 // 不检查 error 属性（该属性不存在于 status 类型中）
@@ -155,7 +155,7 @@ export async function invokeAI(prompt: string, options: AIInvokeOptions): Promis
             // 超时检查
             const finalStatus = localLLMService.getStatus();
             if (!finalStatus.isReady) {
-                console.warn('[AI调用] 本地模型加载超时（30秒），降级到 API');
+                logger.warn('AI服务', '本地模型加载超时（30秒），降级到 API');
                 return await callCloudAPI(prompt, type);
             }
         }
@@ -164,18 +164,18 @@ export async function invokeAI(prompt: string, options: AIInvokeOptions): Promis
         const finalStatus = localLLMService.getStatus();
         if (finalStatus.isReady) {
             try {
-                console.log('[AI调用] 开始本地模型推理');
+                logger.log('AI服务', '开始本地模型推理');
                 const content = await localLLMService.generateInsight(prompt, priority);
-                console.log(`[AI调用] 本地模型成功 (${content.length} 字符)`);
+                logger.log('AI服务', `本地模型成功 (${content.length} 字符)`);
                 return content;
             } catch (genError) {
-                console.warn('[AI调用] 本地模型推理失败，降级到 API', genError);
+                logger.warn('AI服务', '本地模型推理失败，降级到 API', genError);
                 return await callCloudAPI(prompt, type);
             }
         }
 
         // 4. 兜底：降级到 API
-        console.warn('[AI调用] 本地模型不可用，降级到 API');
+        logger.warn('AI服务', '本地模型不可用，降级到 API');
         return await callCloudAPI(prompt, type);
 
     } finally {

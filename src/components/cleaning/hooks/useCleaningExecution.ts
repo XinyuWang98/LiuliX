@@ -54,7 +54,7 @@ export function useCleaningExecution(
                 .sort((a: any, b: any) => String(b.table_name).localeCompare(String(a.table_name)))[0];
 
             if (!dataTable) {
-                console.error('❌ 未找到有效的工作表 (_working)');
+                logger.error('清洗执行', '未找到有效的工作表 (_working)');
                 throw new Error('未找到工作表');
             }
 
@@ -62,7 +62,7 @@ export function useCleaningExecution(
 
             // ✅ 防御性验证：二次确认表名不包含 _dryrun_
             if (tableName.includes('_dryrun_')) {
-                console.error('❌ 严重错误：选中了临时表！', tableName);
+                logger.error('清洗执行', '严重错误：选中了临时表', tableName);
                 throw new Error('内部错误：误选临时表');
             }
             logger.log('清洗执行', `选中工作表: ${tableName}`);
@@ -215,7 +215,7 @@ export function useCleaningExecution(
 
                     onProjectUpdate(updatedProject);
 
-                    console.log('✅ 数据清洗完成，洞察缓存已失效，等待后台刷新');
+                    logger.log('清洗执行', '数据清洗完成，洞察缓存已失效');
                 } catch (err) {
                     // 元数据更新失败不影响主流程
                     logger.warn('清洗执行', '元数据更新失败', { error: err });
@@ -269,7 +269,7 @@ export function useCleaningExecution(
         setShowResetConfirm(false);
 
         if (!activeFile) {
-            console.warn('⚠️ 没有活动文件');
+            logger.warn('清洗执行', '没有活动文件');
             return;
         }
 
@@ -293,7 +293,7 @@ export function useCleaningExecution(
                 if (workingTable) {
                     tableName = String(workingTable.table_name);
                 } else {
-                    console.error('❌ 无法找到有效的工作表');
+                    logger.error('清洗执行', '无法找到有效的工作表');
                     alert('无法重置：未找到工作表');
                     return;
                 }
@@ -301,11 +301,11 @@ export function useCleaningExecution(
 
             // ✅ 防御性验证：确认表名有效
             if (tableName.includes('_dryrun_')) {
-                console.error('❌ 严重错误：尝试重置临时表！', tableName);
+                logger.error('清洗执行', '严重错误：尝试重置临时表', tableName);
                 alert('内部错误：无效的表名');
                 return;
             }
-            console.log(`[清洗执行] ✅ 重置目标表: ${tableName}`);
+            logger.log('清洗执行', `重置目标表: ${tableName}`);
 
             // 调用重置方法
             const success = await engine.resetWorkingTable(tableName);
@@ -343,7 +343,7 @@ export function useCleaningExecution(
             }
 
         } catch (err) {
-            console.error('❌ 重置失败:', err);
+            logger.error('清洗执行', '重置失败', err);
             alert(`重置失败: ${err instanceof Error ? err.message : String(err)}`);
         } finally {
             setLoading(false);

@@ -3,14 +3,23 @@
  * 用于测试时自动收集所有日志，方便问题诊断
  */
 
-import { logger } from './logger';
-
 interface LogEntry {
     timestamp: number;
-    level: 'log' | 'warn' | 'error' | 'group' | 'groupEnd';
+    level: 'log' | 'warn' | 'error' | 'group' | 'groupEnd' | 'user'; // 添加 'user' 级别用于用户操作
     service: string;
     message: string;
     data?: any;
+    error?: {
+        message: string;
+        stack?: string;
+        name?: string;
+    };
+    systemState?: {
+        memory?: string;
+        browser?: string;
+        activeProjects?: number;
+        featureFlags?: Record<string, boolean>;
+    };
 }
 
 class LogCapture {
@@ -29,7 +38,14 @@ class LogCapture {
         this.sessionStartTime = Date.now();
         this.logs = [];
 
-        logger.log('日志捕获', '开始捕捉日志');
+        // 使用 try-catch 兼容 Node.js 环境
+        try {
+            if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
+                console.log('[LogCapture] 开始捕捉日志');
+            }
+        } catch {
+            // Node.js 环境忽略
+        }
     }
 
     /**
@@ -39,7 +55,13 @@ class LogCapture {
         if (!this.isCapturing) return;
 
         this.isCapturing = false;
-        logger.log('日志捕获', '停止捕捉日志', { data: { totalLogs: this.logs.length } });
+        try {
+            if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
+                console.log('[LogCapture] 停止捕捉日志', { totalLogs: this.logs.length });
+            }
+        } catch {
+            // Node.js 环境忽略
+        }
     }
 
     /**
@@ -56,12 +78,98 @@ class LogCapture {
             data
         };
 
+        // 如果 data 是 Error 对象，提取错误信息
+        if (data instanceof Error) {
+            entry.error = {
+                message: data.message,
+                stack: data.stack,
+                name: data.name
+            };
+            entry.data = undefined; // 避免重复存储
+        }
+
         this.logs.push(entry);
 
         // 超过最大数量时删除最早的日志
         if (this.logs.length > this.maxLogs) {
             this.logs.shift();
         }
+    }
+
+    /**
+     * 添加用户操作日志（便捷方法）
+     */
+    addUserAction(action: string, details?: any) {
+        this.addLog('user', '用户操作', action, details);
+    }
+
+    /**
+     * 添加系统状态快照
+     */
+    addSystemSnapshot(context: string) {
+        if (!this.isCapturing) return;
+
+        const snapshot: LogEntry = {
+            timestamp: Date.now(),
+            level: 'log',
+            service: '系统状态',
+            message: context,
+            systemState: {
+                memory: this.getMemoryInfo(),
+                browser: navigator.userAgent,
+                activeProjects: this.getActiveProjectsCount(),
+                featureFlags: this.getFeatureFlags()
+            }
+        };
+
+        this.logs.push(snapshot);
+    }
+
+    /**
+     * 获取内存信息
+     */
+    private getMemoryInfo(): string {
+        if ('deviceMemory' in navigator) {
+            return `${(navigator as any).deviceMemory}GB`;
+        }
+        return 'Unknown';
+    }
+
+    /**
+     * 获取活动项目数量
+     */
+    private getActiveProjectsCount(): number {
+        try {
+            const projects = localStorage.getItem('liulix_projects');
+            return projects ? JSON.parse(projects).length : 0;
+        } catch {
+            return 0;
+        }
+    }
+
+    /**
+     * 获取 Feature Flags 状态
+     */
+    private getFeatureFlags(): Record<string, boolean> {
+        try {
+            const flags = localStorage.getItem('liulix_feature_flags');
+            return flags ? JSON.parse(flags) : {};
+        } catch {
+            return {};
+        }
+    }
+
+    /**
+     * 安全地序列化对象（处理 BigInt）
+     */
+    private safeStringify(obj: any, space?: number): string {
+        return JSON.stringify(obj, (_key, value) => {
+            // 将 BigInt 转换为字符串
+            if (typeof value === 'bigint') {
+                return value.toString();
+            }
+            return value;
+        }, space);
     }
 
     /**
@@ -83,7 +191,7 @@ class LogCapture {
             }))
         };
 
-        return JSON.stringify(exportData, null, 2);
+        return this.safeStringify(exportData, 2);
     }
 
     /**
@@ -112,10 +220,33 @@ class LogCapture {
             lines.push('');
             lines.push(`**${log.message}**`);
 
+            // 显示错误堆栈
+            if (log.error) {
+                lines.push('');
+                lines.push('**错误详情**:');
+                lines.push('```');
+                lines.push(`${log.error.name || 'Error'}: ${log.error.message}`);
+                if (log.error.stack) {
+                    lines.push('');
+                    lines.push(log.error.stack);
+                }
+                lines.push('```');
+            }
+
+            // 显示数据
             if (log.data) {
                 lines.push('');
                 lines.push('```json');
-                lines.push(JSON.stringify(log.data, null, 2));
+                lines.push(this.safeStringify(log.data, 2));
+                lines.push('```');
+            }
+
+            // 显示系统状态快照
+            if (log.systemState) {
+                lines.push('');
+                lines.push('**系统状态**:');
+                lines.push('```json');
+                lines.push(this.safeStringify(log.systemState, 2));
                 lines.push('```');
             }
 
@@ -141,7 +272,13 @@ class LogCapture {
         a.click();
 
         URL.revokeObjectURL(url);
-        logger.log('日志捕获', '日志已下载', { data: { filename } });
+        try {
+            if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
+                console.log('[LogCapture] 日志已下载', { filename });
+            }
+        } catch {
+            // Node.js 环境忽略
+        }
     }
 
     /**
@@ -153,7 +290,8 @@ class LogCapture {
             warn: '⚠️',
             error: '❌',
             group: '📂',
-            groupEnd: '📁'
+            groupEnd: '📁',
+            user: '🖱️'
         };
         return icons[level] || '📝';
     }
@@ -181,7 +319,13 @@ class LogCapture {
      */
     clear() {
         this.logs = [];
-        logger.log('日志捕获', '日志已清空');
+        try {
+            if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
+                console.log('[LogCapture] 日志已清空');
+            }
+        } catch {
+            // Node.js 环境忽略
+        }
     }
 }
 
@@ -189,7 +333,11 @@ class LogCapture {
 export const logCapture = new LogCapture();
 
 // 开发环境自动暴露到window
-if (import.meta.env.DEV) {
-    (window as any).logCapture = logCapture;
-    logger.log('日志捕获', '使用方法：\n  logCapture.start()     - 开始捕捉\n  logCapture.stop()      - 停止捕捉\n  logCapture.download()  - 下载日志\n  logCapture.getStats()  - 查看统计');
+try {
+    if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
+        (window as any).logCapture = logCapture;
+        console.log('[LogCapture] 使用方法：\n  logCapture.start()     - 开始捕捉\n  logCapture.stop()      - 停止捕捉\n  logCapture.download()  - 下载日志\n  logCapture.getStats()  - 查看统计');
+    }
+} catch {
+    // Node.js 环境忽略
 }

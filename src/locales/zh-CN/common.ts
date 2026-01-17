@@ -41,6 +41,11 @@ export const common = {
     loadPandas: '正在加载 Pandas 数据分析库...',
     firstTimeTip: '💡 首次运行提示：正在配置本地分析引擎（约 20MB），这可能需要一点时间。下次启动将瞬间完成。',
     pageTitle: 'LiuliX - 数据探索平台',
+    // 邀请码配额耗尽提示
+    quotaExhausted: '邀请码配额已用完',
+    quotaExhaustedMessage: '您的邀请码配额已用完。您可以：\n• 去 Discord 社区获取新的邀请码\n• 等待明天配额自动刷新',
+    goToDiscord: '去 LiuliX Community Discord 反馈',
+    waitForRefresh: '等待明天邀请码刷新',
 };
 
 export const data = {

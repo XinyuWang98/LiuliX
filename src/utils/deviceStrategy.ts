@@ -1,5 +1,6 @@
 import { getBrowserMemory, getFileSizeLimit } from './resourceLimits';
 import { formatFileSize } from './formatters';
+import { logger } from '@/utils/logger';
 
 /**
  * 设备内存档位信息
@@ -72,10 +73,12 @@ export function getDeviceStrategyInfo(): DeviceStrategyInfo {
     const memoryGB = browserMemory / (1024 * 1024 * 1024);
 
     // 🐛 调试日志
-    console.log('[设备策略] 浏览器内存:', {
-        原始字节: browserMemory,
-        内存GB: memoryGB.toFixed(2),
-        档位计算: memoryGB >= 32 ? '极致' : memoryGB >= 24 ? '旗舰' : memoryGB >= 16 ? '高性能' : memoryGB >= 8 ? '主流' : memoryGB >= 4 ? '标准' : '低配'
+    logger.log('资源管理', '[设备策略] 浏览器内存:', {
+        data: {
+            原始字节: browserMemory,
+            内存GB: memoryGB.toFixed(2),
+            档位计算: memoryGB >= 32 ? '极致' : memoryGB >= 24 ? '旗舰' : memoryGB >= 16 ? '高性能' : memoryGB >= 8 ? '主流' : memoryGB >= 4 ? '标准' : '低配'
+        }
     });
 
     const memoryTier = getMemoryTier(memoryGB);
@@ -84,7 +87,9 @@ export function getDeviceStrategyInfo(): DeviceStrategyInfo {
     const maxConcurrency = calculateMaxConcurrency(memoryGB);
     const estimatedInferenceTime = getEstimatedInferenceTime(memoryTier);
 
-    console.log('[设备策略] 计算结果:', { memoryTier, maxRows, fileSizeLimit: formatFileSize(fileSizeLimitBytes) });
+    logger.log('资源管理', '[设备策略] 计算结果:', {
+        data: { memoryTier, maxRows, fileSizeLimit: formatFileSize(fileSizeLimitBytes) }
+    });
 
     return {
         memoryTier,

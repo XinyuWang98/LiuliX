@@ -7,13 +7,21 @@ interface SwitchProps {
 }
 
 const Switch = ({ checked, onChange, id }: SwitchProps) => {
+    const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        console.log('[Switch] Clicked, toggling to:', !checked);
+        onChange(!checked);
+    };
+
     return (
         <div
             className={`switch-root ${checked ? 'checked' : ''}`}
-            onClick={() => onChange(!checked)}
+            onClick={handleClick}
             role="switch"
             aria-checked={checked}
             id={id}
+            style={{ cursor: 'pointer', zIndex: 10 }} // Ensure it's clickable
         >
             <div className="switch-thumb" />
         </div>

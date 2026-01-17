@@ -24,10 +24,15 @@ import { WhitepaperLayout } from './components/whitepaper/WhitepaperLayout'; // 
 import './App.css';
 import { ingestFilesAndCreateProject } from './utils/projectImporter';
 import { saveProjects, loadProjects } from './utils/indexedDB';
+import { useGlobalErrorHandler } from './hooks/useGlobalErrorHandler'; // 配额错误处理
+import { Toaster } from 'react-hot-toast'; // Toast 组件
 
 
 function AppContent() {
     const { t, language } = useI18n(); // t is stable and will update when language changes
+
+    // 配额错误处理
+    useGlobalErrorHandler();
 
     // Update document title when language changes
     useEffect(() => {
@@ -394,6 +399,8 @@ export default function App() {
                     <AnalysisContextProvider>
                         <InsightChainProvider>
                             <AppContent />
+                            {/* Toast 提示组件 */}
+                            <Toaster position="top-right" />
                         </InsightChainProvider>
                     </AnalysisContextProvider>
                 </EvidenceProvider>

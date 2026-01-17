@@ -218,7 +218,7 @@ export const settings = {
     testLog: '测试日志',
     testLogDownload: '测试日志下载',
     testLogDownloadDesc: '导出完整的测试日志（所有操作记录、错误信息、性能数据）',
-    testLogDownloadSuccess: '✅ 日志已下载！\n\n文件格式: Markdown\n建议用途: 提交Issue、问题诊断',
+    testLogDownloadSuccess: '✅ 日志已成功下载！\n\n📤 请将日志文件发送至 Discord 获取技术支持\n👉 点击确定后自动跳转',
 
     // 硬件状态
     hardwareStrong: '性能强劲',

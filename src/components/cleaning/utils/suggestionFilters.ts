@@ -56,7 +56,7 @@ export function mapAISuggestions(
 
         // 🐛 DEBUG: 验证source传递
         if (s.source || mapped.source) {
-            console.log(`[mapAISuggestions] ${s.id} -> source: ${s.source} => ${mapped.source}`);
+            // 已完成 source 字段迁移验证
         }
 
         return mapped;

@@ -11,6 +11,7 @@ import { AnalysisPackagesSettings } from './AnalysisPackagesSettings';
 import { UserRoleSettings } from './UserRoleSettings';
 import { DataPrivacySection } from '../DataPrivacySection';
 import { DataAnalysisSection } from '../DataAnalysisSection';
+import { useDeveloperMode } from '@/hooks/useDeveloperMode';
 
 
 // Import Types
@@ -42,6 +43,7 @@ interface SettingsContentProps {
 
 export const SettingsContent = (props: SettingsContentProps) => {
     const { t, language, setLanguage } = useI18n();
+    const { isDeveloperMode, toggleDeveloperMode } = useDeveloperMode();
 
     const { activeCategory } = props;
 
@@ -324,7 +326,7 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         <SettingsRow
                             label={t('settings.devMode')}
                             description={t('settings.devModeDesc')}
-                            action={<Switch checked={false} onChange={() => { }} />}
+                            action={<Switch checked={isDeveloperMode} onChange={toggleDeveloperMode} />}
                         />
                         <SettingsRow
                             label={t('settings.testLogDownload')}

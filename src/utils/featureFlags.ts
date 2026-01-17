@@ -3,6 +3,8 @@
  * 用于控制实验性功能的渐进式发布
  */
 
+import { logger } from '@/utils/logger';
+
 /** 功能特性枚举 */
 export const FeatureFlags = {
     /** 多层级導航功能（智能折叠导航） */
@@ -27,10 +29,12 @@ export function isFeatureEnabled(flag: FeatureFlagKey): boolean {
  */
 export function logFeatureFlags(): void {
     if (import.meta.env.DEV) {
-        console.group('🚩 Feature Flags');
-        Object.entries(FeatureFlags).forEach(([key, enabled]) => {
-            console.log(`${enabled ? '✅' : '❌'} ${key}: ${enabled}`);
-        });
-        console.groupEnd();
+        if (import.meta.env.DEV) {
+            logger.group('系统', '🚩 Feature Flags');
+            Object.entries(FeatureFlags).forEach(([key, enabled]) => {
+                logger.log('系统', `${enabled ? '✅' : '❌'} ${key}: ${enabled}`);
+            });
+            logger.groupEnd();
+        }
     }
 }

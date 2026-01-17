@@ -95,10 +95,7 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
             }
         },
         triggerUpload: () => {
-            console.log('[FileUploader] triggerUpload called');
-            console.log('[FileUploader] checkInviteCodeGate result:', checkInviteCodeGate());
             if (checkInviteCodeGate()) {
-                console.log('[FileUploader] Triggering file input click');
                 fileInputRef.current?.click();
             }
         }

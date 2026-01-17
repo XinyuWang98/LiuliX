@@ -1,6 +1,5 @@
 import { Download } from 'lucide-react';
 import { logCapture } from '@/utils/logCapture';
-import { useEffect } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 
 /**
@@ -9,16 +8,16 @@ import { useI18n } from '@/contexts/I18nContext';
 export function LogDownloadButton() {
     const { t } = useI18n();
 
-    // 自动启动日志捕捉
-    useEffect(() => {
-        if (import.meta.env.DEV) {
-            logCapture.start();
-        }
-    }, []);
-
     const handleDownload = () => {
         logCapture.download('markdown');
-        alert(t('settings.testLogDownloadSuccess'));
+
+        // 弹出确认提示
+        const userConfirmed = confirm(t('settings.testLogDownloadSuccess'));
+
+        // 用户点击"确定"后自动跳转到 Discord
+        if (userConfirmed) {
+            window.open('https://discord.gg/RnDvjtrs72', '_blank');
+        }
     };
 
     return (
