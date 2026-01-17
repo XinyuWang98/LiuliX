@@ -1,5 +1,6 @@
 import { useI18n } from '@/contexts/I18nContext';
 // import { Github } from 'lucide-react';
+import { EXTERNAL_LINKS } from '@/config/externalLinks';
 import { DiscordIcon } from '@/components/common/DiscordIcon';
 import './FeedbackSection.css';
 
@@ -25,7 +26,7 @@ export function FeedbackSection() {
                 <div className="community-grid">
                     {/* Discord Card */}
                     <a
-                        href="https://discord.gg/Y7NVzzCUbG"
+                        href={EXTERNAL_LINKS.discord.general}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="community-card is-discord"

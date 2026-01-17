@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import toast from 'react-hot-toast';
+import { EXTERNAL_LINKS } from '@/config/externalLinks';
 
 /**
  * 全局错误处理 Hook
@@ -63,7 +64,7 @@ function showQuotaExhaustedToast(t: (key: string) => string) {
 
         if (userChoice) {
             // 去 Discord
-            window.open('https://discord.gg/Y7NVzzCUbG', '_blank');
+            window.open(EXTERNAL_LINKS.discord.appRedirect, '_blank');
         } else {
             // 返回首页
             window.location.href = '/';

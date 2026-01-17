@@ -1,5 +1,6 @@
 import { useI18n } from '@contexts/I18nContext';
 import { Settings, User } from 'lucide-react';
+import { EXTERNAL_LINKS } from '@/config/externalLinks';
 import { Logo } from '@/components/common/Logo/Logo';
 import { DiscordIcon } from '@/components/common/DiscordIcon';
 import { FreeTrialBadge } from '@/components/Header/FreeTrialBadge';
@@ -84,7 +85,7 @@ export function NavigationBar({
                 <a
                     className="btn-ghost"
                     title="Discord"
-                    href="https://discord.gg/Y7NVzzCUbG"
+                    href={EXTERNAL_LINKS.discord.general}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

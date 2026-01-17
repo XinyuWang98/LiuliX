@@ -1,6 +1,8 @@
 import { Download } from 'lucide-react';
 import { logCapture } from '@/utils/logCapture';
 import { useI18n } from '@/contexts/I18nContext';
+import { toast } from '@/components/common/Toast';
+import { EXTERNAL_LINKS } from '@/config/externalLinks';
 
 /**
  * 开发者日志下载按钮组件
@@ -11,13 +13,13 @@ export function LogDownloadButton() {
     const handleDownload = () => {
         logCapture.download('markdown');
 
-        // 弹出确认提示
-        const userConfirmed = confirm(t('settings.testLogDownloadSuccess'));
+        // 使用 Toast 提示用户
+        toast.success(t('settings.testLogDownloadSuccess'), 5000);
 
-        // 用户点击"确定"后自动跳转到 Discord
-        if (userConfirmed) {
-            window.open('https://discord.gg/Y7NVzzCUbG', '_blank');
-        }
+        // 3秒后自动打开 Discord 链接
+        setTimeout(() => {
+            window.open(EXTERNAL_LINKS.discord.appRedirect, '_blank');
+        }, 3000);
     };
 
     return (

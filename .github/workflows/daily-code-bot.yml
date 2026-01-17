@@ -1,0 +1,68 @@
+name: Daily Invite Code Bot
+
+on:
+  schedule:
+    # 每天北京时间上午 8:00 (UTC 0:00) 运行
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # 允许手动触发
+
+jobs:
+  post-daily-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Date String
+        id: date
+        run: echo "TODAY=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+      - name: Post to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL_DAILY_CODE }}
+          CODE: LIULIX-${{ steps.date.outputs.TODAY }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "Error: DISCORD_WEBHOOK_URL_DAILY_CODE secret is not set."
+            exit 1
+          fi
+
+          # 构建 Embed 消息
+          PAYLOAD=$(cat <<EOF
+          {
+            "username": "LiuliX Daily Code",
+            "avatar_url": "https://liulix.com/logo.png",
+            "embeds": [
+              {
+                "title": "🎁 Today's Invite Code | 今日邀请码",
+                "description": "Here is your fresh invite code for unlimited AI analysis! \n这里是您的解锁无限 AI 分析的新邀请码！",
+                "color": 5793266,
+                "fields": [
+                  {
+                    "name": "🔑 Code",
+                    "value": "\\\`$CODE\\\`",
+                    "inline": true
+                  },
+                  {
+                    "name": "📅 Date",
+                    "value": "$(date +'%Y-%m-%d')",
+                    "inline": true
+                  },
+                  {
+                    "name": "⏳ Validity",
+                    "value": "24 Hours",
+                    "inline": true
+                  }
+                ],
+                "footer": {
+                  "text": "LiuliX Community • Daily Drop"
+                }
+              }
+            ]
+          }
+          EOF
+          )
+
+          # 发送请求
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "$PAYLOAD" \
+               $DISCORD_WEBHOOK

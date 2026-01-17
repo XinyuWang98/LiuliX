@@ -10,7 +10,7 @@
 
 | 渠道名称 (Channel)  | 目标平台                       | 专用链接 (URL)                  | 有效期 | 使用限制                  | 备注                             |
 | :------------------ | :----------------------------- | :------------------------------ | :----- | :------------------------ | :------------------------------- |
-| **Reddit - Launch** | r/dataisbeautiful, r/Python 等 | `https://discord.gg/faRSTEnJ`   | 永久   | **100次 (⚠️建议设为无限)** | 首次 Reddit 推广使用             |
+| **Reddit - Launch** | r/dataisbeautiful, r/Python 等 | `https://discord.gg/Y7NVzzCUbG` | 永久   | **100次 (⚠️建议设为无限)** | 首次 Reddit 推广使用             |
 | **App Redirect**    | LiuliX App (配额提示)          | `https://discord.gg/Y7NVzzCUbG` | 永久   | 无限制                    | App 内 "Get Daily Code" 按钮链接 |
 | **Product Hunt**    | Product Hunt Launch            | *待生成*                        | 永久   | 无限制                    | 准备用于 PH 发布                 |
 | **Social**          | Twitter / X / LinkedIn         | *待生成*                        | 永久   | 无限制                    | 官号推文使用                     |
@@ -20,9 +20,10 @@
 
 ## 💡 最佳实践提醒
 
-1.  **关于使用次数**：
-    *   公开推广（如 Reddit, Product Hunt）建议将 **Max number of uses** 设为 **`No limit`**。
-    *   原因：社交媒体流量有长尾效应，如果设为 100 次，第 101 个用户点击会显示“链接无效”，造成流量浪费和体验受损。
+1.  **关于使用次数与有效期（内测策略）**：
+    *   **策略**：对于 Reddit 等公开渠道，**建议设置限制**（如 100 次 / 7 天）。
+    *   **原因**：当前处于内测 (Beta) 阶段，比起数量，我们更看重**早期核心用户的质量**。
+    *   **优势**：制造稀缺感 (Scarcity)，控制增长节奏，避免过多用户涌入导致服务过载或反馈噪音。
 
 2.  **关于有效期**：
     *   建议所有推广链接都设为 **`Expire after: Never`**。
