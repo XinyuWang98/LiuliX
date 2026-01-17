@@ -70,14 +70,14 @@ export const settings = {
         simpleMode: 'Model Selection',
         modeSelection: 'Select AI Mode',
         useLocalModel: 'Use Local Model',
-        localMode: 'Local Privacy Mode',
+        localMode: 'Local Model',
         localModeDesc: 'Use local Ollama, completely free, data stays on device',
         cloudMode: 'LiuliX Built-in AI',
         cloudModeDesc: 'Use Cloud AI, consumes invite code quota',
         cloudModeDescNew: 'Use platform-provided AI service, no API Key needed',
         cloudModeHint: 'Cloud mode uses built-in DeepSeek API, consuming your invite code quota',
         cloudTrialHint: 'Currently using trial quota for testing only. For production, please configure your own API Key',
-        localPriorityHint: 'Local model (Ollama) is prioritized - data stays offline',
+        localPriorityHint: 'Local model (Ollama) is prioritized - data stays local',
         unlockFirst: 'Please activate with invite code first',
         modeLocal: 'Local Mode',
         modeCloud: 'Cloud Mode',
@@ -99,7 +99,7 @@ export const settings = {
 
     // Local Model Configuration
     localModelTitle: 'Enable Local Model (Recommended)',
-    localModelDesc: 'First-time download 4.3GB model, takes 10-30 minutes, then permanently available offline',
+    localModelDesc: 'First-time download 4.3GB model, takes 10-30 minutes, then permanently available locally',
     localModelInfo: '💡 Model: {model} (Strong in Chinese, Fast)',
 
     // Performance Configuration
@@ -188,7 +188,7 @@ export const settings = {
 
     // Model Call Logic
     modelLogicTitle: 'How It Works',
-    modelLogicLocal: 'Local model (Ollama) is prioritized - data stays offline',
+    modelLogicLocal: 'Local model (Ollama) is prioritized - data stays local',
     modelLogicAPI: 'Uses Cloud API - requires a valid API Key',
     modelLogicFallback: 'If local model is enabled, it will be prioritized with API Key as fallback',
 

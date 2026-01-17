@@ -67,7 +67,7 @@ export const enUS: LanguageConfig = {
             gpuMedium: 'Dedicated GPU (Medium)',
             gpuIntegrated: 'Integrated GPU',
             recommendedMode: 'Recommended Mode',
-            localMode: 'Local Model (Offline)',
+            localMode: 'Local Model (Local)',
             apiMode: 'Cloud Model (API)',
             confidence: 'Confidence',
             confidenceHigh: 'High',

@@ -9,7 +9,7 @@ export default {
         uploadButton: 'Upload Your First File', // CTA button text
         trustBadges: {
             local: 'Local Execution',
-            offline: 'Offline Capable*',
+            offline: 'Local Execution',
             desktop: 'Desktop Optimized',
         },
     },
@@ -18,7 +18,7 @@ export default {
     valueProps: {
         privacy: {
             title: 'The Data Invisibility Cloak',
-            desc: 'Your data never leaves this computer. We bring the most advanced AI models into your browser, so you can process sensitive financial data even offline.',
+            desc: 'Python execution happens entirely in your browser via WebAssembly. Raw data stays local during processing. AI insights require exchanging sanitized metadata.',
         },
         safety: {
             title: 'Dry Run Guarantee',

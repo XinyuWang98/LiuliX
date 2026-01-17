@@ -33,7 +33,7 @@ export const cache = {
 // 本地模型模块翻译（新增）
 export const localModel = {
     init: '初始化本地模型...',
-    downloadHint: '⏳ 首次下载 4.3GB 模型，约需 10-30 分钟，完成后永久离线可用',
+    downloadHint: '⏳ 首次下载 4.3GB 模型，约需 10-30 分钟，完成后永久本地可用',
     status: {
         loading: '正在加载模型...',
         fetching: '正在下载模型参数 ({progress})',
@@ -84,7 +84,7 @@ export const hardware = {
 
     // 推荐模式
     recommendedMode: '推荐模式',
-    localMode: '本地模型 (离线)',
+    localMode: '本地模型 (本地)',
     apiMode: '云端模型 (API)',
     confidence: '推荐置信度',
     confidenceHigh: '高',

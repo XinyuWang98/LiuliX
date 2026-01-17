@@ -9,7 +9,7 @@ export default {
         uploadButton: '上传第一个文件', // CTA按钮文案
         trustBadges: {
             local: '本地执行',
-            offline: '端侧计算',
+            offline: '本地执行',
             desktop: 'PC端优化',
         },
     },

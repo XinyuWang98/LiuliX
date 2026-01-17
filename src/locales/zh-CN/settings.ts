@@ -72,14 +72,14 @@ export const settings = {
         simpleMode: '模型选择',
         modeSelection: '选择 AI 模式',
         useLocalModel: '使用本地模型',
-        localMode: '本地隐私模式',
+        localMode: '本地模型',
         localModeDesc: '使用本机 Ollama，完全免费，数据不出本机',
         cloudMode: 'LiuliX 内置 AI',
         cloudModeDesc: '使用云端 AI，消耗邀请码额度',
         cloudModeDescNew: '使用平台提供的 AI 服务，无需配置 API Key',
         cloudModeHint: '云端模式使用平台内置的 DeepSeek API，会消耗您的邀请码额度',
         cloudTrialHint: 'Currently using trial quota for testing only. For production, please configure your own API Key',
-        localPriorityHint: '优先使用本地模型（Ollama），数据完全离线不上传',
+        localPriorityHint: '优先使用本地模型（Ollama），数据在本地处理',
         unlockFirst: '请先输入邀请码激活',
         modeLocal: '本地模式',
         modeCloud: '云端模式',
@@ -101,7 +101,7 @@ export const settings = {
 
     // 本地模型配置
     localModelTitle: '启用本地模型 (推荐)',
-    localModelDesc: '首次下载 4.3GB 模型，约 10-30 分钟，之后永久离线可用',
+    localModelDesc: '首次下载 4.3GB 模型，约 10-30 分钟，之后永久本地可用',
     localModelInfo: '💡 模型: {model} (中文强，速度快)',
 
     // 性能配置
@@ -256,7 +256,7 @@ export const settings = {
 
     // 模型调用逻辑说明
     modelLogicTitle: '调用逻辑',
-    modelLogicLocal: '优先使用本地模型（Ollama），数据完全离线不上传',
+    modelLogicLocal: '优先使用本地模型（Ollama），数据在本地处理',
     modelLogicAPI: '使用云端API，需配置有效的API Key',
     modelLogicFallback: '如果启用本地模型，将优先使用本地模型，但会根据配置的API Key兜底',
 
