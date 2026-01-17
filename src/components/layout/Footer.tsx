@@ -44,10 +44,11 @@ export function Footer() {
                         </a>
                     </div>
                 </div>
-                <div className="footer-bottom-links" style={{ marginTop: '1rem', fontSize: '12px', color: 'var(--text-tertiary)', display: 'flex', gap: '16px' }}>
+                {/* 内测阶段隐藏法律链接 */}
+                {/* <div className="footer-bottom-links" style={{ marginTop: '1rem', fontSize: '12px', color: 'var(--text-tertiary)', display: 'flex', gap: '16px' }}>
                     <a href="/whitepaper" target="_blank" title="Pending legal review">Terms of Service</a>
                     <a href="/whitepaper" target="_blank" title="See our Privacy First architecture">Privacy Policy</a>
-                </div>
+                </div> */}
             </div>
         </footer>
     );
