@@ -467,60 +467,65 @@ apiRouter.get('/model/list', async (req, res) => {
 
 // 🆕 邀请码验证接口
 apiRouter.post('/validate-invite-code', (req, res) => {
-    const { code } = req.body;
+    try {
+        const { code } = req.body;
 
-    if (!code) {
-        return res.status(400).json({ error: '请输入邀请码' });
-    }
+        if (!code) {
+            return res.status(400).json({ error: '请输入邀请码' });
+        }
 
-    const upperCode = code.toUpperCase().trim();
+        const upperCode = code.toUpperCase().trim();
 
-    // Debug: 打印验证详情
-    console.log(`[验证] 收到: "${upperCode}", 白名单:`, Array.from(validInviteCodes));
+        // Debug: 打印验证详情
+        console.log(`[验证] 收到: "${upperCode}", 白名单:`, Array.from(validInviteCodes));
 
-    // 1. 检查静态白名单
-    if (validInviteCodes.has(upperCode)) {
-        return res.json({
-            valid: true,
-            message: '邀请码验证成功 (静态)',
-            quota: INVITE_CODE_TOTAL_LIMIT
+        // 1. 检查静态白名单
+        if (validInviteCodes.has(upperCode)) {
+            return res.json({
+                valid: true,
+                message: '邀请码验证成功 (静态)',
+                quota: INVITE_CODE_TOTAL_LIMIT
+            });
+        }
+
+        // 2. 检查动态日期码 (格式: 前缀 + YYYYMMDD, e.g., REDDIT20260115)
+        // 允许的前缀列表 (新增 VIP/SPONSOR)
+        const DYNAMIC_PREFIXES = ['REDDIT', 'LIULI', 'PH', 'VIP', 'SPONSOR'];
+
+        // 获取服务器当前日期 (UTC-8 US Pacific Time)
+        const now = new Date();
+        // 使用 Intl.DateTimeFormat 获取准确的 YYYYMMDD
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            timeZone: 'America/Los_Angeles'
         });
-    }
+        const [yyyy, mm, dd] = formatter.format(now).split('-');
+        const todaySuffix = `${yyyy}${mm}${dd}`;
 
-    // 2. 检查动态日期码 (格式: 前缀 + YYYYMMDD, e.g., REDDIT20260115)
-    // 允许的前缀列表 (新增 VIP/SPONSOR)
-    const DYNAMIC_PREFIXES = ['REDDIT', 'LIULI', 'PH', 'VIP', 'SPONSOR'];
-
-    // 获取服务器当前日期 (UTC-8 US Pacific Time)
-    const now = new Date();
-    // 使用 Intl.DateTimeFormat 获取准确的 YYYYMMDD
-    const formatter = new Intl.DateTimeFormat('en-CA', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        timeZone: 'America/Los_Angeles'
-    });
-    const [yyyy, mm, dd] = formatter.format(now).split('-');
-    const todaySuffix = `${yyyy}${mm}${dd}`;
-
-    // 检查是否匹配任意动态规则
-    const isDynamicValid = DYNAMIC_PREFIXES.some(prefix => {
-        const expectedCode = `${prefix}${todaySuffix}`;
-        return upperCode === expectedCode;
-    });
-
-    if (isDynamicValid) {
-        return res.json({
-            valid: true,
-            message: '邀请码验证成功 (动态)',
-            quota: INVITE_CODE_TOTAL_LIMIT
+        // 检查是否匹配任意动态规则
+        const isDynamicValid = DYNAMIC_PREFIXES.some(prefix => {
+            const expectedCode = `${prefix}${todaySuffix}`;
+            return upperCode === expectedCode;
         });
-    }
 
-    console.log(`[验证] 失败: "${upperCode}" 不在白名单且不符合动态规则 (今日后缀: ${todaySuffix})`);
-    res.status(400).json({
-        error: 'INVITE_CODE_INVALID',
-        message: '邀请码无效或已过期',
-        valid: false
-    });
+        if (isDynamicValid) {
+            return res.json({
+                valid: true,
+                message: '邀请码验证成功 (动态)',
+                quota: INVITE_CODE_TOTAL_LIMIT
+            });
+        }
+
+        console.log(`[验证] 失败: "${upperCode}" 不在白名单且不符合动态规则 (今日后缀: ${todaySuffix})`);
+        res.status(400).json({
+            error: 'INVITE_CODE_INVALID',
+            message: '邀请码无效或已过期',
+            valid: false
+        });
+    } catch (error) {
+        console.error('[验证错误]', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
 });
 
 // 注册 Router (顺序很重要：先 /api 匹配完整路径，再 / 匹配 Stripped 路径)

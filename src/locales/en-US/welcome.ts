@@ -35,7 +35,7 @@ export default {
         sectionTitle: 'What Makes LiuliX Different',
         zeroSetup: {
             title: 'Zero-Setup Data Engine',
-            desc: 'Say goodbye to tedious configuration. LiuliX has built-in scientific computing stack (Pandas/Scikit-learn), drag in files and start immediately. Run data analysis even on a plane.',
+            desc: 'Say goodbye to tedious configuration. LiuliX has built-in scientific computing stack (Pandas/Scikit-learn), drag in files and start immediately. Enjoy zero-latency local processing.',
             label: 'Built-in Engine',
         },
         audit: {
