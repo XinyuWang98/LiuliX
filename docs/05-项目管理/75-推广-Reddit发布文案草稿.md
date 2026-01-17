@@ -29,7 +29,7 @@ If you're tired of manual SQL hell and want something truly private + reliable, 
 No pressure, just want real feedback from people who actually deal with dirty data every day.
 
 DM me “救命” (or “help” if your Chinese is rusty) for an invite code.
-**Better yet, join our [Discord](https://discord.gg/RnDvjtrs72) to grab a key instantly and chat with me directly.**
+**Better yet, join our [Discord](https://discord.gg/faRSTEnJ) to grab a key instantly and chat with me directly.**
 First 20 people get in, let's see how much we can break together 🫠
 
 ---
@@ -53,5 +53,5 @@ Early MVP, looking for browser/WASM nerds to test and roast.
 No pressure, just want real feedback from people who actually deal with dirty data every day.
 
 DM me “救命” (or “help” if your Chinese is rusty) for an invite code.
-**Better yet, join our [Discord](https://discord.gg/RnDvjtrs72) to grab a key instantly and chat with me directly.**
+**Better yet, join our [Discord](https://discord.gg/faRSTEnJ) to grab a key instantly and chat with me directly.**
 First 20 people get in, let's see how much we can break together 🫠

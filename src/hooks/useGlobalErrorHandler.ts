@@ -63,7 +63,7 @@ function showQuotaExhaustedToast(t: (key: string) => string) {
 
         if (userChoice) {
             // 去 Discord
-            window.open('https://discord.gg/RnDvjtrs72', '_blank');
+            window.open('https://discord.gg/Y7NVzzCUbG', '_blank');
         } else {
             // 返回首页
             window.location.href = '/';

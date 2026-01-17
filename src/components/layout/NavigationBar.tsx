@@ -84,7 +84,7 @@ export function NavigationBar({
                 <a
                     className="btn-ghost"
                     title="Discord"
-                    href="https://discord.gg/RnDvjtrs72"
+                    href="https://discord.gg/Y7NVzzCUbG"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

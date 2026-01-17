@@ -16,7 +16,7 @@ export function LogDownloadButton() {
 
         // 用户点击"确定"后自动跳转到 Discord
         if (userConfirmed) {
-            window.open('https://discord.gg/RnDvjtrs72', '_blank');
+            window.open('https://discord.gg/Y7NVzzCUbG', '_blank');
         }
     };
 

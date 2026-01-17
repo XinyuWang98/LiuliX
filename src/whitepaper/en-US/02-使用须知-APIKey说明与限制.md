@@ -35,7 +35,7 @@ To prevent abuse and control costs, the built-in DeepSeek API Key has strict usa
 
 > [!TIP]
 > **Quota Exhausted?**
-> After the quota is used up, we suggest joining our **[Discord Community](https://discord.gg/RnDvjtrs72)** to get a new invitation code, or apply for **LiuliX Desktop Offline (Beta)** access.
+> After the quota is used up, we suggest joining our **[Discord Community](https://discord.gg/Y7NVzzCUbG)** to get a new invitation code, or apply for **LiuliX Desktop Offline (Beta)** access.
 
 ---
 

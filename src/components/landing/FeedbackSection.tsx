@@ -25,7 +25,7 @@ export function FeedbackSection() {
                 <div className="community-grid">
                     {/* Discord Card */}
                     <a
-                        href="https://discord.gg/RnDvjtrs72"
+                        href="https://discord.gg/Y7NVzzCUbG"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="community-card is-discord"

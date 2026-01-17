@@ -32,7 +32,7 @@ export function Footer() {
                     </div>
                     <div className="footer-col">
                         <h4>{t('footer.community')}</h4>
-                        <a href="https://discord.gg/RnDvjtrs72" target="_blank" rel="noopener noreferrer">
+                        <a href="https://discord.gg/Y7NVzzCUbG" target="_blank" rel="noopener noreferrer">
                             <DiscordIcon size={16} /> Discord
                         </a>
                         {/* <a href="https://github.com/LiuliX-Dev/LiuliX" target="_blank" rel="noopener noreferrer">

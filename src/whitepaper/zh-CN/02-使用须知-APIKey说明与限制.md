@@ -35,7 +35,7 @@ LiuliX Web 版采用 **"Cloud-Native"** (云原生体验) 策略，内置 DeepSe
 
 > [!TIP]
 > **额度用尽后？**  
-> 额度用尽后，建议加入我们的 **[Discord 社区](https://discord.gg/RnDvjtrs72)** 获取新邀请码，或申请 **LiuliX Desktop 离线版 (Beta)** 资格。
+> 额度用尽后，建议加入我们的 **[Discord 社区](https://discord.gg/Y7NVzzCUbG)** 获取新邀请码，或申请 **LiuliX Desktop 离线版 (Beta)** 资格。
 
 ---
 
