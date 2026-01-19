@@ -3,6 +3,7 @@
 [![Official Website](https://img.shields.io/badge/Website-www.liulix.com-blue?style=flat&logo=google-chrome)](https://www.liulix.com/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-%E5%8A%A0%E5%85%A5%E7%A4%BE%E5%8C%BA-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.gg/Pr5nS9K7NT)
+[![Demo Video](https://img.shields.io/badge/Demo-%E6%BC%94%E7%A4%BA%E8%A7%86%E9%A2%91-ea4335?style=flat&logo=google-drive&logoColor=white)](https://drive.google.com/file/d/1pufIsfCvH62iEBVFqk57cTyPTvPjzgby/view?usp=sharing)
 
 > **Private, Powerful, Pure Browser-Based.**
 > 下一代隐私优先的 AI 数据探索平台 (EDA)
