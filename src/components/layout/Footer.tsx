@@ -1,6 +1,6 @@
 
 import { useI18n } from '@/contexts/I18nContext';
-import { Twitter, FileText } from 'lucide-react';
+import { Twitter, FileText, Github } from 'lucide-react';
 import { EXTERNAL_LINKS } from '@/config/externalLinks';
 // import { Github } from 'lucide-react';
 import { DiscordIcon } from '@/components/common/DiscordIcon';
@@ -33,6 +33,9 @@ export function Footer() {
                     </div>
                     <div className="footer-col">
                         <h4>{t('footer.community')}</h4>
+                        <a href={EXTERNAL_LINKS.github.repo} target="_blank" rel="noopener noreferrer" title="GitHub">
+                            <Github size={16} /> GitHub
+                        </a>
                         <a href={EXTERNAL_LINKS.discord.general} target="_blank" rel="noopener noreferrer" title="Discord">
                             <DiscordIcon size={16} /> Discord
                         </a>

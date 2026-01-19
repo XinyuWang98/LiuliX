@@ -36,7 +36,7 @@ export const EXTERNAL_LINKS = {
      * GitHub 仓库链接（暂时隐藏，内测阶段）
      */
     github: {
-        repo: 'https://github.com/LiuliX-Dev/LiuliX',
+        repo: 'https://github.com/XinyuWang98/LiuliX',
         issues: 'https://github.com/LiuliX-Dev/LiuliX/issues',
     },
 
