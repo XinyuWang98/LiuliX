@@ -27,6 +27,9 @@ export const EXTERNAL_LINKS = {
 
         /** 社交媒体（Twitter/X）专用链接（待生成） */
         social: 'https://discord.gg/Y7NVzzCUbG', // TODO: 生成专用链接
+
+        /** GitHub README 专用链接 (Role: Code Explorer) */
+        github: 'https://discord.gg/Pr5nS9K7NT',
     },
 
     /**

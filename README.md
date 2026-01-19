@@ -1,82 +1,110 @@
-# DataPrism
+# LiuliX
 
-Future Tech 风格的 AI 主导 EDA (探索性数据分析) 工具
+[![Official Website](https://img.shields.io/badge/Website-www.liulix.com-blue?style=flat&logo=google-chrome)](https://www.liulix.com/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.gg/Pr5nS9K7NT)
 
-## 项目简介
+> **Private, Powerful, Pure Browser-Based.**
+> Next-Generation Privacy-First AI Exploratory Data Analysis (EDA) Platform.
 
-DataPrism 是一款纯前端的数据分析平台,基于 React + TypeScript + Pyodide 构建,实现完全本地化的数据处理和 AI 分析能力。
+[**English**](./README.md) | [中文](./README.zh-CN.md)
 
-## 核心特性
+## Introduction
 
-- 🎨 **Future Tech 设计**: 新拟态风格,支持主题切换
-- 🤖 **AI 主导分析**: 智能 Prompt 库,结构化假设验证
-- 🔒 **数据隐私**: 100% 本地运行,数据不上传
-- ⚡ **高性能**: Web Worker + Pyodide,异步计算不阻塞 UI
-- 📊 **专业分析**: Pandas/Numpy 驱动,Plotly 可视化
+**LiuliX** is a modern data analysis platform built with **React + TypeScript + Pyodide**. It breaks the limitations of traditional web analysis tools by porting the complete Python data science stack (Pandas/Scikit-learn/DuckDB) to the browser via **WASM**. This architecture delivers on the promise of **"Data Never Leaves Your Device"**, offering privacy-first, AI-driven automated exploration capabilities.
 
-## 技术栈
+## 🌟 Key Features
 
-- **前端框架**: React 18 + TypeScript
-- **构建工具**: Vite
-- **数据处理**: Pyodide (Python in Browser)
-- **图表库**: Plotly.js
-- **数据库**: IndexedDB (Dexie)
-- **表格组件**: TanStack Table
+- **🎨 Future Tech Design**: A composite design style featuring Neuomorphism and Glassmorphism for an immersive data exploration experience.
+- **🤖 Intelligent Analysis Loop**:
+    - **Router Prompt**: Schema-based intelligent intent routing (Router -> Analyzer -> Visualizer).
+    - **Context Awareness**: EDA closed-loop design that automatically injects historical insights as context to reduce AI hallucinations.
+- **🔒 Privacy-First Architecture**: Adopts a "Local-First" strategy where all data processing (DuckDB/Pandas) is performed locally in the browser. Raw data is never uploaded to the cloud.
 
-## 快速开始
+## 🏗 Technical Architecture
 
-### 安装依赖
+This project adopts a **Browser-Native** architecture, fully utilizing modern browser computing power:
+
+### 1. Compute Layer
+- **Pyodide (Python on WASM)**: Complete implementation of Pandas/Numpy/Scikit-learn in the browser environment.
+- **DuckDB-WASM**: High-performance SQL pre-aggregation and filtering for million-row datasets.
+- **Dynamic Worker Pool**:
+    - Adaptive Web Worker pool (1-5 workers) dynamically scheduled based on device memory.
+    - **Progressive Warm-up**: The first worker responds immediately, while subsequent workers load silently in the background to eliminate cold start latency.
+
+### 2. Memory Strategy
+- **Dynamic Assessment Algorithm**: Intelligently calculates the maximum safe row count based on `UserAgent` device fingerprinting and available memory (`navigator.deviceMemory`).
+- **Auto-Sampling**: Large files automatically degrade to sampling mode to prevent OOM (Out of Memory) crashes.
+
+### 3. Visualization
+- **Plotly.js**: Interactive chart rendering.
+- **Virtual Scrolling**: High-performance tables based on `TanStack Virtual`, supporting smooth scrolling for 100k+ rows.
+
+## 🛠 Tech Stack
+
+- **Framework**: React 18 + TypeScript + Vite
+- **Data Engine**: Pyodide + DuckDB-WASM
+- **State Management**: React Context + IndexedDB (Dexie)
+- **UI System**: LiuliX Design System (CSS Variables + Glassmorphism)
+
+## 🚀 Quick Start
+
+### Development
+
+Start frontend and backend services:
 
 ```bash
-npm install
+npm run dev:all
 ```
 
-### 开发模式
-
-```bash
-npm run dev
-```
-
-### 构建生产版本
+### Build
 
 ```bash
 npm run build
 ```
 
-### 预览生产版本
+### Preview
 
 ```bash
 npm run preview
 ```
 
-## 项目结构
+## 📂 Project Structure
 
-```
+```text
 src/
-├── types/              # TypeScript 类型定义
-├── styles/             # 全局样式(CSS 变量系统)
-├── themes/             # 主题配置
-├── config/             # 配置文件(Prompt 库等)
-├── contexts/           # React Context
-├── workers/            # Web Workers
-├── utils/              # 工具函数
-├── components/         # React 组件
-│   ├── layout/         # 布局组件
-│   ├── data/           # 数据相关组件
-│   ├── analysis/       # 分析相关组件
-│   ├── report/         # 报告相关组件
-│   └── common/         # 通用组件
-├── App.tsx             # 主应用组件
-└── main.tsx            # 入口文件
+├── adapters/           # Adapter implementations (Pyodide, etc.)
+├── components/         # React Component Library
+│   ├── analysis/       # Analysis components (InsightCard, Notebook)
+│   ├── cleaning/       # Data cleaning components
+│   ├── common/         # Common UI components (LiuliX Design System)
+│   ├── data/           # Data loading and preview
+│   ├── datagrid/       # Virtualized table components
+│   ├── evidence/       # Evidence chain management
+│   ├── exploration/    # Exploratory analysis components
+│   ├── insights/       # Insight generation and rendering
+│   ├── layout/         # Global layout (Sidebar, Navbar)
+│   └── whitepaper/     # Whitepaper rendering components
+├── config/             # Global configuration (Prompt IDs, Charts, etc.)
+├── contexts/           # React Context (State Management)
+├── db/                 # IndexedDB database layer
+├── hooks/              # Custom React Hooks
+├── locales/            # i18n Resources (zh-CN/en-US)
+├── pages/              # Page route components
+├── platforms/          # Cross-platform layer (Browser/Server)
+│   └── browser/        # Browser-side implementation (WorkerPool)
+├── services/           # Core Business Services
+│   ├── ai/             # AI Services (DeepSeek/Ollama)
+│   ├── prompts/        # Prompt Engineering Library (Router/Executor)
+│   ├── codeQuality/    # Code Quality Monitoring
+│   └── skills/         # Skill Registry
+├── styles/             # Global CSS Variable System
+├── types/              # TypeScript Type Definitions
+├── utils/              # Utility Functions (Logger, Sanitizer)
+├── workers/            # Web Workers (Pyodide)
+└── App.tsx             # Application Entry
 ```
 
-## 开发文档
+## 📄 License
 
-详细的开发计划和任务清单请查看:
-- `implementation_plan.md`: 实施计划
-- `task.md`: 任务清单
-- `PRD.md`: 产品需求文档
-
-## License
-
-MIT
+Apache-2.0

@@ -8,13 +8,14 @@
 
 ## 📊 渠道链接清单
 
-| 渠道名称 (Channel)  | 目标平台                       | 专用链接 (URL)                  | 有效期 | 使用限制                  | 备注                             |
-| :------------------ | :----------------------------- | :------------------------------ | :----- | :------------------------ | :------------------------------- |
-| **Reddit - Launch** | r/dataisbeautiful, r/Python 等 | `https://discord.gg/Y7NVzzCUbG` | 永久   | **100次 (⚠️建议设为无限)** | 首次 Reddit 推广使用             |
-| **App Redirect**    | LiuliX App (配额提示)          | `https://discord.gg/Y7NVzzCUbG` | 永久   | 无限制                    | App 内 "Get Daily Code" 按钮链接 |
-| **Product Hunt**    | Product Hunt Launch            | *待生成*                        | 永久   | 无限制                    | 准备用于 PH 发布                 |
-| **Social**          | Twitter / X / LinkedIn         | *待生成*                        | 永久   | 无限制                    | 官号推文使用                     |
-| **Direct**          | 官网 / 朋友分享                | *待生成*                        | 永久   | 无限制                    | 通用链接                         |
+| 渠道名称 (Channel)  | 目标平台                       | 专用链接 (URL)                  | 有效期 | 使用限制 | 备注                             |
+| :------------------ | :----------------------------- | :------------------------------ | :----- | :------- | :------------------------------- |
+| **Reddit - Launch** | r/dataisbeautiful, r/Python 等 | `https://discord.gg/FzXqBdWp`   | 7天    | **25次** | 首次 Reddit 推广使用             |
+| **App Redirect**    | LiuliX App (配额提示)          | `https://discord.gg/Y7NVzzCUbG` | 永久   | 无限制   | App 内 "Get Daily Code" 按钮链接 |
+| **即刻 (Jike)**     | 即刻 (中国)                    | `https://discord.gg/GzRnb82v`   | 7天    | 无限制   | 中国区推广                       |
+| **Product Hunt**    | Product Hunt Launch            | *待生成*                        | 永久   | 无限制   | 准备用于 PH 发布                 |
+| **Social**          | Twitter / X / LinkedIn         | *待生成*                        | 永久   | 无限制   | 官号推文使用                     |
+| **Direct**          | 官网 / 朋友分享                | *待生成*                        | 永久   | 无限制   | 通用链接                         |
 
 ---
 
@@ -34,4 +35,4 @@
 
 ---
 
-*最后更新时间: 2026-01-17*
+*最后更新时间: 2026-01-18*

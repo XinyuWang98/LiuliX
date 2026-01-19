@@ -1,52 +1,72 @@
-# Dependencies
+# Defaults
 node_modules/
-
-# Build outputs
+.DS_Store
 dist/
-build/
+dist-ssr/
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+logs/
 
 # Editor directories and files
+.idea
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Environment variables (淇濇姢鏁忔劅淇℃伅)
-.env*
-!.env.examplelog
-npm-debug.log*
+# Environment variables
+.env
+.env.*
+!.env.example
 
-# Test data (often large files)
-test_data/
+# Testing types
+coverage/
+test_datasets/
 *.csv
 *.xlsx
 *.xls
 
-# Backup folders
-backup_*/
-backup*/
+# Pyodide & Large Binaries
+public/pyodide/*.whl
+public/pyodide/*.metadata
+public/pyodide/*.zip
+public/pyodide/*.tar.gz
+# Keep the download script
+!public/pyodide/download.ps1
+!public/pyodide/README.md
 
-# IDE
-.vscode/
-.idea/
+# Build output
+build/
+stats.html
+
+# Local Server
+server/node_modules/
+server/.env
+server/.env.*
 
 # Temporary files
 *.tmp
 *.temp
-# Pyodide 离线包（大文件，不提交到Git）
-# 其他开发者使用 public/pyodide/download.ps1 自行下载
-public/pyodide/*
-!public/pyodide/README.md
-!public/pyodide/download.ps1
+*.bak
 
-# Local AI Models Cache (Large files)
+# Vercel
+.vercel
+
+# Local AI Models
 models_cache/
 
-# Ollama Setup Executable
+# Internal Documentation (Private)
+docs/
+📚文档导航.md
+
+# Executables
 OllamaSetup.exe
-.vercel
