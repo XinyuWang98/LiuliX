@@ -12,7 +12,8 @@ import { SEED_CLEANING_PROMPTS } from '../seedCleaningPrompts';
 export function buildCleaningRouterPromptInternal(columns: any[], stats: any[]): string {
     // 获取所有清洗模板
     let templates = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
-        .filter(p => p.id.startsWith('cleaner-'));
+        .filter(p => p.id.startsWith('cleaner-'))
+        .filter(p => !p.deprecated);  // 🆕 v2.3 过滤已废弃的 Prompt
 
     // 🛡️ 防御性编程：如果未找到模板，尝试重新注册种子模板
     if (templates.length === 0) {

@@ -57,10 +57,17 @@ export async function getColumnStats(
                             min("${col.name}") as min_val,
                             approx_quantile("${col.name}", 0.25) as q1,
                             median("${col.name}") as median_val,
+                            avg("${col.name}") as mean_val,
                             approx_quantile("${col.name}", 0.75) as q3,
                             max("${col.name}") as max_val,
                             stddev("${col.name}") as stddev_val,
-                            skewness("${col.name}") as skewness_val
+                            skewness("${col.name}") as skewness_val,
+                            kurtosis("${col.name}") as kurtosis_val,
+                            CASE 
+                                WHEN avg("${col.name}") != 0 
+                                THEN stddev("${col.name}") / avg("${col.name}")
+                                ELSE NULL 
+                            END as cv_val
                         FROM ${tableName}
                         WHERE "${col.name}" IS NOT NULL
                     `;
@@ -72,10 +79,13 @@ export async function getColumnStats(
                             min: Number(numericRow['min_val']),
                             q1: Number(numericRow['q1']),
                             median: Number(numericRow['median_val']),
+                            mean: Number(numericRow['mean_val']),
                             q3: Number(numericRow['q3']),
                             max: Number(numericRow['max_val']),
                             stddev: Number(numericRow['stddev_val']),
-                            skewness: Number(numericRow['skewness_val'])
+                            skewness: Number(numericRow['skewness_val']),
+                            kurtosis: Number(numericRow['kurtosis_val']),
+                            cv: numericRow['cv_val'] !== null ? Number(numericRow['cv_val']) : undefined
                         };
 
                         // 获取直方图数据 (Smart Binning)
@@ -166,7 +176,7 @@ export async function getColumnStats(
                     logger.warn('DuckDB', `获取数值统计失败: ${col.name}`, numericError);
                 }
             } else if (nonNull > 0) {
-                // 非数值类型：获取 TOP 5 VALUES
+                // 非数值类型：获取 TOP 10 VALUES
                 try {
                     const topValuesSql = `
                         SELECT 
@@ -176,7 +186,7 @@ export async function getColumnStats(
                         WHERE "${col.name}" IS NOT NULL
                         GROUP BY "${col.name}"
                         ORDER BY count DESC
-                        LIMIT 5
+                        LIMIT 10
                     `;
                     const topValuesResult = await conn.query(topValuesSql);
                     const topValues = [];

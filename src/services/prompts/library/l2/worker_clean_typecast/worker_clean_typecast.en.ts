@@ -16,6 +16,10 @@ export const workerCleanTypecastPrompt: UserPrompt = {
     outputCharts: ['chart'],
     layer: 'L2_EXECUTION',
 
+    // 🚫 Deprecated (2026-01-20)
+    deprecated: true,
+    deprecatedReason: 'Use cleaner-cast-to-numeric-v1 instead (SQL-based, faster execution)',
+
     dimensions: [
         { category: 'industry', value: 'general', label: 'General' },
         { category: 'intent', value: 'exploration', label: 'Explore' },

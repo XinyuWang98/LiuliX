@@ -64,9 +64,13 @@ export class CleaningRouter {
                 count: recommendations.length
             });
 
+            // Step 3.5: 🆕 注入精确统计参数（v2.3）
+            const { injectStatsParams } = await import('./paramInjector');
+            const injectedRecommendations = injectStatsParams(recommendations, stats);
+
             // Step 4: SQL Inflater填充模板
             const suggestions = this.inflateSQLTemplates(
-                recommendations,
+                injectedRecommendations,  // 使用注入后的推荐
                 tableName,
                 stats
             );

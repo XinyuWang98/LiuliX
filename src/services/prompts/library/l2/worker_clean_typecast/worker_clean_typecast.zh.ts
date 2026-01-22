@@ -5,28 +5,32 @@ import { UserPrompt } from '@/types/prompt';
  * 将列从一种数据类型转换为另一种类型
  */
 export const workerCleanTypecastPrompt: UserPrompt = {
-    id: 'worker-clean-typecast-v1',
-    name: 'worker_clean_typecast',
-    title: '类型转换',
-    description: '转换列的数据类型，如字符串转日期、字符串转数值、日期格式化',
+  id: 'worker-clean-typecast-v1',
+  name: 'worker_clean_typecast',
+  title: '类型转换',
+  description: '转换列的数据类型，如字符串转日期、字符串转数值、日期格式化',
 
-    
 
-    // 能力包配置 (v2.1)
-    slug: 'worker-clean-typecast-v1',
-    packageId: 'basic',
-    requiredPackages: [],
-    outputCharts: ['chart'],
-layer: 'L2_EXECUTION',
 
-    dimensions: [
-        { category: 'industry', value: 'general', label: '通用' },
-        { category: 'intent', value: 'cleaning', label: '清洗' },
-        { category: 'method', value: 'type_conversion', label: '类型转换' },
-        { category: 'output', value: 'sql', label: 'SQL' }
-    ],
+  // 能力包配置 (v2.1)
+  slug: 'worker-clean-typecast-v1',
+  packageId: 'basic',
+  requiredPackages: [],
+  outputCharts: ['chart'],
+  layer: 'L2_EXECUTION',
 
-    template: `
+  // 🚫 标记为废弃 (2026-01-20)
+  deprecated: true,
+  deprecatedReason: '推荐使用 cleaner-cast-to-numeric-v1（SQL 模板，执行更快）',
+
+  dimensions: [
+    { category: 'industry', value: 'general', label: '通用' },
+    { category: 'intent', value: 'cleaning', label: '清洗' },
+    { category: 'method', value: 'type_conversion', label: '类型转换' },
+    { category: 'output', value: 'sql', label: 'SQL' }
+  ],
+
+  template: `
 你是一个专业的数据清洗专家。
 请针对表 "__TABLE_NAME__" 中的 "{{column_name}}" 列进行类型转换。
 
@@ -77,9 +81,9 @@ layer: 'L2_EXECUTION',
 }
 `,
 
-    inputVariables: ['df_summary', 'column_name', 'source_type', 'target_type', 'date_format'],
-    author: 'System',
-    version: '1.0.0',
-    isBuiltIn: true,
-    updatedAt: Date.now()
+  inputVariables: ['df_summary', 'column_name', 'source_type', 'target_type', 'date_format'],
+  author: 'System',
+  version: '1.0.0',
+  isBuiltIn: true,
+  updatedAt: Date.now()
 };

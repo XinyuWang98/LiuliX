@@ -59,7 +59,7 @@ ChatGPT 擅长写诗，因为诗歌没有标准答案。但数据分析不同：
 
 即使 AI 写出的代码在语法上是对的，逻辑上可能是错的（例如：访问了空的 DataFrame）。
 
-为此，我们开发并开源了 **[LiuliX Code Enhancer](https://github.com/liulix/code-enhancer)**。
+为此，我们开发并开源了 **LiuliX Code Enhancer**（AST 级代码增强器）。
 
 这不是简单的正则替换，而是基于 **AST (抽象语法树)** 的深度解析器。它会在代码执行前，自动注入防御性逻辑：
 

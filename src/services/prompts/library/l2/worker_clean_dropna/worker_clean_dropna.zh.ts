@@ -5,28 +5,32 @@ import { UserPrompt } from '@/types/prompt';
  * 删除包含空值的行
  */
 export const workerCleanDropnaPrompt: UserPrompt = {
-    id: 'worker-clean-dropna-v1',
-    name: 'worker_clean_dropna',
-    title: '删除空值行',
-    description: '删除数据集中包含空值的行，可指定列或全表扫描',
+  id: 'worker-clean-dropna-v1',
+  name: 'worker_clean_dropna',
+  title: '删除空值行',
+  description: '删除数据集中包含空值的行，可指定列或全表扫描',
 
-    
 
-    // 能力包配置 (v2.1)
-    slug: 'worker-clean-dropna-v1',
-    packageId: 'basic',
-    requiredPackages: [],
-    outputCharts: ['chart'],
-layer: 'L2_EXECUTION',
 
-    dimensions: [
-        { category: 'industry', value: 'general', label: '通用' },
-        { category: 'intent', value: 'cleaning', label: '清洗' },
-        { category: 'method', value: 'filtering', label: '过滤' },
-        { category: 'output', value: 'sql', label: 'SQL' }
-    ],
+  // 能力包配置 (v2.1)
+  slug: 'worker-clean-dropna-v1',
+  packageId: 'basic',
+  requiredPackages: [],
+  outputCharts: ['chart'],
+  layer: 'L2_EXECUTION',
 
-    template: `
+  // ⚠️ 已废弃 (v2.3)
+  deprecated: true,
+  deprecatedReason: 'Use cleaner-delete-null-rows-v1 instead (SQL-based, faster and more reliable)',
+
+  dimensions: [
+    { category: 'industry', value: 'general', label: '通用' },
+    { category: 'intent', value: 'cleaning', label: '清洗' },
+    { category: 'method', value: 'filtering', label: '过滤' },
+    { category: 'output', value: 'sql', label: 'SQL' }
+  ],
+
+  template: `
 你是一个专业的数据清洗专家。
 请针对表 "__TABLE_NAME__" 删除包含空值的行。
 
@@ -66,9 +70,9 @@ layer: 'L2_EXECUTION',
 }
 `,
 
-    inputVariables: ['df_summary', 'column_name', 'drop_mode'],
-    author: 'System',
-    version: '1.0.0',
-    isBuiltIn: true,
-    updatedAt: Date.now()
+  inputVariables: ['df_summary', 'column_name', 'drop_mode'],
+  author: 'System',
+  version: '1.0.0',
+  isBuiltIn: true,
+  updatedAt: Date.now()
 };

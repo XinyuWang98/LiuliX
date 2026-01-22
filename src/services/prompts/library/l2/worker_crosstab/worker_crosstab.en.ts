@@ -121,7 +121,7 @@ Please perform crosstab analysis on columns \`{{row_col}}\` and \`{{col_col}}\` 
 }
 `,
 
-    inputVariables: ['row_col', 'col_col'],
+    inputVariables: ['df_summary', 'row_col', 'col_col'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

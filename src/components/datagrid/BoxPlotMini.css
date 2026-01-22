@@ -1,0 +1,74 @@
+/* 箱线图迷你组件样式 */
+.boxplot-mini {
+    position: relative;
+    width: 100%;
+    height: 12px;
+    margin: 0;
+    /* 移除垂直 margin，确保与条形图底部对齐 */
+    background: var(--glass-border);
+    border-radius: var(--radius-sm);
+    overflow: visible;
+}
+
+/* 须线（Whiskers） */
+.whisker {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2px;
+    background: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.whisker::before,
+.whisker::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 8px;
+    background: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.whisker-left::before {
+    left: 0;
+    transform: translateY(-3px);
+}
+
+.whisker-right::after {
+    right: 0;
+    transform: translateY(-3px);
+}
+
+/* 箱体（Box, IQR） */
+.box {
+    position: absolute;
+    height: 100%;
+    background: var(--primary);
+    opacity: 0.3;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--primary);
+}
+
+/* 中位线 */
+.median-line {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--primary);
+    opacity: 1;
+    box-shadow: 0 0 4px var(--primary-glow);
+}
+
+/* 常数值指示器（所有值相同） */
+.constant-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 0 4px var(--primary-glow);
+}

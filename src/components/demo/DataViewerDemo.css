@@ -377,7 +377,8 @@
 
 /* 内嵌微型图 */
 .mini-chart-inline {
-    height: 24px;
+    height: 100%;
+    /* 修改为 100%，让条形图填满父容器（数值列24px，非数值列52px） */
     display: flex;
     align-items: flex-end;
     gap: 1px;

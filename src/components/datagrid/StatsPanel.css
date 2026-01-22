@@ -6,11 +6,12 @@
     backdrop-filter: none;
     /* 模糊效果由父级列头提供 */
     border-radius: var(--radius-s);
-    padding: var(--gap-s);
+    /* padding: var(--gap-s); */
+    /* 注释掉，减少留白 */
     font-size: var(--fs-xs);
     color: var(--text-secondary);
     margin-top: var(--gap-xs);
-    /* 移除固定高度限制，避免出现滚动条 */
+    /* 移除高度限制，让内容完全展示，避免滚动条 */
     height: auto;
     overflow: visible;
 }
@@ -64,7 +65,8 @@
     height: 1px;
     background: var(--border-light);
     /* 提高不透明度让分隔符可见 */
-    margin: 6px 0;
+    /* margin: 6px 0; */
+    /* 注释掉margin，让分隔线紧凑 */
     /* 增加间距突出标题 */
     opacity: 1;
     /* 移除额外削弱 */

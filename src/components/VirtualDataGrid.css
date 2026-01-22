@@ -1,132 +1,264 @@
-/* VirtualDataGrid.css - 涓ユ牸閬靛畧 CSS 鍙橀噺瑙勫垯 */
+/* VirtualDataGrid.css - 严格遵守 CSS 变量规则 */
+
 
 .virtualGridContainer {
     width: 100%;
     height: 100%;
     min-height: var(--grid-min-height);
-    background: var(--glass-surface);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-l);
-    backdrop-filter: blur(var(--blur-medium));
+    min-width: 800px;
+    /* 最小宽度，防止布局崩溃 */
+    background: transparent;
+    /* Changed from var(--bg-panel) for Glass effect */
+    border: none;
+    /* Border is handled by LiuliGlass now */
+    border-radius: var(--radius-m);
 
     --local-row-height: var(--grid-row-height);
 
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
+    /* 允许横向滚动 */
     position: relative;
 }
 
-/* 澧炲己琛ㄥご */
+/* ========== 方案B：统一滚动容器 + Sticky Header ========== */
+.unified-scroll-wrapper {
+    flex: 1;
+    overflow: auto;
+    /* 统一处理横向和纵向滚动 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    position: relative;
+}
+
+.unified-scroll-wrapper::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.unified-scroll-wrapper::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+
+.unified-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: var(--radius-full);
+}
+
+.unified-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+}
+
+/* 增强表头 V2 - 使用 Sticky 固定在顶部 */
 .enhancedGridHeader {
     display: flex;
-    background: transparent
-        /* 锟斤拷为透锟斤拷 */
-    ;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
     border-bottom: 2px solid var(--border);
     flex-shrink: 0;
+
+    /* 关键：sticky 定位，固定在滚动容器顶部 */
     position: sticky;
     top: 0;
     z-index: var(--grid-header-z);
     align-items: stretch;
-    /* 纭繚鎵€鏈夊垪绛夐珮 */
+
+    /* ✅ 修复：让容器宽度随内容撑开，确保阴影覆盖所有列 */
+    width: max-content;
+    min-width: 100%;
 }
 
 .enhancedHeaderCell {
     flex-shrink: 0;
+    /* padding: var(--gap-s);  <-- 使用 header-cell-inline 的 padding */
     padding: var(--gap-s);
     display: flex;
     flex-direction: column;
     gap: var(--gap-xs);
-    border-right: 1px solid var(--border);
+    min-width: 180px;
+    /* ✅ 基础最小宽度，防止内容溢出 */
+    width: auto;
+    /* ✅ 允许内容撑开 */
+    max-width: 320px;
+    /* ✅ 限制最大宽度，避免浪费空间 */
+    /* border-right: 移除右侧边框，统一所有列视觉效果 */
     box-sizing: border-box;
-    /* 绉婚櫎 min-height锛岃鎵€鏈夊垪鑷劧绛夐珮 */
-    /* 为整个列头添加深色背景，提升统计信息可读性 */
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(4px);
-    border-radius: var(--radius-s);
+    /* 样式对齐 DataViewerDemo */
+    border-bottom: none;
+    /* simpleTableBody handles bottom border? No, header needs specific border */
+    text-align: left;
+    vertical-align: top;
 }
 
-.headerCellTop {
+/* 内嵌表头布局 (Core of V2 Look) */
+.header-cell-inline {
     display: flex;
-    align-items: center;
-    /* 鏀逛负center浠ヤ究瀵归綈 badge */
-    justify-content: space-between;
-    /* 璁╁悕绉板拰 Badge 鍒嗗紑 */
+    flex-direction: column;
     gap: var(--gap-xs);
     width: 100%;
-    /* 鎾戞弧 */
 }
 
-.headerCellName {
-    font-weight: var(--fw-bold);
+.column-name {
     font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
     color: var(--text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex: 1;
-    /* 鍗犳嵁鍓╀綑绌洪棿 */
+    font-family: var(--font-family);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 40px;
+    /* 固定最小高度，确保各列统一 */
 }
 
-/* 绫诲瀷寰界珷鎸夐挳 - 涓嬫媺瑙﹀彂锟?*/
-.headerCellTypeBadge {
+.column-type {
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-normal);
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 6px;
-    border-radius: var(--radius-s);
-    background: transparent
-        /* 锟斤拷为透锟斤拷 */
-    ;
-    border: 1px solid var(--border);
+}
 
+/* 缺失值进度条样式 V2 */
+.missing-rate-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* 两端对齐 */
+    gap: var(--gap-xs);
+    width: 100%;
+    margin-top: 2px;
+    height: 20px;
+    /* 固定高度，确保所有列的元数据行高度一致 */
+    overflow: hidden;
+    /* ✅ 防止内容溢出容器 */
+    /* 重置字体样式，防止子元素继承父级的15px白色字体 */
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-family: var(--font-sans);
+    font-feature-settings: 'tnum';
+}
+
+.missing-rate-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: var(--bg-accent);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.missing-rate-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width var(--transition-fast);
+}
+
+/* 提高优先级：使用容器选择器 */
+.missing-rate-container .missing-rate-text {
+    /* 使用 stat-value 相同样式 */
+    color: var(--text-secondary) !important;
+    font-family: var(--font-sans) !important;
+    font-size: var(--fs-xs) !important;
+    font-weight: 500 !important;
+    font-feature-settings: 'tnum' !important;
+    text-align: right;
+    margin-left: 4px;
+    white-space: nowrap;
+    /* 防止换行 */
+    overflow: hidden;
+    /* ✅ 防止溢出 */
+    text-overflow: ellipsis;
+    /* ✅ 显示省略号 */
+}
+
+/* 缺失率颜色标记 - 根据严重程度 */
+.missing-rate-text.low-missing {
+    color: var(--success) !important;
+    /* 0-10%: 绿色/正常 */
+}
+
+.missing-rate-text.medium-missing {
+    color: var(--warning) !important;
+    /* 10-50%: 黄色/警告 */
+}
+
+.missing-rate-text.high-missing {
+    color: var(--error) !important;
+    /* 50%+: 红色/危险 */
+}
+
+/* 统一为 stat-value 样式：移除 uppercase */
+.missing-rate-container .missing-rate-label {
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+    font-size: var(--fs-xs) !important;
+    font-family: var(--font-sans) !important;
+    font-feature-settings: 'tnum' !important;
+    margin-left: auto;
+    margin-right: 4px;
+}
+
+/* Unique Count V2 */
+.unique-count {
     font-size: var(--fs-xxs);
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    font-weight: var(--fw-medium);
+    color: var(--text-secondary);
+    margin-top: 2px;
+    font-weight: var(--fw-normal);
+}
+
+/* 提高优先级 */
+.missing-rate-container .unique-count-inline {
+    color: var(--text-secondary) !important;
+    font-family: var(--font-sans) !important;
+    font-size: var(--fs-xs) !important;
+    font-weight: 500 !important;
+    font-feature-settings: 'tnum' !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-right: var(--gap-xs);
+}
+
+/* 下拉菜单 */
+/* ========== 列筛选与类型下拉菜单 ========== */
+.column-filter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-s);
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s var(--easing-smooth);
 }
 
-.headerCellTypeBadge:hover,
-.headerCellTypeBadge.active {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-    border-color: var(--primary);
-}
-
-.headerCellTypeBadge:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.spinner {
-    animation: spin 1s linear infinite;
+.column-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
     color: var(--primary);
 }
 
-@keyframes spin {
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* 涓嬫媺鑿滃崟 */
-.type-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 4px;
-    background: var(--glass-surface);
-    backdrop-filter: blur(var(--blur-medium));
+/* 统一的下拉菜单样式 (用于类型选择和列筛选) */
+.type-dropdown-menu,
+.column-filter-panel {
+    position: fixed;
+    /* 使用 fixed 定位配合 createPortal */
+    background: rgba(30, 30, 35, 0.95);
+    /* 深色磨砂背景 */
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-m);
-    box-shadow: var(--shadow-l);
-    z-index: 1000;
-    /* 楂樺眰锟?*/
-    min-width: 140px;
-    padding: 4px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(16px);
+    z-index: 9999;
+    overflow: hidden;
+    min-width: 180px;
+    padding: var(--gap-xs);
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -137,41 +269,26 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 6px 10px;
+    padding: 8px 12px;
     border: none;
     background: transparent;
     border-radius: var(--radius-s);
-
-    font-size: var(--fs-xs);
+    font-size: var(--fs-sm);
     color: var(--text-secondary);
     text-align: left;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
 
-/* 序号列专属样式 - Row Number Column */
-.row-number-col,
-.row-number {
-    text-align: center;
-    /* F-03: 序号列居中 */
-    font-variant-numeric: tabular-nums;
-    font-weight: var(--fw-medium);
-    color: var(--text-tertiary);
-    user-select: none;
-    cursor: default;
-    background: var(--surface-elevated);
-}
-
 .type-dropdown-item:hover {
-    background: var(--bg-hover);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
 }
 
 .type-dropdown-item.selected {
-    background: var(--primary-bg);
-    /* light version of primary */
+    background: rgba(var(--primary-rgb), 0.15);
     color: var(--primary);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-medium);
 }
 
 
@@ -181,7 +298,7 @@
     gap: var(--gap-xxs);
 }
 
-/* 缂哄け鍊艰繘搴︽潯鏍峰紡 */
+/* 缺失值进度条样式 */
 .missing-rate-container {
     display: flex;
     align-items: center;
@@ -214,9 +331,7 @@
 
 .statMiniBar {
     height: var(--stat-mini-bar-height);
-    background: transparent
-        /* 锟斤拷为透锟斤拷 */
-    ;
+    background: var(--bg-main);
     border-radius: var(--progress-radius);
     overflow: hidden;
 }
@@ -232,23 +347,22 @@
     color: var(--text-tertiary);
 }
 
-/* ========== 寰瀷鐩存柟锟?========== */
-.mini-chart-inline {
+/* ========== 微型直方图 ========== */
+.headerMiniHistogram {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 2px;
     height: 80px;
     padding: var(--gap-xs) var(--gap-xxs);
-    /* 绉婚櫎鑳屾櫙锟?background: rgba(0, 0, 0, 0.1); */
+    /* 移除背景色 background: rgba(0, 0, 0, 0.1); */
     border-radius: var(--radius-s);
     overflow: hidden;
     margin: var(--gap-xs) 0;
-    border: none;
-    /* 根据用户反馈移除边框 */
+    border: 1px solid var(--border-light);
 }
 
-.bar-inline {
+.histogramBar {
     flex: 1;
     background: var(--primary);
     min-height: 4px;
@@ -257,13 +371,13 @@
     opacity: 0.8;
 }
 
-.bar-inline:hover {
+.histogramBar:hover {
     background: var(--primary);
     opacity: 1;
     transform: scaleY(1.05);
 }
 
-/* ========== 鍒嗙被鏉″舰锟?(Top 5 - 鍨傜洿灞曠ず) ========== */
+/* ========== 分类条形图 (Top 5 - 垂直展示) ========== */
 .headerMiniBarChart {
     display: flex;
     flex-direction: row;
@@ -272,12 +386,11 @@
     gap: 2px;
     height: 80px;
     padding: var(--gap-xs) var(--gap-xxs);
-    /* 绉婚櫎鑳屾櫙锟?background: rgba(0, 0, 0, 0.1); */
+    /* 移除背景色 background: rgba(0, 0, 0, 0.1); */
     border-radius: var(--radius-s);
     overflow: hidden;
     margin: var(--gap-xs) 0;
-    border: none;
-    /* 根据用户反馈移除边框 */
+    border: 1px solid var(--border-light);
 }
 
 .miniBarItem {
@@ -301,17 +414,17 @@
 .miniBar:hover {
     opacity: 1;
     transform: scaleY(1.05);
-    /* 鎮诞鏀惧ぇ */
+    /* 悬浮放大 */
     transform-origin: bottom;
 }
 
-/* ========== 鍗曚竴鍊兼寚绀哄櫒锛堝敮涓€锟?1鐨勫厹搴曞睍绀猴級 ========== */
+/* ========== 单一值指示器（唯一值=1的兜底展示） ========== */
 .single-value-indicator {
-    /* 缁ф壙寰瀷鐩存柟鍥剧殑瀹瑰櫒鏍峰紡锛岀‘淇濋珮搴︾粺涓€ */
+    /* 继承微型直方图的容器样式，确保高度统一 */
     display: flex;
     align-items: center;
     justify-content: center;
-    /* 绉婚櫎杈规鍜岄槾褰憋紝淇濇寔绠€锟?*/
+    /* 移除边框和阴影，保持简洁 */
 }
 
 .single-value-badge {
@@ -319,7 +432,7 @@
     align-items: center;
     gap: var(--gap-xs);
     padding: var(--gap-xs) var(--gap-s);
-    /* 绉婚櫎鑳屾櫙銆佽竟妗嗗拰闃村奖 */
+    /* 移除背景、边框和阴影 */
     font-size: var(--fs-xs);
     color: var(--text-secondary);
     cursor: help;
@@ -341,32 +454,30 @@
 .single-value-text {
     font-weight: var(--fw-bold);
     color: var(--text-primary);
-    font-family: var(--font-mono);
+    font-family: 'Consolas', 'Monaco', monospace;
 }
 
-/* ========== 璇︾粏缁熻闈㈡澘 ========== */
+/* ========== 详细统计面板 ========== */
 .headerDetailedStats {
-    /* 鏀逛负浣跨敤 flex: 1 鎾戞弧鍓╀綑楂樺害锛岀‘淇濋珮搴︾粺涓€ */
+    /* 使用固定高度而非 flex:1，避免窄屏时布局混乱 */
     position: relative;
     width: 100%;
-    flex: 1;
-    /* 鎾戞弧鍓╀綑楂樺害锛屽疄鐜伴珮搴︾粺涓€ */
+    max-height: 300px;
+    /* 限制最大高度 */
     display: flex;
-    /* 鍏朵腑鐨勫唴瀹逛篃鍙兘闇€瑕佷几锟?*/
     flex-direction: column;
 
-    background: transparent
-        /* 锟斤拷为透锟斤拷 */
-    ;
-    /* 浣跨敤涓昏儗鏅壊浠ュ尯锟?*/
+    background: var(--bg-main);
+    /* 使用主背景色以区分 */
     border: 1px solid var(--border-light);
     border-radius: var(--radius-s);
     padding: var(--gap-xs);
     margin-top: var(--gap-xs);
     animation: slideDown var(--transition-fast);
-    /* 纭繚鍐呭涓嶆孩锟?*/
+    /* 确保内容不溢出 */
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-y: auto;
+    /* 内容过多时允许滚动 */
 }
 
 @keyframes slideDown {
@@ -381,57 +492,9 @@
     }
 }
 
-/* 缁熻闈㈡澘閫氱敤鏍峰紡 */
-.numericStatsPanel,
-.categoricalStatsPanel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-xxs);
-}
+/* 统计面板通用样式已移至 StatsPanel.css，此处从略 */
 
-.headerCellStats {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-xxs);
-}
-
-.statHeader {
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-medium);
-    color: var(--text-secondary);
-    margin-bottom: var(--gap-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.statRow {
-    display: flex;
-    justify-content: space-between;
-    padding: var(--gap-xxs) 0;
-    font-size: var(--fs-xs);
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border-light);
-}
-
-.statRow:last-child {
-    border-bottom: none;
-}
-
-.statRow span:first-child {
-    font-weight: var(--fw-medium);
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-    font-size: var(--fs-xxs);
-    letter-spacing: 0.3px;
-}
-
-.statRow span:last-child {
-    font-weight: var(--fw-medium);
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-}
-
-/* 鍒嗙被鍊兼牱锟?*/
+/* 分类值样式 */
 .valueText {
     flex: 1;
     overflow: hidden;
@@ -450,13 +513,13 @@
     font-weight: var(--fw-medium);
 }
 
-/* ========== 琛ㄦ牸琛屽拰鍗曞厓鏍兼牱锟?========== */
+/* ========== 表格行和单元格样式 ========== */
 
-/* 琛ㄤ綋瀹瑰櫒 - 缁熶竴绠＄悊妯悜鍜岀旱鍚戞粴锟?*/
+/* 表体容器 - 统一管理横向和纵向滚动 */
 .simpleTableBody {
     flex: 1;
     overflow: auto;
-    /* 鍚屾椂澶勭悊妯悜鍜岀旱鍚戞粴锟?*/
+    /* 同时处理横向和纵向滚动 */
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
@@ -479,40 +542,26 @@
     background: var(--scrollbar-thumb-hover);
 }
 
-/* 琛屼氦鏇胯儗鏅紙瀵归綈 /design 椤甸潰锛?*/
-.simpleTableRow:nth-child(even) {
-    background: rgba(255, 255, 255, 0.01);
-}
-
-.simpleTableRow:nth-child(even):hover {
-    background: rgba(255, 255, 255, 0.04);
-}
-
 .simpleTableRow {
     display: flex;
     border-bottom: 1px solid var(--border-light);
     transition: background var(--transition-s) var(--ease-out);
-    /* 鏍稿績淇锛氱‘淇濊瀹藉害鎾戝紑锛岃 sticky left 鐢熸晥 */
+    /* 核心修复：确保行宽度撑开，让 sticky left 生效 */
     width: max-content;
     min-width: 100%;
 }
 
-/* Hover 鏁堟灉锛堝榻?/design 椤甸潰锛?*/
-.simpleTableRow:hover {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-/* 绉婚櫎hover鏁堟灉锛屽彧淇濈暀鐐瑰嚮閫変腑鐨勯珮锟?*/
+/* 移除hover效果，只保留点击选中的高亮 */
 
 .enhancedGridCell {
     flex-shrink: 0;
     padding: var(--gap-s);
     display: flex;
     align-items: center;
-    border-right: 1px solid var(--border-light);
+    /* border-right: 移除右侧边框，统一所有列视觉效果 */
     border-bottom: 1px solid var(--border-light);
     font-size: var(--fs-sm);
-    color: var(--text-secondary);
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -521,11 +570,9 @@
     transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-/* 绉婚櫎鍗曞厓鏍糷over鏁堟灉 */
+/* 移除单元格hover效果 */
 
-/* 序号列专属样式 - Row Number Column */
-.enhancedHeaderCell.row-number-col,
-.enhancedGridCell.row-number,
+/* 序号列专属样式 */
 .enhancedHeaderCell-index,
 .enhancedGridCell-index {
     position: sticky;
@@ -535,39 +582,43 @@
     align-items: center;
     /* 确保垂直方向居中 (对于 header 是 flex-col) */
     justify-content: center;
-    /* 确保水平方向居中 - F-03: 修复序号列居中 */
+    /* 确保水平方向居中 */
     font-weight: var(--fw-medium);
     color: var(--text-secondary);
-    background-color: transparent;
-    /* 移除灰色背景 */
+
+    /* ✅ 毛玻璃效果，确保序号始终清晰可读 */
+    background: var(--glass-surface);
+    backdrop-filter: blur(var(--blur-medium));
+    -webkit-backdrop-filter: blur(var(--blur-medium));
+
     /* 移除阴影，用户要求消除灰色阴影 */
     box-shadow: none;
 }
 
-/* 绉婚櫎搴忓彿鍒梙over鏁堟灉 */
+/* 移除序号列hover效果 */
 
-/* 琛屽垪楂樹寒鏁堟灉 */
-/* 琛屽垪楂樹寒鏁堟灉 */
+/* 行列高亮效果 */
+/* 行列高亮效果 */
 .enhancedGridCell.highlightRow {
-    background-color: rgba(10, 132, 255, 0.08) !important;
+    background-color: var(--highlight-row) !important;
 }
 
 /* 修复序号列高亮时的透明度问题（确保不透出下方内容） */
-.enhancedGridCell.row-number.highlightRow {
-    background: rgba(var(--primary-rgb), 0.12) !important;
-    /* 序号列高亮稍浓 */
+.enhancedGridCell-index.highlightRow {
+    background: linear-gradient(var(--highlight-row), var(--highlight-row)), var(--bg-secondary) !important;
 }
 
 .enhancedGridCell.highlightCol {
-    background-color: rgba(10, 132, 255, 0.06) !important;
+    background-color: var(--highlight-col) !important;
 }
 
 .enhancedGridCell.highlightCell {
-    background-color: rgba(10, 132, 255, 0.15) !important;
-    border: 1px solid rgba(10, 132, 255, 0.3);
+    background-color: var(--highlight-cell) !important;
+    border: var(--border-width) solid var(--primary);
+    box-shadow: inset 0 0 0 1px var(--primary);
 }
 
-/* 鍔犺浇鐘讹拷?*/
+/* 加载状态 */
 .loadingPlaceholder {
     display: flex;
     flex-direction: column;
@@ -586,74 +637,90 @@
     border-radius: 50%;
 }
 
-/* 鍒嗛〉锟?*/
+/* 分页器 */
+/* ========== 分页器 (Design Version) ========== */
 .simplePagination {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--gap-l);
-    padding: var(--gap-m);
-    border-top: 1px solid var(--border);
+    /* ✅ 改为居中对齐 */
+    gap: var(--gap-m);
+    /* 按钮和文字之间的间距 */
+    padding: var(--gap-m) var(--gap-l);
+    border-top: 1px solid var(--glass-border);
+    /* 使用 glass border */
+    background: rgba(0, 0, 0, 0.2);
+    /* 半透明背景 */
+    color: var(--text-dim);
+    font-size: var(--fs-xs);
     flex-shrink: 0;
-    background: transparent
-        /* 锟斤拷为透锟斤拷 */
-    ;
 }
 
+/* ✅ 移除 .pagination-controls 容器样式（已不需要） */
+
 .paginationBtn {
-    padding: var(--btn-padding-y) var(--btn-padding-x);
-    background: transparent
-        /* 锟斤拷为透锟斤拷 */
-    ;
-    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    /* 固定宽高 */
+    height: 28px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-s);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     font-size: var(--fs-sm);
     cursor: pointer;
     transition: all var(--transition-s) var(--ease-out);
 }
 
 .paginationBtn:hover:not(:disabled) {
-    background: var(--primary);
-    color: var(--text-inverse);
+    background: rgba(255, 255, 255, 0.1);
     border-color: var(--primary);
-    transform: translateY(-1px);
+    color: var(--primary);
+    box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.3);
+    transform: translateY(0);
+    /* 取消位移，微光效果更稳重 */
 }
 
 .paginationBtn:disabled {
-    opacity: var(--opacity-disabled);
+    opacity: 0.3;
     cursor: not-allowed;
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.02);
 }
 
 .paginationInfo {
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
+    font-weight: var(--fw-medium);
 }
 
 .paginationInfo strong {
     color: var(--text-primary);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
 }
 
 /* ========== Portal Dropdown Menu ========== */
 .type-dropdown-menu {
-    /* 寮哄埗鍥哄畾瀹氫綅鍜屽眰锟?*/
+    /* 强制固定定位和层级 */
     position: fixed;
     z-index: 9999;
 
-    /* 灏哄闄愬埗 - 淇瀹藉害杩囧闂 */
+    /* 尺寸限制 - 修复宽度过宽问题 */
     width: max-content;
     min-width: 140px;
     max-width: 220px;
 
-    /* 澶栬 - 鐜荤拑鎬佹晥锟?*/
-    background: var(--glass-surface);
-    backdrop-filter: blur(var(--blur-medium));
-    border: 1px solid var(--glass-border);
+    /* 外观 - 修复透明度问题，使用实色背景 */
+    background-color: rgb(28, 28, 30);
+    /* 强制不透明 (对应 Apple Dark Surface) */
+    border: 1px solid var(--border);
     border-radius: var(--radius-m);
     box-shadow: var(--shadow-xl);
 
-    /* 甯冨眬 */
+    /* 布局 */
     padding: var(--gap-xs);
     display: flex;
     flex-direction: column;
@@ -687,10 +754,4 @@
     font-weight: var(--fw-medium);
 }
 
-
-/* NULL 鍊兼樉绀烘牱寮忥紙瀵归綈 /design 椤甸潰锛?*/
-.null-indicator {
-    color: var(--text-dim);
-    opacity: 0.5;
-    font-style: italic;
-}
+/* 触发Vite重新编译 - 修复列头宽度问题以覆盖所有列阴影 (2026-01-21) */

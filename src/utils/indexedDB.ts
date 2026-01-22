@@ -63,11 +63,11 @@ export async function saveProjects(projects: Project[]): Promise<void> {
                     fileSize: file.data.fileSize,
                     originalSize: file.data.originalSize,
                     isSampled: file.data.isSampled,
+                    rawContent: file.data.rawContent, // ✅ 保留原始CSV内容，用于刷新后重建（修复数据持久化 #13）
                     // ❌ 删除不可序列化对象
                     originalFile: undefined,
                     rawFile: undefined,
                     file: undefined,
-                    rawContent: undefined, // 大字符串，节省空间
                 } : file.data,
             })),
         };
@@ -144,11 +144,11 @@ export async function saveProject(project: Project): Promise<void> {
                 fileSize: file.data.fileSize,
                 originalSize: file.data.originalSize,
                 isSampled: file.data.isSampled,
+                rawContent: file.data.rawContent, // ✅ 保留原始CSV内容，用于刷新后重建（修复数据持久化 #13）
                 // ❌ 删除不可序列化对象
                 originalFile: undefined,
                 rawFile: undefined,
                 file: undefined,
-                rawContent: undefined,
             } : file.data,
         })),
     };

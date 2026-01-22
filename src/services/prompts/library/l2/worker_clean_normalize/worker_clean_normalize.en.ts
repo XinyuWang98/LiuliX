@@ -16,6 +16,10 @@ export const workerCleanNormalizePrompt: UserPrompt = {
     outputCharts: ['chart'],
     layer: 'L2_EXECUTION',
 
+    // 🚫 Deprecated (2026-01-20)
+    deprecated: true,
+    deprecatedReason: 'Use cleaner-trim-whitespace-v1 or cleaner-standardize-case-v1 instead (SQL-based)',
+
     dimensions: [
         { category: 'industry', value: 'general', label: 'General' },
         { category: 'intent', value: 'exploration', label: 'Explore' },

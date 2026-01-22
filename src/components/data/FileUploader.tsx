@@ -134,12 +134,22 @@ export const FileUploader = forwardRef<FileUploaderRef, FileUploaderProps>(({ on
 
                     if (ext === 'csv') {
                         const analysis = await engine.analyzeCSV(file);
+
+                        // 读取文件内容作为rawContent（用于刷新后重建）
+                        const rawContent = await new Promise<string>((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = (e) => resolve(e.target?.result as string);
+                            reader.onerror = () => reject(new Error('Failed to read file'));
+                            reader.readAsText(file);
+                        });
+
                         const baseResult: ParsedFileData = {
                             fileName: file.name,
                             fileType: 'CSV',
                             fileSize: file.size,
                             originalSize: file.size,
                             originalFile: file,
+                            rawContent, // ✅ 保存原始CSV内容
                             data: [],
                             columns: [],
                             rowCount: analysis.rowCount,

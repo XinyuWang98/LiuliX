@@ -12,7 +12,8 @@ import { SEED_CLEANING_PROMPTS } from '../seedCleaningPrompts';
 export function buildCleaningRouterPromptInternal(columns: any[], stats: any[]): string {
     // Get all cleaning templates
     let templates = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
-        .filter(p => p.id.startsWith('cleaner-'));
+        .filter(p => p.id.startsWith('cleaner-'))
+        .filter(p => !p.deprecated);  // 🆕 v2.3 Filter deprecated prompts
 
     // Defensive programming: if no templates found, try re-registering seed templates
     if (templates.length === 0) {

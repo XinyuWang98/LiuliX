@@ -16,6 +16,10 @@ export const workerCleanDedupPrompt: UserPrompt = {
     outputCharts: ['chart'],
     layer: 'L2_EXECUTION',
 
+    // ⚠️ Deprecated (v2.3)
+    deprecated: true,
+    deprecatedReason: 'Use cleaner-remove-duplicates-v1 instead (SQL-based, faster and more reliable)',
+
     dimensions: [
         { category: 'industry', value: 'general', label: 'General' },
         { category: 'intent', value: 'exploration', label: 'Explore' },

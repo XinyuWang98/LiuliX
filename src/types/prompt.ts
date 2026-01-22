@@ -134,9 +134,113 @@ export interface UserPrompt {
     isBuiltIn: boolean; // 是否内置
     updatedAt: number;
 
+    // 🆕 废弃标记 (v2.2)
+    /**
+     * 是否已废弃
+     * 废弃的 Prompt 不会出现在 Router 推荐列表中
+     */
+    deprecated?: boolean;
+
+    /**
+     * 废弃原因说明
+     * 建议包含替代方案（如：Use cleaner-fill-null-median-v1 instead）
+     */
+    deprecatedReason?: string;
+
+    // 🆕 参数注入配置 (v2.3)
+    /**
+     * 统计参数自动注入配置（可选）
+     * 
+     * 用于声明哪些参数需要从 ColumnStats 自动注入精确值
+     * 支持用户自定义 Prompt 时灵活配置注入规则
+     * 
+     * 使用场景：
+     * - cleaner-fill-null-median-v1: 需要从 DuckDB 获取精确的 median 值
+     * - cleaner-filter-outliers-iqr-v1: 需要计算 IQR 边界值
+     * 
+     * 示例：
+     * ```typescript
+     * statsInjection: {
+     *   median_value: 'median',           // 简单映射：直接取 stats.median
+     *   q1_minus_iqr: (stats) => stats.q1 - 1.5 * stats.iqr  // 计算公式
+     * }
+     * ```
+     * 
+     * 架构优势：
+     * - 声明式配置：注入规则与 Prompt 定义在一起
+     * - 用户可编辑：UI 界面可提供注入规则配置面板
+     * - 完全动态：无需修改注入器代码即可支持新 Prompt
+     */
+    statsInjection?: StatsInjectionConfig;
+
     // UI 展示增强字段
     isOfficial?: boolean; // 是否官方认证
     usageCount?: number; // 使用次数
+}
+
+/**
+ * 统计参数注入配置
+ * 
+ * Key: 参数名（必须在 inputVariables 中声明）
+ * Value: 提取规则（字符串映射或计算函数）
+ * 
+ * 示例：
+ * ```typescript
+ * {
+ *   median_value: 'median',  // 字符串：直接映射 ColumnStats 字段
+ *   iqr_lower: (stats) => stats.q1 - 1.5 * stats.iqr  // 函数：自定义计算
+ * }
+ * ```
+ */
+export type StatsInjectionConfig = Record<string, StatsExtractor>;
+
+/**
+ * 统计值提取器
+ * 
+ * 两种模式：
+ * 1. 字符串：直接映射 ColumnStats 字段名
+ *    - 示例：'median' → stats.median
+ *    - 适用场景：简单值提取
+ * 
+ * 2. 函数：自定义计算公式
+ *    - 示例：(stats) => stats.q1 - 1.5 * stats.iqr
+ *    - 适用场景：需要计算的复杂值
+ * 
+ * 返回值：
+ * - number: 数值参数（如 median_value）
+ * - string: 字符串参数（如 mode_value 的分类值）
+ * - undefined: 值无法提取（将保留 AI 猜测值）
+ */
+export type StatsExtractor =
+    | 'min' | 'max' | 'mean' | 'median' | 'std' | 'q1' | 'q3' | 'iqr' | 'mode' | 'skewness' | 'kurtosis' | 'cv'  // ColumnStats 字段名 (v2.3 新增 mean, cv)
+    | ((stats: ColumnStats) => number | string | undefined);  // 计算函数
+
+/**
+ * 列统计信息（从 DuckDB 计算）
+ * 
+ * 注意：此类型在 src/types/data.ts 中已定义，这里仅引用
+ */
+export interface ColumnStats {
+    name: string;
+    dtype: string;
+    total: number;
+    nullCount: number;
+    unique?: number;
+    // 数值型统计
+    min?: number;
+    max?: number;
+    mean?: number;
+    median?: number;
+    std?: number;
+    q1?: number;
+    q3?: number;
+    iqr?: number;
+    skewness?: number;
+    kurtosis?: number;
+    cv?: number;  // 🆕 v2.3 变异系数
+    // 分类型统计
+    mode?: string | number;
+    topValues?: Array<{ value: any; count: number }>;
 }
 
 // ========== 3. 注册表接口 ==========

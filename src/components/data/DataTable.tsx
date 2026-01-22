@@ -93,7 +93,7 @@ function InlineColumnStats({ stats }: { stats: ColumnStats }) {
                 fontSize: '11px',
                 color: 'var(--text-secondary)'
             }}>
-                <span>Unique: <strong style={{ color: 'var(--text-primary)' }}>{stats.unique_count}</strong></span>
+                <span>{stats.unique_count} unique</span>
                 <span style={{ color: stats.missing_ratio > 0.1 ? 'var(--warning)' : 'inherit' }}>
                     Missing: <strong>{(stats.missing_ratio * 100).toFixed(1)}%</strong>
                 </span>

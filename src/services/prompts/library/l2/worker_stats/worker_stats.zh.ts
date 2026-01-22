@@ -29,6 +29,19 @@ export const workerStatsPrompt: UserPrompt = {
     // ✅ Router 模式
     executionMode: 'TEMPLATE_FILL',
 
+    // 🆕 v2.3 统计值注入配置
+    statsInjection: {
+        mean_value: 'mean',
+        median_value: 'median',
+        std_value: 'std',
+        min_value: 'min',
+        max_value: 'max',
+        q1_value: 'q1',
+        q3_value: 'q3',
+        skewness_value: 'skewness',  // 🆕 v2.3 新增
+        kurtosis_value: 'kurtosis'   // 🆕 v2.3 新增
+    },
+
     // 预置 Python 代码模板
     codeTemplate: `import matplotlib.pyplot as plt
 import pandas as pd
@@ -42,18 +55,18 @@ plt.switch_backend('Agg')
 column_name = {{column_name}}
 col_data = pd.to_numeric(df[column_name], errors='coerce').dropna()
 
-# 计算统计指标
+# 统计指标从 DuckDB 注入（不在代码中重复计算）
 stats_dict = {
     '计数': len(col_data),
-    '均值': col_data.mean(),
-    '标准差': col_data.std(),
-    '最小值': col_data.min(),
-    'Q1': col_data.quantile(0.25),
-    '中位数': col_data.median(),
-    'Q3': col_data.quantile(0.75),
-    '最大值': col_data.max(),
-    '偏度': col_data.skew(),
-    '峰度': col_data.kurtosis()
+    '均值': {{mean_value}},
+    '标准差': {{std_value}},
+    '最小值': {{min_value}},
+    'Q1': {{q1_value}},
+    '中位数': {{median_value}},
+    'Q3': {{q3_value}},
+    '最大值': {{max_value}},
+    '偏度': {{skewness_value}},
+    '峰度': {{kurtosis_value}}
 }
 
 # 可视化统计指标
@@ -119,7 +132,7 @@ print(json.dumps(result))`,
 }
 `,
 
-    inputVariables: ['column_name'],
+    inputVariables: ['column_name', 'mean_value', 'median_value', 'std_value', 'min_value', 'max_value', 'q1_value', 'q3_value', 'skewness_value', 'kurtosis_value'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

@@ -29,6 +29,13 @@ export const workerTrendPrompt: UserPrompt = {
     // ✅ Router 模式
     executionMode: 'TEMPLATE_FILL',
 
+    // 🆕 v2.3 统计值注入
+    statsInjection: {
+        mean_value: 'mean',
+        max_value: 'max',
+        min_value: 'min'
+    },
+
     // 预置 Python 代码模板
     codeTemplate: `import matplotlib.pyplot as plt
 import pandas as pd
@@ -55,9 +62,10 @@ y_values = pd.to_numeric(df_copy[value_col], errors='coerce')
 fig, ax = plt.subplots(figsize=(12, 6), dpi=72)
 ax.plot(x_dates, y_values, 'b-', alpha=0.6, label=value_col)
 
-# 添加移动平均
+#// 添加移动平均（使用 mean 统计值）
 window = min(7, len(y_values) // 5) if len(y_values) > 10 else 3
 if window > 1:
+    # 使用简单移动平均，不重新计算
     ma = y_values.rolling(window=window).mean()
     ax.plot(x_dates, ma, 'r-', linewidth=2, label=f'{window}日移动平均')
 
@@ -81,7 +89,7 @@ buffer.seek(0)
 image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
 plt.close(fig)
 
-summary = f"{value_col} 呈{trend_desc}趋势 (斜率={slope:.4f}), 最高值={y_values.max():.2f}, 最低值={y_values.min():.2f}"
+summary = f"{value_col} 呈{trend_desc}趋势 (斜率={slope:.4f}), 最高值={{{max_value}}:.2f}, 最低值={{{min_value}}:.2f}"
 
 result = {"image": f"data:image/png;base64,{image_base64}", "summary": summary}
 print(json.dumps(result))`,
@@ -114,7 +122,7 @@ print(json.dumps(result))`,
 }
 `,
 
-    inputVariables: ['date_col', 'value_col'],
+    inputVariables: ['date_col', 'value_col', 'mean_value', 'max_value', 'min_value'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

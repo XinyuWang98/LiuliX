@@ -5,28 +5,32 @@ import { UserPrompt } from '@/types/prompt';
  * 用均值、众数或指定值填充缺失值
  */
 export const workerCleanFillnaPrompt: UserPrompt = {
-    id: 'worker-clean-fillna-v1',
-    name: 'worker_clean_fillna',
-    title: '缺失值填充',
-    description: '填充数据集中的缺失值，支持均值、众数、中位数或指定值填充',
+  id: 'worker-clean-fillna-v1',
+  name: 'worker_clean_fillna',
+  title: '缺失值填充',
+  description: '填充数据集中的缺失值，支持均值、众数、中位数或指定值填充',
 
-    
 
-    // 能力包配置 (v2.1)
-    slug: 'worker-clean-fillna-v1',
-    packageId: 'basic',
-    requiredPackages: [],
-    outputCharts: ['chart'],
-layer: 'L2_EXECUTION',
 
-    dimensions: [
-        { category: 'industry', value: 'general', label: '通用' },
-        { category: 'intent', value: 'cleaning', label: '清洗' },
-        { category: 'method', value: 'imputation', label: '填充' },
-        { category: 'output', value: 'sql', label: 'SQL' }
-    ],
+  // 能力包配置 (v2.1)
+  slug: 'worker-clean-fillna-v1',
+  packageId: 'basic',
+  requiredPackages: [],
+  outputCharts: ['chart'],
+  layer: 'L2_EXECUTION',
 
-    template: `
+  // 🚫 标记为废弃 (2026-01-20)
+  deprecated: true,
+  deprecatedReason: '推荐使用 cleaner-fill-null-* 系列（SQL 模板，参数更精确）。参见：cleaner-fill-null-mean-v1, cleaner-fill-null-median-v1, cleaner-fill-null-mode-v1',
+
+  dimensions: [
+    { category: 'industry', value: 'general', label: '通用' },
+    { category: 'intent', value: 'cleaning', label: '清洗' },
+    { category: 'method', value: 'imputation', label: '填充' },
+    { category: 'output', value: 'sql', label: 'SQL' }
+  ],
+
+  template: `
 你是一个专业的数据清洗专家。
 请针对表 "__TABLE_NAME__" 中的 "{{column_name}}" 列进行缺失值填充。
 
@@ -67,9 +71,9 @@ layer: 'L2_EXECUTION',
 }
 `,
 
-    inputVariables: ['df_summary', 'column_name', 'fill_strategy', 'fill_value'],
-    author: 'System',
-    version: '1.0.0',
-    isBuiltIn: true,
-    updatedAt: Date.now()
+  inputVariables: ['df_summary', 'column_name', 'fill_strategy', 'fill_value'],
+  author: 'System',
+  version: '1.0.0',
+  isBuiltIn: true,
+  updatedAt: Date.now()
 };

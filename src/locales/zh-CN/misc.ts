@@ -54,8 +54,9 @@ export const grid = {
     loadStatsFailed: '加载统计信息失败',
     loadDataFailed: '加载数据失败',
     nullRate: '缺失率: {rate}%',
-    uniqueValues: '{count} 个唯一值',
+    uniqueValues: '{count} 唯一值',
     missingPercent: '{percent}% 缺失',
+    missingRate: '缺失率',  // 🆕 v2.3 新增
     selectedColumns: '已选择 {count}/{total} 列',
     selectColumns: '选择列',
     clickToExpand: '点击展开统计',
