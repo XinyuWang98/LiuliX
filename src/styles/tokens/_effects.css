@@ -9,7 +9,7 @@
     /* Glassmorphism System */
 
     /* 1. Surfaces - 进一步提高透明度以提升清透感 */
-    --glass-surface: rgba(255, 255, 255, 0.005);
+    --glass-surface: rgba(255, 255, 255, 0.06);
     /* 从 0.01 进一步降低到 0.005 */
     --glass-secondary: rgba(255, 255, 255, 0.02);
     /* 从 0.03 降低到 0.02 */

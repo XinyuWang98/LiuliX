@@ -188,4 +188,117 @@ export const prompt = {
         req5Suffix: ' code with Chinese comments',
         req6: '6. Output only pure JSON, no other text',
     },
+
+    // Playground Editor
+    playground: {
+        title: 'Prompt Editor Playground',
+        noPreview: 'Enter template content to preview',
+        mockDataService: 'Using MockDataService (Titanic Dataset)',
+        sampleRowsAvailable: 'Sample Rows Available',
+        detectedVariables: 'Detected Variables',
+        availableStatsContext: 'Available Stats Context',
+        mockContextSimulator: 'Mock Context Simulator',
+        titleLabel: 'Title',
+        descriptionLabel: 'Description',
+        finalPromptPreview: 'Final Prompt Preview',
+        basicInfo: 'Basic Info',
+        template: 'Template',
+        templateDescription: 'Use {{variable}} to insert dynamic content',
+        backButton: 'Back',
+        savePromptButton: 'Save Prompt',
+        testButton: 'Test Validation',
+        validationResult: 'Validation Result',
+        validationPassed: 'Template is valid',
+        validationFailed: 'Found {count} issue(s)',
+        promptType: 'Prompt Type',
+        mockDataset: 'Mock Dataset',
+        switchDataset: 'Switch Dataset',
+    },
+
+    // Prompt Builder
+    builder: {
+        title: 'Prompt Builder',
+        header: {
+            saveTemplate: 'Save Template',
+            exportJson: 'Export JSON',
+            help: 'Help',
+        },
+        codeEditor: {
+            autoDetected: '(Auto Detected)',
+            smartParameterize: 'Smart Parameterize',
+            pasteExample: 'Paste Example',
+            clear: 'Clear',
+            importFile: 'Import File',
+        },
+        emptyState: {
+            title: 'Start Building Your Smart Prompt',
+            description: 'Transform your code into reusable Prompt templates with parameterization, package imports, and intelligent recognition',
+            step1: 'Paste or write code in the editor below',
+            step2: 'Click "Smart Parameterize" button for auto-detection',
+            step3: 'Preview and export as JSON template',
+        },
+        recognition: {
+            success: 'Recognition Successful',
+            language: 'Language',
+            confidence: 'Confidence',
+            collapse: 'Collapse',
+            confirmParameterize: 'Confirm Parameterize',
+            previewTemplate: 'Preview Template',
+            manualAdjust: 'Manual Adjust',
+        },
+        imports: {
+            title: 'Python Package Imports',
+            selectPackage: 'Select Common Package',
+            addButton: 'Add',
+            autoDetected: 'Auto Detected',
+            manualAdded: 'Manually Added',
+            removeTooltip: 'Remove this import',
+            emptyHint: 'No imports yet. Add common packages or write import statements in your code',
+        },
+        params: {
+            inputTitle: 'Input Parameters',
+            outputTitle: 'Output Parameters',
+            validated: 'Validated',
+            statsValue: 'Stats Value',
+        },
+        alerts: {
+            noLanguage: 'Unable to recognize code language. Please check if your code is Python or SQL',
+            duplicateImport: 'This import already exists!',
+        },
+        // Pyodide Compatibility Warnings
+        pyodideWarning: {
+            title: 'Pyodide Compatibility Warning',
+            incompatiblePackages: 'Detected {count} package(s) not available in browser environment',
+            viewDetails: 'View Details',
+            reason: 'Reason',
+            alternative: 'Alternative',
+            incompatibleTag: 'Incompatible',
+        },
+        // SQL Dangerous Operation Warnings
+        sqlWarning: {
+            title: 'SQL Dangerous Operation Warning',
+            dangerousOperations: 'Detected {count} high-risk SQL operation(s)',
+            severity: {
+                high: 'High',
+                medium: 'Medium',
+                low: 'Low',
+            },
+            viewDetails: 'View Details',
+        },
+    },
+
+    // Python Package Descriptions (for Prompt Builder)
+    packages: {
+        pandas: 'Data processing and analysis',
+        numpy: 'Numerical computing',
+        matplotlib: 'Basic visualization',
+        seaborn: 'Statistical visualization',
+        plotly: 'Interactive charts',
+        scipy: 'Scientific computing',
+        sklearn: 'Machine learning',
+        datetime: 'Date and time',
+        json: 'JSON processing',
+        base64: 'Base64 encoding',
+        io: 'IO operations',
+    },
 };

@@ -1,3 +1,4 @@
+import React from 'react';
 import './AscensionBackground.css';
 
 /**
@@ -9,11 +10,17 @@ import './AscensionBackground.css';
  * Usage: Place this component at the top level of a page or layout. 
  * It uses fixed positioning with z-index: -1 to stay behind content.
  */
-export const AscensionBackground = () => {
+export interface AscensionBackgroundProps {
+    children?: React.ReactNode;
+    className?: string;
+}
+
+export const AscensionBackground = ({ children, className = '' }: AscensionBackgroundProps) => {
     return (
-        <div className="ascension-bg-container">
+        <div className={`ascension-bg-container ${className}`}>
             <div className="ascension-core-beam" /> {/* [NEW] The Holy Light Pillar */}
             <div className="ascension-bg-rain" />
+            {children}
         </div>
     );
 };

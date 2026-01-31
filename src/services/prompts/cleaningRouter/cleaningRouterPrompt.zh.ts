@@ -5,6 +5,7 @@
 import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { SEED_CLEANING_PROMPTS } from '../seedCleaningPrompts';
+import { isFeatureEnabled } from '@/config/featureFlags';
 
 /**
  * 构建清洗 Router Prompt（中文）
@@ -21,6 +22,27 @@ export function buildCleaningRouterPromptInternal(columns: any[], stats: any[]):
         promptRegistry.registerBatch(SEED_CLEANING_PROMPTS);
         templates = promptRegistry.listPrompts({ layer: 'L2_EXECUTION' })
             .filter(p => p.id.startsWith('cleaner-'));
+    }
+
+    // 🆕 Phase 1 - 类型预过滤 (Feature Flag控制)
+    if (isFeatureEnabled('ENABLE_TYPE_CONTEXT_PASSING')) {
+        const availableTypes = new Set(stats.map(s => s.type));
+        const beforeCount = templates.length;
+
+        templates = templates.filter(t => {
+            // 无类型约束的模板默认兼容
+            if (!t.inputDataTypes || t.inputDataTypes.length === 0) {
+                return true;
+            }
+            // 检查是否有任何一列类型匹配模板要求
+            return t.inputDataTypes.some(requiredType =>
+                availableTypes.has(requiredType)
+            );
+        });
+
+        logger.log('AI清洗', '类型预过滤完成', {
+            data: { before: beforeCount, after: templates.length }
+        });
     }
 
     // 再次检查
@@ -40,18 +62,25 @@ export function buildCleaningRouterPromptInternal(columns: any[], stats: any[]):
         const params = t.inputVariables.length > 0
             ? `(参数: ${t.inputVariables.join(', ')})`
             : '(无参数)';
-        return `- ${t.id}: ${t.title} ${params}\n  ${t.description}`;
+
+        // 🆕 显示类型约束 (Phase 1)
+        const typeConstraint = t.inputDataTypes && t.inputDataTypes.length > 0
+            ? `\n  适用类型: ${t.inputDataTypes.join(', ')}`
+            : '';
+
+        return `- ${t.id}: ${t.title} ${params}${typeConstraint}\n  ${t.description}`;
     }).join('\n\n');
 
     // 分析数据质量问题
     const qualityIssues = summarizeQualityIssuesInternal(columns, stats);
 
-    // 列信息摘要
-    const columnSummary = columns.slice(0, 10).map(c => {
-        const colStat = stats.find(s => s.name === c.name);
-        const nullRate = colStat ? ((colStat.nullCount / colStat.total) * 100).toFixed(1) : '0.0';
-        return `- ${c.name} (${c.type}), 缺失率: ${nullRate}%`;
-    }).join('\n');
+    // 列信息摘要 - 🆕 显示更详细的类型信息 (Phase 1)
+    const columnSummary = stats.slice(0, 10).map(stat => {
+        const nullRate = ((stat.nullCount / stat.total) * 100).toFixed(1);
+        const uniqueRate = ((stat.uniqueCount / stat.total) * 100).toFixed(1);
+
+        return `- **${stat.name}**\n  类型: ${stat.type}\n  缺失率: ${nullRate}%\n  唯一值比例: ${uniqueRate}%`;
+    }).join('\n\n');
 
     return `你是数据清洗专家。请根据数据质量问题，从【可用清洗模板】中选择2-5个最合适的。
 
@@ -66,8 +95,11 @@ ${templateList}
 
 ## 任务要求
 1. 从上述模板中选择 **2-5 个**最有价值的清洗操作
-2. 为每个推荐填写具体的参数（如列名、填充值等）
-3. 给出简短的推荐理由
+2. **重要**：选择模板时必须匹配列的实际类型
+   - 示例："cleaner-standardize-date-v1" 只能用于 VARCHAR/TEXT 类型的列
+   - 示例：如果列已经是 "TIMESTAMP" 类型，则不需要日期标准化
+3. 为每个推荐填写具体的参数（如列名、填充值等）
+4. 给出简短的推荐理由
 
 ## 输出格式 (严格JSON)
 \`\`\`json

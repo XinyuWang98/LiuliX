@@ -1,0 +1,267 @@
+/**
+ * Prompt Editor Styles
+ * 
+ * Reusing layout classes from PromptDetailModal.css to ensure consistency.
+ * Layout: 2-column grid (Left: Config, Right: Preview)
+ */
+
+.prompt-editor-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    padding: var(--spacing-lg) var(--spacing-md);
+    gap: var(--spacing-md);
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.editor-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Main Layout Grid */
+.editor-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* 50% 50% split */
+    gap: var(--gap-l);
+    flex: 1;
+    overflow: hidden;
+    /* Prevent scroll on parent */
+    min-height: 0;
+}
+
+/* Column Containers */
+.editor-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-l);
+    overflow-y: auto;
+    padding-right: var(--spacing-xs);
+    /* Space for scrollbar */
+}
+
+/* Sections */
+.editor-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-m);
+}
+
+.section-title {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Input Styles Override/Enhancement */
+.editor-textarea {
+    font-family: var(--font-family-mono);
+    line-height: 1.5;
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    padding: var(--spacing-sm);
+    resize: none;
+    min-height: 200px;
+}
+
+.editor-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+/* Variable Card */
+.variable-card {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.variable-name {
+    font-family: var(--font-family-mono);
+    color: var(--accent-cyan);
+    font-weight: 500;
+}
+
+/* Preview Context */
+.context-preview-box {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+/* ===== 替代内联样式的类（P0 整改）===== */
+
+/* Header 布局类 */
+.editor-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.editor-header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Section 间距类 */
+.section-spacer-top {
+    margin-top: var(--gap-xl);
+}
+
+.section-description {
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+    line-height: 1.4;
+}
+
+/* 统计面板布局 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.stats-item-scaled {
+    transform: scale(0.8);
+    transform-origin: top left;
+}
+
+/* 预览框高亮版本 */
+.preview-box-highlighted {
+    min-height: 150px;
+    border: 1px solid var(--primary-color);
+}
+
+.preview-box-auto-bottom {
+    margin-top: auto;
+}
+
+/* Playground 页面专用样式 */
+.playground-page {
+    padding-top: 60px;
+    /* 避免被顶部导航栏遮挡 */
+}
+
+/* ===== 增强卡片交互（P2 优化）===== */
+.editor-col {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.3s var(--ease-out);
+}
+
+.editor-col:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    border-top-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== 校验功能样式（P1 新增）===== */
+
+/* Test 按钮 */
+.test-button {
+    align-self: flex-start;
+    margin-top: var(--spacing-xs);
+}
+
+/* 校验结果面板 */
+.validation-panel {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.validation-panel-title {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+/* 校验问题项 */
+.validation-issue {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+}
+
+.validation-issue-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 3px solid var(--error-color);
+    color: var(--error-color);
+}
+
+.validation-issue-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 3px solid var(--warning-color);
+    color: var(--warning-color);
+}
+
+.validation-issue-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 3px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.validation-issue-success {
+    background: rgba(34, 197, 94, 0.1);
+    border-left: 3px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.validation-issue-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.validation-issue-content {
+    flex: 1;
+}
+
+.validation-issue-message {
+    font-weight: var(--fw-medium);
+}
+
+.validation-issue-suggestion {
+    margin-top: 4px;
+    opacity: 0.8;
+    font-size: var(--fs-xxs);
+}
+
+/* ===== Prompt 类型选择器样式 ===== */
+.prompt-type-selector {
+    margin-bottom: var(--spacing-sm);
+}

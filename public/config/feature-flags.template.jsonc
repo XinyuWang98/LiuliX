@@ -66,6 +66,10 @@
     // AST 代码增强器（v3.0，默认开启）
     // 使用位置：src/services/prompts/guards/codeEnhancer.ts
     "USE_AST_CODE_ENHANCER": true,
+    // 类型上下文传递机制（开发中）
+    // 功能说明：在Router/Worker Prompt中传递列类型信息，提升AI生成代码的类型安全性
+    // 使用位置：src/services/prompts/cleaningRouter.ts, src/services/prompts/insightRouter.ts
+    "ENABLE_TYPE_CONTEXT_PASSING": false,
     // ========== 系统控制模块 ==========
     // 高级 API 配置界面（MVP 阶段隐藏）
     // 使用位置：src/components/settings/APISettings.tsx

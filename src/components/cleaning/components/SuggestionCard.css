@@ -42,7 +42,7 @@
 /* ... existing hover ... */
 .suggestionCard:hover {
     border-color: var(--primary);
-    background: var(--bg-hover);
+    /* background: var(--bg-hover); */
     transform: translateY(-2px);
     /* 增加悬浮感 */
     box-shadow: var(--shadow-lv2);

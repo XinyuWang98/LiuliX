@@ -11,6 +11,9 @@ export const cleanerFillNullMedianPrompt: UserPrompt = {
     requiredPackages: [],
     outputCharts: [],
 
+    // 🆕 类型约束 (Phase 1)
+    inputDataTypes: ['INTEGER', 'BIGINT', 'DOUBLE', 'DECIMAL'],
+
     layer: 'L2_EXECUTION',
     executionMode: 'TEMPLATE_FILL',
 

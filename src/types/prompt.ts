@@ -3,6 +3,18 @@
  * 基于 v2.0 四维矩阵架构 (Industry x Intent x Method x Output)
  */
 
+// ========== 0. 数据类型定义 ==========
+
+/**
+ * DuckDB 数据类型枚举
+ * 用于 Prompt 模板的类型约束和类型安全检查
+ */
+export type DuckDBDataType =
+    | 'VARCHAR' | 'TEXT'
+    | 'INTEGER' | 'BIGINT' | 'DOUBLE' | 'DECIMAL'
+    | 'DATE' | 'TIMESTAMP' | 'TIME'
+    | 'BOOLEAN';
+
 // ========== 1. 核心架构定义 ==========
 
 /**
@@ -98,13 +110,60 @@ export interface UserPrompt {
      * 示例：
      * - worker-cluster-v1: ['Cluster']  → KMeans 聚类后生成 Cluster 列
      * - worker-outlier-v1: []           → 不生成新列，仅绘图（可省略此字段）
+     * - worker-correlation-v1: ['Correlation_Score']  → 生成相关性分数列
      * 
-     * 架构扩展点（预留）：
-     * - 未来可扩展为对象数组: { name: string, type: 'numeric'|'categorical', description: string }
-     * - 支持用户编辑界面的输入提示
-     * - 支持版本管理时的 schema diff 对比
+     * 实现要点：
+     * - 字段为空或未定义：表示不生成新列
+     * - ['*']: 表示动态生成列，列名不可预测（罕见，谨慎使用）
+     * 
+     * 注意事项：
+     * - 此字段仅声明**新生成**的列，不包括输入数据中已有的列
+     * - 执行引擎需要在校验阶段将这些列加入白名单
      */
     outputColumns?: string[];
+
+    /**
+     * 🆕 输入数据类型约束 (Phase 1 - 类型传递机制)
+     * 
+     * 用途：声明此 Prompt 模板适用于哪些数据类型的列
+     * 
+     * 使用场景：
+     * 1. Router 预过滤：L1 Router 在推荐模板时，过滤掉类型不兼容的模板
+     * 2. AI 提示：在 Router Prompt 中显示模板的类型约束，帮助 AI 做出正确选择
+     * 3. 运行时验证：执行前检查输入列类型是否匹配（可选）
+     * 
+     * 示例：
+     * - cleaner-standardize-date-v1: ['VARCHAR', 'TEXT']  → 只能用于字符串列
+     * - cleaner-cast-to-numeric-v1: ['VARCHAR', 'TEXT']  → 只能用于字符串列
+     * - worker-correlation-v1: ['INTEGER', 'BIGINT', 'DOUBLE', 'DECIMAL']  → 只能用于数值列
+     * - worker-distribution-v1: undefined  → 不限制类型（默认）
+     * 
+     * 注意事项：
+     * - 未定义或空数组表示不限制类型（适用于所有列）
+     * - 定义后，Router 会自动过滤掉类型不兼容的模板
+     */
+    inputDataTypes?: DuckDBDataType[];
+
+    /**
+     * 🆕 输出数据类型 (Phase 1 - 类型传递机制)
+     * 
+     * 用途：声明此 Prompt 执行后，目标列的数据类型
+     * 
+     * 使用场景：
+     * 1. 类型追踪：清洗操作后，更新 DuckDB schema 的预期类型
+     * 2. 依赖分析：后续 Prompt 可以根据输出类型选择合适的分析方法
+     * 3. 类型链验证：检查 Prompt 链的类型兼容性
+     * 
+     * 示例：
+     * - cleaner-standardize-date-v1: 'DATE'  → 输出 DATE 类型
+     * - cleaner-cast-to-numeric-v1: 'DOUBLE'  → 输出 DOUBLE 类型
+     * - worker-distribution-v1: undefined  → 不改变列类型（仅可视化）
+     * 
+     * 注意事项：
+     * - 仅适用于清洗类 Prompt（cleaner-*），分析类通常不改变类型
+     * - 未定义表示不改变输入列的类型
+     */
+    outputDataType?: DuckDBDataType;
 
     // ========== Router 模式扩展 (L1 推荐式) ==========
 
@@ -176,6 +235,26 @@ export interface UserPrompt {
     // UI 展示增强字段
     isOfficial?: boolean; // 是否官方认证
     usageCount?: number; // 使用次数
+}
+
+/**
+ * 多语言支持的 UserPrompt (用于存储)
+ * 
+ * 用户的自定义 Prompt 需要支持多语言，因此核心文本字段
+ * 使用 Record<string, string> 存储多语言版本。
+ * 
+ * 示例:
+ * title: { 'zh-CN': '分析', 'en-US': 'Analyze' }
+ */
+export interface MultiLangUserPrompt extends Omit<UserPrompt, 'title' | 'description' | 'template' | 'codeTemplate'> {
+    title: Record<string, string>;
+    description: Record<string, string>;
+    template: Record<string, string>;
+    codeTemplate?: Record<string, string>;
+
+    // 标识字段
+    isCustom: true;
+    lastModified: number;
 }
 
 /**

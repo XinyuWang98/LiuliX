@@ -109,7 +109,7 @@ function checkFreeTrialLimit(type) {
             // 1. 静态白名单
             if (validInviteCodes.has(code)) return true;
             // 2. 动态日期码 (新增 VIP/SPONSOR 前缀)
-            const DYNAMIC_PREFIXES = ['REDDIT', 'LIULI', 'PH', 'VIP', 'SPONSOR'];
+            const DYNAMIC_PREFIXES = ['REDDIT', 'LIULI', 'PH', 'VIP', 'SPONSOR', 'LINKEDIN'];
             const now = new Date();
             // 使用 US Pacific Time (America/Los_Angeles)
             const formatter = new Intl.DateTimeFormat('en-CA', {
@@ -490,7 +490,7 @@ apiRouter.post('/validate-invite-code', (req, res) => {
 
         // 2. 检查动态日期码 (格式: 前缀 + YYYYMMDD, e.g., REDDIT20260115)
         // 允许的前缀列表 (新增 VIP/SPONSOR)
-        const DYNAMIC_PREFIXES = ['REDDIT', 'LIULI', 'PH', 'VIP', 'SPONSOR'];
+        const DYNAMIC_PREFIXES = ['REDDIT', 'LIULI', 'PH', 'VIP', 'SPONSOR', 'LINKEDIN'];
 
         // 获取服务器当前日期 (UTC-8 US Pacific Time)
         const now = new Date();

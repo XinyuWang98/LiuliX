@@ -29,6 +29,8 @@
     "@duckdb/react-duckdb": "^1.29.1-dev132.0",
     "@google/generative-ai": "^0.24.1",
     "@mlc-ai/web-llm": "^0.2.80",
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "@monaco-editor/react": "^4.7.0",
     "@tanstack/react-table": "^8.20.5",
     "@types/prismjs": "^1.26.5",
     "@types/react-syntax-highlighter": "^15.5.13",

@@ -21,6 +21,8 @@ import { logger } from './utils/logger';
 import { LiuliShowcase } from './pages/LiuliShowcase'; // [NEW] Design System
 import { initializeConfig } from './services/configService'; // [NEW 2026-01-08] Feature Flags配置
 import { WhitepaperLayout } from './components/whitepaper/WhitepaperLayout'; // [NEW] Whitepaper
+import PromptEditorPlayground from './pages/playground/PromptEditorPlayground'; // 🆕 Playground
+import { PromptBuilder } from './pages/prompt-builder/PromptBuilder'; // 🆕 Prompt Builder
 import './App.css';
 import { ingestFilesAndCreateProject } from './utils/projectImporter';
 import { saveProjects, loadProjects } from './utils/indexedDB';
@@ -40,7 +42,7 @@ function AppContent() {
     }, [language, t]);
 
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'workbench' | 'design' | 'welcome' | 'whitepaper'>('welcome');
+    const [activeView, setActiveView] = useState<'dashboard' | 'library' | 'workbench' | 'design' | 'welcome' | 'whitepaper' | 'prompt_builder' | 'v2'>('welcome');
     const [cleaningTrigger, setCleaningTrigger] = useState(0);
     const [showLeft, setShowLeft] = useState(() => localStorage.getItem('layout.showLeft') !== 'false');
     const [showRight, setShowRight] = useState(() => localStorage.getItem('layout.showRight') !== 'false');
@@ -74,6 +76,17 @@ function AppContent() {
                 }
             } else if (pathname === '/design') {
                 setActiveView('design'); // Design System
+            } else if (pathname === '/playground/prompt') {
+                setActiveView('playground_prompt' as any); // 🆕 Playground Route
+            } else if (pathname === '/prompt-builder') {
+                // 🆕 Prompt Builder Route（Feature Flag 控制）
+                if (isFeatureEnabled('ENABLE_PROMPT_BUILDER')) {
+                    setActiveView('prompt_builder');
+                } else {
+                    // 未启用时重定向到旧版 Playground
+                    window.history.replaceState({}, '', '/playground/prompt');
+                    setActiveView('playground_prompt' as any);
+                }
             } else if (pathname.startsWith('/whitepaper')) {
                 setActiveView('whitepaper'); // Whitepaper Portal
             } else if (pathname === '/' || pathname === '/welcome') {
@@ -279,6 +292,12 @@ function AppContent() {
                     navigateTo('/welcome');
                     setActiveView('welcome');
                 }} />
+            ) : activeView === 'playground_prompt' as any ? (
+                /* [NEW] Playground Route */
+                <PromptEditorPlayground />
+            ) : activeView === 'prompt_builder' ? (
+                /* [NEW] Prompt Builder Route */
+                <PromptBuilder />
             ) : selectedProject === null ? (
                 /* [NEW] 独立产品首页 (无侧边栏) */
                 <LandingPage onFilesUploaded={handleWelcomeUpload} />
