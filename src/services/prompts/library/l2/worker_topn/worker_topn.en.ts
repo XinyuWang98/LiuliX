@@ -142,7 +142,7 @@ Please find the top {{n}} records with {{#if ascending}}smallest{{else}}largest{
 }
 `,
 
-    inputVariables: ['df_summary', 'column_name', 'n', 'ascending'],
+    inputVariables: ['column_name', 'n', 'ascending'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

@@ -291,7 +291,7 @@ export type StatsInjectionConfig = Record<string, StatsExtractor>;
  * - undefined: 值无法提取（将保留 AI 猜测值）
  */
 export type StatsExtractor =
-    | 'min' | 'max' | 'mean' | 'median' | 'std' | 'q1' | 'q3' | 'iqr' | 'mode' | 'skewness' | 'kurtosis' | 'cv'  // ColumnStats 字段名 (v2.3 新增 mean, cv)
+    | 'min' | 'max' | 'mean' | 'median' | 'std' | 'stddev' | 'q1' | 'q3' | 'iqr' | 'mode' | 'skewness' | 'kurtosis' | 'cv'  // ColumnStats 字段名 (v2.3 新增 mean, cv, stddev)
     | ((stats: ColumnStats) => number | string | undefined);  // 计算函数
 
 /**
@@ -311,9 +311,10 @@ export interface ColumnStats {
     mean?: number;
     median?: number;
     std?: number;
+    stddev?: number;  // 🆕 v2.3 标准差（DuckDB格式）
     q1?: number;
     q3?: number;
-    iqr?: number;
+    iqr?: number;  // 🆕 v2.3 四分位距 (Q3 - Q1)
     skewness?: number;
     kurtosis?: number;
     cv?: number;  // 🆕 v2.3 变异系数

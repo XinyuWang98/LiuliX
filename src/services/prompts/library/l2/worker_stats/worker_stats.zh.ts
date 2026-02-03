@@ -33,7 +33,7 @@ export const workerStatsPrompt: UserPrompt = {
     statsInjection: {
         mean_value: 'mean',
         median_value: 'median',
-        std_value: 'std',
+        std_value: 'stddev',
         min_value: 'min',
         max_value: 'max',
         q1_value: 'q1',

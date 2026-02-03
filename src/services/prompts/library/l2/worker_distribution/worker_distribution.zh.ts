@@ -33,7 +33,7 @@ export const workerDistributionPrompt: UserPrompt = {
     statsInjection: {
         mean_value: 'mean',
         median_value: 'median',
-        std_value: 'std'
+        std_value: 'stddev'
     },
 
     // 预置 Python 代码模板（与英文版一致，使用 seaborn）
@@ -76,7 +76,7 @@ if is_numeric:
     ax2.set_ylabel('密度')
     ax2.grid(alpha=0.3)
     
-    // 统计量从 DuckDB 注入
+    # 统计量从 DuckDB 注入
     mean_val = {{mean_value}}
     median_val = {{median_value}}
     std_val = {{std_value}}

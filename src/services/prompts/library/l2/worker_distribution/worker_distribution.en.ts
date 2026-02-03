@@ -30,7 +30,7 @@ export const workerDistributionPrompt: UserPrompt = {
     statsInjection: {
         mean_value: 'mean',
         median_value: 'median',
-        std_value: 'std'
+        std_value: 'stddev'
     },
 
     codeTemplate: `import matplotlib.pyplot as plt
@@ -71,7 +71,7 @@ if is_numeric:
     ax2.set_ylabel('Density')
     ax2.grid(alpha=0.3)
     
-    // Stats injected from DuckDB
+    # Stats injected from DuckDB
     mean_val = {{mean_value}}
     median_val = {{median_value}}
     std_val = {{std_value}}

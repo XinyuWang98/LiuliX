@@ -83,6 +83,7 @@ export async function getColumnStats(
                             q3: Number(numericRow['q3']),
                             max: Number(numericRow['max_val']),
                             stddev: Number(numericRow['stddev_val']),
+                            iqr: Number(numericRow['q3']) - Number(numericRow['q1']),  // 🆕 v2.3 四分位距
                             skewness: Number(numericRow['skewness_val']),
                             kurtosis: Number(numericRow['kurtosis_val']),
                             cv: numericRow['cv_val'] !== null ? Number(numericRow['cv_val']) : undefined
