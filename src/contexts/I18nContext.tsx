@@ -24,6 +24,13 @@ export function getCurrentLanguage(): LanguageCode {
     return currentGlobalLanguage;
 }
 
+/**
+ * 仅用于非组件环境测试 (e.g. Node.js scripts)
+ */
+export function setGlobalLanguageForTesting(lang: LanguageCode) {
+    currentGlobalLanguage = lang;
+}
+
 // i18n 上下文类型
 interface I18nContextType {
     language: LanguageConfig;

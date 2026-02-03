@@ -1,0 +1,104 @@
+/**
+ * CodeEditorPanel 样式
+ * Monaco Editor 容器样式
+ */
+
+.code-editor-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-surface, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    border-radius: var(--radius-l, 12px);
+    overflow: hidden;
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--gap-m, 16px);
+    background: rgba(20, 20, 25, 0.8);
+    backdrop-filter: blur(var(--blur-light));
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.editor-language {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary, #a0a0b0);
+}
+
+.btn-smart-param {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs, 8px);
+}
+
+/* Monaco Editor Container */
+.monaco-editor-container {
+    flex: 1;
+    overflow: hidden;
+    /* Monaco Editor 自带背景，这里只控制容器 */
+}
+
+/* 自定义 Monaco Editor 主题（通过全局CSS） */
+.monaco-editor-container .monaco-editor {
+    background: transparent !important;
+}
+
+.monaco-editor-container .monaco-editor .margin,
+.monaco-editor-container .monaco-editor .monaco-editor-background {
+    background: transparent !important;
+}
+
+/* 去除 Monaco Editor 焦点时的蓝色高光边框 */
+.monaco-editor-container .monaco-editor,
+.monaco-editor-container .monaco-editor .overflow-guard,
+.monaco-editor-container .monaco-editor .monaco-scrollable-element {
+    outline: none !important;
+}
+
+.editor-footer {
+    display: flex;
+    gap: var(--gap-s, 12px);
+    padding: var(--gap-m, 16px);
+    background: rgba(20, 20, 25, 0.8);
+    backdrop-filter: blur(var(--blur-light));
+    border-top: 1px solid var(--glass-border);
+}
+
+/* 按钮样式（如果尚未在父级定义） */
+.btn-primary {
+    padding: 10px 20px;
+    background: var(--color-accent, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: var(--radius-m, 8px);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 200ms;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--color-accent-hover, #6d28d9);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-text {
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--text-secondary, #a0a0b0);
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 200ms;
+}
+
+.btn-text:hover {
+    color: var(--text-primary, #ffffff);
+}

@@ -95,21 +95,19 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, isSe
         if (!suggestion.sql) return '';
 
         let sql = suggestion.sql;
+        const csvName = fileName || 'your_table.csv';
 
         // 方案1：替换__TABLE_NAME__占位符
         if (sql.includes('__TABLE_NAME__')) {
-            const csvName = fileName || 'your_table.csv';
-            sql = sql.replace(/__TABLE_NAME__/g, csvName);
+            sql = sql.replace(/__TABLE_NAME__/g, `"${csvName}"`);
         }
-        // 方案2：替换DuckDB实际表名(如t_xxx_working)
-        else if (sql.match(/t_\d+_(original|working)/g)) {
-            const csvName = fileName || 'your_table.csv';
-            sql = sql.replace(/t_\d+_(original|working)/g, csvName);
+        // 方案2：替换DuckDB实际表名（UUID格式：t_{uuid}_working 或 t_{uuid}_original）
+        else if (sql.match(/t_[0-9a-f_]+_(original|working)/gi)) {
+            sql = sql.replace(/t_[0-9a-f_]+_(original|working)/gi, `"${csvName}"`);
         }
 
         // 添加提示注释
-        // Note: Using a localized string for the SQL comment
-        const warningText = t('cleaning.sqlWarning', { fileName: fileName || 'your_table.csv' });
+        const warningText = t('cleaning.sqlWarning', { fileName: csvName });
         return `-- ${warningText}\n${sql}`;
     })();
 

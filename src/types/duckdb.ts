@@ -36,10 +36,13 @@ export interface ColumnStats {
         min: number;
         q1: number;
         median: number;
+        mean: number;      // 🆕 v2.3 平均值
         q3: number;
         max: number;
         stddev: number;
         skewness: number;
+        kurtosis: number;
+        cv?: number;       // 🆕 v2.3 变异系数 (CV = StdDev / Mean)
     };
     categoricalStats?: {
         topValues: Array<{ value: string; count: number }>;

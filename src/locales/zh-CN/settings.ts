@@ -104,6 +104,14 @@ export const settings = {
     localModelDesc: '首次下载 4.3GB 模型，约 10-30 分钟，之后永久本地可用',
     localModelInfo: '💡 模型: {model} (中文强，速度快)',
 
+    // Local Router Configuration
+    localRouterTitle: '本地 Router 加速',
+    localRouterDesc: '使用 Transformers.js (~200MB) 进行意图识别和参数提取，无需联网',
+    downloadRouterModel: '下载 Router 模型',
+    routerModelReady: 'Router 模型已就绪',
+    routerModelNotReady: 'Router 模型未加载',
+    routerModelDownloading: '正在下载 Router 模型...',
+
     // 性能配置
     performanceSlowWarning: '⚠️ 可能较慢',
     performanceColumnsUnit: '列',

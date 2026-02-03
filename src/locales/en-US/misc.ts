@@ -63,8 +63,11 @@ export const grid = {
     loadStatsFailed: 'Failed to load stats',
     loadDataFailed: 'Failed to load data',
     nullRate: 'Missing rate: {rate}%',
-    uniqueValues: '{count} unique values',
+    uniqueValues: '{count} unique',
     missingPercent: '{percent}% missing',
+    missingRate: 'Missing',  // 🆕 v2.3 added
+    singleValueLabel: 'Unique Value:',  // 🆕 Single value indicator label
+    singleValueTitle: 'Constant column: all values are {value}',  // 🆕 Single value indicator tooltip
     selectedColumns: 'Selected {count}/{total} columns',
     selectColumns: 'Select Columns',
     clickToExpand: 'Click to expand stats',

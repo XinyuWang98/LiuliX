@@ -9,6 +9,7 @@ from .exception_wrap import ExceptionWrapRule
 from .groupby_enhance import GroupByEnhanceRule
 from .plot_protection import PlotProtectionRule
 from .sklearn_protection import SklearnProtectionRule
+from .json_serializer import JsonSerializerRule  # 🆕 JSON序列化器注入
 
 __all__ = [
     'EnhancementRule',
@@ -19,5 +20,6 @@ __all__ = [
     'GroupByEnhanceRule',
     'PlotProtectionRule',
     'SklearnProtectionRule',
+    'JsonSerializerRule',  # 🆕
 ]
 

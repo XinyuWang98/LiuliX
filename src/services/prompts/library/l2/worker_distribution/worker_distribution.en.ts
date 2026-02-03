@@ -26,6 +26,13 @@ export const workerDistributionPrompt: UserPrompt = {
 
     executionMode: 'TEMPLATE_FILL',
 
+    // 🆕 v2.3 Stats injection config
+    statsInjection: {
+        mean_value: 'mean',
+        median_value: 'median',
+        std_value: 'stddev'
+    },
+
     codeTemplate: `import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -64,13 +71,13 @@ if is_numeric:
     ax2.set_ylabel('Density')
     ax2.grid(alpha=0.3)
     
-    # Statistics
-    mean_val = col_data.mean()
-    median_val = col_data.median()
-    std_val = col_data.std()
+    # Stats injected from DuckDB
+    mean_val = {{mean_value}}
+    median_val = {{median_value}}
+    std_val = {{std_value}}
     skew_val = col_data.skew()
     skew_desc = 'right-skewed' if skew_val > 0.5 else ('left-skewed' if skew_val < -0.5 else 'symmetric')
-    summary = f"{column_name}: Mean={mean_val:.2f}, Median={median_val:.2f}, Std={std_val:.2f}, Distribution is {skew_desc}"
+    summary = f"{column_name}: mean={mean_val:.2f}, median={median_val:.2f}, std={std_val:.2f}, distribution is {skew_desc}"
 
 else:
     # Categorical Data: Bar Chart
@@ -133,7 +140,7 @@ Please analyze the distribution characteristics of column \`{{column_name}}\` in
 }
 `,
 
-    inputVariables: ['column_name'],
+    inputVariables: ['column_name', 'mean_value', 'median_value', 'std_value'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

@@ -53,7 +53,33 @@ description: Vercel 混合应用（Vite + Express Serverless）部署与调试�
      -d '{"messages":[{"role":"user","content":"test"}]}'
    ```
 
+
 6. 如果本地测试失败，检查 Terminal 中的错误日志
+
+## Pre-deployment检查（强烈推荐）⭐
+
+在提交并推送代码前，建议先运行 `/pre-deploy-check` workflow进行完整检查：
+
+- ✅ Git工作区状态（无未提交文件）
+- ✅ TypeScript类型检查
+- ✅ 大文件检测（>100MB）
+- ✅ Vercel环境变量验证
+- ✅ Deployment Protection配置
+
+**快速执行**：
+```bash
+# 运行 Agent workflow
+/pre-deploy-check
+
+# 或手动执行关键检查
+git status --short  # 应为空
+npm run type-check  # 应通过
+npm run build       # 应成功
+```
+
+**如果跳过此步骤**，请至少确认：
+- [ ] `git status` 无未提交的重要文件
+- [ ] `npm run type-check` 通过
 
 ## 部署到 Vercel
 
@@ -63,6 +89,7 @@ description: Vercel 混合应用（Vite + Express Serverless）部署与调试�
    git commit -m "deploy: <描述>"
    git push
    ```
+
 
 8. 检查 Vercel 构建日志
    - 访问 https://vercel.com/your-project/deployments
@@ -117,3 +144,22 @@ description: Vercel 混合应用（Vite + Express Serverless）部署与调试�
     - 本地：编辑 `.env.local`
     - Vercel：Dashboard → Settings → Environment Variables
     - 添加后需要**重新部署**才能生效
+
+---
+
+## 部署失败排查
+
+如果部署失败或遇到问题，运行 `/fix-deployment-issue` workflow进行系统化诊断：
+
+**常见问题快速索引**：
+- Build Failed → 查看问题1（TypeScript/Import错误）
+- API返回HTML → 查看问题2（Deployment Protection）
+- Git Push失败 → 查看问题3（Large File）
+- UI改动未生效 → 查看问题4（未提交文件/错误URL）
+- 环境变量问题 → 查看问题5（环境范围设置）
+
+**或直接运行**：
+```bash
+/fix-deployment-issue
+```
+

@@ -81,8 +81,11 @@ const results: TestResult[] = [];
             const timeline: TestResult['timeline'] = [];
             const insights: InsightDetail[] = [];
             const errors: string[] = [];
+            const validationBlocks: any[] = [];  // 🆕 列名验证失败记录
+            const injectionFailures: any[] = [];  // 🆕 参数注入失败记录
             let columnCount = 0;
             let promptLength = 0;
+            let currentPromptId = '';  // 🆕 跟踪当前处理的PromptID
 
             // 监听控制台日志
             page.on('console', async msg => {
@@ -292,6 +295,45 @@ const results: TestResult[] = [];
                         note
                     });
                 }
+
+                // 🆕 监控参数注入
+                if (text.includes('[参数注入器]')) {
+                    // 跟踪当前PromptID
+                    const promptIdMatch = text.match(/worker-[\w-]+/);
+                    if (promptIdMatch) currentPromptId = promptIdMatch[0];
+
+                    // 捕获注入失败 ⭐ 关键
+                    if (text.includes('无法提取') || text.includes('保留原值')) {
+                        const paramMatch = text.match(/参数\s+(\w+)\s+无法提取/);
+                        if (paramMatch && currentPromptId) {
+                            injectionFailures.push({
+                                promptId: currentPromptId,
+                                param: paramMatch[1],
+                                reason: 'Field not found in stats',
+                                timestamp: parseTime(text)
+                            });
+                            console.log(`    ⚠️ [参数注入失败] ${currentPromptId} - ${paramMatch[1]}`);
+                        }
+                    }
+                }
+
+                // 🆕 监控列名验证
+                if (text.includes('[列名校验]')) {
+                    if (text.includes('❌ 未通过') || text.includes('invalidColumns')) {
+                        try {
+                            const invalidColsMatch = text.match(/invalidColumns:\s*\[([^\]]+)\]/);
+                            if (invalidColsMatch && currentPromptId) {
+                                const cols = invalidColsMatch[1].split(',').map(c => c.trim().replace(/['"]/g, ''));
+                                validationBlocks.push({
+                                    promptId: currentPromptId,
+                                    invalidColumns: cols,
+                                    timestamp: parseTime(text)
+                                });
+                                console.log(`    ⚠️ [列名验证失败] ${currentPromptId} - ${cols.join(', ')}`);
+                            }
+                        } catch (e) { }
+                    }
+                }
             });
 
             // 1. 加载页面
@@ -316,6 +358,17 @@ const results: TestResult[] = [];
                     } catch (e) { }
                     localStorage.setItem('use_local_model', 'false');
                     localStorage.setItem('app_has_run_before', 'true');
+
+                    // 🆕 清除远程Feature Flag缓存（防止覆盖）
+                    localStorage.removeItem('feature_flags_remote');
+                    localStorage.removeItem('feature_flags_remote_timestamp');
+
+                    // 🆕 使用兜底邀请码
+                    localStorage.setItem('liulix_invite_code', 'LIULIX2026');
+
+                    // 🆕 强制关闭邀请码Feature Flag（localStorage优先级最高）
+                    const flags = { ENABLE_INVITE_CODE_GATE: false };
+                    localStorage.setItem('feature_flags', JSON.stringify(flags));
                 });
                 await page.reload({ waitUntil: 'networkidle0' });
             }
@@ -390,7 +443,9 @@ const results: TestResult[] = [];
                 },
                 insights: insights,
                 timeline: timeline,
-                errors: errors
+                errors: errors,
+                injectionFailures: injectionFailures,  // 🆕 参数注入失败记录
+                validationBlocks: validationBlocks     // 🆕 列名验证失败记录
             });
 
             isFirstRun = false; // Next datasets will be warm

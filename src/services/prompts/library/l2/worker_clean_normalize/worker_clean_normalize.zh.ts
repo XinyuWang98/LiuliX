@@ -5,28 +5,32 @@ import { UserPrompt } from '@/types/prompt';
  * 统一文本格式：去空格、统一大小写等
  */
 export const workerCleanNormalizePrompt: UserPrompt = {
-    id: 'worker-clean-normalize-v1',
-    name: 'worker_clean_normalize',
-    title: '文本标准化',
-    description: '标准化文本列格式，包括去除首尾空格、统一大小写、替换特殊字符',
+  id: 'worker-clean-normalize-v1',
+  name: 'worker_clean_normalize',
+  title: '文本标准化',
+  description: '标准化文本列格式，包括去除首尾空格、统一大小写、替换特殊字符',
 
-    
 
-    // 能力包配置 (v2.1)
-    slug: 'worker-clean-normalize-v1',
-    packageId: 'basic',
-    requiredPackages: [],
-    outputCharts: ['chart'],
-layer: 'L2_EXECUTION',
 
-    dimensions: [
-        { category: 'industry', value: 'general', label: '通用' },
-        { category: 'intent', value: 'cleaning', label: '清洗' },
-        { category: 'method', value: 'normalization', label: '标准化' },
-        { category: 'output', value: 'sql', label: 'SQL' }
-    ],
+  // 能力包配置 (v2.1)
+  slug: 'worker-clean-normalize-v1',
+  packageId: 'basic',
+  requiredPackages: [],
+  outputCharts: ['chart'],
+  layer: 'L2_EXECUTION',
 
-    template: `
+  // 🚫 标记为废弃 (2026-01-20)
+  deprecated: true,
+  deprecatedReason: '推荐使用 cleaner-trim-whitespace-v1 或 cleaner-standardize-case-v1（SQL 模板）',
+
+  dimensions: [
+    { category: 'industry', value: 'general', label: '通用' },
+    { category: 'intent', value: 'cleaning', label: '清洗' },
+    { category: 'method', value: 'normalization', label: '标准化' },
+    { category: 'output', value: 'sql', label: 'SQL' }
+  ],
+
+  template: `
 你是一个专业的数据清洗专家。
 请针对表 "__TABLE_NAME__" 中的 "{{column_name}}" 列进行文本标准化。
 
@@ -69,9 +73,9 @@ layer: 'L2_EXECUTION',
 }
 `,
 
-    inputVariables: ['df_summary', 'column_name', 'normalize_options'],
-    author: 'System',
-    version: '1.0.0',
-    isBuiltIn: true,
-    updatedAt: Date.now()
+  inputVariables: ['df_summary', 'column_name', 'normalize_options'],
+  author: 'System',
+  version: '1.0.0',
+  isBuiltIn: true,
+  updatedAt: Date.now()
 };

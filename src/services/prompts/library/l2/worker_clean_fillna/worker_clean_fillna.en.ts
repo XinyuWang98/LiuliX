@@ -16,6 +16,10 @@ export const workerCleanFillnaPrompt: UserPrompt = {
     outputCharts: ['chart'],
     layer: 'L2_EXECUTION',
 
+    // 🚫 Deprecated (2026-01-20)
+    deprecated: true,
+    deprecatedReason: 'Use cleaner-fill-null-* series instead (SQL-based, more accurate parameters). See: cleaner-fill-null-mean-v1, cleaner-fill-null-median-v1, cleaner-fill-null-mode-v1',
+
     dimensions: [
         { category: 'industry', value: 'general', label: 'General' },
         { category: 'intent', value: 'exploration', label: 'Explore' },

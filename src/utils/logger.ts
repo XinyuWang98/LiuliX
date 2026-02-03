@@ -18,6 +18,8 @@ export type ServiceName =
     | 'AI配置'  // 🆕 AI配置与推荐
     | 'AI代码增强'  // 🆕 AI代码增强服务
     | '本地模型'
+    | 'LocalRouter' // 🆕 本地 Router AI
+    | 'LocalRouterWorker' // 🆕 本地 Router AI Worker
     | 'DuckDB'
     | '数据清洗'
     | '数据准备'  // 🆕 数据准备服务(采样+脱敏)
@@ -40,7 +42,8 @@ export type ServiceName =
     | '报告'  // 🆕 报告生成服务
     | '诊断工具'  // 🆕 WebLLM诊断等工具
     | '日志捕获'  // 🆕 日志捕获工具
-    | '列名校验';  // 🆕 列名校验工具
+    | '列名校验'  // 🆕 列名校验工具
+    | '参数注入器';  // 🆕 v2.3 参数注入器
 
 export interface LogOptions {
     data?: any; // 附加数据

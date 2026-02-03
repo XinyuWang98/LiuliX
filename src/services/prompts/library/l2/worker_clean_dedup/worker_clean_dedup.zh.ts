@@ -5,28 +5,31 @@ import { UserPrompt } from '@/types/prompt';
  * 按指定列或全行去重，删除重复记录
  */
 export const workerCleanDedupPrompt: UserPrompt = {
-    id: 'worker-clean-dedup-v1',
-    name: 'worker_clean_dedup',
-    title: '去除重复行',
-    description: '删除数据集中的重复行，可按指定列或全行去重',
+  id: 'worker-clean-dedup-v1',
+  name: 'worker_clean_dedup',
+  title: '去除重复行',
+  description: '删除数据集中的重复行，可按指定列或全行去重',
 
-    
 
-    // 能力包配置 (v2.1)
-    slug: 'worker-clean-dedup-v1',
-    packageId: 'basic',
-    requiredPackages: [],
-    outputCharts: ['chart'],
-layer: 'L2_EXECUTION',
 
-    dimensions: [
-        { category: 'industry', value: 'general', label: '通用' },
-        { category: 'intent', value: 'cleaning', label: '清洗' },
-        { category: 'method', value: 'deduplication', label: '去重' },
-        { category: 'output', value: 'sql', label: 'SQL' }
-    ],
+  // 能力包配置 (v2.1)
+  slug: 'worker-clean-dedup-v1',
+  packageId: 'basic',
+  requiredPackages: [],
+  outputCharts: ['chart'],
+  layer: 'L2_EXECUTION',
 
-    template: `
+  // ⚠️ 已废弃 (v2.3)
+  deprecated: true,
+  deprecatedReason: 'Use cleaner-remove-duplicates-v1 instead (SQL-based, faster and more reliable)',
+  dimensions: [
+    { category: 'industry', value: 'general', label: '通用' },
+    { category: 'intent', value: 'cleaning', label: '清洗' },
+    { category: 'method', value: 'deduplication', label: '去重' },
+    { category: 'output', value: 'sql', label: 'SQL' }
+  ],
+
+  template: `
 你是一个专业的数据清洗专家。
 请针对表 "__TABLE_NAME__" 进行去重操作。
 
@@ -63,9 +66,9 @@ layer: 'L2_EXECUTION',
 }
 `,
 
-    inputVariables: ['df_summary', 'dedup_columns'],
-    author: 'System',
-    version: '1.0.0',
-    isBuiltIn: true,
-    updatedAt: Date.now()
+  inputVariables: ['df_summary', 'dedup_columns'],
+  author: 'System',
+  version: '1.0.0',
+  isBuiltIn: true,
+  updatedAt: Date.now()
 };

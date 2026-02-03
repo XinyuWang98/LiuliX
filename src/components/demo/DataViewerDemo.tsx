@@ -26,8 +26,11 @@ interface ColumnStats {
         median: number;
         q3: number;
         max: number;
+        mean: number;
         stddev: number;
         skewness: number;
+        kurtosis: number;
+        cv?: number;
     };
     categoricalStats?: {
         topValues: Array<{ value: string; count: number }>;
@@ -71,7 +74,7 @@ export const DataViewerDemo = () => {
                     uniqueCount: 1240,
                     missingRatio: 0,
                     distribution: [20, 35, 50, 45, 40, 30, 15, 5],
-                    numericStats: { min: 1, q1: 310, median: 620, q3: 930, max: 1240, stddev: 358.2, skewness: 0.02 }
+                    numericStats: { min: 1, q1: 310, median: 620, mean: 615, q3: 930, max: 1240, stddev: 358.2, skewness: 0.02, kurtosis: -0.5, cv: 0.58 }
                 },
                 {
                     name: 'name',
@@ -111,7 +114,7 @@ export const DataViewerDemo = () => {
                     uniqueCount: 52,
                     missingRatio: 0,
                     distribution: [5, 15, 35, 48, 52, 45, 28, 12],
-                    numericStats: { min: 18, q1: 25, median: 32, q3: 45, max: 78, stddev: 12.5, skewness: 0.85 }
+                    numericStats: { min: 18, q1: 25, median: 32, mean: 34, q3: 45, max: 78, stddev: 12.5, skewness: 0.85, kurtosis: 1.2, cv: 0.37 }
                 },
                 {
                     name: 'city',
@@ -320,6 +323,7 @@ export const DataViewerDemo = () => {
                     stat={stats.categoricalStats}
                     type={stats.type}
                     columnName={stats.name}
+                    total={activeFile?.rows || 0}
                 />
             );
         }

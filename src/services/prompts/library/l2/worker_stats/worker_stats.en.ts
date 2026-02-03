@@ -25,10 +25,21 @@ export const workerStatsPrompt: UserPrompt = {
         { category: 'output', value: 'table', label: 'Table' }
     ],
 
-    // Router mode
+    // ✅ Router mode
     executionMode: 'TEMPLATE_FILL',
 
-    // Preset Python code template
+    // 🆕 v2.3 Stats injection config
+    statsInjection: {
+        mean_value: 'mean',
+        median_value: 'median',
+        std_value: 'stddev',
+        min_value: 'min',
+        max_value: 'max',
+        q1_value: 'q1',
+        q3_value: 'q3'
+    },
+
+    // Python code template
     codeTemplate: `import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -41,18 +52,18 @@ plt.switch_backend('Agg')
 column_name = {{column_name}}
 col_data = pd.to_numeric(df[column_name], errors='coerce').dropna()
 
-# Calculate statistics
+# Stats injected from DuckDB (no duplicate calculation)
 stats_dict = {
     'Count': len(col_data),
-    'Mean': col_data.mean(),
-    'Std': col_data.std(),
-    'Min': col_data.min(),
-    'Q1': col_data.quantile(0.25),
-    'Median': col_data.median(),
-    'Q3': col_data.quantile(0.75),
-    'Max': col_data.max(),
-    'Skewness': col_data.skew(),
-    'Kurtosis': col_data.kurtosis()
+    'Mean': {{mean_value}},
+    'Std': {{std_value}},
+    'Min': {{min_value}},
+    'Q1': {{q1_value}},
+    'Median': {{median_value}},
+    'Q3': {{q3_value}},
+    'Max': {{max_value}},
+    'Skew': col_data.skew(),
+    'Kurt': col_data.kurtosis()
 }
 
 # Visualize statistics
@@ -118,7 +129,7 @@ Please perform descriptive statistical analysis on column \`{{column_name}}\` in
 }
 `,
 
-    inputVariables: ['column_name'],
+    inputVariables: ['column_name', 'mean_value', 'median_value', 'std_value', 'min_value', 'max_value', 'q1_value', 'q3_value'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

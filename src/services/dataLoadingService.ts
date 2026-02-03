@@ -26,28 +26,47 @@ export class DataLoadingService {
         // 优先使用原始文件对象
         let rawFile = file.data.rawFile || file.data.originalFile || file.data.file;
 
-        // 回退：如果没有原始文件，从 JSON 数据重建 CSV
+        // 回退：如果没有原始文件，按优先级重建
         if (!rawFile) {
-            console.warn('⚠️ 原始文件对象不存在，尝试从 JSON 数据重建 CSV');
-            const data = file.data.data;
-
-            if (!data || data.length === 0) {
-                throw new Error('无法获取原始文件对象且无数据可重建');
+            // 方案1: 从 rawContent 重建（推荐路径）
+            if (file.data.rawContent) {
+                const blob = new Blob([file.data.rawContent], { type: 'text/csv' });
+                rawFile = new File([blob], file.data.fileName, { type: 'text/csv' });
+                logger.log('数据分析', '从rawContent重建File对象成功', {
+                    data: { fileName: file.data.fileName, size: blob.size }
+                });
             }
+            // 方案2: 从 JSON 数据重建（备用路径，兼容旧数据）
+            else if (file.data.data && Array.isArray(file.data.data) && file.data.data.length > 0) {
+                logger.warn('数据分析', '使用data数组重建CSV（非最优路径）', {
+                    data: {
+                        rowCount: file.data.data.length
+                    }
+                });
 
-            // 从 JSON 重建 CSV
-            const headers = Object.keys(data[0]);
-            let csvContent = headers.join(',') + '\n';
-            data.forEach((row: any) => {
-                csvContent += headers.map((h: string) => {
-                    const val = row[h];
-                    return val === null || val === undefined ? '' : String(val);
-                }).join(',') + '\n';
-            });
+                const headers = Object.keys(file.data.data[0]);
+                let csvContent = headers.join(',') + '\n';
+                file.data.data.forEach((row: any) => {
+                    csvContent += headers.map((h: string) => {
+                        const val = row[h];
+                        return val === null || val === undefined ? '' : String(val);
+                    }).join(',') + '\n';
+                });
 
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            rawFile = new File([blob], file.data.fileName, { type: 'text/csv' });
-            logger.log('数据分析', '从 JSON 重建CSV成功', { count: data.length });
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                rawFile = new File([blob], file.data.fileName, { type: 'text/csv' });
+                logger.log('数据分析', '从data数组重建CSV成功', {
+                    data: { rowCount: file.data.data.length }
+                });
+            }
+            // 方案3: 无法重建，抛出明确错误
+            else {
+                throw new Error(
+                    '无法重建文件：缺少 rawContent 和 data 数组。' +
+                    '可能原因：项目数据损坏或使用了旧版本保存格式。' +
+                    '请尝试重新上传文件。'
+                );
+            }
         }
 
         const result = await engine.ingestCSV(rawFile, {

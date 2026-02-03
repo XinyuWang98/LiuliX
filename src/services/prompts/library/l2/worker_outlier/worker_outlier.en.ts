@@ -26,6 +26,13 @@ export const workerOutlierPrompt: UserPrompt = {
 
     executionMode: 'TEMPLATE_FILL',
 
+    // 🆕 v2.3 Stats injection config
+    statsInjection: {
+        q1_value: 'q1',
+        q3_value: 'q3',
+        iqr_value: 'iqr'
+    },
+
     codeTemplate: `import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -38,10 +45,10 @@ plt.switch_backend('Agg')
 column_name = {{column_name}}
 col_data = pd.to_numeric(df[column_name], errors='coerce').dropna()
 
-# IQR method for outlier detection
-Q1 = col_data.quantile(0.25)
-Q3 = col_data.quantile(0.75)
-IQR = Q3 - Q1
+# IQR method (stats from DuckDB)
+Q1 = {{q1_value}}
+Q3 = {{q3_value}}
+IQR = {{iqr_value}}
 lower_bound = Q1 - 1.5 * IQR
 upper_bound = Q3 + 1.5 * IQR
 
@@ -127,7 +134,7 @@ Please detect outliers in column \`{{column_name}}\` in DataFrame \`df\`.
 }
 `,
 
-    inputVariables: ['column_name'],
+    inputVariables: ['column_name', 'q1_value', 'q3_value', 'iqr_value'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,

@@ -17,6 +17,7 @@ interface CategoricalStatsPanelProps {
     stat: CategoricalStats;
     type: string;
     columnName: string;
+    total: number; // 总行数，用于计算百分比
 }
 
 // 简单的辅助格式化函数
@@ -43,20 +44,26 @@ const formatDisplayValue = (value: any, type: string, columnName: string): strin
     return str;
 };
 
-export const CategoricalStatsPanel: React.FC<CategoricalStatsPanelProps> = ({ stat, type, columnName }) => {
+export const CategoricalStatsPanel: React.FC<CategoricalStatsPanelProps> = ({ stat, type, columnName, total }) => {
+    // 取前10个值（如果有的话）
+    const topTenValues = stat.topValues.slice(0, 10);
+
     return (
         <div className="stats-panel categorical-panel">
-            <div className="panel-header">TOP 5 VALUES</div>
-            <div className="separator"></div>
+            <div className="panel-header">TOP 10 VALUES</div>
             <div className="panel-body">
-                {stat.topValues.map((item, idx) => (
-                    <div key={idx} className="stat-row">
-                        <span className="stat-label text-ellipsis" title={String(item.value)}>
-                            {formatDisplayValue(item.value, type, columnName)}
-                        </span>
-                        <span className="stat-value">{item.count}</span>
-                    </div>
-                ))}
+                {topTenValues.map((item, idx) => {
+                    // 计算百分比
+                    const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : '0.0';
+                    return (
+                        <div key={idx} className="stat-row">
+                            <span className="stat-label text-ellipsis" title={String(item.value)}>
+                                {formatDisplayValue(item.value, type, columnName)}
+                            </span>
+                            <span className="stat-value">{percentage}%</span>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

@@ -194,5 +194,117 @@ export const prompt = {
         req5Suffix: ' 代码，带中文注释',
         req6: '6. 只输出纯 JSON，不要任何其他文字',
     },
-};
 
+    // Playground 编辑器
+    playground: {
+        title: 'Prompt 编辑器 Playground',
+        noPreview: '请输入模板内容以预览',
+        mockDataService: '使用 MockDataService (Titanic 数据集)',
+        sampleRowsAvailable: '可用采样行数',
+        detectedVariables: '检测到的变量',
+        availableStatsContext: '可用统计上下文',
+        mockContextSimulator: 'Mock 上下文模拟器',
+        titleLabel: '标题',
+        descriptionLabel: '描述',
+        finalPromptPreview: '最终 Prompt 预览',
+        basicInfo: '基本信息',
+        template: '模板',
+        templateDescription: '使用 {{variable}} 插入动态内容',
+        backButton: '返回',
+        savePromptButton: '保存 Prompt',
+        testButton: 'Test 校验',
+        validationResult: '校验结果',
+        validationPassed: '模板格式正确',
+        validationFailed: '发现 {count} 个问题',
+        promptType: 'Prompt 类型',
+        mockDataset: 'Mock 数据集',
+        switchDataset: '切换数据集',
+    },
+
+    // Prompt Builder
+    builder: {
+        title: 'Prompt Builder',
+        header: {
+            saveTemplate: '保存模板',
+            exportJson: '导出JSON',
+            help: '帮助',
+        },
+        codeEditor: {
+            autoDetected: '(自动识别)',
+            smartParameterize: '智能参数化',
+            pasteExample: '粘贴示例',
+            clear: '清空',
+            importFile: '导入文件',
+        },
+        emptyState: {
+            title: '开始构建您的智能 Prompt',
+            description: '将您的代码转换为可复用的 Prompt 模板,支持参数化、包导入和智能识别',
+            step1: '在下方编辑器中粘贴或编写代码',
+            step2: '点击"智能参数化"按钮进行自动识别',
+            step3: '预览并导出为 JSON 模板',
+        },
+        recognition: {
+            success: '识别成功',
+            language: '语言',
+            confidence: '置信度',
+            collapse: '折叠',
+            confirmParameterize: '确认参数化',
+            previewTemplate: '预览模板',
+            manualAdjust: '手动调整',
+        },
+        imports: {
+            title: 'Python 包导入',
+            selectPackage: '选择常用包',
+            addButton: '添加',
+            autoDetected: '自动识别',
+            manualAdded: '手动添加',
+            removeTooltip: '删除此导入',
+            emptyHint: '暂无导入，请添加常用包或在代码中编写 import 语句',
+        },
+        params: {
+            inputTitle: '输入参数',
+            outputTitle: '输出参数',
+            validated: '校验通过',
+            statsValue: '统计值',
+        },
+        alerts: {
+            noLanguage: '无法识别代码语言，请检查代码是否为 Python 或 SQL',
+            duplicateImport: '该导入已存在！',
+        },
+        // Pyodide 兼容性警告
+        pyodideWarning: {
+            title: 'Pyodide 兼容性警告',
+            incompatiblePackages: '检测到 {count} 个包在浏览器环境中不可用',
+            viewDetails: '查看详情',
+            reason: '原因',
+            alternative: '替代方案',
+            incompatibleTag: '不兼容',
+        },
+        // SQL 危险操作警告
+        sqlWarning: {
+            title: 'SQL 危险操作警告',
+            dangerousOperations: '检测到 {count} 个高危 SQL 操作',
+            severity: {
+                high: '高危',
+                medium: '中危',
+                low: '低危',
+            },
+            viewDetails: '查看详情',
+        },
+    },
+
+    // Python 包描述（用于 Prompt Builder）
+    packages: {
+        pandas: '数据处理与分析',
+        numpy: '数值计算',
+        matplotlib: '基础可视化',
+        seaborn: '统计可视化',
+        plotly: '交互式图表',
+        scipy: '科学计算',
+        sklearn: '机器学习',
+        datetime: '日期时间',
+        json: 'JSON 处理',
+        base64: 'Base64 编码',
+        io: 'IO 操作',
+    },
+};

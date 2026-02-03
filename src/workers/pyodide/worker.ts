@@ -236,7 +236,7 @@ for col in df.columns:
     else:
         stats["data_type"] = "categorical" if col_data.nunique() < 50 else "text"
         if stats["data_type"] == "categorical":
-            value_counts = col_data.value_counts().head(5)
+            value_counts = col_data.value_counts().head(10)  # TOP 10 而非 TOP 5
             stats["categorical_stats"] = {
                 "top_values": [
                     {"value": str(val), "count": int(count), "percentage": float(count / len(col_data))}

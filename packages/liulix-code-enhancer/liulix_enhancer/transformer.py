@@ -35,11 +35,13 @@ class CodeEnhancer:
             GroupByEnhanceRule,
             ExceptionWrapRule,
             PlotProtectionRule,
-            SklearnProtectionRule
+            SklearnProtectionRule,
+            JsonSerializerRule  # 🆕 JSON序列化器注入
         )
         
         # 注册所有规则（按优先级顺序）
         self.rules = [
+            JsonSerializerRule(),          # 🆕 最高优先级：在所有代码执行前注入序列化器
             EmptyCheckRule(df_name),
             ColumnValidationRule(columns, df_name),
             PlotProtectionRule(),      # 绘图前检查

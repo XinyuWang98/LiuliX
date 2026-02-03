@@ -7,6 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
 import { logger } from '@/utils/logger';
 import { Download, RefreshCw, CheckCircle, AlertCircle, Loader, ChevronDown } from 'lucide-react';
+import { isFeatureEnabled } from '@/config/featureFlags';
+import { localRouterService } from '@/services/ai/localRouter/LocalRouterService';
 
 interface OllamaModel {
     name: string;
@@ -42,6 +44,59 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [customModel, setCustomModel] = useState('');
     const [showCustomInput, setShowCustomInput] = useState(false);
+
+    // Router AI Logic
+    const [routerEnabled, setRouterEnabled] = useState(false);
+    const [routerStatus, setRouterStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+    const [routerProgress, setRouterProgress] = useState(0);
+
+    useEffect(() => {
+        setRouterEnabled(isFeatureEnabled('ENABLE_LOCAL_ROUTER'));
+        setRouterStatus(localRouterService.getStatus());
+    }, []);
+
+    const handleDownloadRouter = async () => {
+        setRouterStatus('loading');
+        try {
+            await localRouterService.loadModels((progress) => setRouterProgress(progress));
+            setRouterStatus('ready');
+        } catch (e) {
+            setRouterStatus('error');
+            logger.error('LocalRouter', 'Load failed', e);
+        }
+    };
+
+    const renderRouterStatus = () => {
+        if (routerStatus === 'ready') {
+            return (
+                <div style={{ display: 'flex', alignItems: 'center', color: 'var(--success)', fontSize: '0.8rem', gap: '4px' }}>
+                    <CheckCircle size={14} />
+                    {t('settings.routerModelReady')}
+                </div>
+            );
+        } else if (routerStatus === 'loading') {
+            return (
+                <div style={{ display: 'flex', alignItems: 'center', color: 'var(--primary)', fontSize: '0.8rem', gap: '4px' }}>
+                    <Loader size={14} className="spinning" />
+                    {t('settings.routerModelDownloading')} {routerProgress}%
+                </div>
+            );
+        } else {
+            return (
+                <button
+                    onClick={handleDownloadRouter}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        padding: '4px 8px', fontSize: '0.8rem',
+                        background: 'var(--surface-hover)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer'
+                    }}
+                >
+                    <Download size={12} />
+                    {t('settings.downloadRouterModel')}
+                </button>
+            );
+        }
+    };
 
     // Dynamic descriptions for recommended models based on locale
     const getRecommendedModels = () => [
@@ -255,12 +310,14 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
     };
 
     return (
+        // ... (Existing Render)
         <div className="local-model-selector">
-            {/* 连接状态 */}
+            {/* ... Existing Ollama UI ... */}
             {renderConnectionStatus()}
 
-            {/* 自定义下拉菜单 */}
+            {/* ... Existing Dropdown ... */}
             {ollamaAvailable && (
+                // ... dropdown code ...
                 <div className="model-dropdown-wrapper" ref={dropdownRef}>
                     <button
                         className={`model-dropdown-trigger ${isDropdownOpen ? 'open' : ''}`}
@@ -270,10 +327,10 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                         <span className="model-dropdown-value">{getSelectedModelDisplay()}</span>
                         <ChevronDown size={16} className={`model-dropdown-arrow ${isDropdownOpen ? 'rotated' : ''}`} />
                     </button>
-
+                    {/* ... menu items ... */}
                     {isDropdownOpen && (
                         <div className="model-dropdown-menu">
-                            {/* 已安装模型 */}
+                            {/* ... models map ... */}
                             {models.length > 0 && (
                                 <div className="model-dropdown-group">
                                     <div className="model-dropdown-group-label">{t('settings.installedModels')}</div>
@@ -294,7 +351,8 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                                 </div>
                             )}
 
-                            {/* 推荐模型 */}
+                            {/* ... recommended ... */}
+                            {/* ... custom ... */}
                             <div className="model-dropdown-group">
                                 <div className="model-dropdown-group-label">{t('settings.recommendedModels')}</div>
                                 {recommendedList.filter(rm => !models.some(m => m.name.startsWith(rm.id))).map(rm => (
@@ -318,7 +376,6 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                                 ))}
                             </div>
 
-                            {/* 自定义 */}
                             <div className="model-dropdown-group">
                                 <button
                                     className="model-dropdown-item"
@@ -333,10 +390,9 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                         </div>
                     )}
                 </div>
-            )
-            }
+            )}
 
-            {/* 自定义模型输入 */}
+            {/* ... Custom Input ... */}
             {
                 showCustomInput && (
                     <div className="custom-model-input">
@@ -353,7 +409,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                 )
             }
 
-            {/* 下载进度提示 */}
+            {/* ... Download Progress ... */}
             {downloadingModel && downloadProgress && (
                 <div className="model-download-progress">
                     <Loader size={16} className="spinning" />
@@ -361,7 +417,7 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                 </div>
             )}
 
-            {/* 使用提示 */}
+            {/* ... Error & Tips ... */}
             {
                 ollamaAvailable && models.length === 0 && (
                     <div className="model-tip">
@@ -369,8 +425,6 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                     </div>
                 )
             }
-
-            {/* 错误信息 */}
             {
                 error && !isLoading && (
                     <div className="model-error">
@@ -378,7 +432,22 @@ export const LocalModelSelector: React.FC<LocalModelSelectorProps> = ({
                     </div>
                 )
             }
-        </div >
+
+            {/* 🆕 Router AI Section */}
+            {routerEnabled && (
+                <div className="router-ai-section" style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
+                    <div className="router-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <div>
+                            <div className="router-title" style={{ fontWeight: 500, fontSize: '0.9rem' }}>{t('settings.localRouterTitle')}</div>
+                            <div className="router-desc" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t('settings.localRouterDesc')}</div>
+                        </div>
+                        <div className="router-status">
+                            {renderRouterStatus()}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 

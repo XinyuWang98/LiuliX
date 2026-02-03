@@ -1,4 +1,5 @@
-import { IPromptRegistry, UserPrompt, PromptFilter, DimensionKey } from '../types/prompt';
+import { IPromptRegistry, UserPrompt, PromptFilter, DimensionKey, MultiLangUserPrompt } from '../types/prompt';
+import { getCurrentLanguage } from '@/contexts/I18nContext';
 import { logger } from '../utils/logger';
 
 /**
@@ -8,10 +9,68 @@ import { logger } from '../utils/logger';
 class PromptRegistry implements IPromptRegistry {
     private static instance: PromptRegistry;
     private prompts: Map<string, UserPrompt> = new Map();
+    private customPrompts: Map<string, MultiLangUserPrompt> = new Map();
 
     private constructor() {
         // Load persist usage counts
         this.loadUsageCounts();
+        this.loadCustomPrompts();
+    }
+
+    private loadCustomPrompts() {
+        try {
+            const stored = localStorage.getItem('liulix_custom_prompts');
+            if (stored) {
+                const prompts = JSON.parse(stored) as Record<string, MultiLangUserPrompt>;
+                for (const p of Object.values(prompts)) {
+                    this.customPrompts.set(p.id, p);
+                }
+                logger.log('AI服务', `[PromptRegistry] 加载自定义 Prompt: ${this.customPrompts.size} 个`);
+            }
+        } catch (e) {
+            console.error('Failed to load custom prompts', e);
+        }
+    }
+
+    public saveCustomPrompt(prompt: MultiLangUserPrompt) {
+        this.customPrompts.set(prompt.id, prompt);
+        this.persistCustomPrompts();
+        logger.log('AI服务', `[PromptRegistry] 保存自定义 Prompt: ${prompt.id}`);
+    }
+
+    private persistCustomPrompts() {
+        try {
+            const obj = Object.fromEntries(this.customPrompts);
+            localStorage.setItem('liulix_custom_prompts', JSON.stringify(obj));
+        } catch (e) {
+            console.error('Failed to save custom prompts', e);
+        }
+    }
+
+    /**
+     * 将多语言 Prompt 扁平化为当前语言的 UserPrompt
+     */
+    private flattenMultiLangPrompt(custom: MultiLangUserPrompt): UserPrompt {
+        const lang = getCurrentLanguage(); // 'zh-CN' or 'en-US'
+        const fallback = 'zh-CN';
+
+        const title = custom.title[lang] || custom.title[fallback] || 'Untitled';
+        const description = custom.description[lang] || custom.description[fallback] || '';
+        const template = custom.template[lang] || custom.template[fallback] || '';
+
+        // 分离多语言字段和其他字段
+        const { title: _, description: __, template: ___, codeTemplate: ____, ...rest } = custom;
+
+        return {
+            ...rest,
+            title,
+            description,
+            template,
+            codeTemplate: custom.codeTemplate?.[lang] || custom.codeTemplate?.[fallback],
+            isBuiltIn: false,
+            // @ts-ignore: Inject isCustom marker related to logic not type
+            isCustom: true
+        } as UserPrompt;
     }
 
     private loadUsageCounts() {
@@ -69,12 +128,24 @@ class PromptRegistry implements IPromptRegistry {
      * v2.1: 增强支持slug查询，向后兼容
      */
     public getPrompt(idOrSlug: string): UserPrompt | undefined {
-        // 先尝试ID查询
-        const byId = this.prompts.get(idOrSlug);
-        if (byId) return byId;
+        // 1. 先尝试标准 Prompt (内置)
+        let prompt = this.prompts.get(idOrSlug) || this.getPromptBySlug(idOrSlug);
+        if (prompt) return prompt;
 
-        // 再尝试slug查询
-        return this.getPromptBySlug(idOrSlug);
+        // 2. 再尝试自定义 Prompt (并执行扁平化)
+        const custom = this.customPrompts.get(idOrSlug) || this.getCustomPromptBySlug(idOrSlug);
+        if (custom) {
+            return this.flattenMultiLangPrompt(custom);
+        }
+
+        return undefined;
+    }
+
+    private getCustomPromptBySlug(slug: string): MultiLangUserPrompt | undefined {
+        for (const prompt of this.customPrompts.values()) {
+            if (prompt.slug === slug) return prompt;
+        }
+        return undefined;
     }
 
     /**
@@ -94,14 +165,22 @@ class PromptRegistry implements IPromptRegistry {
      * 检查 Prompt 是否存在（支持ID或slug）
      */
     public hasPrompt(idOrSlug: string): boolean {
-        return this.prompts.has(idOrSlug) || this.getPromptBySlug(idOrSlug) !== undefined;
+        return this.prompts.has(idOrSlug) ||
+            this.customPrompts.has(idOrSlug) ||
+            this.getPromptBySlug(idOrSlug) !== undefined ||
+            this.getCustomPromptBySlug(idOrSlug) !== undefined;
     }
 
     /**
      * 获取 Prompt 列表 (支持筛选)
      */
     public listPrompts(filter?: PromptFilter): UserPrompt[] {
+        // 1. 获取所有内置 Prompt
         let results = Array.from(this.prompts.values());
+
+        // 2. 合并自定义 Prompt (扁平化)
+        const customFlatted = Array.from(this.customPrompts.values()).map(p => this.flattenMultiLangPrompt(p));
+        results = [...results, ...customFlatted];
 
         if (filter) {
             if (filter.layer) {

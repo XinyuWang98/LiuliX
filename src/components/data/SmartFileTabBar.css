@@ -7,9 +7,10 @@
     flex: 1 1 auto;
     min-width: 0;
     /* 关键：允许 flex item 收缩到内容以下，防止撑破容器 */
-    overflow: hidden;
-    /* Prevent tabs from overflowing container */
+    overflow: visible;
+    /* ✅ 改为 visible，允许下拉菜单显示在容器外 */
     padding-right: var(--gap-m);
+
 }
 
 .smartTab {
@@ -74,14 +75,19 @@
     top: 100%;
     right: 0;
     margin-top: 4px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
+    /* ✅ 使用高不透明度毛玻璃背景，确保菜单可见 */
+    background: var(--glass-heavy);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-m);
-    box-shadow: var(--shadow-m);
+    /* ✅ 增强阴影，提高层级感 */
+    box-shadow: var(--shadow-l);
     padding: 4px;
     min-width: 200px;
     max-width: 300px;
-    z-index: 1000;
+    /* ✅ 提升到9999，确保绝对置于表格之上 */
+    z-index: 9999;
     display: flex;
     flex-direction: column;
     gap: 2px;

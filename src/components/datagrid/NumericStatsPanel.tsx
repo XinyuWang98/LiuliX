@@ -5,10 +5,13 @@ interface NumericStats {
     min: number;
     q1: number;
     median: number;
+    mean: number;      // 🆕 v2.3 平均值
     q3: number;
     max: number;
     stddev: number;
     skewness: number;
+    kurtosis: number;
+    cv?: number;       // 🆕 v2.3 变异系数
 }
 
 interface NumericStatsPanelProps {
@@ -50,7 +53,6 @@ export const NumericStatsPanel: React.FC<NumericStatsPanelProps> = ({ stat }) =>
     return (
         <div className="stats-panel numeric-panel">
             <div className="panel-header">SUMMARY</div>
-            <div className="separator"></div>
             <div className="stat-row">
                 <span className="stat-label">MIN</span>
                 <span className="stat-value" title={String(stat.min)}>{formatSmartNumber(stat.min)}</span>
@@ -72,12 +74,26 @@ export const NumericStatsPanel: React.FC<NumericStatsPanelProps> = ({ stat }) =>
                 <span className="stat-value" title={String(stat.max)}>{formatSmartNumber(stat.max)}</span>
             </div>
             <div className="stat-row">
+                <span className="stat-label">MEAN</span>
+                <span className="stat-value" title={String(stat.mean)}>{formatSmartNumber(stat.mean)}</span>
+            </div>
+            <div className="stat-row">
                 <span className="stat-label">STD DEV</span>
                 <span className="stat-value" title={String(stat.stddev)}>{formatSmartNumber(stat.stddev)}</span>
             </div>
+            {stat.cv !== undefined && (
+                <div className="stat-row">
+                    <span className="stat-label">CV</span>
+                    <span className="stat-value" title={String(stat.cv)}>{formatSmartNumber(stat.cv)}</span>
+                </div>
+            )}
             <div className="stat-row">
                 <span className="stat-label">SKEWNESS</span>
                 <span className="stat-value" title={String(stat.skewness)}>{formatSmartNumber(stat.skewness)}</span>
+            </div>
+            <div className="stat-row">
+                <span className="stat-label">KURTOSIS</span>
+                <span className="stat-value" title={String(stat.kurtosis)}>{formatSmartNumber(stat.kurtosis)}</span>
             </div>
         </div>
     );

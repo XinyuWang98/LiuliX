@@ -58,7 +58,7 @@ export const workerTopnPrompt: UserPrompt = {
 }
 `,
 
-    inputVariables: ['df_summary', 'column_name', 'n', 'ascending'],
+    inputVariables: ['column_name', 'n', 'ascending'],
 
     // 开启模板模式，支持 Inflater 直接渲染
     executionMode: 'TEMPLATE_FILL',

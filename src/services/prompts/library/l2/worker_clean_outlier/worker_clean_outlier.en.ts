@@ -18,6 +18,10 @@ export const workerCleanOutlierPrompt: UserPrompt = {
     outputCharts: ['box'],
     layer: 'L2_EXECUTION',
 
+    // ⚠️ Deprecated (v2.3)
+    deprecated: true,
+    deprecatedReason: 'Use cleaner-filter-outliers-iqr-v1 instead (SQL-based with precise IQR calculation)',
+
     dimensions: [
         { category: 'industry', value: 'general', label: 'General' },
         { category: 'intent', value: 'cleaning', label: 'Cleaning' },

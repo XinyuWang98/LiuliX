@@ -13,6 +13,7 @@ import { promptRegistry } from '@/services/promptRegistry';
 import { logger } from '@/utils/logger';
 import { CodeEnhancer } from '@/services/prompts/guards/codeEnhancer';  // v2.0: 代码增强器
 import { getTableSchema } from '@/services/schemaService';  // 🆕 Task 2.3: 第三道防线（性能优化）
+import { extractColumnParams } from '@/utils/columnValidation';  // 🆕 统一列名提取
 
 // 生成唯一 ID
 function generateId(): string {
@@ -56,79 +57,19 @@ export function renderTemplate(template: string, params: Record<string, unknown>
 /**
  * 从参数中提取使用的列名
  * 
- * 架构改进（v2.0）：
- * - 🆕 优先使用 inputVariables（配置驱动），避免硬编码
- * - 🔄 兼容旧版：如果未提供 inputVariables，降级到硬编码 columnKeys
+ * 🆕 统一逻辑：使用 extractColumnParams 工具函数
+ * - ✅ 白名单机制：跳过 agg_func 等非列名参数
+ * - ✅ 配置驱动：优先使用 inputVariables
+ * - ✅ 向后兼容：降级到硬编码列名
  * 
- * @param params 参数对象
- * @param inputVariables 可选：prompt 的 inputVariables（优先使用）
- * @returns 提取的列名数组
+ * @deprecated 请直接使用 extractColumnParams
  */
 export function extractColumnsUsed(
     params: Record<string, unknown>,
     inputVariables?: string[]
 ): string[] {
-    const columns: string[] = [];
-
-    // 🆕 架构改进：优先使用 prompt.inputVariables（配置驱动）
-    if (inputVariables && inputVariables.length > 0) {
-        // 🎯 核心逻辑：从 params 中提取 inputVariables 对应的列名
-        for (const key of inputVariables) {
-            const value = params[key];
-
-            if (typeof value === 'string') {
-                // 单列参数
-                columns.push(value);
-            } else if (Array.isArray(value)) {
-                // 数组类型的列名参数（如 feature_cols）
-                for (const item of value) {
-                    if (typeof item === 'string') {
-                        columns.push(item);
-                    }
-                }
-            }
-        }
-
-        return columns;
-    }
-
-    // 🔄 降级处理：如果未提供 inputVariables，使用硬编码 columnKeys（向后兼容）
-    const columnKeys = [
-        // 通用单列字段
-        'column_name', 'col_x', 'col_y', 'x_column', 'y_column',  // ✅ 添加 x_column/y_column
-        // 特定用途单列
-        'date_col', 'value_col', 'group_col', 'category_col', 'metric_col',
-        // 回归/ML相关
-        'target_col', 'feature_col',
-        // 聚类相关（可能是数组）
-        'cluster_col'
-    ];
-
-    // 数组类型的列名字段
-    const arrayColumnKeys = [
-        'feature_cols', 'group_cols', 'category_cols'
-    ];
-
-    // 提取单列参数
-    for (const key of columnKeys) {
-        if (params[key] && typeof params[key] === 'string') {
-            columns.push(params[key] as string);
-        }
-    }
-
-    // 提取数组类型的列名参数
-    for (const key of arrayColumnKeys) {
-        if (Array.isArray(params[key])) {
-            const arr = params[key] as unknown[];
-            for (const item of arr) {
-                if (typeof item === 'string') {
-                    columns.push(item);
-                }
-            }
-        }
-    }
-
-    return columns;
+    // 🆕 直接复用统一工具函数
+    return extractColumnParams(params, inputVariables);
 }
 
 /**

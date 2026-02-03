@@ -379,3 +379,137 @@
 .code-block.liuli-code-block::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.2);
 }
+
+/* =========================================
+   7. LiuliSelect (下拉选择器)
+   ========================================= */
+.liuli-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.liuli-select-label {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: var(--fw-medium);
+}
+
+.liuli-select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 10px 36px 10px 12px;
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+   transition: all 0.2s var(--ease-out);
+    backdrop-filter: blur(4px);
+    position: relative;
+    user-select: none;
+}
+
+.liuli-select:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.liuli-select.open {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.liuli-select.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.liuli-select-value {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.liuli-select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--text-tertiary);
+    transition: transform 0.2s var(--ease-out);
+    pointer-events: none;
+}
+
+.liuli-select.open .liuli-select-arrow {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.liuli-select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(var(--blur-medium));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lv2);
+    z-index: 1000;
+    max-height: 240px;
+    overflow-y: auto;
+    animation: slideDown 0.2s var(--ease-out);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.liuli-select-option {
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    transition: all 0.15s var(--ease-out);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.liuli-select-option:last-child {
+    border-bottom: none;
+}
+
+.liuli-select-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--primary-color);
+}
+
+.liuli-select-option.selected {
+    background: rgba(0, 122, 255, 0.15);
+    color: var(--primary-color);
+    font-weight: var(--fw-medium);
+}
+
+.liuli-select-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.liuli-select-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.liuli-select-dropdown::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}

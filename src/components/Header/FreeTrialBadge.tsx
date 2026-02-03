@@ -1,12 +1,20 @@
 /**
  * 免费试用徽章组件
  * 显示在导航栏右侧，区分免费用户和邀请码用户
+ * 
+ * 📌 显示逻辑（受 ENABLE_INVITE_CODE_GATE Feature Flag 控制）：
+ * - Flag OFF (开发阶段): 完全不显示徽章
+ * - Flag ON (上线阶段): 根据用户配置显示徽章
+ *   - 有邀请码 → "Invite Code Trial 19/20"
+ *   - 无邀请码 → "Free Trial 8/10"
+ *   - 有自己的 API Key → 不显示
  */
 import { useState, useEffect } from 'react';
 import { Sparkles, Star } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
 import { getInviteCode } from '@/utils/userIdManager';
 import { InviteCodeModal } from '@/components/InviteCodeModal/InviteCodeModal';
+import { isFeatureEnabled } from '@/config/featureFlags';
 
 interface UsageData {
     type?: 'free' | 'invite';
@@ -23,9 +31,14 @@ export const FreeTrialBadge = () => {
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
+        // 🆕 检查 Feature Flag：只有启用邀请码功能时才显示徽章
+        const inviteCodeEnabled = isFeatureEnabled('ENABLE_INVITE_CODE_GATE');
+
         // 检查是否使用兜底Key（没有配置自己的API Key）
         const hasOwnKey = sessionStorage.getItem('dataprism_api_key') !== null;
-        setShowBadge(!hasOwnKey);
+
+        // 🔄 修改后逻辑：Feature Flag 启用 且 没有自己的 Key 时才显示
+        setShowBadge(inviteCodeEnabled && !hasOwnKey);
 
         // 检查用户类型
         const inviteCode = getInviteCode();

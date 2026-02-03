@@ -30,6 +30,8 @@ export interface FeatureFlags {
     SKILLS_ARCHITECTURE: boolean;       // Skills架构（已实现，默认关闭）
     PYODIDE_OFFLINE: boolean;           // Pyodide离线模式
     USE_AST_CODE_ENHANCER: boolean;     // AST代码增强器（v3.0，默认关闭）
+    ENABLE_TYPE_CONTEXT_PASSING: boolean; // 类型上下文传递机制（开发中）
+    ENABLE_LOCAL_ROUTER: boolean;         // 本地 Router AI (基于 Transformers.js)
 
     // MVP阶段控制
     ENABLE_ADVANCED_API_CONFIG: boolean; // 高级API配置界面（MVP阶段默认关闭）
@@ -38,6 +40,12 @@ export interface FeatureFlags {
     // 智能闭环
     ENABLE_EDA_CONTEXT_LOOP: boolean;    // EDA 闭环与 Context 回流（开发中）
     ENABLE_UPLOAD_ROW_LIMIT: boolean;    // MVP 强制限制上传文件行数
+
+    // 🆕 用户自定义 Prompt
+    ENABLE_CUSTOM_PROMPT: boolean;       // 用户自定义 Prompt 编辑器
+
+    // 🆕 Prompt Builder
+    ENABLE_PROMPT_BUILDER: boolean;      // Prompt Builder 新页面（代码参数化）
 }
 
 /**
@@ -71,6 +79,8 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
     SKILLS_ARCHITECTURE: false,  // 已实现，默认关闭
     PYODIDE_OFFLINE: false,
     USE_AST_CODE_ENHANCER: true,  // ✅ v3.0 AST增强器已启用（2026-01-03测试）
+    ENABLE_TYPE_CONTEXT_PASSING: false,  // 类型上下文传递（开发中，默认关闭）
+    ENABLE_LOCAL_ROUTER: false,          // 本地 Router AI (默认关闭，需手动开启)
 
     // MVP阶段控制
     ENABLE_ADVANCED_API_CONFIG: false,  // MVP阶段隐藏高级配置
@@ -81,6 +91,12 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 
     // MVP 数据限制
     ENABLE_UPLOAD_ROW_LIMIT: true,       // 强制限制上传文件行数 < 100万行
+
+    // 🆕 用户自定义 Prompt
+    ENABLE_CUSTOM_PROMPT: false,         // 用户自定义 Prompt 编辑器 (Playground 阶段默认关闭)
+
+    // 🆕 Prompt Builder
+    ENABLE_PROMPT_BUILDER: true,         // Prompt Builder 新页面（临时启用用于测试）
 };
 
 /**

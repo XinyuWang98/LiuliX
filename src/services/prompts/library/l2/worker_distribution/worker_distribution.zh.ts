@@ -29,6 +29,13 @@ export const workerDistributionPrompt: UserPrompt = {
     // ✅ Router 模式：使用预置代码模板
     executionMode: 'TEMPLATE_FILL',
 
+    // 🆕 v2.3 统计值注入配置
+    statsInjection: {
+        mean_value: 'mean',
+        median_value: 'median',
+        std_value: 'stddev'
+    },
+
     // 预置 Python 代码模板（与英文版一致，使用 seaborn）
     codeTemplate: `import matplotlib.pyplot as plt
 import pandas as pd
@@ -69,10 +76,10 @@ if is_numeric:
     ax2.set_ylabel('密度')
     ax2.grid(alpha=0.3)
     
-    # 统计量
-    mean_val = col_data.mean()
-    median_val = col_data.median()
-    std_val = col_data.std()
+    # 统计量从 DuckDB 注入
+    mean_val = {{mean_value}}
+    median_val = {{median_value}}
+    std_val = {{std_value}}
     skew_val = col_data.skew()
     skew_desc = '右偏' if skew_val > 0.5 else ('左偏' if skew_val < -0.5 else '对称')
     summary = f"{column_name}: 均值={mean_val:.2f}, 中位数={median_val:.2f}, 标准差={std_val:.2f}, 分布{skew_desc}"
@@ -133,7 +140,7 @@ print(json.dumps(result))`,
 }
 `,
 
-    inputVariables: ['column_name'],
+    inputVariables: ['column_name', 'mean_value', 'median_value', 'std_value'],
     author: 'System',
     version: '1.0.0',
     isBuiltIn: true,
