@@ -52,12 +52,15 @@ export function injectStatsParams(
             return rec;
         }
 
-        // 获取目标列的统计信息
-        const columnName = rec.params.column_name;
+        // 🆕 智能推断统计值来源列（替代硬编码的 column_name 检查）
+        const columnName = inferColumnForStats(rec.params, rec.promptId);
+
         if (!columnName) {
-            logger.warn('参数注入器', `${rec.promptId} 缺少 column_name，跳过注入`);
+            logger.warn('参数注入器', `${rec.promptId} 无法推断列名，跳过注入`);
             return rec;
         }
+
+        logger.log('参数注入器', `${rec.promptId} 推断统计值来源列: ${columnName}`);
 
         // 查找列统计信息（兼容多种字段名）
         const stats = columnStats.find(s =>
@@ -116,14 +119,15 @@ export function injectStatsParams(
 }
 
 /**
- * 标准化 ColumnStats 对象
+ * 标准化 ColumnStats对象
  * 
  * 兼容不同的 stats 数据结构：
  * - { name, numeric_stats: { median, mean, ... } }  // data.ts 格式
+ * - { name, numericStats: { median, mean, ... } }   // DuckDB 格式（驼峰）
  * - { name, median, mean, ... }  // 扁平格式
  */
 function normalizeStats(stats: any): ColumnStats {
-    // 如果有 numeric_stats 嵌套结构，展开它
+    // 如果有 numeric_stats 嵌套结构（下划线命名），展开它
     if (stats.numeric_stats) {
         return {
             name: stats.column_name || stats.name,
@@ -131,7 +135,21 @@ function normalizeStats(stats: any): ColumnStats {
             total: stats.total || 0,
             nullCount: stats.missing_count || stats.nullCount || 0,
             ...stats.numeric_stats,  // 展开 numeric_stats
-            mode: stats.categorical_stats?.top_values?.[0]?.value
+            mode: stats.categorical_stats?.top_values?.[0]?.value ||
+                stats.categoricalStats?.topValues?.[0]?.value
+        } as ColumnStats;
+    }
+
+    // 🆕 如果有 numericStats 嵌套结构（驼峰命名，DuckDB格式），展开它
+    if (stats.numericStats) {
+        return {
+            name: stats.column_name || stats.name,
+            dtype: stats.data_type || stats.type || stats.dtype || 'unknown',
+            total: stats.total || 0,
+            nullCount: stats.missing_count || stats.nullCount || 0,
+            ...stats.numericStats,  // 展开 numericStats
+            mode: stats.categorical_stats?.top_values?.[0]?.value ||
+                stats.categoricalStats?.topValues?.[0]?.value
         } as ColumnStats;
     }
 
@@ -150,14 +168,24 @@ function extractStatField(stats: any, fieldName: string): any {
         return stats[fieldName];
     }
 
-    // 尝试从 numeric_stats 中获取
+    // 尝试从 numeric_stats 中获取（下划线命名）
     if (stats.numeric_stats && stats.numeric_stats[fieldName] !== undefined) {
         return stats.numeric_stats[fieldName];
     }
 
-    // 特殊处理 mode（可能在 categorical_stats 中）
-    if (fieldName === 'mode' && stats.categorical_stats?.top_values?.length > 0) {
-        return stats.categorical_stats.top_values[0].value;
+    // 🆕 兼容 DuckDB 返回的驼峰命名 numericStats
+    if (stats.numericStats && stats.numericStats[fieldName] !== undefined) {
+        return stats.numericStats[fieldName];
+    }
+
+    // 特殊处理 mode（可能在 categorical_stats/categoricalStats 中）
+    if (fieldName === 'mode') {
+        if (stats.categorical_stats?.topValues?.length > 0) {
+            return stats.categorical_stats.topValues[0].value;
+        }
+        if (stats.categoricalStats?.topValues?.length > 0) {
+            return stats.categoricalStats.topValues[0].value;
+        }
     }
 
     return undefined;
@@ -196,4 +224,90 @@ export function validateStatsInjection(
         valid: errors.length === 0,
         errors
     };
+}
+
+/**
+ * 🆕 智能推断统计值来源列
+ * 
+ * 根据参数中的字段名和 Prompt ID 智能判断应该从哪个列获取统计值
+ * 避免让 AI 返回 column_name，直接从本地 DuckDB 获取
+ * 
+ * @param params AI 返回的参数
+ * @param promptId Prompt ID（用于特殊处理）
+ * @returns 推断的列名，如果无法推断则返回 undefined
+ * 
+ * @example
+ * // Case 1: worker-trend-v1
+ * inferColumnForStats(
+ *   {date_col: 'order_date', value_col: 'total_amount'},
+ *   'worker-trend-v1'
+ * )
+ * // → 'total_amount'（时序分析的统计值来自 value_col）
+ * 
+ * // Case 2: worker-stats-v1
+ * inferColumnForStats(
+ *   {column_name: 'price'},
+ *   'worker-stats-v1'
+ * )
+ * // → 'price'（直接使用 column_name）
+ */
+function inferColumnForStats(
+    params: Record<string, any>,
+    promptId: string
+): string | undefined {
+    // 优先级 1：如果参数中有 column_name，直接使用（最直接）
+    if (params.column_name && typeof params.column_name === 'string') {
+        return params.column_name;
+    }
+
+    // 优先级 2：对于时序分析（worker-trend），使用 value_col
+    if (promptId.includes('trend') || promptId.includes('time')) {
+        if (params.value_col && typeof params.value_col === 'string') {
+            return params.value_col;
+        }
+    }
+
+    // 优先级 3：对于分布分析（worker-distribution），优先 column_name
+    if (promptId.includes('distribution')) {
+        if (params.column_name && typeof params.column_name === 'string') {
+            return params.column_name;
+        }
+    }
+
+    // 优先级 4：对于统计分析（worker-stats），优先 column_name
+    if (promptId.includes('stats')) {
+        if (params.column_name && typeof params.column_name === 'string') {
+            return params.column_name;
+        }
+    }
+
+    // 优先级 5：对于异常值检测（worker-outlier），使用 column_name
+    if (promptId.includes('outlier')) {
+        if (params.column_name && typeof params.column_name === 'string') {
+            return params.column_name;
+        }
+    }
+
+    // 优先级 6：对于清洗操作（cleaner），使用 column_name
+    if (promptId.includes('cleaner')) {
+        if (params.column_name && typeof params.column_name === 'string') {
+            return params.column_name;
+        }
+    }
+
+    // 优先级 7：通用降级 - 如果有 value_col
+    if (params.value_col && typeof params.value_col === 'string') {
+        return params.value_col;
+    }
+
+    // 优先级 8：如果有 x_column 或 y_column（相关性分析等）
+    if (params.x_column && typeof params.x_column === 'string') {
+        return params.x_column;
+    }
+    if (params.y_column && typeof params.y_column === 'string') {
+        return params.y_column;
+    }
+
+    // 无法推断
+    return undefined;
 }

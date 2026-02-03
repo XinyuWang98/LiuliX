@@ -8,14 +8,14 @@
 
     /* Glassmorphism System */
 
-    /* 1. Surfaces - 进一步提高透明度以提升清透感 */
-    --glass-surface: rgba(255, 255, 255, 0.06);
-    /* 从 0.01 进一步降低到 0.005 */
-    --glass-secondary: rgba(255, 255, 255, 0.02);
-    /* 从 0.03 降低到 0.02 */
-    --glass-hover: rgba(255, 255, 255, 0.04);
-    /* 从 0.05 降低到 0.04 */
-    --glass-active: rgba(255, 255, 255, 0.06);
+    /* 1. Surfaces - 极致清透以匹配线上版本 */
+    --glass-surface: rgba(255, 255, 255, 0.004);
+    /* 🎯 降低到 0.004 以匹配线上侧边栏透明度 */
+    --glass-secondary: rgba(255, 255, 255, 0.005);
+    /* 保持层级关系 */
+    --glass-hover: rgba(255, 255, 255, 0.02);
+    /* 降低悬停透明度但保留视觉反馈 */
+    --glass-active: rgba(255, 255, 255, 0.03);
     /* 从 0.08 降低到 0.06 */
     --glass-heavy: rgba(20, 20, 23, 0.7);
 

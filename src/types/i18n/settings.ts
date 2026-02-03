@@ -108,6 +108,14 @@ export interface SettingsTranslations {
         localModelDesc: string;
         localModelInfo: string;
 
+        // Local Router Configuration
+        localRouterTitle: string;
+        localRouterDesc: string;
+        downloadRouterModel: string;
+        routerModelReady: string;
+        routerModelNotReady: string;
+        routerModelDownloading: string;
+
         // 性能配置
         performanceSlowWarning: string;
         performanceColumnsUnit: string;

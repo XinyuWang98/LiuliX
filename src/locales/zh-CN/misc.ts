@@ -57,6 +57,8 @@ export const grid = {
     uniqueValues: '{count} 唯一值',
     missingPercent: '{percent}% 缺失',
     missingRate: '缺失率',  // 🆕 v2.3 新增
+    singleValueLabel: '唯一值：',  // 🆕 单一值指示器标签
+    singleValueTitle: '常量列：所有值均为 {value}',  // 🆕 单一值指示器提示
     selectedColumns: '已选择 {count}/{total} 列',
     selectColumns: '选择列',
     clickToExpand: '点击展开统计',

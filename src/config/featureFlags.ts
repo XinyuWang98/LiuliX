@@ -31,6 +31,7 @@ export interface FeatureFlags {
     PYODIDE_OFFLINE: boolean;           // Pyodide离线模式
     USE_AST_CODE_ENHANCER: boolean;     // AST代码增强器（v3.0，默认关闭）
     ENABLE_TYPE_CONTEXT_PASSING: boolean; // 类型上下文传递机制（开发中）
+    ENABLE_LOCAL_ROUTER: boolean;         // 本地 Router AI (基于 Transformers.js)
 
     // MVP阶段控制
     ENABLE_ADVANCED_API_CONFIG: boolean; // 高级API配置界面（MVP阶段默认关闭）
@@ -79,6 +80,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
     PYODIDE_OFFLINE: false,
     USE_AST_CODE_ENHANCER: true,  // ✅ v3.0 AST增强器已启用（2026-01-03测试）
     ENABLE_TYPE_CONTEXT_PASSING: false,  // 类型上下文传递（开发中，默认关闭）
+    ENABLE_LOCAL_ROUTER: false,          // 本地 Router AI (默认关闭，需手动开启)
 
     // MVP阶段控制
     ENABLE_ADVANCED_API_CONFIG: false,  // MVP阶段隐藏高级配置

@@ -116,6 +116,9 @@ export interface WorkshopTranslations {
         nullRate: string;
         uniqueValues: string;
         missingPercent: string;
+        missingRate?: string;  // 🆕 v2.3 新增（可选）
+        singleValueLabel: string;  // 🆕 单一值指示器标签
+        singleValueTitle: string;  // 🆕 单一值指示器提示
         selectedColumns: string;
         selectColumns: string;
         clickToExpand: string;

@@ -7,8 +7,10 @@
  */
 
 /**
- * 核心Feature Flags配置（仅3个）
+ * 核心Feature Flags配置（扩展为5个）
  * 从环境变量读取，支持生产/开发环境切换
+ * 
+ * @date 2026-02-03 v2.0 新增AI服务控制（REAL_AI_INSIGHT, ENABLE_LOCAL_ROUTER）
  */
 export function getCoreFlags() {
     return {
@@ -20,6 +22,12 @@ export function getCoreFlags() {
 
         // 🟢 P2: AST代码增强器（紧急回滚开关）
         USE_AST_CODE_ENHANCER: process.env.USE_AST_CODE_ENHANCER !== 'false', // 默认true
+
+        // 🆕 P1: 真实AI洞察（生产环境启用DeepSeek API）
+        REAL_AI_INSIGHT: process.env.REAL_AI_INSIGHT !== 'false', // 默认true
+
+        // 🆕 P2: 本地Router AI（实验性功能，默认关闭）
+        ENABLE_LOCAL_ROUTER: process.env.ENABLE_LOCAL_ROUTER === 'true', // 默认false
     };
 }
 
@@ -39,6 +47,8 @@ export function registerConfigRoutes(router) {
             ENABLE_INVITE_CODE_GATE: flags.ENABLE_INVITE_CODE_GATE,
             ENABLE_ADVANCED_API_CONFIG: flags.ENABLE_ADVANCED_API_CONFIG,
             USE_AST_CODE_ENHANCER: flags.USE_AST_CODE_ENHANCER,
+            REAL_AI_INSIGHT: flags.REAL_AI_INSIGHT,
+            ENABLE_LOCAL_ROUTER: flags.ENABLE_LOCAL_ROUTER,
         });
 
         res.json({

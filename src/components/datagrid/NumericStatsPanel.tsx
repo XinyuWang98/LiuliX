@@ -53,7 +53,6 @@ export const NumericStatsPanel: React.FC<NumericStatsPanelProps> = ({ stat }) =>
     return (
         <div className="stats-panel numeric-panel">
             <div className="panel-header">SUMMARY</div>
-            <div className="separator"></div>
             <div className="stat-row">
                 <span className="stat-label">MIN</span>
                 <span className="stat-value" title={String(stat.min)}>{formatSmartNumber(stat.min)}</span>

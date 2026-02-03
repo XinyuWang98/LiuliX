@@ -102,6 +102,25 @@ await micropip.install('${wheelUrl}')
     }
 
     /**
+     * 修复Python代码中的JavaScript注释语法
+     * 
+     * 将独立行的 `//` 注释转为 `#` 注释
+     * 注意：不影响字符串或URL中的双斜杠
+     * 
+     * @param code 原始Python代码
+     * @returns 修复后的代码
+     */
+    private static fixPythonComments(code: string): string {
+        // 正则说明：
+        // ^           - 行首
+        // (\s*)       - 捕获组1：行首空白字符（保留缩进）
+        // //          - JavaScript注释符号
+        // (.*)$       - 捕获组2：注释内容到行尾
+        // gm          - 全局+多行模式
+        return code.replace(/^(\s*)\/\/(.*)$/gm, '$1#$2');
+    }
+
+    /**
      * 增强Python代码
      * 
      * @param code 原始Python代码
@@ -113,6 +132,9 @@ await micropip.install('${wheelUrl}')
         context: EnhanceContext
     ): Promise<EnhancementResult> {
 
+        // 🆕 v3.1 预处理：修复Python注释语法
+        const preprocessedCode = this.fixPythonComments(code);
+
         // 确保初始化完成
         if (!this.isReady) {
             await this.init();
@@ -121,8 +143,8 @@ await micropip.install('${wheelUrl}')
         const startTime = performance.now();
 
         try {
-            // 转义代码中的特殊字符
-            const escapedCode = this.escapeCode(code);
+            // 转义代码中的特殊字符（使用预处理后的代码）
+            const escapedCode = this.escapeCode(preprocessedCode);
 
             // 调用Python增强器
             const resultJson = await this.pyodide.runPythonAsync(`

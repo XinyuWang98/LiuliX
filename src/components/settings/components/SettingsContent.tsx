@@ -4,6 +4,8 @@ import { SettingsGroup, SettingsRow } from './SettingsSection';
 import Switch from './Switch';
 import { LiuliButton } from '@/components/common/liulix/LiuliButton';
 import { Globe, Monitor } from 'lucide-react';
+import LocalModelSelector from './LocalModelSelector';
+import { isFeatureEnabled } from '@/config/featureFlags';
 import '../SettingsPage.css';
 
 import { LogDownloadButton } from './LogDownloadButton';
@@ -18,6 +20,7 @@ import { useDeveloperMode } from '@/hooks/useDeveloperMode';
 import { type AIModel } from '@/services/aiService';
 import { type HardwareDetectionResult } from '@/utils/hardwareDetection';
 import { type AIModeRecommendation } from '@/utils/aiModeRecommendation';
+import { SUPPORTED_MODELS } from '@/services/localLLMService';
 
 
 interface SettingsContentProps {
@@ -156,7 +159,8 @@ export const SettingsContent = (props: SettingsContentProps) => {
                         </div>
                     </div>
 
-                    {/* MVP版本暂不开放本地模型 (2026-01-15)
+                    {/* MVP版本暂不开放硬件检测 (2026-01-15) */}
+                    {/*
                     <SettingsGroup title={t('settings.hardwareEnvironment')}>
                         {props.isDetecting ? (
                             <div className="hardware-detection-row">
@@ -184,55 +188,60 @@ export const SettingsContent = (props: SettingsContentProps) => {
                             </div>
                         )}
                     </SettingsGroup>
-
-                    <SettingsGroup>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: 'var(--gap-m)',
-                            background: 'var(--bg-secondary)',
-                            borderRadius: 'var(--radius-m)',
-                            border: '1px solid var(--border)',
-                        }}>
-                            <div style={{ flex: 1 }}>
-                                <div style={{
-                                    fontSize: 'var(--fs-m)',
-                                    fontWeight: 'var(--fw-medium)',
-                                    marginBottom: 'var(--gap-xs)',
-                                }}>
-                                    {t('settings.aiSettings.useLocalModel')}
-                                </div>
-                                <div style={{
-                                    fontSize: 'var(--fs-xs)',
-                                    color: 'var(--text-secondary)',
-                                }}>
-                                    {props.useLocalModel
-                                        ? t('settings.aiSettings.localModeDesc')
-                                        : t('settings.aiSettings.cloudModeDescNew')
-                                    }
-                                </div>
-                            </div>
-
-                            <Switch
-                                checked={props.useLocalModel}
-                                onChange={props.onAIModeChange}
-                            />
-                        </div>
-                    </SettingsGroup>
-
-                    {props.useLocalModel && (
-                        <SettingsGroup>
-                            <LocalModelSelector
-                                currentModel={localStorage.getItem('ollama_model') || SUPPORTED_MODELS.QWEN_7B}
-                                onModelChange={(modelId) => {
-                                    localStorage.setItem('ollama_model', modelId);
-                                    window.dispatchEvent(new CustomEvent('ollama-model-change', { detail: modelId }));
-                                }}
-                            />
-                        </SettingsGroup>
-                    )}
                     */}
+
+                    {/* Local Model Settings (Controlled by Flag or DevMode) */}
+                    {(isFeatureEnabled('ENABLE_LOCAL_ROUTER') || isDeveloperMode) && (
+                        <>
+                            <SettingsGroup>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: 'var(--gap-m)',
+                                    background: 'var(--bg-secondary)',
+                                    borderRadius: 'var(--radius-m)',
+                                    border: '1px solid var(--border)',
+                                }}>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{
+                                            fontSize: 'var(--fs-m)',
+                                            fontWeight: 'var(--fw-medium)',
+                                            marginBottom: 'var(--gap-xs)',
+                                        }}>
+                                            {t('settings.aiSettings.useLocalModel')}
+                                        </div>
+                                        <div style={{
+                                            fontSize: 'var(--fs-xs)',
+                                            color: 'var(--text-secondary)',
+                                        }}>
+                                            {props.useLocalModel
+                                                ? t('settings.aiSettings.localModeDesc')
+                                                : t('settings.aiSettings.cloudModeDescNew')
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <Switch
+                                        checked={props.useLocalModel}
+                                        onChange={props.onAIModeChange}
+                                    />
+                                </div>
+                            </SettingsGroup>
+
+                            {props.useLocalModel && (
+                                <SettingsGroup>
+                                    <LocalModelSelector
+                                        currentModel={localStorage.getItem('ollama_model') || SUPPORTED_MODELS.QWEN_7B}
+                                        onModelChange={(modelId) => {
+                                            localStorage.setItem('ollama_model', modelId);
+                                            window.dispatchEvent(new CustomEvent('ollama-model-change', { detail: modelId }));
+                                        }}
+                                    />
+                                </SettingsGroup>
+                            )}
+                        </>
+                    )}
 
                     {/* API Keys - MVP阶段隐藏，用户使用内置API */}
                     {/* <SettingsGroup title={t('settings.apiPriorityAndKeys')}>

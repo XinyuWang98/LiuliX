@@ -18,6 +18,8 @@ export type ServiceName =
     | 'AI配置'  // 🆕 AI配置与推荐
     | 'AI代码增强'  // 🆕 AI代码增强服务
     | '本地模型'
+    | 'LocalRouter' // 🆕 本地 Router AI
+    | 'LocalRouterWorker' // 🆕 本地 Router AI Worker
     | 'DuckDB'
     | '数据清洗'
     | '数据准备'  // 🆕 数据准备服务(采样+脱敏)

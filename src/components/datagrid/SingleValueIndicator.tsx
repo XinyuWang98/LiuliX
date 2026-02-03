@@ -26,8 +26,8 @@ export const SingleValueIndicator: React.FC<SingleValueIndicatorProps> = ({ valu
 
     return (
         <div className="headerMiniHistogram single-value-indicator">
-            <div className="single-value-badge" title={`常量列：所有值均为 ${displayValue}`}>
-                <span className="single-value-label">唯一值：</span>
+            <div className="single-value-badge" title={t('grid.singleValueTitle', { value: displayValue })}>
+                <span className="single-value-label">{t('grid.singleValueLabel')}</span>
                 <span className="single-value-text">{displayValue}</span>
             </div>
         </div>

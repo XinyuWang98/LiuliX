@@ -81,6 +81,20 @@ export interface InsightDetail {
     status: string;
     params: Record<string, unknown>;
     error?: string | null;
+
+    // 🆕 失败原因细分
+    failureReason?: 'ParamInjectionFailed' | 'ColumnValidationFailed' | 'ExecutionError' | 'QualityGateFailed';
+    failureDetails?: {
+        missingParams?: string[];      // 缺失的参数
+        invalidColumns?: string[];     // 无效的列名
+        errorMessage?: string;          // 执行错误详情
+    };
+
+    // 🆕 参数注入详情（成功的情况）
+    injectedParams?: Array<{
+        param: string;
+        value: number | string;
+    }>;
 }
 
 export interface TestResult {
@@ -105,6 +119,21 @@ export interface TestResult {
         note: string;
     }[];
     errors: string[];
+
+    // 🆕 参数注入失败记录
+    injectionFailures?: Array<{
+        promptId: string;
+        param: string;
+        reason: string;
+        timestamp: string;
+    }>;
+
+    // 🆕 列名验证失败记录
+    validationBlocks?: Array<{
+        promptId: string;
+        invalidColumns: string[];
+        timestamp: string;
+    }>;
 }
 
 // 辅助函数：解析日志时间

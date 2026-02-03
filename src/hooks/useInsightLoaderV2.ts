@@ -164,50 +164,74 @@ export function useInsightLoaderV2() {
             // ✅ 构造 Router Prompt（使用新架构）
             const USE_ROUTER_MODE = true; // 🎯 切换开关
 
-            let prompt: string;
-            if (USE_ROUTER_MODE) {
-                prompt = buildRouterPrompt(
-                    selectedColumns,
-                    privacyMode === 'sanitized' ? [] : sampledDataLocal,
-                    columnTypes
-                );
-                logger.log('AI服务', '[Router] 使用 Router Prompt 模式');
-            } else {
-                // 旧版 Coder Prompt（保留兼容）
-                prompt = generateBatchInsightsPrompt(
-                    selectedColumns,
-                    sampledDataLocal.length,
-                    totalRows,
-                    privacyMode === 'sanitized' ? [] : sampledDataLocal
-                );
-                logger.log('AI服务', '[Coder] 使用传统 Coder Prompt 模式');
-            }
-
-
-            // ========== 步骤3.5：使用统一AI调用（自动降级） ==========
-            setLoadingStage('progress.sendingRequest');
-            const aiStartTime = performance.now();
-
-            const { invokeAI } = await import('@/services/aiInvoker');
-            const aiResponse = await invokeAI(prompt, {
-                type: 'insight',
-                priority: 'normal'
-            });
-
-            const aiDuration = (performance.now() - aiStartTime) / 1000;
-            logger.log('AI洞察', `AI响应收到 (${aiResponse.length}字符，耗时${aiDuration.toFixed(1)}秒)`);
-
-            // ========== 步骤4：解析AI响应并膨胀为 InsightNode[] ==========
-            setLoadingStage('progress.analyzingResponse');
+            let prompt = '';
             let insightNodes: InsightNode[] = [];
 
-            // 🆕 获取已采纳的洞察用于 Context 注入 (EDA闭环暂未启用,保留以便后续使用)
-            // const _adoptedInsights = getAdoptedInsights();
+            // 🆕 Check Feature Flag for Local Router
+            let isLocalSuccess = false;
+            let recommendations: any[] = [];
 
             if (USE_ROUTER_MODE) {
-                // ✅ Router 模式：解析轻量 JSON → 膨胀为完整节点
-                const recommendations = parseRouterResponse(aiResponse, selectedColumns); // 🆕 传递columns用于校验
+                const { isFeatureEnabled } = await import('@/config/featureFlags');
+                const useLocalRouter = isFeatureEnabled('ENABLE_LOCAL_ROUTER');
 
+                if (useLocalRouter) {
+                    try {
+                        const { localInsightRouter } = await import('@/services/ai/localRouter/LocalInsightRouter');
+                        logger.log('AI服务', '[Router] 🟢 启用本地模型 (LocalInsightRouter)');
+
+                        recommendations = await localInsightRouter.generate(
+                            selectedColumns,
+                            columnTypes || {},
+                            sampledDataLocal
+                        );
+
+                        if (recommendations.length > 0) {
+                            isLocalSuccess = true;
+                            logger.log('AI洞察', `[Local] 生成 ${recommendations.length} 条推荐`);
+                        }
+                    } catch (err) {
+                        logger.warn('AI服务', `[Router] 本地模型失败，降级到云端: ${err}`);
+                    }
+                }
+
+                if (!isLocalSuccess) {
+                    // Cloud Flow (Original)
+                    prompt = buildRouterPrompt(
+                        selectedColumns,
+                        privacyMode === 'sanitized' ? [] : sampledDataLocal,
+                        columnTypes
+                    );
+                    logger.log('AI服务', '[Router] 使用 Cloud Router Prompt 模式');
+
+                    // Call AI
+                    setLoadingStage('progress.sendingRequest');
+                    const { invokeAI } = await import('@/services/aiInvoker');
+                    const aiStartTime = performance.now();
+                    const aiResponse = await invokeAI(prompt, { type: 'insight', priority: 'normal' });
+                    const aiDuration = (performance.now() - aiStartTime) / 1000;
+                    logger.log('AI洞察', `AI响应收到 (${aiResponse.length}字符，耗时${aiDuration.toFixed(1)}秒)`);
+
+                    recommendations = parseRouterResponse(aiResponse, selectedColumns);
+
+                    // 🆕 注入统计参数（修复膨胀失败问题）
+                    try {
+                        const db = DuckDBEngine.getInstance();
+                        const columnStats = await db.getColumnStats(tableName!);
+                        const { injectStatsParams } = await import('@/services/prompts/paramInjector');
+                        recommendations = injectStatsParams(recommendations, columnStats);
+                        logger.log('AI服务', '[Router] 参数注入完成', {
+                            data: { beforeCount: recommendations.length }
+                        });
+                    } catch (statsError) {
+                        logger.warn('AI服务', '[Router] 参数注入失败，使用 AI 原始参数', {
+                            data: { error: String(statsError) }
+                        });
+                        // 降级：保留 AI 猜测的参数
+                    }
+                }
+
+                // Shared Inflation Logic
                 logger.log('AI服务', `[LoadInsights] 🔍 准备膨胀推荐`, {
                     data: { count: recommendations.length, tableName: tableName! }
                 });
@@ -215,11 +239,10 @@ export function useInsightLoaderV2() {
                 if (recommendations.length === 0) {
                     logger.warn('AI服务', '[Router] AI未返回推荐，使用规则层兜底');
                     const fallbackRecs = buildFallbackRecommendations(selectedColumns, columnTypes);
-                    insightNodes = await inflateRecommendations(fallbackRecs as any, tableName!);  // 🆕 传递tableName（非空断言）
+                    insightNodes = await inflateRecommendations(fallbackRecs as any, tableName!);
                 } else {
                     logger.log('AI服务', '[Router] 解析成功', { data: { count: recommendations.length } });
 
-                    // 🆕 使用流式处理器：膨胀完成 → 立即执行
                     const { processRecommendationsStreaming } = await import('@/services/insights/streamProcessor');
 
                     insightNodes = await processRecommendationsStreaming(
@@ -245,13 +268,26 @@ export function useInsightLoaderV2() {
                     );
                 }
             } else {
-                // 旧版 Coder 模式（需要转换为 InsightNode）
+                // Legacy Coder Mode
+                prompt = generateBatchInsightsPrompt(
+                    selectedColumns,
+                    sampledDataLocal.length,
+                    totalRows,
+                    privacyMode === 'sanitized' ? [] : sampledDataLocal
+                );
+                logger.log('AI服务', '[Coder] 使用传统 Coder Prompt 模式');
+
+                // Call AI
+                setLoadingStage('progress.sendingRequest');
+                const { invokeAI } = await import('@/services/aiInvoker');
+                const aiResponse = await invokeAI(prompt, { type: 'insight', priority: 'normal' });
+
+                // Parse Coder response
                 const insightSuggestions = parseBatchInsightsResponse(aiResponse);
 
                 if (insightSuggestions.length === 0) {
                     logger.warn('AI洞察', 'AI未返回有效建议，使用预置模板');
                     const fallback = getFallbackInsights();
-                    // 转换为 InsightNode 格式
                     insightNodes = fallback.map((sugg, idx) => ({
                         id: `node-${Date.now()}-${idx}`,
                         depth: 0,
@@ -265,12 +301,30 @@ export function useInsightLoaderV2() {
                         isExpanded: false,
                         result: {
                             code: sugg.full_mode.code,
-                            rawCode: sugg.full_mode.code,  // ✅ 保留纯净代码（fallback无增强）
+                            rawCode: sugg.full_mode.code,
                             summary: '',
                             columnsUsed: sugg.columns_used || []
                         }
                     }));
-                    logger.log('AI洞察', '解析成功', { data: { count: insightNodes.length } });
+                } else {
+                    insightNodes = insightSuggestions.map((sugg, idx) => ({
+                        id: `node-coder-${Date.now()}-${idx}`,
+                        depth: 0,
+                        title: sugg.title,
+                        columnsUsed: sugg.columns_used || [],
+                        promptId: '',
+                        params: {},
+                        isLoading: false,
+                        drillDownActions: [],
+                        children: [],
+                        isExpanded: false,
+                        result: {
+                            code: sugg.full_mode.code,
+                            rawCode: sugg.full_mode.code,
+                            summary: '',
+                            columnsUsed: sugg.columns_used || []
+                        }
+                    }));
                 }
             }
 
@@ -486,10 +540,21 @@ export function useInsightLoaderV2() {
                 });
 
                 // 3. 解析响应
-                const recommendations = parseRouterResponse(
+                let recommendations = parseRouterResponse(
                     aiResponse,
                     parentNode.columnsUsed || [] // 🆕 传递父节点使用的列名
                 );
+
+                // 🆕 注入统计参数（与主流程保持一致）
+                try {
+                    const db = DuckDBEngine.getInstance();
+                    const columnStats = await db.getColumnStats(tableName);
+                    const { injectStatsParams } = await import('@/services/prompts/paramInjector');
+                    recommendations = injectStatsParams(recommendations, columnStats);
+                    logger.log('AI服务', '[SilentTrigger] 参数注入完成');
+                } catch (statsError) {
+                    logger.warn('AI服务', '[SilentTrigger] 参数注入失败，使用 AI 原始参数');
+                }
 
                 if (recommendations.length === 0) {
                     logger.warn('AI洞察', '[SilentTrigger] AI未返回推荐');

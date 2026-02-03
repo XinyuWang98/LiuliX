@@ -102,6 +102,14 @@ export const settings = {
     localModelDesc: 'First-time download 4.3GB model, takes 10-30 minutes, then permanently available locally',
     localModelInfo: '💡 Model: {model} (Strong in Chinese, Fast)',
 
+    // Local Router Configuration
+    localRouterTitle: 'Local Router Acceleration',
+    localRouterDesc: 'Use Transformers.js (~200MB) for intent classification and parameter extraction offline',
+    downloadRouterModel: 'Download Router Model',
+    routerModelReady: 'Router Model Ready',
+    routerModelNotReady: 'Router Model Not Loaded',
+    routerModelDownloading: 'Downloading Router...',
+
     // Performance Configuration
     performanceSlowWarning: '⚠️ May Be Slow',
     performanceColumnsUnit: 'columns',

@@ -51,7 +51,6 @@ export const CategoricalStatsPanel: React.FC<CategoricalStatsPanelProps> = ({ st
     return (
         <div className="stats-panel categorical-panel">
             <div className="panel-header">TOP 10 VALUES</div>
-            <div className="separator"></div>
             <div className="panel-body">
                 {topTenValues.map((item, idx) => {
                     // 计算百分比

@@ -335,7 +335,9 @@ export const VirtualDataGridV2: React.FC<VirtualDataGridProps> = ({ tableName, r
 
                                     {/* 3. Mini Charts */}
                                     {stat?.uniqueCount === 1 ? (
-                                        <SingleValueIndicator value={stat.categoricalStats?.topValues?.[0]?.value ?? stat.numericStats?.min ?? 'N/A'} type={col.type} />
+                                        <div style={{ marginTop: '4px', height: '52px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <SingleValueIndicator value={stat.categoricalStats?.topValues?.[0]?.value ?? stat.numericStats?.min ?? 'N/A'} type={col.type} />
+                                        </div>
                                     ) : stat?.distribution ? (
                                         <div style={{ marginTop: '4px', height: '52px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                             <MiniHistogram distribution={stat.distribution} type={col.type} columnName={col.name} />
