@@ -115,7 +115,7 @@ export class MockDataService implements IDataContextService {
         return result;
     }
 
-    async runTest(code: string): Promise<any> {
+    async runTest(_code: string): Promise<any> {
         return {
             status: 'success',
             message: 'Mock 执行完成。代码模拟成功。',
