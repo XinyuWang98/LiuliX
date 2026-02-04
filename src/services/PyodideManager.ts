@@ -191,8 +191,70 @@ class PyodideManager {
         return this.sendMessage('LOAD_DATA_FILE', {
             content: fileContent,
             fileType,
-            options
+            options,
+            transferMethod: 'JSON'  // 明确标记为 JSON 传输
         });
+    }
+
+    /**
+     * 🆕 从 DuckDB 加载数据到 DataFrame（支持 Arrow 传输）
+     * @param engine - DuckDBEngine 实例
+     * @param tableName - 表名
+     * @param options - 加载选项
+     * @returns DataFrameInfo 对象
+     */
+    public async loadDataFromDuckDB(
+        engine: any,  // DuckDBEngine 类型
+        tableName: string,
+        options: {
+            maxRows?: number;
+            transferMethod?: 'ARROW' | 'ARROW_SAMPLED' | 'JSON';
+        } = {}
+    ): Promise<any> {
+        await this.waitForReady();
+
+        const { transferMethod = 'ARROW', maxRows } = options;
+
+        // 根据传输方案选择不同的导出方式
+        if (transferMethod.startsWith('ARROW')) {
+            // Arrow 传输路径
+            const arrowBuffer = await engine.exportArrowTable(tableName, maxRows);
+
+            logger.log('AI服务', 'Arrow 数据导出完成', {
+                data: {
+                    table: tableName,
+                    bufferSize: `${(arrowBuffer.length / 1024 / 1024).toFixed(2)}MB`,
+                    maxRows
+                }
+            });
+
+            return this.sendMessage('LOAD_DATA_FILE', {
+                content: arrowBuffer,
+                fileType: 'arrow',  // 新类型标识
+                options: { maxRows },
+                transferMethod
+            });
+
+        } else {
+            // JSON 传输路径（降级）
+            const rows = await engine.runQuery(`SELECT * FROM ${tableName}${maxRows ? ` LIMIT ${maxRows}` : ''}`);
+            const jsonContent = JSON.stringify(rows);
+
+            logger.log('AI服务', 'JSON 数据导出完成', {
+                data: {
+                    table: tableName,
+                    dataSize: `${(jsonContent.length / 1024 / 1024).toFixed(2)}MB`,
+                    maxRows
+                }
+            });
+
+            return this.sendMessage('LOAD_DATA_FILE', {
+                content: jsonContent,
+                fileType: 'json',
+                options: { maxRows },
+                transferMethod: 'JSON'
+            });
+        }
     }
 
     /**

@@ -118,6 +118,61 @@ export function useDataLoader(
                 } catch (duckErr) {
                     console.warn('DuckDB 加载失败，回退到 Pyodide', duckErr);
                 }
+
+                // 🆕 DuckDB 加载成功后，传输数据到 Pyodide
+                if (useDuckDB && duckInfo) {
+                    try {
+                        // 1. 选择传输方案
+                        const { selectTransferStrategy } = await import('../../../utils/dataTransferStrategy');
+                        const strategy = await selectTransferStrategy(
+                            duckInfo.rowCount,
+                            duckInfo.columns.length
+                        );
+
+                        logger.log('文件管理', '数据传输方案', {
+                            data: {
+                                method: strategy.method,
+                                maxRows: strategy.maxRows,
+                                reason: strategy.reason
+                            }
+                        });
+
+                        // 2. 使用选定的方案传输数据
+                        const engine = DuckDBEngine.getInstance();
+                        const loadResult = await pyodideManager.loadDataFromDuckDB(
+                            engine,  // 传递整个 engine 实例
+                            duckInfo.tableName,
+                            {
+                                maxRows: strategy.maxRows,
+                                transferMethod: strategy.method
+                            }
+                        );
+
+                        // 3. 计算统计信息
+                        const columnStats = await pyodideManager.calculateColumnStats();
+
+                        // 4. 更新 UI 状态
+                        setDataInfo({
+                            columns: columnStats,
+                            row_count: loadResult.row_count,
+                            column_count: loadResult.column_count,
+                            preview_data: loadResult.preview_data
+                        });
+
+                        logger.log('文件管理', `数据传输完成 (${strategy.method})`, {
+                            data: {
+                                rows: loadResult.row_count,
+                                columns: loadResult.column_count
+                            }
+                        });
+
+                        return;
+
+                    } catch (transferErr) {
+                        logger.error('文件管理', '数据传输失败，尝试 JSON 降级', transferErr);
+                        // 降级处理会在下面的回退流程中执行
+                    }
+                }
             }
 
             // 回退到 Pyodide
