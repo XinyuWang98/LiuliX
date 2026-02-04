@@ -144,20 +144,73 @@ shape = df.shape
 
             ctx.postMessage({ id, type: 'SUCCESS', result });
         } else if (type === 'LOAD_DATA_FILE') {
-            // Enhanced data loading with statistics
-            const { content: fileContent, fileType, options } = content;
+            // 🆕 增强数据加载：支持 JSON 和 Arrow 双路径传输
+            const { content: fileContent, fileType, options, transferMethod } = content;
             const maxRows = options?.maxRows || 100000;
             const sample = options?.sample || false;
 
-            // Write content to virtual filesystem
-            const filename = `data_${Date.now()}.${fileType}`;
-            pyodide.FS.writeFile(filename, fileContent);
+            // 🔀 根据传输方案选择不同的加载逻辑
+            if (transferMethod === 'ARROW' || transferMethod === 'ARROW_SAMPLED') {
+                // ===== Arrow 传输路径（Phase 2 新增）=====
+                const filename = `data_${Date.now()}.arrow`;
+                pyodide.FS.writeFile(filename, fileContent);
 
-            const readCmd = fileType === 'csv' ?
-                `df = pd.read_csv('${filename}')` :
-                `df = pd.read_json('${filename}')`;
+                const pythonCode = `
+import pyarrow as pa
+import pandas as pd
+import io
+import json
 
-            const pythonCode = `
+# 从虚拟文件系统读取 Arrow IPC 流
+with open('${filename}', 'rb') as f:
+    ipc_bytes = f.read()
+
+# 解析 Arrow IPC 流
+reader = pa.ipc.open_stream(io.BytesIO(ipc_bytes))
+table = reader.read_all()
+
+# 转换为 Pandas（零拷贝优化）
+df = table.to_pandas(self_destruct=True, split_blocks=True)
+
+# 返回统计信息
+result = {
+    "row_count": int(df.shape[0]),
+    "column_count": int(df.shape[1]),
+    "column_names": df.columns.tolist(),
+    "dtypes": {col: str(dtype) for col, dtype in df.dtypes.items()},
+    "preview_data": df.head(100).values.tolist(),
+    "transfer_method": "${transferMethod}",
+    "was_sampled": False  # Arrow 路径采样在 DuckDB 侧完成
+}
+
+import math
+def replace_nan(obj):
+    if isinstance(obj, float) and math.isnan(obj):
+        return None
+    elif isinstance(obj, dict):
+        return {k: replace_nan(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_nan(x) for x in obj]
+    return obj
+
+json.dumps(replace_nan(result))
+`;
+
+                const resultStr = await pyodide.runPythonAsync(pythonCode);
+                const result = JSON.parse(resultStr);
+
+                ctx.postMessage({ id, type: 'SUCCESS', result });
+
+            } else {
+                // ===== JSON 传输路径（保持向后兼容）=====
+                const filename = `data_${Date.now()}.${fileType}`;
+                pyodide.FS.writeFile(filename, fileContent);
+
+                const readCmd = fileType === 'csv' ?
+                    `df = pd.read_csv('${filename}')` :
+                    `df = pd.read_json('${filename}')`;
+
+                const pythonCode = `
 import pandas as pd
 import numpy as np
 import json
@@ -179,6 +232,7 @@ result = {
     "column_names": df.columns.tolist(),
     "dtypes": {col: str(dtype) for col, dtype in df.dtypes.items()},
     "preview_data": df.head(100).values.tolist(),
+    "transfer_method": "JSON",
     "was_sampled": was_sampled
 }
 
@@ -195,10 +249,11 @@ def replace_nan(obj):
 json.dumps(replace_nan(result))
 `;
 
-            const resultStr = await pyodide.runPythonAsync(pythonCode);
-            const result = JSON.parse(resultStr);
+                const resultStr = await pyodide.runPythonAsync(pythonCode);
+                const result = JSON.parse(resultStr);
 
-            ctx.postMessage({ id, type: 'SUCCESS', result });
+                ctx.postMessage({ id, type: 'SUCCESS', result });
+            }
         } else if (type === 'CALCULATE_STATS') {
             // Calculate column statistics
             const pythonCode = `
