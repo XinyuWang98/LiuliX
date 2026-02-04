@@ -1,0 +1,60 @@
+name: Pyodide Version Check
+
+on:
+  schedule:
+    # 每周一早上 9 点检查（UTC 1:00 = 北京时间 9:00）
+    - cron: '0 1 * * 1'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  check-pyodide-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Pyodide Latest Version
+        id: check
+        run: |
+          # 获取 Pyodide 最新版本
+          LATEST=$(curl -s https://api.github.com/repos/pyodide/pyodide/releases/latest | jq -r .tag_name)
+          CURRENT=$(grep -oP "pyodide/v\K[0-9.]+" src/workers/pyodide/worker.ts | head -1)
+          
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+          
+          if [ "$LATEST" != "$CURRENT" ]; then
+            echo "update_needed=true" >> $GITHUB_OUTPUT
+          else
+            echo "update_needed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Issue if Update Needed
+        if: steps.check.outputs.update_needed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚀 Pyodide 版本更新可用: ${{ steps.check.outputs.latest }}`,
+              body: `检测到 Pyodide 新版本发布！
+              
+              **当前版本**: ${{ steps.check.outputs.current }}
+              **最新版本**: ${{ steps.check.outputs.latest }}
+              
+              **操作建议**：
+              1. 查看 [更新日志](https://github.com/pyodide/pyodide/releases/tag/${{ steps.check.outputs.latest }})
+              2. 评估兼容性和破坏性变更
+              3. 更新 \`src/workers/pyodide/worker.ts\` 中的版本号
+              4. 运行完整测试套件
+              5. 参考文档：\`docs/pyodide_version_assessment.md\`
+              
+              **相关包检查**：
+              - \`pyarrow\` - 是否仍然支持？
+              - \`pandas\`, \`numpy\`, \`matplotlib\` - 版本兼容性
+              - Python 版本 - 3.11/3.12/3.13 支持情况
+              
+              **自动生成** by Pyodide Version Check Workflow`,
+              labels: ['dependencies', 'pyodide', 'needs-review']
+            })

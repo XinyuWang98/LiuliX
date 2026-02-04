@@ -15,7 +15,8 @@ async function loadPyodideAndPackages() {
         // 🚀 使用 CDN 加载 Pyodide
         // 注意：public/pyodide/ 不会被部署到 Vercel（在 .gitignore 中）
         // 因此在所有环境统一使用 CDN
-        const indexURL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
+        // 🆕 升级到 0.29.3 以支持 pyarrow (0.26.4 不支持 pyarrow)
+        const indexURL = 'https://cdn.jsdelivr.net/pyodide/v0.29.3/full/';
 
         // 动态加载Pyodide（运行时加载，不打包进bundle）
         // @ts-ignore - Pyodide会通过script标签加载到全局
@@ -25,10 +26,10 @@ async function loadPyodideAndPackages() {
             indexURL
         });
 
-        ctx.postMessage({ type: 'STATUS', message: 'Loading Pandas & Matplotlib...' });
+        ctx.postMessage({ type: 'STATUS', message: 'Loading Pandas & Matplotlib & PyArrow...' });
 
-        // Load operational packages (添加 matplotlib 用于图表生成)
-        await pyodide.loadPackage(['pandas', 'numpy', 'matplotlib']);
+        // Load operational packages (添加 matplotlib 用于图表生成, pyarrow 用于 Arrow 数据传输)
+        await pyodide.loadPackage(['pandas', 'numpy', 'matplotlib', 'pyarrow']);
 
         // 🔧 配置 matplotlib 使用 Agg 后端(非交互式)，避免 Worker 环境访问 DOM
         await pyodide.runPythonAsync(`
@@ -419,6 +420,31 @@ else:
                 } catch (fallbackErr) {
                     ctx.postMessage({ id, type: 'ERROR', error: String(err) });
                 }
+            }
+        } else if (type === 'WRITE_FILE') {
+            // 将文件写入 Pyodide 虚拟文件系统（用于 Arrow 数据传输）
+            const { filename, content: fileContent } = content;
+
+            try {
+                if (!filename || !fileContent) {
+                    throw new Error('filename and content are required');
+                }
+
+                // content 可以是 Uint8Array 或 ArrayBuffer
+                // Pyodide FS.writeFile 接受两者
+                pyodide.FS.writeFile(filename, fileContent);
+
+                if (import.meta.env.DEV) {
+                    const sizeKB = (fileContent.length / 1024).toFixed(2);
+                    console.log(`[Worker] File written: ${filename} (${sizeKB} KB)`);
+                }
+
+                ctx.postMessage({ id, type: 'SUCCESS', result: `File written: ${filename}` });
+            } catch (err) {
+                if (import.meta.env.DEV) {
+                    console.error("File write error:", err);
+                }
+                ctx.postMessage({ id, type: 'ERROR', error: String(err) });
             }
         }
     } catch (error) {

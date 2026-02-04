@@ -11,7 +11,7 @@ import { PYODIDE_BRIDGE_INIT_CODE } from '@/workers/pyodideArrowBridge';
 import { logger } from '@/utils/logger';
 
 export async function testArrowPOC(tableName: string, maxRows: number = 10000) {
-    logger.group('Arrow POC', '开始测试');
+    logger.group('AI服务', '🧪 Arrow POC测试');
 
     try {
         const db = DuckDBEngine.getInstance();
@@ -22,11 +22,11 @@ export async function testArrowPOC(tableName: string, maxRows: number = 10000) {
         await pyodideManager.waitForReady();
 
         // 初始化Arrow Bridge
-        logger.log('Arrow POC', '初始化Arrow Bridge');
+        logger.log('Python', '初始化Arrow Bridge');
         await pyodideManager.runPython(PYODIDE_BRIDGE_INIT_CODE);
 
         // ========== 方案1：JSON传输（当前方案）==========
-        logger.log('Arrow POC', '测试方案1: JSON传输');
+        logger.log('数据分析', '测试方案1: JSON传输');
         const jsonStartTime = performance.now();
 
         const jsonData = await db.runQuery(`SELECT * FROM ${tableName} LIMIT ${maxRows}`);
@@ -56,7 +56,7 @@ print(json.dumps(result))
         const jsonEndTime = performance.now();
         const jsonTotalTime = ((jsonEndTime - jsonStartTime) / 1000).toFixed(3);
 
-        logger.log('Arrow POC', `JSON方案完成`, {
+        logger.log('数据分析', `JSON方案完成`, {
             data: {
                 totalTime: `${jsonTotalTime}s`,
                 dataSize: `${(rawJson.length / 1024 / 1024).toFixed(2)}MB`,
@@ -65,36 +65,43 @@ print(json.dumps(result))
         });
 
         // ========== 方案2：Arrow传输 ==========
-        logger.log('Arrow POC', '测试方案2: Arrow传输');
+        logger.log('数据分析', '测试方案2: Arrow传输');
         const arrowStartTime = performance.now();
 
         // 导出Arrow IPC
         const arrowBuffer = await db.exportArrowTable(tableName, maxRows);
-        logger.log('Arrow POC', `Arrow导出完成`, {
+        logger.log('DuckDB', `Arrow导出完成`, {
             data: {
                 bufferSize: `${(arrowBuffer.length / 1024 / 1024).toFixed(2)}MB`,
                 rows: maxRows
             }
         });
 
-        // 注册到Pyodide
-        const pyodide = (pyodideManager as any).pyodide;
-        if (!pyodide) {
-            throw new Error('Pyodide not ready');
-        }
+        // ✅ 使用 writeFile 将 Arrow 缓冲区写入 Pyodide 虚拟文件系统
+        // 这样可以在 Worker 中访问，避免直接访问 pyodide 实例
+        await pyodideManager.writeFile('data.arrow', arrowBuffer);
 
-        pyodide.registerJsModule('arrow_transfer', {
-            buffer: arrowBuffer
-        });
-
-        // Python侧加载
+        // Python侧加载（从文件系统读取）
         const arrowLoadScript = `
+import pyarrow as pa
+import pandas as pd
 import json
 import time
-from js import arrow_transfer
+import io
 
 start = time.time()
-df_arrow = load_arrow_stream(arrow_transfer.buffer)
+
+# 从虚拟文件系统读取
+with open('data.arrow', 'rb') as f:
+    ipc_bytes = f.read()
+
+# 解析 Arrow IPC 流
+reader = pa.ipc.open_stream(io.BytesIO(ipc_bytes))
+table = reader.read_all()
+
+# 转换为 Pandas (使用零拷贝优化)
+df_arrow = table.to_pandas(self_destruct=True, split_blocks=True)
+
 end = time.time()
 
 result = {
@@ -109,7 +116,7 @@ print(json.dumps(result))
         const arrowEndTime = performance.now();
         const arrowTotalTime = ((arrowEndTime - arrowStartTime) / 1000).toFixed(3);
 
-        logger.log('Arrow POC', `Arrow方案完成`, {
+        logger.log('数据分析', `Arrow方案完成`, {
             data: {
                 totalTime: `${arrowTotalTime}s`,
                 bufferSize: `${(arrowBuffer.length / 1024 / 1024).toFixed(2)}MB`,
@@ -142,7 +149,7 @@ print(json.dumps(result))
         };
 
     } catch (error: any) {
-        logger.error('Arrow POC', '测试失败', error);
+        logger.error('AI服务', '测试失败', error);
         logger.groupEnd();
         return {
             success: false,

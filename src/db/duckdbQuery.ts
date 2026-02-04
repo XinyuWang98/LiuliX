@@ -41,9 +41,23 @@ export async function exportArrowTable(
     }
 
     const result = await conn.query(query);
-    // DuckDB-WASM Arrow Table directly supports toIPCStream() in recent versions
-    // If strict types complain, we can cast to any or use a polyfill
-    return (result as any).toIPCStream();
+
+    // 🔧 使用 tableFromArrays 桥接方法解决 DuckDB-WASM 与 Apache Arrow CDN 版本冲突
+    // 将 DuckDB 的列数据提取为原生数组，然后重新构建 Arrow Table
+    try {
+        // @ts-ignore - 动态CDN导入，运行时加载
+        const { tableFromArrays, tableToIPC } = await import('https://cdn.jsdelivr.net/npm/apache-arrow@16.1.0/+esm');
+
+        const columnData: Record<string, any> = {};
+        for (const field of result.schema.fields) {
+            columnData[field.name] = result.getChild(field.name)!.toArray();
+        }
+
+        const table = tableFromArrays(columnData);
+        return tableToIPC(table, 'stream');
+    } catch (error) {
+        throw new Error(`Arrow export failed: ${error}`);
+    }
 }
 
 /**
