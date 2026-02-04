@@ -6,7 +6,7 @@
 import { logger } from './logger';
 
 /** 传输方法类型 */
-export type TransferMethod = 'JSON' | 'ARROW' | 'ARROW_SAMPLED';
+export type TransferMethod = 'JSON' | 'ARROW';  // 移除 ARROW_SAMPLED
 
 /** 传输策略 */
 export interface TransferStrategy {
@@ -16,26 +16,26 @@ export interface TransferStrategy {
     maxRows: number;
     /** 决策原因 */
     reason: string;
-    /** 是否需要采样 */
-    needsSampling: boolean;
+    // ✅ 移除 needsSampling，采样决策统一在 duckdbIngestion.ts
 }
 
 /** 策略阈值配置 */
 const STRATEGY_THRESHOLDS = {
     /** 小数据集上限（<= 此值使用 JSON） */
     SMALL_DATA_LIMIT: 50000,
-    /** Arrow 中等数据集上限 */
-    ARROW_MEDIUM_LIMIT: 200000,
-    /** Arrow 大数据集上限（需采样） */
-    ARROW_LARGE_LIMIT: 300000,
-    /** JSON 降级最大行数 */
-    JSON_FALLBACK_LIMIT: 100000,
+    // 注意：Arrow 上限由 DuckDB 动态内存评估决定，无需硬编码
 } as const;
 
 /**
- * 选择最优数据传输方案
- * @param totalRows 总行数
- * @param columnCount 列数（可选，用于未来的内存评估）
+ * 选择最优数据传输方案（简化版）
+ * 
+ * ✅ 2026-02-04 简化：仅负责选择传输方式，不再决策采样
+ * - 采样决策统一在 duckdbIngestion.ts（基于动态内存评估）
+ * - Arrow 策略仅选择 JSON vs Arrow（传输优化）
+ * - 传入 totalRows 已是 workingTable 行数（已采样）
+ * 
+ * @param totalRows 总行数（注意：这是 workingTable 的行数，已完成采样）
+ * @param columnCount 列数（可选，用于日志）
  * @returns 传输策略
  */
 export async function selectTransferStrategy(
@@ -57,42 +57,29 @@ export async function selectTransferStrategy(
     if (totalRows <= STRATEGY_THRESHOLDS.SMALL_DATA_LIMIT) {
         return {
             method: 'JSON',
-            maxRows: totalRows,
+            maxRows: totalRows,  // 全部传输（已采样）
             reason: `小数据集（${totalRows.toLocaleString()} 行 ≤ ${STRATEGY_THRESHOLDS.SMALL_DATA_LIMIT.toLocaleString()}），JSON 传输简单高效`,
-            needsSampling: false
         };
     }
 
-    // 3. 中等数据集：优先使用 Arrow（性能提升明显）
-    if (totalRows <= STRATEGY_THRESHOLDS.ARROW_MEDIUM_LIMIT && arrowAvailable) {
+    // 3. 中大数据集：优先使用 Arrow（性能提升明显）
+    if (arrowAvailable) {
         return {
             method: 'ARROW',
-            maxRows: STRATEGY_THRESHOLDS.ARROW_MEDIUM_LIMIT,
-            reason: `中等数据集（${totalRows.toLocaleString()} 行），Arrow 零拷贝传输，性能提升 4-5x`,
-            needsSampling: false
+            maxRows: totalRows,  // 全部传输（已采样）
+            reason: `中大数据集（${totalRows.toLocaleString()} 行），Arrow 零拷贝传输，性能提升 4-5x`,
         };
     }
 
-    // 4. 大数据集：Arrow + 采样（突破内存限制）
-    if (totalRows > STRATEGY_THRESHOLDS.ARROW_MEDIUM_LIMIT && arrowAvailable) {
-        return {
-            method: 'ARROW_SAMPLED',
-            maxRows: STRATEGY_THRESHOLDS.ARROW_LARGE_LIMIT,
-            reason: `大数据集（${totalRows.toLocaleString()} 行），Arrow + 采样到 ${STRATEGY_THRESHOLDS.ARROW_LARGE_LIMIT.toLocaleString()} 行，突破单次传输限制`,
-            needsSampling: true
-        };
-    }
-
-    // 5. 降级：Arrow 不可用 → 使用 JSON
+    // 4. 降级：Arrow 不可用 → 使用 JSON
     logger.warn('AI服务', 'Arrow 不可用，降级到 JSON', {
-        reason: arrowAvailable ? '数据规模超限' : 'Arrow 加载失败'
+        reason: 'Arrow 加载失败'
     });
 
     return {
         method: 'JSON',
-        maxRows: STRATEGY_THRESHOLDS.JSON_FALLBACK_LIMIT,
-        reason: `Arrow 不可用，降级到 JSON（最大 ${STRATEGY_THRESHOLDS.JSON_FALLBACK_LIMIT.toLocaleString()} 行）`,
-        needsSampling: totalRows > STRATEGY_THRESHOLDS.JSON_FALLBACK_LIMIT
+        maxRows: totalRows,
+        reason: `Arrow 不可用，降级到 JSON（${totalRows.toLocaleString()} 行）`,
     };
 }
 

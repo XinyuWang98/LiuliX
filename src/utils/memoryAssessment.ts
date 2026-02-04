@@ -173,20 +173,19 @@ export function calculateRecommendedSampleRows(
 }
 
 /**
- * 🚫 已废弃（Web版MVP）- 改为固定10万行上限（2026-01-14）
- * 
  * Pyodide专用：根据设备内存和列数动态计算最大安全行数
  * 
- * @deprecated Web版MVP已改为固定常量MAX_PYODIDE_ROWS=100000
- * @reason Pyodide WASM内存限制导致动态评估收益有限，复杂度与稳定性不成正比
- * @preserve 保留此函数作为未来Native离线版参考（CPython无WASM限制）
+ * ✅ 已恢复使用（2026-02-04 Phase 2 优化）
+ * @reason 结合 Arrow 传输（4-5x 加速），可充分利用 Pyodide 2GB 内存限制
+ * @update Pyodide 0.29.3 的 WASM 内存限制为 2GB（不是旧版的 256MB）
  * 
  * @param columnCount 数据列数
- * @returns 最大行数（考虑Pyodide内存开销和安全系数）
+ * @returns 最大行数（考虑 Pyodide 内存开销和安全系数）
  * 
- * @example Native版使用示例（未来）
+ * @example
  * ```typescript
- * const maxRows = calculateMaxRowsForPyodide(columnCount);
+ * const maxRows = calculateMaxRowsForPyodide(14);  // 16GB设备 → ~1,400,000 行
+ * const maxRows = calculateMaxRowsForPyodide(20);  // 8GB设备 → ~1,000,000 行
  * ```
  */
 export function calculateMaxRowsForPyodide(columnCount: number): number {
@@ -209,8 +208,9 @@ export function calculateMaxRowsForPyodide(columnCount: number): number {
     }
     // <4GB 保持默认10%
 
-    // 🔧 Pyodide绝对内存上限：Worker进程限制，不管设备多大都不超过256MB
-    const PYODIDE_MAX_MEMORY_MB = 256;  // 保守值，确保不会MemoryError
+    // 🔧 Pyodide绝对内存上限：2GB (Pyodide 0.29.3 WASM限制，2026-02-04确认)
+    // 参考: https://stackoverflow.com/questions/webassembly-memory-limit
+    const PYODIDE_MAX_MEMORY_MB = 2048;  // 2GB (旧版256MB已过时)
     const dynamicMemoryMB = (browserMemory / (1024 * 1024)) * budgetRatio;
     const availableMemoryMB = Math.min(dynamicMemoryMB, PYODIDE_MAX_MEMORY_MB);
 

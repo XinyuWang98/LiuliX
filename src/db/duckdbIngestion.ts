@@ -165,10 +165,15 @@ export async function ingestCSV(
     const schemaResult = await conn.query(`DESCRIBE ${originalTable}`);
     const columnCount = schemaResult.numRows;
 
-    // Step 3.2: 固定最大行数（Web版MVP策略：2026-01-14）
-    // 注：动态评估已废弃，Native版可恢复calculateMaxRowsForPyodide
-    const MAX_PYODIDE_ROWS = 100000;  // Pyodide内存限制，固定10万行上限
-    const maxRows = MAX_PYODIDE_ROWS;
+    // Step 3.2: 动态计算最大行数（基于设备内存和列数）
+    // 2026-02-04: 恢复动态内存评估，结合 Arrow 传输（4-5x 加速）
+    // Pyodide 0.29.3 WASM 限制: 2GB（不是旧版 256MB）
+    const { calculateMaxRowsForPyodide } = await import('../utils/memoryAssessment');
+    const maxRows = calculateMaxRowsForPyodide(columnCount);
+    // 示例结果：
+    // - 16GB设备 + 14列 → ~1,400,000 行（vs 旧版 178,756 行）
+    // - 8GB设备 + 20列 → ~1,000,000 行（vs 旧版 125,000 行）
+    // - 4GB设备 + 5列 → ~5,400,000 行（vs 旧版 680,000 行）
 
     // Step 3.3: 判断是否需要采样（纯行数比较，无文件大小条件）
     const shouldSample = totalRows > maxRows;

@@ -150,8 +150,8 @@ shape = df.shape
             const sample = options?.sample || false;
 
             // 🔀 根据传输方案选择不同的加载逻辑
-            if (transferMethod === 'ARROW' || transferMethod === 'ARROW_SAMPLED') {
-                // ===== Arrow 传输路径（Phase 2 新增）=====
+            if (transferMethod === 'ARROW') {
+                // ===== Arrow 传输路径（Phase 2）=====
                 const filename = `data_${Date.now()}.arrow`;
                 pyodide.FS.writeFile(filename, fileContent);
 
